@@ -130,13 +130,11 @@ namespace xlang::xmeta
             check_hresult(m_metadata_dispenser->SetOption(MetaDataRuntimeVersion, &version.GetVARIANT()));
         }
 
-
         check_hresult(m_metadata_dispenser->DefineScope(
             CLSID_CorMetaDataRuntime,
             0,
             IID_IMetaDataAssemblyEmit,
             reinterpret_cast<IUnknown**>(m_metadata_assembly_emitter.put_void())));
-
 
         check_hresult(m_metadata_assembly_emitter->QueryInterface(IID_IMetaDataEmit2, m_metadata_emitter.put_void()));
         check_hresult(m_metadata_emitter->QueryInterface(IID_IMetaDataImport, m_metadata_import.put_void()));

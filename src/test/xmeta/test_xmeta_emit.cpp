@@ -30,14 +30,29 @@ const TypeAttributes enum_type_attributes()
     return result;
 }
 
+void test_enum_type_properties(TypeDef const& enum_type)
+{
+    auto const& enum_flags = enum_type.Flags();
+    REQUIRE(enum_flags.value == enum_type_attributes().value); // TODO: Revisit reader flags to enable easy OR'ing together of values
+    // These are basic things that should be true of all enums.
+    // Offload these to a helper test method so we don't have to duplicate this level of paranoia everywhere.
+    REQUIRE(enum_type.is_enum());
+    REQUIRE(empty(enum_type.MethodList()));
+    REQUIRE(empty(enum_type.EventList()));
+    REQUIRE(empty(enum_type.GenericParam()));
+    REQUIRE(empty(enum_type.InterfaceImpl()));
+    REQUIRE(empty(enum_type.MethodImplList()));
+    REQUIRE(empty(enum_type.PropertyList()));
+}
+
 TEST_CASE("Assemblies metadata") 
 {
     std::string assembly_name = "testidl";
     std::string common_assembly_ref = "mscorlib";
-    std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
+    xlang::xmeta::xmeta_emit emitter(assembly_name);
 
     xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter->save_to_memory());
+    writer.add_metadata(emitter.save_to_memory());
 
     xlang::meta::reader::database db{ writer.save_to_memory() };
 
@@ -64,7 +79,6 @@ TEST_CASE("Enum metadata")
     xmeta_idl_reader reader{ "" };
     REQUIRE(reader.read(test_idl) == 0);
     xlang::xmeta::xlang_model_walker walker(reader.get_namespaces());
-
     std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
 
     walker.register_listener(emitter);
@@ -77,7 +91,9 @@ TEST_CASE("Enum metadata")
 
     auto const& enum_type = db.TypeDef[1];
     REQUIRE(enum_type.TypeName() == "Color");
+    REQUIRE(enum_type.Flags().value == (tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime));
     // REQUIRE(enum_type.TypeNamespace() == "Xmeta.Test"); // TODO: populate metadata with namespace
+    test_enum_type_properties(enum_type);
 
     auto const& fields = enum_type.FieldList();
     REQUIRE(size(fields) == 4); // # of enumerators plus one for the value
