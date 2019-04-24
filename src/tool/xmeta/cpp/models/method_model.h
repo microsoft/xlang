@@ -24,12 +24,10 @@ namespace xlang::xmeta
                 std::string_view const& assembly_name, 
                 std::optional<type_ref>&& return_type, 
                 std::vector<formal_parameter_model>&& formal_params,
-                std::variant<std::shared_ptr<class_model>, std::shared_ptr<interface_model>> const& parent,
                 method_semantics const& sem) :
             base_model{ id, decl_line, assembly_name },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
-            m_parent{ parent },
             m_semantic{ sem },
             m_implemented_method_ref{ "" }
         { }
@@ -39,12 +37,10 @@ namespace xlang::xmeta
                 std::string_view const& assembly_name, 
                 std::optional<type_ref>&& return_type, 
                 std::vector<formal_parameter_model>&& formal_params,
-                std::variant<std::shared_ptr<class_model>, std::shared_ptr<interface_model>> const& parent,
                 std::string_view const& overridden_method_ref) :
             base_model{ id, decl_line, assembly_name },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
-            m_parent{ parent },
             m_implemented_method_ref{ std::string(overridden_method_ref) }
         { }
 
@@ -68,11 +64,6 @@ namespace xlang::xmeta
             return m_semantic;
         }
 
-        auto const& get_parent() const noexcept
-        {
-            return m_parent;
-        }
-
         void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept
         {
             m_implemented_method_ref.resolve(ref);
@@ -83,7 +74,6 @@ namespace xlang::xmeta
         std::optional<type_ref> m_return_type;
         std::vector<formal_parameter_model> m_formal_parameters;
         model_ref<std::shared_ptr<method_model>> m_implemented_method_ref;
-        std::variant<std::shared_ptr<class_model>, std::shared_ptr<interface_model>> m_parent;
         // TODO: Add type parameters (generic types)
     };
 }

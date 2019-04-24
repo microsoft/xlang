@@ -29,14 +29,12 @@ namespace xlang::xmeta
                 property_semantics const& sem, 
                 property_type_semantics&& type, 
                 std::shared_ptr<method_model> const& get_method, 
-                std::shared_ptr<method_model> const& set_method,
-                std::variant<std::shared_ptr<class_model>, std::shared_ptr<interface_model>> const& parent) :
+                std::shared_ptr<method_model> const& set_method) :
             base_model{ id, decl_line, assembly_name },
             m_semantic{ sem },
             m_type{ std::move(type) },
             m_get_method{ get_method },
-            m_set_method{ set_method },
-            m_parent{ parent }
+            m_set_method{ set_method }
         { }
 
         auto const& get_semantic() const noexcept
@@ -59,16 +57,10 @@ namespace xlang::xmeta
             return m_set_method;
         }
 
-        auto const& get_parent() const noexcept
-        {
-            return m_parent;
-        }
-
     private:
         property_semantics m_semantic;
         property_type_semantics m_type;
         std::shared_ptr<method_model> m_get_method;
         std::shared_ptr<method_model> m_set_method;
-        std::variant<std::shared_ptr<class_model>, std::shared_ptr<interface_model>> m_parent;
     };
 }

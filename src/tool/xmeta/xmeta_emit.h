@@ -22,12 +22,12 @@ namespace xlang::xmeta
         void save_to_file() const;
 		std::vector<uint8_t> save_to_memory() const;
 
-        void listen_namespace_model(std::shared_ptr<namespace_model> const& model) override final;
-        void listen_class_model(std::shared_ptr<class_model> const& model) override final;
-        void listen_struct_model(std::shared_ptr<struct_model> const& model) override final;
-        void listen_interface_model(std::shared_ptr<interface_model> const& model) override final;
-        void listen_enum_model(std::shared_ptr<enum_model> const& model) override final;
-        void listen_delegate_model(delegate_model const& model) override final;
+        void listen_namespace_model(std::shared_ptr<namespace_model> const& model) final;
+        void listen_class_model(std::shared_ptr<class_model> const& model) final;
+        void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
+        void listen_interface_model(std::shared_ptr<interface_model> const& model) final;
+        void listen_enum_model(std::shared_ptr<enum_model> const& model) final;
+        void listen_delegate_model(delegate_model const& model) final;
 
     private:
         std::string m_assembly_name;

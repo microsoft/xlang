@@ -43,7 +43,6 @@ target_sources(xmeta_antlr PRIVATE ${antlr_generated_src})
 target_include_directories(xmeta_antlr PUBLIC
     ${antlr_generated_dir}
     ${ANTLR4_INCLUDE_DIRS} # antlr4cpp artifacts
-    ${CMAKE_CURRENT_SOURCE_DIR}/cpp/models
 )
 target_link_libraries(xmeta_antlr PUBLIC antlr4_static)
 
