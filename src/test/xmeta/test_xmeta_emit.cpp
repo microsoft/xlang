@@ -18,7 +18,6 @@ using namespace antlr4;
 
 using namespace xlang::xmeta;
 using namespace xlang::meta::reader;
-using namespace std;
 
 // In-depth checking of type properties of enums
 const TypeAttributes enum_type_attributes()
@@ -47,8 +46,8 @@ void test_enum_type_properties(TypeDef const& enum_type)
 
 TEST_CASE("Assemblies metadata") 
 {
-    std::string assembly_name = "testidl";
-    std::string common_assembly_ref = "mscorlib";
+    constexpr char assembly_name[] = "testidl";
+    constexpr char common_assembly_ref[] = "mscorlib";
     xlang::xmeta::xmeta_emit emitter(assembly_name);
 
     xlang::meta::writer::pe_writer writer;

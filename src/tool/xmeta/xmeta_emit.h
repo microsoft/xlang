@@ -35,8 +35,8 @@ namespace xlang::xmeta
         winrt::com_ptr<IMetaDataAssemblyEmit> m_metadata_assembly_emitter;
         winrt::com_ptr<IMetaDataEmit2> m_metadata_emitter;
         winrt::com_ptr<IMetaDataImport> m_metadata_import;
-        std::map<std::string, meta::reader::TypeRef> type_references;
 
+        std::map<std::string, meta::reader::TypeRef> type_references;
         meta::reader::Module m_module;
         mdAssembly token_assembly;
         mdAssemblyRef token_mscorlib;
@@ -44,7 +44,23 @@ namespace xlang::xmeta
         mdTypeRef token_value_type;
         mdTypeRef token_delegate;
 
-        // A generic assembly metadata struct.
+        void define_assembly();
+        void define_common_reference_assembly();
+        mdTypeDef define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[]);
+        
+        void define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def);
+        void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
+        void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
+
+        mdParamDef define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def);
+        void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, uint16_t parameter_index);
+
+        static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
+        static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
+        static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract 
+        static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;           // Flags: Public | Sealed | Class
+
+                // A generic assembly metadata struct.
         static constexpr ASSEMBLYMETADATA s_genericMetadata =
         {
             // usMajorVersion - Unspecified major version
@@ -68,21 +84,5 @@ namespace xlang::xmeta
             // ulOS
             0,
         };
-
-        void define_assembly();
-        void define_common_reference_assembly();
-        mdTypeDef define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[]);
-        
-        void define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def);
-        void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
-        void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
-
-        mdParamDef define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def);
-        void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, uint16_t parameter_index);
-
-        static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
-        static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
-        static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract 
-        static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;           // Flags: Public | Sealed | Class
     };
 }
