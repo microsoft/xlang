@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|ARM">
-      <Configuration>Debug</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|ARM64">
-      <Configuration>Debug</Configuration>
-      <Platform>ARM64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -16,14 +8,6 @@
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|ARM">
-      <Configuration>Release</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|ARM64">
-      <Configuration>Release</Configuration>
-      <Platform>ARM64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -47,18 +31,6 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -69,20 +41,6 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -99,18 +57,6 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -135,30 +81,6 @@
     <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
     <IntDir>$(OutDir)temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <GenerateManifest>false</GenerateManifest>
-    <IgnoreImportLibrary>false</IgnoreImportLibrary>
-    <ExecutablePath>..\..;$(VC_ExecutablePath_ARM);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
-    <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <GenerateManifest>false</GenerateManifest>
-    <IgnoreImportLibrary>false</IgnoreImportLibrary>
-    <ExecutablePath>..\..;$(VC_ExecutablePath_ARM64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
-    <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <GenerateManifest>false</GenerateManifest>
-    <IgnoreImportLibrary>false</IgnoreImportLibrary>
-    <ExecutablePath>..\..;$(VC_ExecutablePath_ARM);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
-    <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <GenerateManifest>false</GenerateManifest>
-    <IgnoreImportLibrary>false</IgnoreImportLibrary>
-    <ExecutablePath>..\..;$(VC_ExecutablePath_ARM64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
-    <CustomBuildAfterTargets>Midl</CustomBuildAfterTargets>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <GenerateManifest>false</GenerateManifest>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
@@ -180,60 +102,10 @@
       <Outputs>Generated Files\module.g.cpp</Outputs>
       <Inputs>$(OutputDir)Composable.winmd</Inputs>
     </CustomBuildStep>
-    <ClCompile>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">NOMINMAX;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Use</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">precomp.hpp</PrecompiledHeaderFile>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</ConformanceMode>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/await /bigobj</AdditionalOptions>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Level4</WarningLevel>
-      <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">false</CompileAsWinRT>
-      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</MultiProcessorCompilation>
-      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">MultiThreadedDebug</RuntimeLibrary>
-    </ClCompile>
-    <ClCompile>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">NOMINMAX;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Use</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">precomp.hpp</PrecompiledHeaderFile>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</ConformanceMode>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">/await /bigobj</AdditionalOptions>
-      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</MultiProcessorCompilation>
-    </ClCompile>
-    <Midl>
-      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      </PrependWithABINamepsace>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      </AdditionalOptions>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      </HeaderFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      </MetadataFileName>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      </AdditionalMetadataDirectories>
-      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      </EnableWindowsRuntime>
-      <MinimumTargetSystem Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" />
-    </Midl>
-    <Midl>
-      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      </PrependWithABINamepsace>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      </AdditionalOptions>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      </HeaderFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      </MetadataFileName>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      </AdditionalMetadataDirectories>
-      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      </EnableWindowsRuntime>
-      <MinimumTargetSystem Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" />
-    </Midl>
+    <ClCompile />
+    <ClCompile />
+    <Midl />
+    <Midl />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -304,82 +176,6 @@
       <PrependWithABINamepsace>
       </PrependWithABINamepsace>
       <TypeLibraryName />
-      <HeaderFileName>
-      </HeaderFileName>
-      <MetadataFileName>
-      </MetadataFileName>
-      <AdditionalMetadataDirectories>
-      </AdditionalMetadataDirectories>
-      <EnableWindowsRuntime>
-      </EnableWindowsRuntime>
-      <MinimumTargetSystem />
-    </Midl>
-    <CustomBuildStep />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <CompileAsWinRT>false</CompileAsWinRT>
-      <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <PrecompiledHeaderFile>precomp.hpp</PrecompiledHeaderFile>
-      <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>NOMINMAX;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/await /bigobj</AdditionalOptions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <ModuleDefinitionFile>module.def</ModuleDefinitionFile>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <GenerateMapFile>true</GenerateMapFile>
-    </Link>
-    <Midl>
-      <AdditionalOptions>
-      </AdditionalOptions>
-      <PrependWithABINamepsace>
-      </PrependWithABINamepsace>
-      <HeaderFileName>
-      </HeaderFileName>
-      <MetadataFileName>
-      </MetadataFileName>
-      <AdditionalMetadataDirectories>
-      </AdditionalMetadataDirectories>
-      <EnableWindowsRuntime>
-      </EnableWindowsRuntime>
-      <MinimumTargetSystem />
-    </Midl>
-    <CustomBuildStep />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <CompileAsWinRT>false</CompileAsWinRT>
-      <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(OutputPath);Generated Files</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <PrecompiledHeaderFile>precomp.hpp</PrecompiledHeaderFile>
-      <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>NOMINMAX;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE;_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/await /bigobj</AdditionalOptions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <ModuleDefinitionFile>module.def</ModuleDefinitionFile>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <GenerateMapFile>true</GenerateMapFile>
-    </Link>
-    <Midl>
-      <AdditionalOptions>
-      </AdditionalOptions>
-      <PrependWithABINamepsace>
-      </PrependWithABINamepsace>
       <HeaderFileName>
       </HeaderFileName>
       <MetadataFileName>
@@ -485,10 +281,6 @@
     <ClCompile Include="precomp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -500,42 +292,22 @@
     <Midl Include="Composable.idl">
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
-      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
       <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SystemRoot)\System32\WinMetadata</AdditionalMetadataDirectories>
       <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
       <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
-      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
       <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
       <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutputPath)$(ProjectName).winmd</MetadataFileName>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</EnableWindowsRuntime>
-      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</EnableWindowsRuntime>
-      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</EnableWindowsRuntime>
-      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</EnableWindowsRuntime>
-      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</EnableWindowsRuntime>
       <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableWindowsRuntime>
       <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
       <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
       <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
       <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutputPath)$(ProjectName)_h.h</HeaderFileName>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</PrependWithABINamepsace>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</PrependWithABINamepsace>
-      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</PrependWithABINamepsace>
-      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</PrependWithABINamepsace>
-      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</PrependWithABINamepsace>
-      <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</PrependWithABINamepsace>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</PrependWithABINamepsace>
       <PrependWithABINamepsace Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</PrependWithABINamepsace>
     </Midl>

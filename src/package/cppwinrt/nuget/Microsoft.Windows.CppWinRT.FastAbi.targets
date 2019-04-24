@@ -1,0 +1,37 @@
+﻿<!--
+***********************************************************************************************
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <ImportGroup>
+        <Import Condition="'$(Platform)'=='Win32' or '$(Platform)'=='x64'" Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+        <Import Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'" Project="$(VCTargetsPath)\BuildCustomizations\marmasm.props" />
+    </ImportGroup>
+
+    <Target Name="CppWinRTPreprocessArmThunk" Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'"
+        BeforeTargets="_MARMASM" Outputs="$(IntDir)thunks.pp" Inputs="$(CppWinRTPackageDir)\src\$(CmakePlatform)\thunks.asm">
+        <Exec Command="cl /I$(CppWinRTPackageDir)\src /E /Tc $(CppWinRTPackageDir)\src\$(Platform)\thunks.asm > $(IntDir)thunks.pp" />
+    </Target>
+
+    <ItemGroup Condition="'$(Platform)'!='ARM' and '$(Platform)'!='ARM64'">
+        <MASM Include="$(CppWinRTPackageDir)\src\$(CmakePlatform)\thunks.asm">
+            <FileType>Document</FileType>
+            <IncludePaths>$(CppWinRTPackageDir)\src</IncludePaths>
+        </MASM>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'">
+        <MARMASM Include="$(IntDir)thunks.pp">
+            <FileType>Document</FileType>
+            <IncludePaths>$(CppWinRTPackageDir)\src</IncludePaths>
+        </MARMASM>
+    </ItemGroup>
+
+    <ImportGroup>
+        <Import Condition="'$(Platform)'=='Win32' or '$(Platform)'=='x64'" Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+        <Import Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'" Project="$(VCTargetsPath)\BuildCustomizations\marmasm.targets" />
+    </ImportGroup>
+
+</Project>
