@@ -33,29 +33,24 @@ namespace xlang::impl
     };
     using unknown_abi = abi_t<Windows::Foundation::IUnknown>;
 
-    template <> struct abi<Windows::Foundation::IInspectable>
+    template <> struct abi<Windows::Foundation::IXlangObject>
     {
-        struct XLANG_NOVTABLE type : unknown_abi
-        {
-            virtual int32_t XLANG_CALL GetIids(uint32_t* count, guid** ids) noexcept = 0;
-            virtual int32_t XLANG_CALL GetRuntimeClassName(xlang_string* name) noexcept = 0;
-            virtual int32_t XLANG_CALL GetTrustLevel(Windows::Foundation::TrustLevel* level) noexcept = 0;
-        };
+        using type = ::IXlangObject;
     };
-    template <> struct guid_storage<Windows::Foundation::IInspectable>
+    template <> struct guid_storage<Windows::Foundation::IXlangObject>
     {
-        static constexpr guid value{ 0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
+        static constexpr guid value{ ::IXlangObject_guid } };
     };
-    template <> struct name<Windows::Foundation::IInspectable>
+    template <> struct name<Windows::Foundation::IXlangObject>
     {
         static constexpr auto & value{ u8"Object" };
-        static constexpr auto & data{ u8"cinterface(IInspectable)" };
+        static constexpr auto & data{ u8"cinterface(IXlangObject)" };
     };
-    template <> struct category<Windows::Foundation::IInspectable>
+    template <> struct category<Windows::Foundation::IXlangObject>
     {
         using type = basic_category;
     };
-    using inspectable_abi = abi_t<Windows::Foundation::IInspectable>;
+    using inspectable_abi = abi_t<Windows::Foundation::IXlangObject>;
 
     struct XLANG_NOVTABLE IAgileObject : unknown_abi
     {

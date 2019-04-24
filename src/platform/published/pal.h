@@ -140,6 +140,14 @@ extern "C"
         }
     };
 
+    enum class XlangObjectInfoCategory
+    {
+        TypeName,
+        HashCode,
+        StringRepresentation,
+        ObjectSize
+    };
+
     struct XLANG_NOVTABLE xlang_unknown
     {
         virtual int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) XLANG_NOEXCEPT = 0;
@@ -147,6 +155,13 @@ extern "C"
         virtual uint32_t XLANG_CALL Release() XLANG_NOEXCEPT = 0;
     };
     inline constexpr xlang_guid xlang_unknown_guid{ 0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+
+    struct XLANG_NOVTABLE IXlangObject : xlang_unknown
+    {
+        virtual bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info) = 0;
+        virtual bool Equals(IXlangObject* object) = 0;
+    };
+    inline constexpr xlang_guid IXlangObject_guid{ 0x9f1770a3,0xd152,0x4041,{ 0x95,0x70,0x09,0x57,0xb6,0xeb,0x9e,0xf7 } };
 
     // TODO(manodasanW): Update this with actual new error handling type(s)
     struct XLANG_NOVTABLE xlang_error_info : xlang_unknown

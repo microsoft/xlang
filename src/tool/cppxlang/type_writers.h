@@ -431,7 +431,7 @@ namespace xlang
                         }
                         else
                         {
-                            write("Windows::Foundation::IInspectable");
+                            write("Windows::Foundation::IXlangObject");
                         }
                     }
                     else

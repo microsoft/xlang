@@ -131,15 +131,15 @@ namespace xlang
 
     namespace Windows::Foundation
     {
-        struct IActivationFactory : IInspectable
+        struct IActivationFactory : IXlangObject
         {
             IActivationFactory(std::nullptr_t = nullptr) noexcept {}
-            IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IInspectable(ptr, take_ownership_from_abi) {}
+            IActivationFactory(void* ptr, take_ownership_from_abi_t) noexcept : IXlangObject(ptr, take_ownership_from_abi) {}
 
             template <typename T>
             T ActivateInstance() const
             {
-                IInspectable instance;
+                IXlangObject instance;
                 check_hresult((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
                 return instance.try_as<T>();
             }

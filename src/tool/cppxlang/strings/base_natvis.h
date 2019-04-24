@@ -47,7 +47,7 @@ namespace xlang::impl
             return value;
         }
 
-        static auto XLANG_CALL get_val(xlang::Windows::Foundation::IInspectable* object, wchar_t const * iid_str, int method)
+        static auto XLANG_CALL get_val(xlang::Windows::Foundation::IXlangObject* object, wchar_t const * iid_str, int method)
         {
             return abi_val(static_cast<unknown_abi*>(get_abi(*object)), iid_str, method);
         }

@@ -454,24 +454,10 @@ namespace xlang
         return impl::com_array_proxy<T>(__valueSize, value);
     }
 
-    inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
+    inline hstring get_class_name(Windows::Foundation::IXlangObject const& object)
     {
         xlang_string value;
-        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(&value));
+        check_hresult((*(impl::inspectable_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::TypeName, &value));
         return { value, take_ownership_from_abi };
-    }
-
-    inline com_array<guid> get_interfaces(Windows::Foundation::IInspectable const& object)
-    {
-        com_array<guid> value;
-        check_hresult((*(impl::inspectable_abi**)&object)->GetIids(impl::put_size_abi(value), put_abi(value)));
-        return value;
-    }
-
-    inline Windows::Foundation::TrustLevel get_trust_level(Windows::Foundation::IInspectable const& object)
-    {
-        Windows::Foundation::TrustLevel value{};
-        check_hresult((*(impl::inspectable_abi**)&object)->GetTrustLevel(&value));
-        return value;
     }
 }

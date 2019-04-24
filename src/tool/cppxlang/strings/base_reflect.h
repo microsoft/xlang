@@ -4,7 +4,7 @@ namespace xlang::experimental::reflect
     template <typename T>
     struct base_type
     {
-        using type = Windows::Foundation::IInspectable;
+        using type = Windows::Foundation::IXlangObject;
     };
 
     template <typename T>
