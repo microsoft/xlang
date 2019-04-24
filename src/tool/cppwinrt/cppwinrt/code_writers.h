@@ -166,6 +166,17 @@ namespace xlang
         }
     }
 
+    static void write_generic_asserts(writer& w, std::pair<GenericParam, GenericParam> const& params)
+    {
+        for (auto&& param : params)
+        {
+            auto format = R"(
+        static_assert(impl::has_category_v<%>, "% must be WinRT type.");)";
+
+            w.write(format, param, param);
+        }
+    }
+
     static void write_comma_generic_typenames(writer& w, std::pair<GenericParam, GenericParam> const& params)
     {
         for (auto&& param : params)
@@ -737,8 +748,18 @@ namespace xlang
 
         for (auto&& method : type.MethodList())
         {
-            method_signature signature{ method };
-            w.write(format, get_abi_name(method), bind<write_abi_params>(signature));
+            try
+            {
+                method_signature signature{ method };
+                w.write(format, get_abi_name(method), bind<write_abi_params>(signature));
+            }
+            catch (std::exception const& e)
+            {
+                throw_invalid(e.what(),
+                    "\n method: ", get_name(method),
+                    "\n type: ", type.TypeNamespace(), ".", type.TypeName(),
+                    "\n database: ", type.get_database().path());
+            }
         }
 
         write_fast_interface_abi(w, type);
@@ -2244,7 +2265,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     struct WINRT_EBO % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
-    {
+    {%
         %(std::nullptr_t = nullptr) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
 %%    };
@@ -2255,6 +2276,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 type_name,
                 type,
                 bind<write_interface_requires>(type),
+                bind<write_generic_asserts>(generics),
                 type_name,
                 type_name,
                 bind<write_interface_usings>(type),
@@ -2279,7 +2301,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         }
 
         auto format = R"(    struct % : Windows::Foundation::IUnknown
-    {
+    {%
         %(std::nullptr_t = nullptr) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IUnknown(ptr, take_ownership_from_abi) {}
         template <typename L> %(L lambda);
@@ -2295,6 +2317,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         w.write(format,
             type_name,
+            bind<write_generic_asserts>(generics),
             type_name,
             type_name,
             type_name,

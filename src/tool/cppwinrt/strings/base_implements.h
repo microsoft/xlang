@@ -801,6 +801,11 @@ namespace winrt::impl
         void abi_exit() const noexcept {}
         static void final_release(std::unique_ptr<D>) noexcept {}
 
+        int32_t query_interface_tearoff(guid const&, void**) const noexcept
+        {
+            return error_no_interface;
+        }
+
     protected:
 
         root_implements() noexcept
@@ -1079,7 +1084,7 @@ namespace winrt::impl
                 }
             }
 
-            return error_no_interface;
+            return static_cast<D*>(this)->query_interface_tearoff(id, object);
         }
 
         impl::IWeakReferenceSource* make_weak_ref() noexcept
@@ -1163,7 +1168,7 @@ namespace winrt::impl
     {
         using T::T;
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
         void use_make_function_to_create_this_object() final
         {
         }
@@ -1263,7 +1268,7 @@ namespace winrt
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
         // Please use winrt::make<T>(args...) to avoid allocating a C++/WinRT implementation type on the stack.
         virtual void use_make_function_to_create_this_object() = 0;
 #endif

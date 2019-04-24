@@ -134,6 +134,11 @@ namespace xlang::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_pair.first;
+        }
+
     private:
 
         std::pair<interface_type, impl::input_scope*> m_pair;
@@ -193,6 +198,11 @@ namespace xlang::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:

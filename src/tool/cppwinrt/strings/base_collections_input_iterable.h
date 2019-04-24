@@ -42,7 +42,7 @@ namespace winrt::impl
             return range_container<InputIt>{ m_begin, m_end };
         }
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
         void use_make_function_to_create_this_object() final
         {
         }
@@ -135,6 +135,11 @@ namespace winrt::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_pair.first;
+        }
+
     private:
 
         std::pair<interface_type, impl::input_scope*> m_pair;
@@ -207,6 +212,11 @@ namespace winrt::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_pair.first;
+        }
+
     private:
 
         std::pair<interface_type, impl::input_scope*> m_pair;
@@ -262,6 +272,11 @@ namespace winrt::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
+        }
+
     private:
 
         interface_type m_interface;
@@ -315,6 +330,11 @@ namespace winrt::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:
