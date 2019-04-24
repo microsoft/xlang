@@ -17,6 +17,7 @@ endif()
 target_sources(test_xmeta PUBLIC
     pch.cpp
     test_lexer.cpp
+    test_symbol_table.cpp
     test_midl_compat.cpp
     xlang_test_listener.cpp
 )
