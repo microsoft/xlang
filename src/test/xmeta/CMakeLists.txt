@@ -8,24 +8,34 @@ set(ANTLR4_WITH_STATIC_CRT ON)
 add_executable(test_xmeta "")
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")
-add_custom_command(TARGET test_xmeta POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test"
-    $<TARGET_FILE_DIR:test_xmeta>/midl3test)
+    add_custom_command(TARGET test_xmeta POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test"
+        $<TARGET_FILE_DIR:test_xmeta>/midl3test)
 endif()
 
 target_sources(test_xmeta PUBLIC
     pch.cpp
     test_lexer.cpp
     test_midl_compat.cpp
-    test_xmeta_emit.cpp
     xlang_test_listener.cpp
 )
+
+if (WIN32)
+    target_sources(test_xmeta PUBLIC
+        test_xmeta_emit.cpp
+    )
+endif()
 
 target_include_directories(test_xmeta
     PUBLIC ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(test_xmeta xmeta_antlr xmeta_model)
+
+target_link_libraries(test_xmeta xmeta_antlr xmeta_model xmeta_windows)
+if (WIN32)
+    target_link_libraries(test_xmeta xmeta_windows)
+endif()
+
 
 if (MSVC)
     TARGET_CONFIG_MSVC_PCH(test_xmeta pch.cpp pch.h)

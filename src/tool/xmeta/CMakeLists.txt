@@ -2,12 +2,18 @@ cmake_minimum_required(VERSION 3.9)
 
 project(xmeta)
 
-add_executable(xmeta
-    main.cpp
-)
+if (WIN32)
+    add_executable(xmeta main.cpp)
+endif()
 
-add_library(xmeta_model cpp/xmeta_idl_reader.cpp cpp/ast_to_st_listener.cpp cpp/xlang_model_walker.cpp cpp/xmeta_emit.cpp)
-target_include_directories(xmeta_model PUBLIC cpp/models cpp ${XLANG_LIBRARY_PATH})
+add_library(xmeta_model cpp/xmeta_idl_reader.cpp cpp/ast_to_st_listener.cpp cpp/xlang_model_walker.cpp)
+target_include_directories(xmeta_model PUBLIC cpp/models cpp)
+
+if (WIN32)
+    add_library(xmeta_windows xmeta_emit.cpp)
+    target_include_directories(xmeta_windows PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} cpp/models cpp ${XLANG_LIBRARY_PATH})
+    target_link_libraries(xmeta_windows PUBLIC xmeta_model)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/cmake)
 
@@ -50,9 +56,12 @@ if (MSVC)
     target_compile_definitions(xmeta_antlr PUBLIC -D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 endif()
 
-target_link_libraries(xmeta
-    xmeta_antlr
-    xmeta_model
-    WindowsApp.lib
-    comsuppw.lib
-)
+if (WIN32)
+    target_link_libraries(xmeta
+        xmeta_antlr
+        xmeta_model
+        xmeta_windows
+        WindowsApp.lib
+        comsuppw.lib
+    )
+endif()
