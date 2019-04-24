@@ -233,7 +233,7 @@ TEST_CASE("tearoff")
         closable = nullptr;
         REQUIRE(!InteropType::Destroyed);
 
-        // Releasing the tearoof finally destroys the object.
+        // Releasing the tearoff finally destroys the object.
         persist = nullptr;
         REQUIRE(InteropType::Destroyed);
     }
@@ -270,7 +270,7 @@ TEST_CASE("tearoff")
         closable = nullptr;
         REQUIRE(!RuntimeType::Destroyed);
 
-        // Releasing the tearoof finally destroys the object.
+        // Releasing the tearoff finally destroys the object.
         stringable = nullptr;
         REQUIRE(RuntimeType::Destroyed);
     }
