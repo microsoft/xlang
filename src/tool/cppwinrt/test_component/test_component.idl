@@ -3,7 +3,7 @@ import "Windows.Foundation.Numerics.idl";
 namespace Windows.Foundation.Metadata
 {
     [attributeusage(target_method, target_property)]
-    [attributename("noexcept")]
+    [attributename("noexcept2")]
     attribute NoExceptionAttribute
     {
     }
@@ -57,6 +57,24 @@ namespace test_component
         Class();
         Class(String name);
 
+        Class(Windows.Foundation.Collections.IIterable<String> arg, Int32 dummy1);
+        Class(Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, String> > arg, Int32 dummy1, Int32 dummy2);
+        Class(Windows.Foundation.Collections.IMap<String, String> arg, Int32 dummy1, Int32 dummy2, Int32 dummy3);
+        Class(Windows.Foundation.Collections.IMapView<String, String> arg, Int32 dummy1, Int32 dummy2, Int32 dummy3, Int32 dummy4);
+        Class(Windows.Foundation.Collections.IVector<String> arg, Int32 dummy1, Int32 dummy2, Int32 dummy3, Int32 dummy4, Int32 dummy5);
+        Class(Windows.Foundation.Collections.IVectorView<String> arg, Int32 dummy1, Int32 dummy2, Int32 dummy3, Int32 dummy4, Int32 dummy5, Int32 dummy6);
+
+        static String InIterable(Windows.Foundation.Collections.IIterable<String> value);
+        static String InIterablePair(Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, String> > value);
+        static Windows.Foundation.IAsyncOperation<String> InAsyncIterable(Windows.Foundation.Collections.IIterable<String> value);
+        static Windows.Foundation.IAsyncOperation<String> InAsyncIterablePair(Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, String> > value);
+        static String InMap(Windows.Foundation.Collections.IMap<String, String> value);
+        static String InMapView(Windows.Foundation.Collections.IMapView<String, String> value);
+        static Windows.Foundation.IAsyncOperation<String> InAsyncMapView(Windows.Foundation.Collections.IMapView<String, String> value);
+        static String InVector(Windows.Foundation.Collections.IVector<String> value);
+        static String InVectorView(Windows.Foundation.Collections.IVectorView<String> value);
+        static Windows.Foundation.IAsyncOperation<String> InAsyncVectorView(Windows.Foundation.Collections.IVectorView<String> value);
+
         void Fail(Boolean value);
 
         String InInt32(Int32 value);
@@ -65,46 +83,53 @@ namespace test_component
         String InStringable(Windows.Foundation.IStringable value);
         String InStruct(Struct value);
         String InStructRef(ref const Struct value);
+        String InEnum(Signed value);
 
         void OutInt32(out Int32 value);
         void OutString(out String value);
         void OutObject(out Object value);
         void OutStringable(out Windows.Foundation.IStringable value);
         void OutStruct(out Struct value);
+        void OutEnum(out Signed value);
 
         Int32 ReturnInt32();
         String ReturnString();
         Object ReturnObject();
         Windows.Foundation.IStringable ReturnStringable();
         Struct ReturnStruct();
+        Signed ReturnEnum();
 
         String InInt32Array(Int32[] value);
         String InStringArray(String[] value);
         String InObjectArray(Object[] value);
         String InStringableArray(Windows.Foundation.IStringable[] value);
         String InStructArray(Struct[] value);
+        String InEnumArray(Signed[] value);
 
         void OutInt32Array(out Int32[] value);
         void OutStringArray(out String[] value);
         void OutObjectArray(out Object[] value);
         void OutStringableArray(out Windows.Foundation.IStringable[] value);
         void OutStructArray(out Struct[] value);
+        void OutEnumArray(out Signed[] value);
 
         void RefInt32Array(ref Int32[] value);
         void RefStringArray(ref String[] value);
         void RefObjectArray(ref Object[] value);
         void RefStringableArray(ref Windows.Foundation.IStringable[] value);
         void RefStructArray(ref Struct[] value);
+        void RefEnumArray(ref Signed[] value);
 
         Int32[] ReturnInt32Array();
         String[] ReturnStringArray();
         Object[] ReturnObjectArray();
         Windows.Foundation.IStringable[] ReturnStringableArray();
         Struct[] ReturnStructArray();
+        Signed[] ReturnEnumArray();
 
-        [noexcept] void NoexceptVoid();
-        [noexcept] Int32 NoexceptInt32();
-        [noexcept] String NoexceptString();
+        [noexcept2] void NoexceptVoid();
+        [noexcept2] Int32 NoexceptInt32();
+        [noexcept2] String NoexceptString();
     }
 
     namespace Structs

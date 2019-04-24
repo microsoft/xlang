@@ -194,6 +194,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="abi_args.cpp" />
     <ClCompile Include="abi_guard.cpp" />
     <ClCompile Include="agile_ref.cpp" />
     <ClCompile Include="agility.cpp" />
@@ -207,8 +208,33 @@
     <ClCompile Include="async_return.cpp" />
     <ClCompile Include="async_suspend.cpp" />
     <ClCompile Include="async_throw.cpp" />
+    <ClCompile Include="async_wait_for.cpp" />
     <ClCompile Include="capture.cpp" />
     <ClCompile Include="cmd_reader.cpp" />
+    <ClCompile Include="coro_foundation.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="coro_system.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="coro_threadpool.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="coro_ui_core.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="custom_error.cpp" />
     <ClCompile Include="delegates.cpp" />
     <ClCompile Include="enum.cpp" />
@@ -241,6 +267,9 @@
     <ClCompile Include="return_params_abi.cpp" />
     <ClCompile Include="scratch.cpp" />
     <ClCompile Include="structs.cpp" />
+    <ClCompile Include="tearoff.cpp" />
+    <ClCompile Include="thread_pool.cpp" />
+    <ClCompile Include="uniform_in_params.cpp" />
     <ClCompile Include="variadic_delegate.cpp" />
     <ClCompile Include="velocity.cpp" />
   </ItemGroup>

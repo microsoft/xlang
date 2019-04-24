@@ -53,6 +53,102 @@ namespace winrt::test_component::implementation
         return value.First + value.Second + L"ref";
     }
 
+    hstring Class::InEnum(Signed const& value)
+    {
+        switch (value)
+        {
+        case Signed::First: return L"First";
+        case Signed::Second: return L"Second";
+        case Signed::Third: return L"Third";
+        }
+
+        throw hresult_invalid_argument();
+    }
+
+    Class::Class(Windows::Foundation::Collections::IIterable<hstring> const& arg, int32_t)
+    {
+        if (arg.First().Current() != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, hstring>> const& arg, int32_t, int32_t)
+    {
+        if (arg.First().Current().Key() != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IMap<hstring, hstring> const& arg, int32_t, int32_t, int32_t)
+    {
+        if (arg.Lookup(L"test") != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IMapView<hstring, hstring> const& arg, int32_t, int32_t, int32_t, int32_t)
+    {
+        if (arg.Lookup(L"test") != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IVector<hstring> const& arg, int32_t, int32_t, int32_t, int32_t, int32_t)
+    {
+        if (arg.GetAt(0) != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IVectorView<hstring> const& arg, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t)
+    {
+        if (arg.GetAt(0) != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+
+    hstring Class::InIterable(Windows::Foundation::Collections::IIterable<hstring> const& value)
+    {
+        return value.First().Current();
+    }
+    hstring Class::InIterablePair(Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, hstring>> const& value)
+    {
+        return value.First().Current().Key();
+    }
+    Windows::Foundation::IAsyncOperation<hstring> Class::InAsyncIterable(Windows::Foundation::Collections::IIterable<hstring> value)
+    {
+        co_return value.First().Current();
+    }
+    Windows::Foundation::IAsyncOperation<hstring> Class::InAsyncIterablePair(Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, hstring>> value)
+    {
+        co_return value.First().Current().Key();
+    }
+    hstring Class::InMap(Windows::Foundation::Collections::IMap<hstring, hstring> const& value)
+    {
+        return value.Lookup(L"test");
+    }
+    hstring Class::InMapView(Windows::Foundation::Collections::IMapView<hstring, hstring> const& value)
+    {
+        return value.Lookup(L"test");
+    }
+    Windows::Foundation::IAsyncOperation<hstring> Class::InAsyncMapView(Windows::Foundation::Collections::IMapView<hstring, hstring> value)
+    {
+        co_return value.Lookup(L"test");
+    }
+    hstring Class::InVector(Windows::Foundation::Collections::IVector<hstring> const& value)
+    {
+        return value.GetAt(0);
+    }
+    hstring Class::InVectorView(Windows::Foundation::Collections::IVectorView<hstring> const& value)
+    {
+        return value.GetAt(0);
+    }
+    Windows::Foundation::IAsyncOperation<hstring> Class::InAsyncVectorView(Windows::Foundation::Collections::IVectorView<hstring> value)
+    {
+        co_return value.GetAt(0);
+    }
+
     void Class::OutInt32(int32_t& value)
     {
         value = 123;
@@ -79,6 +175,11 @@ namespace winrt::test_component::implementation
         value.Second = L"2";
     }
 
+    void Class::OutEnum(Signed& value)
+    {
+        value = Signed::First;
+    }
+
     int32_t Class::ReturnInt32()
     {
         return 123;
@@ -98,6 +199,10 @@ namespace winrt::test_component::implementation
     Struct Class::ReturnStruct()
     {
         return { L"1", L"2" };
+    }
+    Signed Class::ReturnEnum()
+    {
+        return Signed::First;
     }
 
     hstring Class::InInt32Array(array_view<int32_t const> value)
@@ -155,6 +260,17 @@ namespace winrt::test_component::implementation
 
         return result;
     }
+    hstring Class::InEnumArray(array_view<Signed const> value)
+    {
+        hstring result;
+
+        for (auto&& v : value)
+        {
+            result = result + InEnum(v);
+        }
+
+        return result;
+    }
 
     void Class::OutInt32Array(com_array<int32_t>& value)
     {
@@ -179,6 +295,11 @@ namespace winrt::test_component::implementation
     void Class::OutStructArray(com_array<Struct>& value)
     {
         value = { { L"1", L"2" }, { L"10", L"20" } };
+    }
+
+    void Class::OutEnumArray(com_array<Signed>& value)
+    {
+        value = { Signed::First, Signed::Second };
     }
 
     void Class::RefInt32Array(array_view<int32_t> value)
@@ -235,6 +356,18 @@ namespace winrt::test_component::implementation
             });
     }
 
+    void Class::RefEnumArray(array_view<Signed> value)
+    {
+        Signed counter{ Signed::First };
+
+        std::generate(value.begin(), value.end() - 1, [&]
+            {
+                auto result = counter;
+                counter = static_cast<Signed>(static_cast<int32_t>(counter) + 1);
+                return result;
+            });
+    }
+
     com_array<int32_t> Class::ReturnInt32Array()
     {
         return { 1,2,3 };
@@ -258,6 +391,11 @@ namespace winrt::test_component::implementation
     com_array<Struct> Class::ReturnStructArray()
     {
         return { { L"1", L"2" }, { L"10", L"20" } };
+    }
+
+    com_array<Signed> Class::ReturnEnumArray()
+    {
+        return { Signed::First, Signed::Second };
     }
 
     void Class::NoexceptVoid() noexcept

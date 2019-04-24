@@ -2,7 +2,7 @@
 namespace winrt::impl
 {
     template <typename T, typename Container>
-    struct input_vector final :
+    struct input_vector :
         implements<input_vector<T, Container>, wfc::IVector<T>, wfc::IVectorView<T>, wfc::IIterable<T>>,
         vector_base<input_vector<T, Container>, T>
     {
@@ -71,6 +71,11 @@ namespace winrt::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:

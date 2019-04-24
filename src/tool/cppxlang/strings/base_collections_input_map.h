@@ -2,7 +2,7 @@
 namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
-    struct input_map final :
+    struct input_map :
         implements<input_map<K, V, Container>, wfc::IMap<K, V>, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
         map_base<input_map<K, V, Container>, K, V>
     {
@@ -83,6 +83,11 @@ namespace xlang::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:

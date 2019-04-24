@@ -234,83 +234,119 @@ namespace winrt
         return awaitable{ handle, timeout };
     }
 
-    [[nodiscard]] inline auto resume_foreground(
-        Windows::UI::Core::CoreDispatcher const& dispatcher,
-        Windows::UI::Core::CoreDispatcherPriority const priority = Windows::UI::Core::CoreDispatcherPriority::Normal) noexcept
+    struct thread_pool
     {
-        struct awaitable
+        thread_pool() :
+            m_pool(check_pointer(WINRT_CreateThreadpool(nullptr)))
         {
-            awaitable(Windows::UI::Core::CoreDispatcher const& dispatcher, Windows::UI::Core::CoreDispatcherPriority const priority) noexcept :
-                m_dispatcher(dispatcher),
-                m_priority(priority)
+            m_environment.Pool = m_pool.get();
+        }
+
+        void thread_limits(uint32_t const high, uint32_t const low)
+        {
+            WINRT_SetThreadpoolThreadMaximum(m_pool.get(), high);
+            check_bool(WINRT_SetThreadpoolThreadMinimum(m_pool.get(), low));
+        }
+
+        bool await_ready() const noexcept
+        {
+            return false;
+        }
+
+        void await_resume() const noexcept
+        {
+        }
+
+        void await_suspend(std::experimental::coroutine_handle<> handle)
+        {
+            if (!WINRT_TrySubmitThreadpoolCallback(callback, handle.address(), &m_environment))
             {
+                throw_last_error();
+            }
+        }
+
+    private:
+
+        static void WINRT_CALL callback(void*, void* context) noexcept
+        {
+            std::experimental::coroutine_handle<>::from_address(context)();
+        }
+
+        struct pool_traits
+        {
+            using type = impl::ptp_pool;
+
+            static void close(type value) noexcept
+            {
+                WINRT_CloseThreadpool(value);
             }
 
-            bool await_ready() const noexcept
+            static constexpr type invalid() noexcept
             {
-                return false;
+                return nullptr;
             }
-
-            void await_resume() const noexcept
-            {
-            }
-
-            void await_suspend(std::experimental::coroutine_handle<> handle) const
-            {
-                m_dispatcher.RunAsync(m_priority, [handle]
-                    {
-                        handle();
-                    });
-            }
-
-        private:
-
-            Windows::UI::Core::CoreDispatcher const& m_dispatcher;
-            Windows::UI::Core::CoreDispatcherPriority const m_priority;
         };
 
-        return awaitable{ dispatcher, priority };
+        struct environment // TP_CALLBACK_ENVIRON
+        {
+            uint32_t Version{ 3 };
+            void* Pool{};
+            void* CleanupGroup{};
+            void* CleanupGroupCancelCallback{};
+            void* RaceDll{};
+            void* ActivationContext{};
+            void* FinalizationCallback{};
+            union
+            {
+                uint32_t Flags{};
+                struct
+                {
+                    uint32_t LongFunction : 1;
+                    uint32_t Persistent : 1;
+                    uint32_t Private : 30;
+                } s;
+            } u;
+            int32_t CallbackPriority{ 1 };
+            uint32_t Size{ sizeof(environment) };
+        };
+
+        handle_type<pool_traits> m_pool;
+        environment m_environment;
     };
 
-    [[nodiscard]] inline auto resume_foreground(
-        Windows::System::DispatcherQueue const& dispatcher,
-        Windows::System::DispatcherQueuePriority const priority = Windows::System::DispatcherQueuePriority::Normal) noexcept
+    struct fire_and_forget {};
+}
+
+namespace std::experimental
+{
+    template <typename... Args>
+    struct coroutine_traits<winrt::fire_and_forget, Args...>
     {
-        struct awaitable
+        struct promise_type
         {
-            awaitable(Windows::System::DispatcherQueue const& dispatcher, Windows::System::DispatcherQueuePriority const priority) noexcept :
-                m_dispatcher(dispatcher),
-                m_priority(priority)
+            winrt::fire_and_forget get_return_object() const noexcept
+            {
+                return{};
+            }
+
+            void return_void() const noexcept
             {
             }
 
-            bool await_ready() const noexcept
+            suspend_never initial_suspend() const noexcept
             {
-                return false;
+                return{};
             }
 
-            bool await_resume() const noexcept
+            suspend_never final_suspend() const noexcept
             {
-                return m_queued;
+                return{};
             }
 
-            bool await_suspend(std::experimental::coroutine_handle<> handle)
+            void unhandled_exception() const noexcept
             {
-                m_queued = m_dispatcher.TryEnqueue(m_priority, [handle]
-                    {
-                        handle();
-                    });
-
-                return m_queued;
+                std::terminate();
             }
-
-        private:
-
-            Windows::System::DispatcherQueue const& m_dispatcher;
-            Windows::System::DispatcherQueuePriority const m_priority;
-            bool m_queued{};
         };
-
-        return awaitable{ dispatcher, priority };
     };
 }
