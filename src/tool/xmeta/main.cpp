@@ -44,7 +44,6 @@ int main(int argc, const char* argv[])
     std::string assembly_name = remove_path(std::string(argv[1]));
     xlang_model_walker walker(reader.get_namespaces());
     std::shared_ptr<xmeta_emit> emitter = std::make_shared<xmeta_emit>(assembly_name);
-    emitter->initialize();
     walker.register_listener(emitter);
     walker.walk();
 

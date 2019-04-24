@@ -15,12 +15,9 @@ namespace xlang::xmeta
     class xmeta_emit : public xlang_model_listener
     {
     public:
-        xmeta_emit(std::string const& assembly_name) 
-            : m_assembly_name(assembly_name)
-        { };
+        xmeta_emit(std::string const& assembly_name);
+        ~xmeta_emit();
 
-        void initialize();
-        void uninitialize();
         void save_to_file() const;
 		std::vector<uint8_t> save_to_memory() const;
 
@@ -30,14 +27,6 @@ namespace xlang::xmeta
         void listen_interface_model(std::shared_ptr<interface_model> const& model) override;
         void listen_enum_model(std::shared_ptr<enum_model> const& model) override;
         void listen_delegate_model(delegate_model const& model) override;
-
-        mdTypeDef define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[]);
-        void define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def);
-        void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
-        void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
-
-        void define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return);
-        void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
 
     private:
         std::string m_assembly_name;
@@ -79,9 +68,16 @@ namespace xlang::xmeta
             0,
         };
 
-        // Windows specific methods
         void define_assembly();
         void define_common_reference_assembly();
+        mdTypeDef define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[]);
+        
+        void define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def);
+        void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
+        void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
+
+        void define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def, mdParamDef *token_return);
+        void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, int parameter_index);
 
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
         static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed

@@ -35,7 +35,6 @@ TEST_CASE("Assemblies metadata")
     std::string assembly_name = "testidl";
     std::string common_assembly_ref = "mscorlib";
     std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
-    emitter->initialize();
 
     xlang::meta::writer::pe_writer writer;
     writer.add_metadata(emitter->save_to_memory());
@@ -46,7 +45,6 @@ TEST_CASE("Assemblies metadata")
     REQUIRE(db.Assembly[0].Name() == assembly_name);
     REQUIRE(db.AssemblyRef.size() == 1);
     REQUIRE(db.AssemblyRef[0].Name() == common_assembly_ref);
-    emitter->uninitialize();
 }
 
 TEST_CASE("Enum metadata")
@@ -69,7 +67,6 @@ TEST_CASE("Enum metadata")
 
     std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
 
-    emitter->initialize();
     walker.register_listener(emitter);
     walker.walk();
 
@@ -114,7 +111,5 @@ TEST_CASE("Enum metadata")
         // REQUIRE(type_ref.TypeNamespace() == "Xmeta.Test"); // TODO: populate metadata with namespace
         REQUIRE(type_ref.ResolutionScope().type() == ResolutionScope::Module);
     }
-
-    emitter->uninitialize();
 }
 

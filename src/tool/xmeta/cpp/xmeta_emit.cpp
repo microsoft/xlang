@@ -112,11 +112,12 @@ namespace
 
 namespace xlang::xmeta
 {
-    void xmeta_emit::initialize() 
+    xmeta_emit::xmeta_emit(std::string const& assembly_name)
+        : m_assembly_name(assembly_name)
     {
         // Getting the meta data dispenser
         check_hresult(CoInitialize(NULL));
-    
+
         // Windows only for now
         check_hresult(CoCreateInstance(CLSID_CorMetaDataDispenser,
             nullptr,
@@ -131,27 +132,28 @@ namespace xlang::xmeta
 
 
         check_hresult(m_metadata_dispenser->DefineScope(
-                CLSID_CorMetaDataRuntime,
-                0,
-                IID_IMetaDataAssemblyEmit,
-                reinterpret_cast<IUnknown**>(m_metadata_assembly_emitter.put_void())));
+            CLSID_CorMetaDataRuntime,
+            0,
+            IID_IMetaDataAssemblyEmit,
+            reinterpret_cast<IUnknown**>(m_metadata_assembly_emitter.put_void())));
 
 
         check_hresult(m_metadata_assembly_emitter->QueryInterface(IID_IMetaDataEmit2, m_metadata_emitter.put_void()));
         check_hresult(m_metadata_emitter->QueryInterface(IID_IMetaDataImport, m_metadata_import.put_void()));
-       // Defining the mscorlib assemblyref
+        // Defining the mscorlib assemblyref
         define_assembly();
         define_common_reference_assembly();
 
         mdModule token_current_module;
         check_hresult(m_metadata_import->GetModuleFromScope(&token_current_module));
         m_module = to_Module(token_current_module);
-    }
+    };
 
-    void xmeta_emit::uninitialize()
+    xmeta_emit::~xmeta_emit()
     {
         CoUninitialize();
-    }
+    };
+
 
     // This doesn't really output in a PE format
     void xmeta_emit::save_to_file() const
