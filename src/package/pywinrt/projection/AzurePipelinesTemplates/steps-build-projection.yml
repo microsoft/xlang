@@ -11,9 +11,8 @@ steps:
     artifactName: 'pywinrt'
     downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-- script: echo $(ProjectionType)
-- script: echo ${{ parameters.buildFullProjection }}
-
+# I have been completely unable to wire up queue-time variables to template parameters so that they work with conditional insertion
+# so instead, I'm passing the projectionType value into the script and switching between full/partial via a script if statement
 - script: |
     echo %ProjectionType%
     IF %ProjectionType%==full (
