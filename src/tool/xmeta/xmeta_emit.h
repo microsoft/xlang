@@ -7,6 +7,7 @@
 #include <cor.h>
 #include <meta_reader.h>
 #include <meta_writer.h>
+#include <string_view>
 
 namespace xlang::xmeta
 {
@@ -15,7 +16,7 @@ namespace xlang::xmeta
     class xmeta_emit : public xlang_model_listener
     {
     public:
-        xmeta_emit(std::string const& assembly_name);
+        xmeta_emit(std::string_view const& assembly_name);
         ~xmeta_emit();
 
         void save_to_file() const;

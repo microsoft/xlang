@@ -112,8 +112,8 @@ namespace
 
 namespace xlang::xmeta
 {
-    xmeta_emit::xmeta_emit(std::string const& assembly_name)
-        : m_assembly_name(assembly_name)
+    xmeta_emit::xmeta_emit(std::string_view const& assembly_name)
+        : m_assembly_name(std::string(assembly_name))
     {
         // Getting the meta data dispenser
         check_hresult(CoInitialize(NULL));

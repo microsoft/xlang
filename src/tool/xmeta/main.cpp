@@ -22,13 +22,13 @@ using namespace antlr4;
 using namespace winrt;
 using namespace xlang::xmeta;
 
-std::string remove_extension(const std::string& filename) {
+std::string_view remove_extension(std::string_view const filename) {
     size_t lastdot = filename.find_last_of(".");
     if (lastdot == std::string::npos) return filename;
     return filename.substr(0, lastdot);
 }
 
-std::string remove_path(const std::string& filename) {
+std::string_view remove_path(std::string_view const filename) {
     size_t lastdot = filename.find_last_of("\\");
     if (lastdot == std::string::npos) return filename;
     return filename.substr(lastdot + 1, filename.length());
@@ -41,7 +41,7 @@ int main(int argc, const char* argv[])
     xmeta_idl_reader reader{ "" };
     reader.read(stream);
 
-    std::string assembly_name = remove_path(std::string(argv[1]));
+    std::string_view assembly_name = remove_path(argv[1]);
     xlang_model_walker walker(reader.get_namespaces());
     std::shared_ptr<xmeta_emit> emitter = std::make_shared<xmeta_emit>(assembly_name);
     walker.register_listener(emitter);
@@ -50,5 +50,5 @@ int main(int argc, const char* argv[])
     assembly_name = remove_extension(assembly_name);
     xlang::meta::writer::pe_writer writer;
     writer.add_metadata(emitter->save_to_memory());
-    writer.save_to_file(std::filesystem::current_path().concat("\\" + assembly_name + ".xmd"));
+    writer.save_to_file(std::filesystem::current_path().append(std::string(assembly_name) + ".xmd"));
 }
