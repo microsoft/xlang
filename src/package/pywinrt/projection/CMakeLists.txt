@@ -57,6 +57,11 @@ target_link_libraries(_winrt PRIVATE onecore)
 
 TARGET_CONFIG_MSVC_PCH(_winrt pch.cpp pch.h)
 
+string(REPLACE "/MDd" "/MTd" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+foreach(build_type RELEASE MINSIZEREL RELWITHDEBINFO)
+    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_${build_type} "${CMAKE_CXX_FLAGS_${build_type}}")
+endforeach()
+
 string(REGEX REPLACE "/GR" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 # TODO: re-enable /GL and /LTCG when we get a bigger build machine
 # string(APPEND CMAKE_MODULE_LINKER_FLAGS " /LTCG:STATUS")

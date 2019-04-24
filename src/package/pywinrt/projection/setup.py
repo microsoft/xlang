@@ -11,11 +11,11 @@ setuptools.setup(
     url="http://github.com/Microsoft/xlang",
     classifiers=[
             'Development Status :: 4 - Beta',
-            'Environment :: Win32 (MS Windows)'
+            'Environment :: Win32 (MS Windows)',
             'License :: OSI Approved :: MIT License',
-            'Operating System :: Microsoft :: Windows :: Windows 10'
+            'Operating System :: Microsoft :: Windows :: Windows 10',
             'Programming Language :: Python :: 3.7',
-            'Programming Language :: Python :: Implementation :: CPython'
+            'Programming Language :: Python :: Implementation :: CPython',
             'Topic :: System :: Operating System',
         ],
     package_data={ "winrt":["_winrt.pyd"] },
