@@ -77,14 +77,15 @@ TEST_CASE("Enum metadata")
     std::string assembly_name = "testidl";
     xmeta_idl_reader reader{ "" };
     REQUIRE(reader.read(test_idl) == 0);
-    xlang::xmeta::xlang_model_walker walker(reader.get_namespaces());
-    std::shared_ptr<xlang::xmeta::xmeta_emit> emitter = std::make_shared<xlang::xmeta::xmeta_emit>(assembly_name);
+    xlang::xmeta::xmeta_emit emitter(assembly_name);
+    xlang::xmeta::xlang_model_walker walker(reader.get_namespaces(), emitter);
+    
 
     walker.register_listener(emitter);
     walker.walk();
 
     xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter->save_to_memory());
+    writer.add_metadata(emitter.save_to_memory());
     xlang::meta::reader::database db{ writer.save_to_memory() };
     REQUIRE(db.TypeDef.size() == 2);
 

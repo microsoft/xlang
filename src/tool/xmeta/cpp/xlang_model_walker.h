@@ -7,17 +7,17 @@ namespace xlang::xmeta
     class xlang_model_walker
     {
     public:
-        xlang_model_walker(std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> const& namespaces)
-            : m_namespaces(namespaces)
+        xlang_model_walker(std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> const& namespaces, xlang_model_listener & listener)
+            : m_namespaces(namespaces), m_listener(listener)
         { };
 
-        void register_listener(std::shared_ptr<xlang_model_listener> const& listener);
+        void register_listener(xlang_model_listener & listener);
         void walk();
         
         xlang_model_walker() = delete;
 
     private:
-        std::shared_ptr<xlang_model_listener> m_listener;
+        xlang_model_listener & m_listener;
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> const& m_namespaces;
 
         void enter_namespace_model(std::shared_ptr<namespace_model> const& model);
