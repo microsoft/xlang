@@ -73,6 +73,11 @@ namespace xlang::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
+        }
+
     private:
 
         interface_type m_interface;

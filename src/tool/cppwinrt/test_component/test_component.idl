@@ -57,6 +57,24 @@ namespace test_component
         Class();
         Class(String name);
 
+        Class(Windows.Foundation.Collections.IIterable<String> arg, Int32 dummy1);
+        Class(Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, String> > arg, Int32 dummy1, Int32 dummy2);
+        Class(Windows.Foundation.Collections.IMap<String, String> arg, Int32 dummy1, Int32 dummy2, Int32 dummy3);
+        Class(Windows.Foundation.Collections.IMapView<String, String> arg, Int32 dummy1, Int32 dummy2, Int32 dummy3, Int32 dummy4);
+        Class(Windows.Foundation.Collections.IVector<String> arg, Int32 dummy1, Int32 dummy2, Int32 dummy3, Int32 dummy4, Int32 dummy5);
+        Class(Windows.Foundation.Collections.IVectorView<String> arg, Int32 dummy1, Int32 dummy2, Int32 dummy3, Int32 dummy4, Int32 dummy5, Int32 dummy6);
+
+        static String InIterable(Windows.Foundation.Collections.IIterable<String> value);
+        static String InIterablePair(Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, String> > value);
+        static Windows.Foundation.IAsyncOperation<String> InAsyncIterable(Windows.Foundation.Collections.IIterable<String> value);
+        static Windows.Foundation.IAsyncOperation<String> InAsyncIterablePair(Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, String> > value);
+        static String InMap(Windows.Foundation.Collections.IMap<String, String> value);
+        static String InMapView(Windows.Foundation.Collections.IMapView<String, String> value);
+        static Windows.Foundation.IAsyncOperation<String> InAsyncMapView(Windows.Foundation.Collections.IMapView<String, String> value);
+        static String InVector(Windows.Foundation.Collections.IVector<String> value);
+        static String InVectorView(Windows.Foundation.Collections.IVectorView<String> value);
+        static Windows.Foundation.IAsyncOperation<String> InAsyncVectorView(Windows.Foundation.Collections.IVectorView<String> value);
+
         void Fail(Boolean value);
 
         String InInt32(Int32 value);
