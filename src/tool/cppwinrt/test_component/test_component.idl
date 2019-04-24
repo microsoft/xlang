@@ -3,7 +3,7 @@ import "Windows.Foundation.Numerics.idl";
 namespace Windows.Foundation.Metadata
 {
     [attributeusage(target_method, target_property)]
-    [attributename("noexcept")]
+    [attributename("noexcept2")]
     attribute NoExceptionAttribute
     {
     }
@@ -127,9 +127,9 @@ namespace test_component
         Struct[] ReturnStructArray();
         Signed[] ReturnEnumArray();
 
-        [noexcept] void NoexceptVoid();
-        [noexcept] Int32 NoexceptInt32();
-        [noexcept] String NoexceptString();
+        [noexcept2] void NoexceptVoid();
+        [noexcept2] Int32 NoexceptInt32();
+        [noexcept2] String NoexceptString();
     }
 
     namespace Structs
