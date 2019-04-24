@@ -786,6 +786,11 @@ namespace xlang::impl
         void abi_exit() const noexcept {}
         static void final_release(std::unique_ptr<D>) noexcept {}
 
+        int32_t query_interface_tearoff(guid const&, void**) const noexcept
+        {
+            return error_no_interface;
+        }
+
     protected:
 
         root_implements() noexcept
@@ -1059,7 +1064,7 @@ namespace xlang::impl
                 }
             }
 
-            return error_no_interface;
+            return static_cast<D*>(this)->query_interface_tearoff(id, object);
         }
 
         impl::IWeakReferenceSource* make_weak_ref() noexcept
