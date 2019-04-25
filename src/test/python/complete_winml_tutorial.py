@@ -77,7 +77,11 @@ def print_results(results, labels):
 async def async_main():
     cur_path = Path.cwd()
 
-    winml_content_path = cur_path 
+    winml_content_path = next((
+        path for path in
+        (p / "samples/python/winml_tutorial/winml_content" for p in (cur_path, *cur_path.parents))
+        if path.is_dir()
+    ), cur_path)
 
     model_path = winml_content_path / "SqueezeNet.onnx"
     model = load_model(model_path)
