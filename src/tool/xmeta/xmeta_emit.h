@@ -20,7 +20,7 @@ namespace xlang::xmeta
         ~xmeta_emit();
 
         void save_to_file() const;
-		std::vector<uint8_t> save_to_memory() const;
+        std::vector<uint8_t> save_to_memory() const;
 
         void listen_namespace_model(std::shared_ptr<namespace_model> const& model) final;
         void listen_class_model(std::shared_ptr<class_model> const& model) final;
@@ -57,8 +57,7 @@ namespace xlang::xmeta
 
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
         static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
-        static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract 
-        static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;           // Flags: Public | Sealed | Class
+        static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract
 
                 // A generic assembly metadata struct.
         static constexpr ASSEMBLYMETADATA s_genericMetadata =
@@ -84,5 +83,6 @@ namespace xlang::xmeta
             // ulOS
             0,
         };
+
     };
 }
