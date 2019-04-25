@@ -17,9 +17,3 @@ static PyModuleDef module_def = {
     nullptr,
     nullptr
 };
-
-PyMODINIT_FUNC
-PyInit_% (void) noexcept
-{
-    return PyModuleDef_Init(&module_def);
-}
