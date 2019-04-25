@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "base_model.h"
@@ -29,15 +30,19 @@ namespace xlang::xmeta
                 : ns_name + "." + get_id();
         }
 
-        auto const& get_fully_qualified_member_name(std::shared_ptr<base_model> const& member)
+        std::string const& get_fully_qualified_member_name(std::shared_ptr<base_model> const& member) const
         {
-            auto const& ns_name = m_containing_namespace_body->get_containing_namespace()->get_full_name();
-            return (ns_name == "")
-                ? member->get_id()
-                : ns_name + "." + member->get_id();
+            if (namespace_id.has_value())
+            {
+                return namespace_id.value();
+            }
+            namespace_id = m_containing_namespace_body->get_containing_namespace()->get_full_name();
+            assert(namespace_id != "");
+            return namespace_id.value();
         }
 
     private:
         std::shared_ptr<namespace_body_model> m_containing_namespace_body;
+        mutable std::optional<std::string> namespace_id = std::nullopt;
     };
 }

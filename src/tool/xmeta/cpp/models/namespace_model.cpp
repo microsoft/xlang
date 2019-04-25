@@ -1,3 +1,9 @@
+#if defined(_WIN32)
+#include <string.h>
+#endif
+
+#include <string_view>
+
 #include "namespace_model.h"
 
 #include "using_directive_models.h"
@@ -13,50 +19,37 @@ namespace xlang::xmeta
 {
     void namespace_body_model::add_class(std::shared_ptr<class_model> const& cm)
     {
-        m_classes[cm->get_id()] = cm;
+        m_classes.insert(std::pair(std::string_view{ cm->get_id() }, cm));
     }
 
     void namespace_body_model::add_struct(std::shared_ptr<struct_model> const& sm)
     {
-        m_structs[sm->get_id()] = sm;
+        m_structs.insert(std::pair(std::string_view{ sm->get_id() }, sm));
     }
 
     void namespace_body_model::add_interface(std::shared_ptr<interface_model> const& im)
     {
-        m_interfaces[im->get_id()] = im;
+        m_interfaces.insert(std::pair(std::string_view{ im->get_id() }, im));
     }
 
     void namespace_body_model::add_enum(std::shared_ptr<enum_model> const& em)
     {
-        m_enums[em->get_id()] = em;
+        m_enums.insert(std::pair(std::string_view{ em->get_id() }, em));
     }
 
     void namespace_body_model::add_delegate(std::shared_ptr<delegate_model> const& dm)
     {
-        m_delegates[dm->get_id()] = dm;
+        m_delegates.insert(std::pair(std::string_view{ dm->get_id() }, dm));
     }
 
     void namespace_body_model::add_using_alias_directive(std::shared_ptr<using_alias_directive_model> const& uad)
     {
-        m_using_alias_directives[uad->get_id()] = uad;
+        m_using_alias_directives.insert(std::pair(std::string_view{ uad->get_id() }, uad));
     }
 
     void namespace_body_model::add_using_namespace_directive(std::shared_ptr<using_namespace_directive_model> const& und)
     {
-        m_using_namespace_directives.emplace_back(std::move(und));
-    }
-
-    std::string copy_to_lower(std::string_view sv)
-    {
-        std::string s{ sv };
-        std::locale loc;
-        // ***NOTE*** ::tolower is temporary. This only works on the ASCII charset.
-        // Comparing case in full UTF-8 is a larger discussion, and should first be documented in detail.
-        std::transform(s.begin(), s.end(), s.begin(), [&](char c)
-        {
-            return static_cast<char>(::tolower(c));
-        });
-        return s;
+        m_using_namespace_directives.emplace_back(und);
     }
 
     // Checks if two member IDs are semantically the same.
@@ -66,12 +59,15 @@ namespace xlang::xmeta
     template<typename T>
     struct same_member_id
     {
-        same_member_id(std::string_view name) : new_name{ name } { }
+        same_member_id(std::string_view const& name) : new_name{ name } { }
         bool operator()(std::pair<std::string_view, std::shared_ptr<T>> const& v) const
         {
             auto old_name = v.first;
-            return (copy_to_lower(std::string(new_name)) == copy_to_lower(std::string(old_name)) && new_name != old_name) ||
+#if defined(_WIN32)
+            return (stricmp(old_name.data(), new_name.data()) == 0 && new_name != old_name) ||
                 new_name == old_name;
+#endif
+            return false; // Only works on windows for now.
         }
     private:
         std::string_view new_name;

@@ -1,4 +1,7 @@
 #include <assert.h>
+#if defined(_WIN32)
+#include <string.h>
+#endif
 
 #include "xmeta_idl_reader.h"
 #include "ast_to_st_listener.h"
@@ -34,11 +37,14 @@ namespace xlang::xmeta
 
     struct invalid_ns_id
     {
-        invalid_ns_id(std::string_view name) : new_name{ name } { }
+        invalid_ns_id(std::string_view const& name) : new_name{ name } { }
         bool operator()(std::pair<std::string_view, std::shared_ptr<namespace_model>> const& v) const
         {
             auto old_name = v.first;
-            return copy_to_lower(std::string(new_name)) == copy_to_lower(std::string(old_name)) && new_name != old_name;
+#if defined(_WIN32)
+            return stricmp(new_name.data(), old_name.data()) == 0 && new_name != old_name;
+#endif
+            return false; // Only works on Windows for now.
         }
     private:
         std::string_view new_name;
