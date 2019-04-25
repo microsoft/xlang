@@ -138,6 +138,8 @@ Where <spec> is one or more of:
 
             group.add([&]
             {
+                write_pch_h(src_dir);
+                write_pch_cpp(src_dir);
                 write_pybase_h(src_dir);
                 write_package_dunder_init_py(module_dir);
                 write_module_cpp(src_dir);

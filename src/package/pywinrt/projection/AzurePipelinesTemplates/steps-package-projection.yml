@@ -1,0 +1,32 @@
+parameters:
+  architecture: 'amd64'
+
+steps:
+
+- ${{ if eq(parameters.architecture, 'amd64') }}:
+  - script: |
+      @echo off
+      @echo ##vso[task.setvariable variable=platname]win-amd64
+    displayName: 'set platname to win-amd64'
+
+- ${{ if eq(parameters.architecture, 'x86') }}:
+  - script: |
+      @echo off
+      @echo ##vso[task.setvariable variable=platname]win32
+    displayName: 'set platname to win32'
+
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: src/package/pywinrt/
+    contents: 'LICENSE'
+    targetFolder: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }} 
+
+- script: python $(Build.SourcesDirectory)/src/package/pywinrt/projection/setup.py bdist_wheel --python-tag cp37 --plat-name $(platname)
+  workingDirectory: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }} 
+  displayName: python setup.py bdist_wheel (${{ parameters.architecture }})
+
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}/dist
+    contents: '*'
+    targetFolder: $(Build.ArtifactStagingDirectory)/wheel
