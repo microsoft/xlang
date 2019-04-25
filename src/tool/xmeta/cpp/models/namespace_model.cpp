@@ -77,12 +77,6 @@ namespace xlang::xmeta
         std::string_view new_name;
     };
 
-    template<typename T>
-    inline bool contains_id(std::map<std::string_view, std::shared_ptr<T>, std::less<>> const& members, std::string_view const& id)
-    {
-        return std::find_if(members.begin(), members.end(), same_member_id<T>(id)) != members.end();
-    }
-
     inline bool namespace_body_model::type_id_exists(std::string_view const& member_id) const
     {
         return contains_id(m_classes, member_id) ||
