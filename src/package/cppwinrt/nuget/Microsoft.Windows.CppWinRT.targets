@@ -467,6 +467,6 @@ $(XamlMetaDataProviderPch)
 
     <!-- Fast ABI component support -->
     <Import Condition="'$(CppWinRTFastAbi)'=='true'"
-        Project="$(MSBuildThisFileDirectory)Microsoft.Windows.CppWinRT.FastAbi.targets">
+        Project="$(MSBuildThisFileDirectory)Microsoft.Windows.CppWinRT.FastAbi.targets" />
 
 </Project>
