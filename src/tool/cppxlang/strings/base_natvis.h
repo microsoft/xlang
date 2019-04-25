@@ -33,13 +33,13 @@ namespace xlang::impl
             guid iid{};
             if (XLANG_IIDFromString(iid_str, &iid) == error_ok)
             {
-                inspectable_abi* pinsp;
-                typedef int32_t(XLANG_CALL inspectable_abi::* PropertyAccessor)(void*);
+                xlang_object_abi* pinsp;
+                typedef int32_t(XLANG_CALL xlang_object_abi::* PropertyAccessor)(void*);
                 if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
                 {
                     auto vtbl = *(PropertyAccessor**)pinsp;
-                    static const int IInspectable_vtbl_size = 6;
-                    auto get_Property = vtbl[method + IInspectable_vtbl_size];
+                    static const int IXlangObject_vtbl_size = 5;
+                    auto get_Property = vtbl[method + IXlangObject_vtbl_size];
                     (pinsp->*get_Property)(&value);
                     pinsp->Release();
                 }

@@ -456,8 +456,8 @@ namespace xlang
 
     inline hstring get_class_name(Windows::Foundation::IXlangObject const& object)
     {
-        xlang_string value;
-        check_hresult((*(impl::inspectable_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::TypeName, &value));
-        return { value, take_ownership_from_abi };
+        void* value{};
+        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::TypeName, &value));
+        return { static_cast<xlang_string>(value), take_ownership_from_abi };
     }
 }

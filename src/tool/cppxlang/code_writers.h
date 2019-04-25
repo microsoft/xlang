@@ -658,7 +658,7 @@ namespace xlang
         {
             auto format = R"(    template <> struct abi<%>
     {
-        struct XLANG_NOVTABLE type : inspectable_abi
+        struct XLANG_NOVTABLE type : xlang_object_abi
         {
 )";
 
@@ -668,7 +668,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct abi<%>
     {
-        struct XLANG_NOVTABLE type : inspectable_abi
+        struct XLANG_NOVTABLE type : xlang_object_abi
         {
 )";
 

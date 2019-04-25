@@ -15,7 +15,10 @@ if (MSVC)
     target_link_libraries(test_cppx windowsapp ole32)
 endif()
 
-target_sources(test_cppx PUBLIC main.cpp)
+target_sources(test_cppx PUBLIC
+    main.cpp
+    IXlangObject.cpp
+)
 
 install(TARGETS test_cppx DESTINATION "test/platform")
 if (WIN32)

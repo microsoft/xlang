@@ -79,7 +79,7 @@ namespace xlang::impl
 
     template <> struct abi<Windows::Foundation::IActivationFactory>
     {
-        struct XLANG_NOVTABLE type : inspectable_abi
+        struct XLANG_NOVTABLE type : xlang_object_abi
         {
             virtual int32_t XLANG_CALL ActivateInstance(void** instance) noexcept = 0;
         };

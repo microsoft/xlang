@@ -20,12 +20,7 @@ namespace xlang::impl
 
     template <> struct abi<Windows::Foundation::IUnknown>
     {
-        struct XLANG_NOVTABLE type
-        {
-            virtual int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept = 0;
-            virtual uint32_t XLANG_CALL AddRef() noexcept = 0;
-            virtual uint32_t XLANG_CALL Release() noexcept = 0;
-        };
+        using type = ::xlang_unknown;
     };
     template <> struct guid_storage<Windows::Foundation::IUnknown>
     {
@@ -39,7 +34,7 @@ namespace xlang::impl
     };
     template <> struct guid_storage<Windows::Foundation::IXlangObject>
     {
-        static constexpr guid value{ ::IXlangObject_guid } };
+        static constexpr guid value{ ::IXlangObject_guid };
     };
     template <> struct name<Windows::Foundation::IXlangObject>
     {
@@ -50,7 +45,7 @@ namespace xlang::impl
     {
         using type = basic_category;
     };
-    using inspectable_abi = abi_t<Windows::Foundation::IXlangObject>;
+    using xlang_object_abi = abi_t<Windows::Foundation::IXlangObject>;
 
     struct XLANG_NOVTABLE IAgileObject : unknown_abi
     {
@@ -65,7 +60,7 @@ namespace xlang::impl
         virtual int32_t XLANG_CALL Resolve(guid const& id, void** object) noexcept = 0;
     };
 
-    struct XLANG_NOVTABLE IStaticLifetime : inspectable_abi
+    struct XLANG_NOVTABLE IStaticLifetime : xlang_object_abi
     {
         virtual int32_t XLANG_CALL unused() noexcept = 0;
         virtual int32_t XLANG_CALL GetCollection(void** value) noexcept = 0;
@@ -75,7 +70,7 @@ namespace xlang::impl
         static constexpr guid value{ 0x17b0e613,0x942a,0x422d,{ 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae } };
     };
 
-    struct XLANG_NOVTABLE IStaticLifetimeCollection : inspectable_abi
+    struct XLANG_NOVTABLE IStaticLifetimeCollection : xlang_object_abi
     {
         virtual int32_t XLANG_CALL Lookup(void*, void**) noexcept = 0;
         virtual int32_t XLANG_CALL unused() noexcept = 0;
