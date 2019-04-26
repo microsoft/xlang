@@ -180,9 +180,7 @@ namespace xlang
             {
                 async =
                     type_name == "IAsyncAction" ||
-                    type_name == "IAsyncOperation`1" ||
-                    type_name == "IAsyncActionWithProgress`1" ||
-                    type_name == "IAsyncOperationWithProgress`2";
+                    type_name == "IAsyncOperation`1";
             }
         },
             [](auto&&) {});
