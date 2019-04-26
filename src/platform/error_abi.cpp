@@ -66,42 +66,42 @@ namespace xlang::impl
             return result;
         }
 
-        void GetError(xlang_result* error) noexcept override
+        void get_error(xlang_result* error) noexcept override
         {
             *error = m_result;
         }
 
-        void GetMessage(xlang_string* message) noexcept override
+        void get_message(xlang_string* message) noexcept override
         {
             *message = m_message;
         }
 
-        void GetLanguageError(xlang_string* language_error) noexcept override
+        void get_language_error(xlang_string* language_error) noexcept override
         {
             *language_error = m_language_error;
         }
 
-        void GetExecutionTrace(xlang_unknown** execution_trace) noexcept override
+        void get_execution_trace(xlang_unknown** execution_trace) noexcept override
         {
             m_execution_trace.copy_to(execution_trace);
         }
 
-        void GetProjectionIdentifier(xlang_string* projection_identifier) noexcept override
+        void get_projection_identifier(xlang_string* projection_identifier) noexcept override
         {
             *projection_identifier = m_projection_identifier;
         }
 
-        void GetLanguageInformation(xlang_unknown** language_information) noexcept override
+        void get_language_information(xlang_unknown** language_information) noexcept override
         {
             m_language_information.copy_to(language_information);
         }
 
-        void GetPropagatedError(xlang_error_info** propagated_error) noexcept override
+        void get_propagated_error(xlang_error_info** propagated_error) noexcept override
         {
             m_next_propagated_error.copy_to(propagated_error);
         }
 
-        void PropagateError(
+        void propagate_error(
             xlang_string projection_identifier,
             xlang_string language_error,
             xlang_unknown* execution_trace,

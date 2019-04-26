@@ -141,6 +141,7 @@ extern "C"
 
     struct XLANG_NOVTABLE xlang_unknown
     {
+        // These methods use pascal casing to allow for interop with COM.
         virtual int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) XLANG_NOEXCEPT = 0;
         virtual uint32_t XLANG_CALL AddRef() XLANG_NOEXCEPT = 0;
         virtual uint32_t XLANG_CALL Release() XLANG_NOEXCEPT = 0;
@@ -220,14 +221,14 @@ extern "C"
 
     struct XLANG_NOVTABLE xlang_error_info : xlang_unknown
     {
-        virtual void GetError(xlang_result* error) XLANG_NOEXCEPT = 0;
-        virtual void GetMessage(xlang_string* message) XLANG_NOEXCEPT = 0;
-        virtual void GetLanguageError(xlang_string* language_error) XLANG_NOEXCEPT = 0;
-        virtual void GetExecutionTrace(xlang_unknown** execution_trace) XLANG_NOEXCEPT = 0;
-        virtual void GetProjectionIdentifier(xlang_string* projection_identifier) XLANG_NOEXCEPT = 0;
-        virtual void GetLanguageInformation(xlang_unknown** language_information) XLANG_NOEXCEPT = 0;
-        virtual void GetPropagatedError(xlang_error_info** propagated_error) XLANG_NOEXCEPT = 0;
-        virtual void PropagateError(
+        virtual void get_error(xlang_result* error) XLANG_NOEXCEPT = 0;
+        virtual void get_message(xlang_string* message) XLANG_NOEXCEPT = 0;
+        virtual void get_language_error(xlang_string* language_error) XLANG_NOEXCEPT = 0;
+        virtual void get_execution_trace(xlang_unknown** execution_trace) XLANG_NOEXCEPT = 0;
+        virtual void get_projection_identifier(xlang_string* projection_identifier) XLANG_NOEXCEPT = 0;
+        virtual void get_language_information(xlang_unknown** language_information) XLANG_NOEXCEPT = 0;
+        virtual void get_propagated_error(xlang_error_info** propagated_error) XLANG_NOEXCEPT = 0;
+        virtual void propagate_error(
             xlang_string projection_identifier,
             xlang_string language_error,
             xlang_unknown* execution_trace,
