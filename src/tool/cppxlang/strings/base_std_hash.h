@@ -50,6 +50,6 @@ namespace std
     };
 
     template<> struct hash<xlang::Windows::Foundation::IUnknown> : xlang::impl::hash_base<xlang::Windows::Foundation::IUnknown> {};
-    template<> struct hash<xlang::Windows::Foundation::IInspectable> : xlang::impl::hash_base<xlang::Windows::Foundation::IInspectable> {};
+    template<> struct hash<xlang::Windows::Foundation::IXlangObject> : xlang::impl::hash_base<xlang::Windows::Foundation::IXlangObject> {};
     template<> struct hash<xlang::Windows::Foundation::IActivationFactory> : xlang::impl::hash_base<xlang::Windows::Foundation::IActivationFactory> {};
 }

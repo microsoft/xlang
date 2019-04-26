@@ -81,7 +81,7 @@ namespace xlang::impl
         void GetChar16Array(com_array<char16_t> &) { throw hresult_not_implemented(); }
         void GetBooleanArray(com_array<bool> &) { throw hresult_not_implemented(); }
         void GetStringArray(com_array<hstring> &) { throw hresult_not_implemented(); }
-        void GetInspectableArray(com_array<Windows::Foundation::IInspectable> &) { throw hresult_not_implemented(); }
+        void GetInspectableArray(com_array<Windows::Foundation::IXlangObject> &) { throw hresult_not_implemented(); }
         void GetGuidArray(com_array<guid> &) { throw hresult_not_implemented(); }
         void GetDateTimeArray(com_array<Windows::Foundation::DateTime> &) { throw hresult_not_implemented(); }
         void GetTimeSpanArray(com_array<Windows::Foundation::TimeSpan> &) { throw hresult_not_implemented(); }
@@ -186,9 +186,9 @@ namespace xlang::impl
     };
 
     template <>
-    struct reference_traits<Windows::Foundation::IInspectable>
+    struct reference_traits<Windows::Foundation::IXlangObject>
     {
-        static auto make(Windows::Foundation::IInspectable const& value) { return Windows::Foundation::PropertyValue::CreateInspectable(value); }
+        static auto make(Windows::Foundation::IXlangObject const& value) { return Windows::Foundation::PropertyValue::CreateInspectable(value); }
     };
 
     template <>
@@ -255,15 +255,15 @@ namespace xlang::Windows::Foundation
 
 namespace xlang
 {
-    inline Windows::Foundation::IInspectable box_value(param::hstring const& value)
+    inline Windows::Foundation::IXlangObject box_value(param::hstring const& value)
     {
         return Windows::Foundation::IReference<hstring>(*(hstring*)(&value));
     }
 
     template <typename T, typename = std::enable_if_t<!std::is_convertible_v<T, param::hstring>>>
-    Windows::Foundation::IInspectable box_value(T const& value)
+    Windows::Foundation::IXlangObject box_value(T const& value)
     {
-        if constexpr (std::is_base_of_v<Windows::Foundation::IInspectable, T>)
+        if constexpr (std::is_base_of_v<Windows::Foundation::IXlangObject, T>)
         {
             return value;
         }
@@ -274,9 +274,9 @@ namespace xlang
     }
 
     template <typename T>
-    T unbox_value(Windows::Foundation::IInspectable const& value)
+    T unbox_value(Windows::Foundation::IXlangObject const& value)
     {
-        if constexpr (std::is_base_of_v<Windows::Foundation::IInspectable, T>)
+        if constexpr (std::is_base_of_v<Windows::Foundation::IXlangObject, T>)
         {
             return value.as<T>();
         }
@@ -298,7 +298,7 @@ namespace xlang
     }
 
     template <typename T>
-    hstring unbox_value_or(Windows::Foundation::IInspectable const& value, param::hstring const& default_value)
+    hstring unbox_value_or(Windows::Foundation::IXlangObject const& value, param::hstring const& default_value)
     {
         if (value)
         {
@@ -312,11 +312,11 @@ namespace xlang
     }
 
     template <typename T, typename = std::enable_if_t<!std::is_same_v<T, hstring>>>
-    T unbox_value_or(Windows::Foundation::IInspectable const& value, T const& default_value)
+    T unbox_value_or(Windows::Foundation::IXlangObject const& value, T const& default_value)
     {
         if (value)
         {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IInspectable, T>)
+            if constexpr (std::is_base_of_v<Windows::Foundation::IXlangObject, T>)
             {
                 if (auto temp = value.try_as<T>())
                 {
