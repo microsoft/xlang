@@ -283,7 +283,7 @@ namespace xlang::meta::reader
 
     private:
         std::vector<CustomModSig> m_cmod;
-        bool m_byref;
+        bool m_byref{};
         TypeSig m_type;
     };
 
@@ -387,9 +387,9 @@ namespace xlang::meta::reader
         }
 
     private:
-        CallingConvention m_calling_convention;
-        uint32_t m_generic_param_count;
-        uint32_t m_param_count;
+        CallingConvention m_calling_convention{ CallingConvention::HasThis };
+        uint32_t m_generic_param_count{};
+        uint32_t m_param_count{};
         RetTypeSig m_ret_type;
         std::vector<ParamSig> m_params;
     };
