@@ -543,7 +543,7 @@ namespace xlang::xmeta
         }
     }
     
-    void xmeta_emit::listen_delegate_model(delegate_model const& model) 
+    void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model)
     {
         //mdTypeDef implements[] = { mdTokenNil };
         //auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
