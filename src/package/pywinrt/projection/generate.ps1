@@ -18,7 +18,7 @@ if (-not $pywinrt_exe) {
     exit
 }
 
-nuget install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory "$repoRootPath/_build/tools"
+nuget install Microsoft.Windows.CppWinRT -Version 2.0.190417.3 -ExcludeVersion -OutputDirectory "$repoRootPath/_build/tools"
 
 $cppwinrt_exe = "$repoRootPath/_build/tools/Microsoft.Windows.CppWinRT\bin\cppwinrt.exe"
 
