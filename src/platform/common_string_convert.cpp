@@ -63,18 +63,18 @@ namespace xlang::impl::convert
             // 2 bytes
             if (end - begin < 1)
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
             char32_t ch2 = *begin++;
             if ((ch2 & 0xc0) != 0x80)
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
 
             char32_t result = ((ch & 0x1f) << 6) | (ch2 & 0x3f);
             if (result <= 0x7f)
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
             return result;
         }
@@ -82,18 +82,18 @@ namespace xlang::impl::convert
         {
             if (end - begin < 2)
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
             char32_t ch2 = *begin++;
             char32_t ch3 = *begin++;
             if ((ch2 & 0xc0) != 0x80 || (ch3 & 0xc0) != 0x80)
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
             char32_t result = ((ch & 0x0f) << 12) | ((ch2 & 0x3f) << 6) | (ch3 & 0x3f);
             if (result <= 0x7ff || (0xd800 <= result && result <= 0xdfff))
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
             return result;
         }
@@ -101,25 +101,25 @@ namespace xlang::impl::convert
         {
             if (end - begin < 3)
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
             char32_t ch2 = *begin++;
             char32_t ch3 = *begin++;
             char32_t ch4 = *begin++;
             if ((ch2 & 0xc0) != 0x80 || (ch3 & 0xc0) != 0x80 || (ch4 & 0xc0) != 0x80)
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
             char32_t result = ((ch & 0x07) << 18) | ((ch2 & 0x3f) << 12) | ((ch3 & 0x3f) << 6) | (ch4 & 0x3f);
             if (result <= 0xffff || 0x10ffff < result)
             {
-                throw_result(xlang_error_untranslatable_string);
+                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
             }
             return result;
         }
         else
         {
-            throw_result(xlang_error_untranslatable_string);
+            throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
         }
     }
 
@@ -192,7 +192,7 @@ namespace xlang::impl::convert
                 return 0x10000 + ((ch - 0xd800) << 10) | (ch2 - 0xdc00);
             }
         }
-        throw_result(xlang_error_untranslatable_string);
+        throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
     }
 
     void converter<char16_t>::encode(char32_t code_point, char16_t* &begin, char16_t* end)

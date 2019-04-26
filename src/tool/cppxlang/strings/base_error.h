@@ -10,6 +10,39 @@ namespace xlang::impl
     {
         return ((int32_t)((x) | 0x10000000));
     }
+
+    constexpr int32_t hresult_from_xlang_result(xlang_result const result) noexcept
+    {
+        switch (result)
+        {
+        case xlang_result::xlang_success:
+            return error_ok;
+        case xlang_result::xlang_access_denied:
+            return error_access_denied;
+        case xlang_result::xlang_bounds:
+            return error_out_of_bounds;
+        case xlang_result::xlang_fail:
+            return error_fail;
+        case xlang_result::xlang_handle:
+            return static_cast<hresult>(0x80070006);
+        case xlang_result::xlang_invalid_arg:
+            return error_invalid_argument;
+        case xlang_result::xlang_invalid_state:
+            return error_illegal_state_change;
+        case xlang_result::xlang_no_interface:
+            return error_no_interface;
+        case xlang_result::xlang_not_impl:
+            return error_not_implemented;
+        case xlang_result::xlang_out_of_memory:
+            return error_bad_alloc;
+        case xlang_result::xlang_pointer:
+            return static_cast<hresult>(0x80004003);
+        case xlang_result::xlang_type_load:
+            return static_cast<hresult>(0x80131522);
+        }
+
+        return error_fail;
+    }
 }
 
 namespace xlang
@@ -277,7 +310,9 @@ namespace xlang
     {
         if (result != nullptr)
         {
-            throw_hresult(result->error_code());
+            xlang_result error;
+            result->GetError(&error);
+            throw_hresult(impl::hresult_from_xlang_result(error));
         }
     }
 

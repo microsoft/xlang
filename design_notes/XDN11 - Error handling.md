@@ -398,9 +398,9 @@ struct IXLangErrorInfo
     void GetError(xlang_result* error);
     void GetMessage(xlang_string* message);
     void GetLanguageError(xlang_string* error);
-    void GetExecutionTrace(IUnknown* executionTrace);
-    void GetLanguageIdentifier(xlang_string* identifier);
-    void GetLanguageInformation(IUnknown* languageInformation);
+    void GetExecutionTrace(IUnknown** executionTrace);
+    void GetProjectionIdentifier(xlang_string* identifier);
+    void GetLanguageInformation(IUnknown** languageInformation);
     void GetPropagatedError(IXlangErrorInfo** propagatedError);
     void PropagateError(
         xlang_string projectionIdentifier,

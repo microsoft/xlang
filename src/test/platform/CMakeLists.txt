@@ -2,10 +2,11 @@ project(test_platform)
 
 add_executable(test_platform "")
 target_sources(test_platform
-    PUBLIC pch.cpp memory.cpp string.cpp activation.cpp)
+    PUBLIC pch.cpp memory.cpp string.cpp activation.cpp error.cpp)
 
 target_include_directories(test_platform
-    PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source)
+    PUBLIC ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../output/component/source
+	PRIVATE "${CMAKE_SOURCE_DIR}/platform/helpers")
 
 target_link_libraries(test_platform pal)
 RPATH_ORIGIN(test_platform)
