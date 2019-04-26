@@ -292,11 +292,11 @@ namespace xlang
     };
 )";
 
-            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+            auto attribute = get_attribute(type, "Foundation.Metadata", "GuidAttribute");
 
             if (!attribute)
             {
-                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+                throw_invalid("'Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
             }
 
             w.write(format,
@@ -369,11 +369,11 @@ namespace xlang
     };
 )";
 
-            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+            auto attribute = get_attribute(type, "Foundation.Metadata", "GuidAttribute");
 
             if (!attribute)
             {
-                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+                throw_invalid("'Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
             }
 
             w.write(format,
