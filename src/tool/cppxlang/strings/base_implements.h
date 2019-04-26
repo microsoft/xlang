@@ -46,12 +46,12 @@ namespace xlang::impl
 #ifdef XLANG_WINDOWS_ABI
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
+    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IXlangObject, T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
 
 #else
 
     template <typename T>
-    struct is_interface : std::is_base_of<Windows::Foundation::IInspectable, T> {};
+    struct is_interface : std::is_base_of<Windows::Foundation::IXlangObject, T> {};
 
 #endif
 
@@ -75,8 +75,8 @@ namespace xlang::impl
 
     template <typename I>
     struct is_cloaked : std::disjunction<
-        std::is_same<Windows::Foundation::IInspectable, I>,
-        std::negation<std::is_base_of<Windows::Foundation::IInspectable, I>>
+        std::is_same<Windows::Foundation::IXlangObject, I>,
+        std::negation<std::is_base_of<Windows::Foundation::IXlangObject, I>>
     > {};
 
     template <typename I>
@@ -331,16 +331,6 @@ namespace xlang::impl
     template <typename T>
     using uncloaked_interfaces = filter<is_uncloaked_interface, typename T::implements_type>;
 
-    template <typename T>
-    struct uncloaked_iids;
-
-    template <typename ... T>
-    struct uncloaked_iids<interface_list<T...>>
-    {
-#pragma warning(suppress: 4307)
-        static constexpr std::array<guid, sizeof...(T)> value{ xlang::guid_of<T>() ... };
-    };
-
     template <typename T, typename = void>
     struct implements_default_interface
     {
@@ -376,27 +366,27 @@ namespace xlang::impl
         return static_cast<unknown_abi*>(implemented_interfaces<T>::find(obj, iid_finder{ iid }));
     }
 
-    struct inspectable_finder
+    struct xlang_object_finder
     {
         template <typename I>
         static constexpr bool test() noexcept
         {
-            return std::is_base_of_v<inspectable_abi, abi_t<I>>;
+            return std::is_base_of_v<xlang_object_abi, abi_t<I>>;
         }
     };
 
     template <typename T>
-    inspectable_abi* find_inspectable(const T* obj) noexcept
+    xlang_object_abi* find_xlang_object(const T* obj) noexcept
     {
         using default_interface = typename implements_default_interface<T>::type;
 
-        if constexpr (std::is_base_of_v<inspectable_abi, abi_t<default_interface>>)
+        if constexpr (std::is_base_of_v<xlang_object_abi, abi_t<default_interface>>)
         {
             return to_abi<default_interface>(obj);
         }
         else
         {
-            return static_cast<inspectable_abi*>(implemented_interfaces<T>::find(obj, inspectable_finder{}));
+            return static_cast<xlang_object_abi*>(implemented_interfaces<T>::find(obj, xlang_object_finder{}));
         }
     }
 
@@ -448,19 +438,14 @@ namespace xlang::impl
             return shim().Release();
         }
 
-        int32_t XLANG_CALL GetIids(uint32_t* count, guid** array) noexcept override
+        bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info) noexcept override
         {
-            return shim().GetIids(count, array);
+            return shim().abi_GetObjectInfo(info_category, info);
         }
 
-        int32_t XLANG_CALL GetRuntimeClassName(xlang_string* name) noexcept override
+        bool Equals(xlang_object_abi* object) noexcept override
         {
-            return shim().abi_GetRuntimeClassName(name);
-        }
-
-        int32_t XLANG_CALL GetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept final
-        {
-            return shim().abi_GetTrustLevel(trustLevel);
+            return shim().abi_Equals(object);
         }
     };
 
@@ -478,18 +463,18 @@ namespace xlang::impl
 
 #endif
 
-    struct INonDelegatingInspectable : Windows::Foundation::IUnknown
+    struct INonDelegatingXlangObject : Windows::Foundation::IUnknown
     {
-        INonDelegatingInspectable(std::nullptr_t = nullptr) noexcept {}
+        INonDelegatingXlangObject(std::nullptr_t = nullptr) noexcept {}
     };
 
-    template <> struct abi<INonDelegatingInspectable>
+    template <> struct abi<INonDelegatingXlangObject>
     {
-        using type = inspectable_abi;
+        using type = xlang_object_abi;
     };
 
     template <typename D>
-    struct produce<D, INonDelegatingInspectable> : produce_base<D, INonDelegatingInspectable>
+    struct produce<D, INonDelegatingXlangObject> : produce_base<D, INonDelegatingXlangObject>
     {
         int32_t XLANG_CALL QueryInterface(const guid& id, void** object) noexcept final
         {
@@ -506,14 +491,14 @@ namespace xlang::impl
             return this->shim().NonDelegatingRelease();
         }
 
-        int32_t XLANG_CALL GetIids(uint32_t* count, guid** array) noexcept final
+        bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info) noexcept final
         {
-            return this->shim().NonDelegatingGetIids(count, array);
+            return this->shim().NonDelegatingGetObjectInfo(info_category, info);
         }
 
-        int32_t XLANG_CALL GetRuntimeClassName(xlang_string* name) noexcept final
+        bool Equals(xlang_object_abi* object) noexcept final
         {
-            return this->shim().NonDelegatingGetRuntimeClassName(name);
+            return this->shim().NonDelegatingEquals(object);
         }
     };
 
@@ -673,7 +658,7 @@ namespace xlang::impl
     {
     protected:
         static constexpr bool is_composing = false;
-        static constexpr inspectable_abi* m_inner = nullptr;
+        static constexpr xlang_object_abi* m_inner = nullptr;
     };
 
     template <>
@@ -691,26 +676,26 @@ namespace xlang::impl
         }
     protected:
         static constexpr bool is_composing = true;
-        Windows::Foundation::IInspectable m_inner;
+        Windows::Foundation::IXlangObject m_inner;
     };
 
     template <typename D, bool>
     struct XLANG_EBO root_implements_composable_inner
     {
     protected:
-        static constexpr inspectable_abi* outer() noexcept { return nullptr; }
+        static constexpr xlang_object_abi* outer() noexcept { return nullptr; }
 
         template <typename, typename, typename>
         friend class produce_dispatch_to_overridable_base;
     };
 
     template <typename D>
-    struct XLANG_EBO root_implements_composable_inner<D, true> : producer<D, INonDelegatingInspectable>
+    struct XLANG_EBO root_implements_composable_inner<D, true> : producer<D, INonDelegatingXlangObject>
     {
     protected:
-        inspectable_abi* outer() noexcept { return m_outer; }
+        xlang_object_abi* outer() noexcept { return m_outer; }
     private:
-        inspectable_abi* m_outer = nullptr;
+        xlang_object_abi* m_outer = nullptr;
 
         template <typename, typename, typename>
         friend class produce_dispatch_to_overridable_base;
@@ -724,7 +709,7 @@ namespace xlang::impl
         : root_implements_composing_outer<std::disjunction_v<std::is_same<composing, I>...>>
         , root_implements_composable_inner<D, std::disjunction_v<std::is_same<composable, I>...>>
     {
-        using IInspectable = Windows::Foundation::IInspectable;
+        using IXlangObject = Windows::Foundation::IXlangObject;
         using root_implements_type = root_implements;
 
         int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept
@@ -812,34 +797,22 @@ namespace xlang::impl
             }
         }
 
-        int32_t XLANG_CALL GetIids(uint32_t* count, guid** array) noexcept
+        bool XLANG_CALL abi_GetObjectInfo(XlangObjectInfoCategory info_category, void** info) noexcept
         {
             if (this->outer())
             {
-                return this->outer()->GetIids(count, array);
+                return this->outer()->GetObjectInfo(info_category, info);
             }
-
-            return NonDelegatingGetIids(count, array);
+            return NonDelegatingGetObjectInfo(info_category, info);
         }
 
-        int32_t XLANG_CALL abi_GetRuntimeClassName(xlang_string* name) noexcept
+        bool XLANG_CALL abi_Equals(xlang_object_abi* object) noexcept
         {
             if (this->outer())
             {
-                return this->outer()->GetRuntimeClassName(name);
+                return this->outer()->Equals(object);
             }
-
-            return NonDelegatingGetRuntimeClassName(name);
-        }
-
-        int32_t XLANG_CALL abi_GetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept
-        {
-            if (this->outer())
-            {
-                return this->outer()->GetTrustLevel(trustLevel);
-            }
-
-            return NonDelegatingGetTrustLevel(trustLevel);
+            return NonDelegatingEquals(object);
         }
 
         uint32_t XLANG_CALL NonDelegatingAddRef() noexcept
@@ -887,9 +860,9 @@ namespace xlang::impl
 
         int32_t XLANG_CALL NonDelegatingQueryInterface(const guid& id, void** object) noexcept
         {
-            if (is_guid_of<Windows::Foundation::IInspectable>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
+            if (is_guid_of<Windows::Foundation::IXlangObject>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
-                auto result = to_abi<INonDelegatingInspectable>(this);
+                auto result = to_abi<INonDelegatingXlangObject>(this);
                 NonDelegatingAddRef();
                 *object = result;
                 return error_ok;
@@ -905,63 +878,39 @@ namespace xlang::impl
             return result;
         }
 
-        int32_t XLANG_CALL NonDelegatingGetIids(uint32_t* count, guid** array) noexcept
+        // TODO: Determine nitty-gritty contract of these methods.
+        //       Can failure be represented, or should they be noexcept and terminate in case of exception?
+        //       What does the return type of GetObjectInfo represent?
+        bool NonDelegatingGetObjectInfo(XlangObjectInfoCategory info_category, void** info)
         {
-            const auto& local_iids = static_cast<D*>(this)->get_local_iids();
-            const uint32_t& local_count = local_iids.first;
-            if constexpr (root_implements_type::is_composing)
+            *info = nullptr;
+            bool result = false;
+
+            switch (info_category)
             {
-                if (local_count > 0)
-                {
-                    const com_array<guid>& inner_iids = get_interfaces(root_implements_type::m_inner);
-                    *count = local_count + inner_iids.size();
-                    *array = static_cast<guid*>(xlang_mem_alloc(sizeof(guid)*(*count)));
-                    if (*array == nullptr)
-                    {
-                        return error_bad_alloc;
-                    }
-                    *array = std::copy(local_iids.second, local_iids.second + local_count, *array);
-                    std::copy(inner_iids.cbegin(), inner_iids.cend(), *array);
-                }
-                else
-                {
-                    return static_cast<inspectable_abi*>(get_abi(root_implements_type::m_inner))->GetIids(count, array);
-                }
+            case XlangObjectInfoCategory::TypeName:
+                *info = detach_abi(static_cast<D*>(this)->GetObjectInfo_TypeName());
+                break;
+
+            case XlangObjectInfoCategory::HashCode:
+                *reinterpret_cast<uint32_t*>(info) = static_cast<D*>(this)->GetObjectInfo_HashCode();
+                break;
+
+            case XlangObjectInfoCategory::StringRepresentation:
+                *info = detach_abi(static_cast<D*>(this)->GetObjectInfo_StringRepresentation());
+                break;
+
+            case XlangObjectInfoCategory::ObjectSize:
+                *reinterpret_cast<uint32_t*>(info) = static_cast<D*>(this)->GetObjectInfo_ObjectSize();
+                break;
             }
-            else
-            {
-                if (local_count > 0)
-                {
-                    *count = local_count;
-                    *array = static_cast<guid*>(xlang_mem_alloc(sizeof(guid)*(*count)));
-                    if (*array == nullptr)
-                    {
-                        return error_bad_alloc;
-                    }
-                    std::copy(local_iids.second, local_iids.second + local_count, *array);
-                }
-                else
-                {
-                    *count = 0;
-                    *array = nullptr;
-                }
-            }
-            return error_ok;
+            return result;
         }
 
-        int32_t XLANG_CALL NonDelegatingGetRuntimeClassName(xlang_string* name) noexcept try
+        bool NonDelegatingEquals(xlang_object_abi* object) const noexcept
         {
-            *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
-            return error_ok;
+            return static_cast<D const*>(this)->Equals(*reinterpret_cast<IXlangObject const*>(&object));
         }
-        catch (...) { return to_hresult(); }
-
-        int32_t XLANG_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept try
-        {
-            *trustLevel = static_cast<D*>(this)->GetTrustLevel();
-            return error_ok;
-        }
-        catch (...) { return to_hresult(); }
 
         uint32_t subtract_reference() noexcept
         {
@@ -1011,8 +960,8 @@ namespace xlang::impl
     private:
 
         using is_agile = std::negation<std::disjunction<std::is_same<non_agile, I>...>>;
-        using is_inspectable = std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, I>...>;
-        using is_weak_ref_source = std::conjunction<is_inspectable, std::negation<is_factory>, std::negation<std::disjunction<std::is_same<no_weak_ref, I>...>>>;
+        using is_xlang_object = std::disjunction<std::is_base_of<Windows::Foundation::IXlangObject, I>...>;
+        using is_weak_ref_source = std::conjunction<is_xlang_object, std::negation<is_factory>, std::negation<std::disjunction<std::is_same<no_weak_ref, I>...>>>;
         using use_module_lock = std::negation<std::disjunction<std::is_same<no_module_lock, I>...>>;
         using weak_ref_t = impl::weak_ref<is_agile::value>;
 
@@ -1038,11 +987,11 @@ namespace xlang::impl
                 }
             }
 
-            if constexpr (is_inspectable::value)
+            if constexpr (is_xlang_object::value)
             {
-                if (is_guid_of<Windows::Foundation::IInspectable>(id))
+                if (is_guid_of<Windows::Foundation::IXlangObject>(id))
                 {
-                    *object = find_inspectable();
+                    *object = find_xlang_object();
                     AddRef();
                     return error_ok;
                 }
@@ -1126,15 +1075,15 @@ namespace xlang::impl
         }
 
         virtual unknown_abi* get_unknown() const noexcept = 0;
-        virtual std::pair<uint32_t, const guid*> get_local_iids() const noexcept = 0;
-        virtual hstring GetRuntimeClassName() const = 0;
         virtual void* find_interface(guid const&) const noexcept = 0;
-        virtual inspectable_abi* find_inspectable() const noexcept = 0;
+        virtual xlang_object_abi* find_xlang_object() const noexcept = 0;
 
-        virtual Windows::Foundation::TrustLevel GetTrustLevel() const noexcept
-        {
-            return Windows::Foundation::TrustLevel::BaseTrust;
-        }
+        virtual bool Equals(IXlangObject const& object) const noexcept = 0;
+        
+        virtual hstring GetObjectInfo_TypeName() const = 0;
+        virtual uint32_t GetObjectInfo_HashCode() const = 0;
+        virtual hstring GetObjectInfo_StringRepresentation() const = 0;
+        virtual uint32_t GetObjectInfo_ObjectSize() const = 0;
 
         template <typename, typename, typename>
         friend struct impl::produce_base;
@@ -1246,7 +1195,7 @@ namespace xlang
     public:
 
         using implements_type = implements;
-        using IInspectable = Windows::Foundation::IInspectable;
+        using IXlangObject = Windows::Foundation::IXlangObject;
 
 #ifdef _DEBUG
         // Please use xlang::make<T>(args...) to avoid allocating an implementation type on the stack.
@@ -1265,10 +1214,10 @@ namespace xlang
             return result;
         }
 
-        operator IInspectable() const noexcept
+        operator IXlangObject() const noexcept
         {
-            IInspectable result;
-            copy_from_abi(result, find_inspectable());
+            IXlangObject result;
+            copy_from_abi(result, find_xlang_object());
             return result;
         }
 
@@ -1301,16 +1250,9 @@ namespace xlang
             return impl::find_iid(static_cast<const D*>(this), id);
         }
 
-        impl::inspectable_abi* find_inspectable() const noexcept override
+        impl::xlang_object_abi* find_xlang_object() const noexcept override
         {
-            return impl::find_inspectable(static_cast<const D*>(this));
-        }
-
-        std::pair<uint32_t, const guid*> get_local_iids() const noexcept override
-        {
-            using interfaces = impl::uncloaked_interfaces<D>;
-            using local_iids = impl::uncloaked_iids<interfaces>;
-            return { static_cast<uint32_t>(local_iids::value.size()), local_iids::value.data() };
+            return impl::find_xlang_object(static_cast<const D*>(this));
         }
 
     private:
@@ -1320,9 +1262,29 @@ namespace xlang
             return reinterpret_cast<impl::unknown_abi*>(to_abi<typename impl::implements_default_interface<D>::type>(this));
         }
 
-        hstring GetRuntimeClassName() const override
+        bool Equals(IXlangObject const& object) const noexcept override
+        {
+            return find_xlang_object() == get_abi(object);
+        }
+
+        hstring GetObjectInfo_TypeName() const override
         {
             return impl::runtime_class_name<typename impl::implements_default_interface<D>::type>::get();
+        }
+
+        uint32_t GetObjectInfo_HashCode() const override
+        {
+            return static_cast<uint32_t>(std::hash<void*>{}(find_xlang_object()));
+        }
+
+        hstring GetObjectInfo_StringRepresentation() const override
+        {
+            return GetObjectInfo_TypeName();
+        }
+
+        uint32_t GetObjectInfo_ObjectSize() const override
+        {
+            return static_cast<uint32_t>(sizeof(D));
         }
 
         template <typename, typename...>

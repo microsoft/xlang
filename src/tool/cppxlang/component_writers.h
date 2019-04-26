@@ -293,7 +293,7 @@ catch (...) { return xlang::to_hresult(); }
                 {
                     default_constructor = true;
 
-                    w.write(R"(        Windows::Foundation::IInspectable ActivateInstance() const
+                    w.write(R"(        Windows::Foundation::IXlangObject ActivateInstance() const
         {
             return make<T>();
         }
@@ -316,7 +316,7 @@ catch (...) { return xlang::to_hresult(); }
 
         if (!default_constructor)
         {
-            w.write(R"(        [[noreturn]] Windows::Foundation::IInspectable ActivateInstance() const
+            w.write(R"(        [[noreturn]] Windows::Foundation::IXlangObject ActivateInstance() const
         {
             throw hresult_not_implemented();
         }
