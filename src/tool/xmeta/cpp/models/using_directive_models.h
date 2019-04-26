@@ -1,11 +1,12 @@
 #pragma once
 
-#include <cassert>
+#include <assert.h>
 #include <variant>
 #include <string>
 #include <string_view>
 
 #include "base_model.h"
+#include "model_types.h"
 
 namespace xlang::xmeta
 {

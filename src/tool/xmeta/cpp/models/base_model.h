@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <string_view>
 
@@ -34,4 +35,23 @@ namespace xlang::xmeta
         size_t m_decl_line;
         std::string_view m_assembly_name;
     };
+
+    template<class T>
+    inline auto get_it(std::vector<std::shared_ptr<T>> const& v, std::string_view const& id)
+    {
+        auto same_id = [&](std::shared_ptr<T> const& t) { return t->get_id() == id; };
+        return std::find_if(v.begin(), v.end(), same_id);
+    }
+
+    template<class T>
+    inline auto get_it(std::map<std::string_view, std::shared_ptr<T>, std::less<>> const& m, std::string_view const& id)
+    {
+        return m.find(id);
+    }
+
+    template<class T>
+    inline bool contains_id(T const& v, std::string_view const& id)
+    {
+        return get_it(v, id) != v.end();
+    }
 }

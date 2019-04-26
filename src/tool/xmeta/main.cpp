@@ -1,15 +1,7 @@
 #include <iostream>
 
-#include "antlr4-runtime.h"
-#include "XlangParser.h"
-#include "XlangLexer.h"
-
 #include "xmeta_idl_reader.h"
 #include "ast_to_st_listener.h"
-
-#if defined(_WIN32)
-#include <Windows.h>
-#endif
 
 #pragma execution_character_set("utf-8")
 

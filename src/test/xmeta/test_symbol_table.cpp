@@ -59,11 +59,8 @@ TEST_CASE("Enum test")
     auto ns_body = ns->get_namespace_bodies()[0];
 
     auto enums = ns_body->get_enums();
-    auto enum_exists = [&enums](std::shared_ptr<enum_model> const& em) { return em->get_id() == "e"; };
-    REQUIRE(enums.size() == 1);
-    auto const& enum_it = std::find_if(enums.begin(), enums.end(), enum_exists);
-    REQUIRE(enum_it != enums.end());
-    auto const& enum_members = (*enum_it)->get_members();
+    REQUIRE(enums.find("e") != enums.end());
+    auto const& enum_members = enums["e"]->get_members();
     REQUIRE(enum_members.size() == 5);
     REQUIRE(enum_members[0].get_id() == "e_member_1");
     REQUIRE(enum_members[1].get_id() == "e_member_2");
