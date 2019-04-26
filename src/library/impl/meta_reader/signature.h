@@ -325,7 +325,7 @@ namespace xlang::meta::reader
 
         TypeSig const& Type() const noexcept
         {
-            return *m_type;
+            return m_type.value();
         }
 
         explicit operator bool() const noexcept
