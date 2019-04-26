@@ -1,7 +1,5 @@
 #include <assert.h>
-#if defined(_WIN32)
 #include <string.h>
-#endif
 
 #include "xmeta_idl_reader.h"
 #include "ast_to_st_listener.h"
@@ -41,10 +39,7 @@ namespace xlang::xmeta
         bool operator()(std::pair<std::string_view, std::shared_ptr<namespace_model>> const& v) const
         {
             auto old_name = v.first;
-#if defined(_WIN32)
             return stricmp(new_name.data(), old_name.data()) == 0 && new_name != old_name;
-#endif
-            return false; // Only works on Windows for now.
         }
     private:
         std::string_view new_name;

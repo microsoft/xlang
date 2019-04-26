@@ -103,8 +103,15 @@ namespace xlang::xmeta
     struct namespace_model : base_model
     {
         namespace_model() = delete;
-        namespace_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_model> const& parent) :
+        namespace_model(
+            std::string_view const& id,
+            size_t decl_line,
+            std::string_view const& assembly_name,
+            std::shared_ptr<namespace_model> const& parent) :
             base_model{ id, decl_line, assembly_name },
+            m_fully_qualified_id{ parent != nullptr
+                ? parent->get_fully_qualified_id() + "." + std::string(id)
+                : id },
             m_parent_namespace { parent }
         { }
 
@@ -123,18 +130,22 @@ namespace xlang::xmeta
             return m_parent_namespace;
         }
 
+        std::string const& get_fully_qualified_id() const noexcept
+        {
+            return m_fully_qualified_id;
+        }
+
         void add_namespace_body(std::shared_ptr<namespace_body_model> const& body);
         void add_child_namespace(std::shared_ptr<namespace_model> const& child);
 
         // Used for semantic check #3 for namespace members
         bool member_id_exists(std::string_view const& member_id) const;
         bool child_namespace_exists(std::string_view const& member_id) const;
-        std::string const& get_fully_qualified_id() const;
 
     private:
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> m_child_namespaces;
         std::vector<std::shared_ptr<namespace_body_model>> m_namespace_bodies;
         std::shared_ptr<namespace_model> m_parent_namespace;
-        mutable std::optional<std::string> m_fully_qualified_id;
+        std::string m_fully_qualified_id;
     };
 }

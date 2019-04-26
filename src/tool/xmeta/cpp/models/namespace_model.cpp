@@ -1,6 +1,4 @@
-#if defined(_WIN32)
 #include <string.h>
-#endif
 
 #include <string_view>
 
@@ -68,11 +66,8 @@ namespace xlang::xmeta
         bool operator()(std::pair<std::string_view, std::shared_ptr<T>> const& v) const
         {
             auto old_name = v.first;
-#if defined(_WIN32)
             return (stricmp(old_name.data(), new_name.data()) == 0 && new_name != old_name) ||
                 new_name == old_name;
-#endif
-            return false; // Only works on windows for now.
         }
     private:
         std::string_view new_name;
@@ -114,17 +109,5 @@ namespace xlang::xmeta
     bool namespace_model::child_namespace_exists(std::string_view const& member_id) const
     {
         return m_child_namespaces.find(member_id) != m_child_namespaces.end();
-    }
-
-    std::string const& namespace_model::get_fully_qualified_id() const
-    {
-        if (!m_fully_qualified_id.has_value())
-        {
-            m_fully_qualified_id = m_parent_namespace == nullptr
-                ? m_parent_namespace->get_fully_qualified_id() + "." + get_id()
-                : get_id();
-        }
-        assert(m_fully_qualified_id.has_value());
-        return m_fully_qualified_id.value();
     }
 }
