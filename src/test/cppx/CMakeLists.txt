@@ -5,6 +5,15 @@ target_sources(test_cppx
     PUBLIC pch.cpp
     hstring.cpp
     collection_base.cpp
+#    param_iterable.cpp
+#    param_map.cpp
+#    param_map_view.cpp
+#    param_vector.cpp
+#    param_vector_view.cpp
+#    produce_map.cpp
+#    produce_vector.cpp
+#    single_threaded_map.cpp
+#    single_threaded_vector.cpp
 )
 
 target_include_directories(test_cppx
