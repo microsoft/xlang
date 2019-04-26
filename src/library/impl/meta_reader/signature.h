@@ -309,6 +309,10 @@ namespace xlang::meta::reader
             : m_type{ type }
         {}
 
+        explicit RetTypeSig(TypeSig const& type)
+            : m_type{ type }
+        {}
+
         auto CustomMod() const noexcept
         {
             return std::pair{ m_cmod.cbegin(), m_cmod.cend() };

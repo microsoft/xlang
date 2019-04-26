@@ -663,68 +663,12 @@ namespace xlang::xmeta
         signature_blob delegate_invoke_sig;
         std::optional<type_ref> return_type_ref = model.get_return_type();
         std::vector<ParamSig> param_sigs;
-        RetTypeSig return_sig{ std::nullopt };
-        if (return_type_ref) // Return type is not void
-        {
-            std::variant<std::string, simple_type, object_type> semantic = to_simple_type_or_id(return_type_ref->get_semantic());
-            if (std::holds_alternative<std::string>(semantic))
-            {
-                std::string return_name = std::get<std::string>(semantic);
-                auto iter = type_references.find(return_name);
-                TypeRef ref;
-                if (iter == type_references.end())
-                {
-                    mdTypeRef md_ref;
-                    m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
-                    auto result = type_references.insert(std::make_pair(return_name, to_TypeRef(md_ref)));
-                    if (!result.second)
-                    {
-                        throw_invalid("Encountered duplicate TypeRef: " + return_name);
-                    }
-                    ref = to_TypeRef(md_ref);
-                }
-                ref = iter->second;
-                return_sig = RetTypeSig{ TypeSig{ ElementType::ValueType, ref.coded_index<TypeDefOrRef>() } };
-            }
-            else if (std::holds_alternative<object_type>(semantic))
-            {
-                return_sig = RetTypeSig{ TypeSig{ ElementType::Object } };
-            }
-            else // holds simple type
-            {
-                return_sig = RetTypeSig{ TypeSig{ to_ElementType(std::get<simple_type>(semantic)) } };
-            }
-        }
+        RetTypeSig return_sig = RetTypeSig{ create_paramater_signature(model.get_return_type()) };
+       
         for (formal_parameter_model const& val : model.get_formal_parameters())
         {
-            std::variant<std::string, simple_type, object_type> semantic = to_simple_type_or_id(val.get_type().get_semantic());
-            if (std::holds_alternative<std::string>(semantic))
-            {
-                std::string param_name = std::get<std::string>(semantic);
-                auto iter = type_references.find(param_name);
-                TypeRef ref;
-                if (iter == type_references.end())
-                {
-                    mdTypeRef md_ref;
-                    m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(param_name).c_str(), &md_ref);
-                    auto result = type_references.insert(std::make_pair(param_name, to_TypeRef(md_ref)));
-                    if (!result.second)
-                    {
-                        throw_invalid("Encountered duplicate TypeRef: " + param_name);
-                    }
-                    ref = to_TypeRef(md_ref);
-                }
-                ref = iter->second;
-                param_sigs.emplace_back(ParamSig{ TypeSig{ ElementType::ValueType, ref.coded_index<TypeDefOrRef>() } });
-            }
-            else if (std::holds_alternative<object_type>(semantic))
-            {
-                param_sigs.emplace_back(ParamSig{ TypeSig{ ElementType::Object } });
-            }
-            else // holds simple type
-            {
-                param_sigs.emplace_back(ParamSig{ TypeSig{ to_ElementType(std::get<simple_type>(semantic)) } });
-            }
+            ParamSig param_sig = ParamSig{ create_paramater_signature(val.get_type()).value() };
+            param_sigs.emplace_back(param_sig);
         }
         delegate_invoke_sig.add_signature(MethodDefSig{ return_sig, param_sigs });
         
@@ -798,6 +742,42 @@ namespace xlang::xmeta
             0,
             &token_param_def));
     }
+
+    std::optional<TypeSig> xmeta_emit::create_paramater_signature(std::optional<type_ref> ref)
+    {
+        if (ref) // Return type is not void
+        {
+            std::variant<std::string, simple_type, object_type> semantic = to_simple_type_or_id(ref->get_semantic());
+            if (std::holds_alternative<std::string>(semantic))
+            {
+                std::string return_name = std::get<std::string>(semantic);
+                auto iter = type_references.find(return_name);
+                TypeRef ref;
+                if (iter == type_references.end())
+                {
+                    mdTypeRef md_ref;
+                    m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
+                    auto result = type_references.insert(std::make_pair(return_name, to_TypeRef(md_ref)));
+                    if (!result.second)
+                    {
+                        throw_invalid("Encountered duplicate TypeRef: " + return_name);
+                    }
+                    ref = to_TypeRef(md_ref);
+                }
+                ref = iter->second;
+                return TypeSig{ ElementType::ValueType, ref.coded_index<TypeDefOrRef>() };
+            }
+            else if (std::holds_alternative<object_type>(semantic))
+            {
+                return TypeSig{ ElementType::Object };
+            }
+            else // holds simple type
+            {
+                return TypeSig{ to_ElementType(std::get<simple_type>(semantic)) };
+            }
+        }
+        return std::nullopt;
+    };
 }
 
 

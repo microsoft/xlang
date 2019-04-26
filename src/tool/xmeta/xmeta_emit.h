@@ -55,7 +55,7 @@ namespace xlang::xmeta
         mdParamDef define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def);
         void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, uint16_t parameter_index);
 
-        RetTypeSig create_paramater_signature();
+        std::optional<xlang::meta::reader::TypeSig> create_paramater_signature(std::optional<type_ref> ref);
 
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
         static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
