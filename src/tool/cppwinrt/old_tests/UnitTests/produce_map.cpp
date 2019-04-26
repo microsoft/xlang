@@ -15,7 +15,7 @@ using namespace Windows::Foundation::Collections;
 namespace
 {
     template <typename K, typename V>
-    struct key_value_pair final : implements<key_value_pair<K, V>, IKeyValuePair<K, V>>
+    struct key_value_pair : implements<key_value_pair<K, V>, IKeyValuePair<K, V>>
     {
         key_value_pair(K key, V value) :
             m_key(std::move(key)),

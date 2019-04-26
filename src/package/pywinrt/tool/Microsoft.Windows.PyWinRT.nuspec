@@ -16,7 +16,7 @@
     <iconUrl>https://aka.ms/cppwinrt.ico</iconUrl>
   </metadata>
   <files>
-    <file src="LICENSE"/>
+    <file src="..\LICENSE"/>
     <file src="$pywinrt_exe$" target="bin"/>
     <file src="readme.txt" target="" />
   </files>
