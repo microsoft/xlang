@@ -116,7 +116,7 @@ namespace xlang::xmeta
         : m_assembly_name(std::string(assembly_name))
     {
         // Getting the meta data dispenser
-        check_hresult(CoInitialize(NULL));
+        check_hresult(CoInitialize(nullptr));
 
         // Windows only for now
         check_hresult(CoCreateInstance(CLSID_CorMetaDataDispenser,
@@ -159,14 +159,14 @@ namespace xlang::xmeta
         m_metadata_emitter->Save((s2ws(remove_extension(m_assembly_name)) + L".xmeta").c_str(), 0);
     }
 
-	std::vector<uint8_t> xmeta_emit::save_to_memory() const
+    std::vector<uint8_t> xmeta_emit::save_to_memory() const
     {
         DWORD save_size;
         m_metadata_emitter->GetSaveSize(CorSaveSize::cssAccurate, &save_size);
-		std::vector<uint8_t> metadata;
+        std::vector<uint8_t> metadata;
         metadata.resize(save_size);
         check_hresult(m_metadata_emitter->SaveToMemory(metadata.data(), save_size));
-		return metadata;
+        return metadata;
     }
 
     void xmeta_emit::define_assembly()
@@ -545,20 +545,20 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_delegate_model(delegate_model const& model) 
     {
-        mdTypeDef implements[] = { mdTokenNil };
-        auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
+        //mdTypeDef implements[] = { mdTokenNil };
+        //auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
 
-        /* Define return value */
-        // To be used for attributes later
-        mdParamDef token_return = define_return(model.get_return_type(), token_delegate_type_def);
+        ///* Define return value */
+        //// To be used for attributes later
+        //mdParamDef token_return = define_return(model.get_return_type(), token_delegate_type_def);
 
-        /* Define formal parameters */
-        int index = 1;
-        for (auto const& val : model.get_formal_parameters())
-        {
-            define_parameters(val, token_delegate_type_def, index);
-            index++;
-        }
+        ///* Define formal parameters */
+        //int index = 1;
+        //for (auto const& val : model.get_formal_parameters())
+        //{
+        //    define_parameters(val, token_delegate_type_def, index);
+        //    index++;
+        //}
     }
 
     mdParamDef xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def)
@@ -647,11 +647,11 @@ namespace xlang::xmeta
                 return std::string("Uint8");
             case simple_type::UInt16:
                 return std::string("Uint16");
-			case simple_type::UInt32:
-				return std::string("Uint32");
-			case simple_type::UInt64:
-				return std::string("Uint64");
-			case simple_type::Char16:
+            case simple_type::UInt32:
+                return std::string("Uint32");
+            case simple_type::UInt64:
+                return std::string("Uint64");
+            case simple_type::Char16:
                 return std::string("Char16");
             case simple_type::Guid:
                 return std::string("Guid");
