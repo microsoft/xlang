@@ -43,12 +43,14 @@ u2 = u.combine_uri("Microsoft/xlang/tree/master/src/tool/python")
 print(str(u2))
 ```
 
-For a full end-to-end sample of using Python/WinRT, please see the
+For more information on accessing Windows Runtime APIs from Python, please visit
+[Python/WinRT's homepage](https://github.com/Microsoft/xlang/tree/master/src/package/pywinrt/projection). 
+
+For an end-to-end sample of using Python/WinRT, please see the
 [WinML Tutorial](https://github.com/Microsoft/xlang/tree/master/samples/python/winml_tutorial)
 in the samples folder of the xlang GitHub repo.
 """
 
-# https://setuptools.readthedocs.io/en/latest/setuptools.html#basic-use
 setuptools.setup(
     name = "winrt",
     version = "1.0.{0}{1}.{2}".format(year, doy, rev),
@@ -57,7 +59,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     license="MIT",
     author='Microsoft Corporation',
-    url="http://github.com/Microsoft/xlang/src/package/pywinrt/projection",
+    url="https://github.com/Microsoft/xlang/tree/master/src/package/pywinrt/projection",
     classifiers=[
             'Development Status :: 4 - Beta',
             'Environment :: Win32 (MS Windows)',
