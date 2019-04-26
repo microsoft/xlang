@@ -1,6 +1,6 @@
-# Windows Runtime Python Projection
+# Python/WinRT
 
-The Windows Runtime Python Projection (WinRT/Python) enables Python developers to access
+The Windows Runtime Python Projection (Python/WinRT) enables Python developers to access
 [Windows Runtime APIs](https://docs.microsoft.com/en-us/uwp/api/) directly from Python in a natural
 and familiar way.
 
@@ -14,14 +14,14 @@ and familiar way.
 
 ### Installing
 
-WinRT/Python can be installed from the [Python Package Index](https://pypi.org/) via pip. Assuming
-pip is on the path, WinRT/Python can be installed from the command line with the following command:
+Python/WinRT can be installed from the [Python Package Index](https://pypi.org/) via pip. Assuming
+pip is on the path, Python/WinRT can be installed from the command line with the following command:
 
 ``` bash
 > pip install -i https://pypi.org/simple/ winrt
 ```
 
-You can test that WinRT/Python is installed correctly by launching Python and running the following
+You can test that Python/WinRT is installed correctly by launching Python and running the following
 snippet of Python code. It should print "https://github.com/Microsoft/xlang/tree/master/src/tool/python"
 to the console.
 
@@ -34,7 +34,7 @@ print(str(u2))
 
 ## Using the Windows Runtime from Python
 
-> For a full end-to-end sample of using WinRT/Python, please see the
+> For a full end-to-end sample of using Python/WinRT, please see the
 > [WinML Tutorial](https://github.com/Microsoft/xlang/tree/master/samples/python/winml_tutorial)
 > in the samples folder of the xlang GitHub repo.
 
@@ -75,9 +75,9 @@ async def get_current_latitude():
 
 ### Known Issues
 
-* This release of the WinRT/Python does not support WinRT composable types. This includes most of
+* This release of the Python/WinRT does not support WinRT composable types. This includes most of
 the classes in the Windows.UI.Composition and Windows.UI.Xaml namespaces. These namespaces are excluded
-from WinRT/Python.
+from Python/WinRT.
   * Note, a few methods in other namespaces reference types in these namespaces. For example,
   [MediaPlayerSurface](https://docs.microsoft.com/en-us/uwp/api/windows.media.playback.mediaplayersurface)
   is in the Windows.Media.Playback namespace but has properties that return types in the

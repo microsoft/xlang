@@ -9,9 +9,9 @@ year = buildNumber[1]
 doy = buildNumber[3]
 rev = buildNumber[4]
 
-long_description = """# Windows Runtime Python Projection
+long_description = """# Python/WinRT
 
-The Windows Runtime Python Projection (WinRT/Python) enables Python developers to access
+The Windows Runtime Python Projection (Python/WinRT) enables Python developers to access
 [Windows Runtime APIs](https://docs.microsoft.com/en-us/uwp/api/) directly from Python in a natural
 and familiar way.
 
@@ -25,14 +25,14 @@ and familiar way.
 
 ### Installing
 
-WinRT/Python can be installed from the [Python Package Index](https://pypi.org/) via pip. Assuming
-pip is on the path, WinRT/Python can be installed from the command line with the following command:
+Python/WinRT can be installed from the [Python Package Index](https://pypi.org/) via pip. Assuming
+pip is on the path, Python/WinRT can be installed from the command line with the following command:
 
 ``` bash
 > pip install -i https://pypi.org/simple/ winrt
 ```
 
-You can test that WinRT/Python is installed correctly by launching Python and running the following
+You can test that Python/WinRT is installed correctly by launching Python and running the following
 snippet of Python code. It should print "https://github.com/Microsoft/xlang/tree/master/src/tool/python"
 to the console.
 
@@ -43,7 +43,7 @@ u2 = u.combine_uri("Microsoft/xlang/tree/master/src/tool/python")
 print(str(u2))
 ```
 
-For a full end-to-end sample of using WinRT/Python, please see the
+For a full end-to-end sample of using Python/WinRT, please see the
 [WinML Tutorial](https://github.com/Microsoft/xlang/tree/master/samples/python/winml_tutorial)
 in the samples folder of the xlang GitHub repo.
 """
