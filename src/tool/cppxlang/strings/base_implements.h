@@ -884,7 +884,19 @@ namespace xlang::impl
             switch (info_category)
             {
             case XlangObjectInfoCategory::TypeName:
-                *info = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
+                *info = detach_abi(static_cast<D*>(this)->GetObjectInfo_TypeName());
+                break;
+
+            case XlangObjectInfoCategory::HashCode:
+                *reinterpret_cast<uint32_t*>(info) = static_cast<D*>(this)->GetObjectInfo_HashCode();
+                break;
+
+            case XlangObjectInfoCategory::StringRepresentation:
+                *info = detach_abi(static_cast<D*>(this)->GetObjectInfo_StringRepresentation());
+                break;
+
+            case XlangObjectInfoCategory::ObjectSize:
+                *reinterpret_cast<uint32_t*>(info) = static_cast<D*>(this)->GetObjectInfo_ObjectSize();
                 break;
             }
             return result;
@@ -892,7 +904,7 @@ namespace xlang::impl
 
         bool NonDelegatingEquals(xlang_object_abi* object) const noexcept
         {
-            return static_cast<D*>(this)->Equals(*reinterpret_cast<IXlangObject const*>(&object));
+            return static_cast<D const*>(this)->Equals(*reinterpret_cast<IXlangObject const*>(&object));
         }
 
         uint32_t subtract_reference() noexcept
@@ -1058,10 +1070,15 @@ namespace xlang::impl
         }
 
         virtual unknown_abi* get_unknown() const noexcept = 0;
-        virtual hstring GetRuntimeClassName() const = 0;
-        virtual bool Equals(IXlangObject const& object) const noexcept = 0;
         virtual void* find_interface(guid const&) const noexcept = 0;
         virtual xlang_object_abi* find_xlang_object() const noexcept = 0;
+
+        virtual bool Equals(IXlangObject const& object) const noexcept = 0;
+        
+        virtual hstring GetObjectInfo_TypeName() const = 0;
+        virtual uint32_t GetObjectInfo_HashCode() const = 0;
+        virtual hstring GetObjectInfo_StringRepresentation() const = 0;
+        virtual uint32_t GetObjectInfo_ObjectSize() const = 0;
 
         template <typename, typename, typename>
         friend struct impl::produce_base;
@@ -1240,14 +1257,29 @@ namespace xlang
             return reinterpret_cast<impl::unknown_abi*>(to_abi<typename impl::implements_default_interface<D>::type>(this));
         }
 
-        hstring GetRuntimeClassName() const override
+        bool Equals(IXlangObject const& object) const noexcept override
+        {
+            return find_xlang_object() == get_abi(object);
+        }
+
+        hstring GetObjectInfo_TypeName() const override
         {
             return impl::runtime_class_name<typename impl::implements_default_interface<D>::type>::get();
         }
 
-        bool Equals(IXlangObject const& object) const noexcept override
+        uint32_t GetObjectInfo_HashCode() const override
         {
-            return 
+            return static_cast<uint32_t>(std::hash<void*>{}(find_xlang_object()));
+        }
+
+        hstring GetObjectInfo_StringRepresentation() const override
+        {
+            return GetObjectInfo_TypeName();
+        }
+
+        uint32_t GetObjectInfo_ObjectSize() const override
+        {
+            return static_cast<uint32_t>(sizeof(D));
         }
 
         template <typename, typename...>

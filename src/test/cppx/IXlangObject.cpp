@@ -10,4 +10,12 @@ TEST_CASE("IXlangObject")
     };
 
     auto obj = make<Object>();
+    REQUIRE(get_TypeName(obj) == "Object");
+    REQUIRE(get_StringRepresentation(obj) == "Object");
+    REQUIRE(get_ObjectSize(obj) == sizeof(Object));
+
+    {
+        auto obj2 = obj;
+        REQUIRE(get_HashCode(obj) == get_HashCode(obj2));
+    }
 }
