@@ -176,7 +176,7 @@ namespace xlang
         {
             auto const&[type_namespace, type_name] = get_type_namespace_and_name(type.GenericType());
 
-            if (type_namespace == "Windows.Foundation")
+            if (type_namespace == "Foundation")
             {
                 async =
                     type_name == "IAsyncAction" ||

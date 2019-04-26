@@ -85,11 +85,6 @@
   } // end of method IAsyncAction::get_ErrorCode
 
   .method public hidebysig newslot specialname abstract virtual 
-          instance uint32 get_Id () runtime managed
-  {
-  } // end of method IAsyncAction::get_Id
-
-  .method public hidebysig newslot specialname abstract virtual 
           instance valuetype Foundation.AsyncStatus get_Status () runtime managed
   {
   } // end of method IAsyncAction::get_Status
@@ -123,11 +118,6 @@
   {
     .get instance int32 Foundation.IAsyncAction::get_ErrorCode()
   } // end of property IAsyncAction::ErrorCode
-
-  .property instance uint32 Id()
-  {
-    .get instance uint32 Foundation.IAsyncAction::get_Id()
-  } // end of property IAsyncAction::Id
 
   .property instance valuetype Foundation.AsyncStatus Status()
   {
@@ -172,11 +162,6 @@
   } // end of method IAsyncOperation`1::get_ErrorCode
 
   .method public hidebysig newslot specialname abstract virtual 
-          instance uint32 get_Id () runtime managed
-  {
-  } // end of method IAsyncOperation`1::get_Id
-
-  .method public hidebysig newslot specialname abstract virtual 
           instance valuetype Foundation.AsyncStatus get_Status () runtime managed
   {
   } // end of method IAsyncOperation`1::get_Status
@@ -210,11 +195,6 @@
   {
     .get instance int32 Foundation.IAsyncOperation`1::get_ErrorCode()
   } // end of property IAsyncOperation`1::ErrorCode
-
-  .property instance uint32 Id()
-  {
-    .get instance uint32 Foundation.IAsyncOperation`1::get_Id()
-  } // end of property IAsyncOperation`1::Id
 
   .property instance valuetype Foundation.AsyncStatus Status()
   {
@@ -342,8 +322,7 @@
 } // end of class Foundation.Collections.IKeyValuePair`2<K, V>
 
 .class interface public abstract auto ansi windowsruntime Foundation.Collections.IMap`2<K, V>
-    implements class Foundation.Collections.IMapView`2<!K, !V>,
-               class Foundation.Collections.IIterable`1<class Foundation.Collections.IKeyValuePair`2<!K, !V>>
+    implements class Foundation.Collections.IMapView`2<!K, !V>
 {
   .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 
@@ -399,8 +378,7 @@
 } // end of class Foundation.Collections.IMapView`2<K, V>
 
 .class interface public abstract auto ansi windowsruntime Foundation.Collections.IVector`1<T>
-    implements class Foundation.Collections.IVectorView`1<!T>,
-               class Foundation.Collections.IIterable`1<!T>
+    implements class Foundation.Collections.IVectorView`1<!T>
 {
   .custom instance void [xlang_foundation]Foundation.Metadata.GuidAttribute::.ctor(
         uint32, uint16, uint16, uint8, uint8, uint8, uint8, uint8, uint8, uint8, uint8) 

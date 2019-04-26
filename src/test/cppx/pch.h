@@ -9,3 +9,4 @@
 #include <string_view>
 
 #include <xlang/base.h>
+#include <xlang/Foundation.Collections.h>

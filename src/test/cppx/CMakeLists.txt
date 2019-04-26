@@ -2,7 +2,10 @@ project(test_cppx)
 
 add_executable(test_cppx "")
 target_sources(test_cppx
-    PUBLIC pch.cpp hstring.cpp)
+    PUBLIC pch.cpp
+    hstring.cpp
+    collection_base.cpp
+)
 
 target_include_directories(test_cppx
     PRIVATE ${XLANG_LIBRARY_PATH} ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_BINARY_DIR})

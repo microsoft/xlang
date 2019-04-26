@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename T, typename Container>
     struct input_iterable :
-        implements<input_iterable<T, Container>, non_agile, no_weak_ref, wfc::IIterable<T>>,
+        implements<input_iterable<T, Container>, non_agile, no_weak_ref, fc::IIterable<T>>,
         iterable_base<input_iterable<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -25,7 +25,7 @@ namespace xlang::impl
     template <typename T, typename InputIt>
     struct scoped_input_iterable :
         input_scope,
-        implements<scoped_input_iterable<T, InputIt>, non_agile, no_weak_ref, wfc::IIterable<T>>,
+        implements<scoped_input_iterable<T, InputIt>, non_agile, no_weak_ref, fc::IIterable<T>>,
         iterable_base<scoped_input_iterable<T, InputIt>, T>
     {
         void abi_enter() const
@@ -63,7 +63,7 @@ namespace xlang::impl
     template <typename T, typename InputIt>
     auto make_scoped_input_iterable(InputIt first, InputIt last)
     {
-        using interface_type = wfc::IIterable<T>;
+        using interface_type = fc::IIterable<T>;
         std::pair<interface_type, input_scope*> result;
         auto ptr = new scoped_input_iterable<T, InputIt>(first, last);
         *put_abi(result.first) = to_abi<interface_type>(ptr);
@@ -78,7 +78,7 @@ namespace xlang::param
     struct iterable
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using interface_type = Foundation::Collections::IIterable<value_type>;
 
         iterable(std::nullptr_t) noexcept
         {
@@ -147,10 +147,10 @@ namespace xlang::param
     };
 
     template <typename K, typename V>
-    struct iterable<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    struct iterable<Foundation::Collections::IKeyValuePair<K, V>>
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using value_type = Foundation::Collections::IKeyValuePair<K, V>;
+        using interface_type = Foundation::Collections::IIterable<value_type>;
 
         iterable(std::nullptr_t) noexcept
         {
@@ -233,7 +233,7 @@ namespace xlang::param
     struct async_iterable
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using interface_type = Foundation::Collections::IIterable<value_type>;
 
         async_iterable(std::nullptr_t) noexcept
         {
@@ -284,10 +284,10 @@ namespace xlang::param
     };
 
     template <typename K, typename V>
-    struct async_iterable<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    struct async_iterable<Foundation::Collections::IKeyValuePair<K, V>>
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using value_type = Foundation::Collections::IKeyValuePair<K, V>;
+        using interface_type = Foundation::Collections::IIterable<value_type>;
 
         async_iterable(std::nullptr_t) noexcept
         {

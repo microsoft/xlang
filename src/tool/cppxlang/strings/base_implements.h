@@ -1160,35 +1160,7 @@ namespace xlang::impl
     {
         using result_type = typename impl::implements_default_interface<D>::type;
 
-        if constexpr (!has_static_lifetime_v<D>)
-        {
-            return { to_abi<result_type>(new heap_implements<D>), take_ownership_from_abi };
-        }
-        else
-        {
-            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(u8"Windows.ApplicationModel.Core.CoreApplication");
-            Windows::Foundation::IUnknown collection;
-            check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
-            auto const map = collection.as<IStaticLifetimeCollection>();
-            param::hstring const name{ name_of<typename D::instance_type>() };
-            result_type object{ to_abi<result_type>(new heap_implements<D>), take_ownership_from_abi };
-
-            static std::mutex lock;
-            std::lock_guard const guard{ lock };
-            void* result{};
-            map->Lookup(get_abi(name), &result);
-
-            if (result)
-            {
-                return { result, take_ownership_from_abi };
-            }
-            else
-            {
-                bool found;
-                check_hresult(map->Insert(get_abi(name), get_abi(object), &found));
-                return object;
-            }
-        }
+        return { to_abi<result_type>(new heap_implements<D>), take_ownership_from_abi };
     }
 
     template <typename T>
