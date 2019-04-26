@@ -33,7 +33,7 @@ namespace xlang::xmeta
 
     struct object_type {};
 
-    using type_semantics = model_ref<
+    using type_semantics = std::variant<
         std::shared_ptr<class_model>,
         std::shared_ptr<enum_model>,
         std::shared_ptr<interface_model>,
@@ -53,7 +53,7 @@ namespace xlang::xmeta
             return m_semantic;
         }
 
-        void set_semantic(std::shared_ptr<class_model> const& sem) noexcept
+        void set_semantic(type_semantics const& sem) noexcept
         {
             m_semantic.resolve(sem);
         }
@@ -84,6 +84,6 @@ namespace xlang::xmeta
         }
 
     private:
-        type_semantics m_semantic;
+        model_ref<type_semantics> m_semantic;
     };
 }

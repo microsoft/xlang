@@ -202,19 +202,25 @@ void extract_property_accessors(XlangParser::Property_accessorsContext *ctx, boo
 
     if (ctx->get_set_property_accessors())
     {
-        get_declared = set_declared = true;
+        get_declared = true;
+        set_declared = true;
+        get_declared_first = true;
     }
     else if (ctx->set_get_property_accessors())
     {
-        get_declared = set_declared = true;
+        get_declared = true;
+        set_declared = true;
         get_declared_first = false;
     }
     else if (ctx->get_property_accessor())
     {
         get_declared = ctx->get_property_accessor() != nullptr;
+        set_declared = false;
+        get_declared_first = true;
     }
     else if (ctx->set_property_accessor())
     {
+        get_declared_first = false;
         set_declared = ctx->set_property_accessor() != nullptr;
         get_declared_first = false;
     }
@@ -398,7 +404,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
         std::string class_name{ id->getText() };
         std::string class_base{ "" };
         auto decl_line = id->getSymbol()->getLine();
-        if (m_reader.get_cur_namespace_body()->member_id_exists(class_name))
+        if (m_reader.get_cur_namespace_body()->type_id_exists(class_name))
         {
             // Semantically invalid by check 3 for namespace members.
             m_reader.write_namespace_member_name_error(decl_line, class_name);

@@ -137,8 +137,7 @@ enum F{}
     REQUIRE(delegates.find("D1") != delegates.end());
     REQUIRE(delegates.at("D1")->get_return_type() != std::nullopt);
     auto del0_return_type = delegates.at("D1")->get_return_type()->get_semantic();
-    REQUIRE(del0_return_type.holds_type<simple_type>());
-    REQUIRE(del0_return_type.get_resolved_target<simple_type>() == simple_type::Int32);
+    REQUIRE((del0_return_type.is_resolved() && std::get<simple_type>(del0_return_type.get_resolved_target<type_semantics>()) == simple_type::Int32));
     auto del0_formal_params = delegates.at("D1")->get_formal_parameters();
     REQUIRE(del0_formal_params.size() == 3);
     auto del0_formal_param_0_type = del0_formal_params[0].get_type().get_semantic();
@@ -147,12 +146,9 @@ enum F{}
     REQUIRE(del0_formal_params[0].get_id() == "i");
     REQUIRE(del0_formal_params[1].get_id() == "d");
     REQUIRE(del0_formal_params[2].get_id() == "e");
-    REQUIRE(del0_formal_param_0_type.holds_type<simple_type>());
-    REQUIRE(del0_formal_param_1_type.holds_type<simple_type>());
-    REQUIRE(!del0_formal_param_2_type.is_resolved());
-    REQUIRE(del0_formal_param_0_type.get_resolved_target<simple_type>() == simple_type::Int32);
-    REQUIRE(del0_formal_param_1_type.get_resolved_target<simple_type>() == simple_type::Double);
-    REQUIRE(del0_formal_param_2_type.get_ref_name() == "E");
+    REQUIRE((del0_formal_param_0_type.is_resolved() && std::get<simple_type>(del0_formal_param_0_type.get_resolved_target<type_semantics>()) == simple_type::Int32));
+    REQUIRE((del0_formal_param_1_type.is_resolved() && std::get<simple_type>(del0_formal_param_1_type.get_resolved_target<type_semantics>()) == simple_type::Double));
+    REQUIRE((!del0_formal_param_2_type.is_resolved() && del0_formal_param_2_type.get_ref_name() == "E"));
 
     REQUIRE(delegates.find("D2") != delegates.end());
     REQUIRE(delegates.at("D2")->get_return_type() == std::nullopt);
