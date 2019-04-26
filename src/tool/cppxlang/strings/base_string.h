@@ -84,7 +84,7 @@ namespace xlang
 
         hstring() noexcept = default;
 
-        hstring(xlang_string ptr, take_ownership_from_abi_t) noexcept : m_handle(ptr)
+        hstring(void* ptr, take_ownership_from_abi_t) noexcept : m_handle(static_cast<xlang_string>(ptr))
         {
         }
 

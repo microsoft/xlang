@@ -465,7 +465,7 @@ namespace xlang
     {
         void* value{};
         check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::HashCode, &value));
-        return reinterpret_cast<uint32_t>(value);
+        return static_cast<uint32_t>(reinterpret_cast<std::size_t>(value));
     }
 
     inline hstring get_StringRepresentation(Windows::Foundation::IXlangObject const& object)
@@ -479,6 +479,6 @@ namespace xlang
     {
         void* value{};
         check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::ObjectSize, &value));
-        return reinterpret_cast<uint32_t>(value);
+        return static_cast<uint32_t>(reinterpret_cast<std::size_t>(value));
     }
 }
