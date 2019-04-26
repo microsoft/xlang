@@ -748,8 +748,18 @@ namespace xlang
 
         for (auto&& method : type.MethodList())
         {
-            method_signature signature{ method };
-            w.write(format, get_abi_name(method), bind<write_abi_params>(signature));
+            try
+            {
+                method_signature signature{ method };
+                w.write(format, get_abi_name(method), bind<write_abi_params>(signature));
+            }
+            catch (std::exception const& e)
+            {
+                throw_invalid(e.what(),
+                    "\n method: ", get_name(method),
+                    "\n type: ", type.TypeNamespace(), ".", type.TypeName(),
+                    "\n database: ", type.get_database().path());
+            }
         }
 
         write_fast_interface_abi(w, type);

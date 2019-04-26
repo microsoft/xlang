@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<SignConfigXML>
+  <job platform="" configuration="" dest="__INPATHROOT__" jobname="dep.pywinrt.projection" approvers="">
+    <!-- Overwrite the input files to simplify downstream things like nuget and framework package generation. -->
+    <file src="__INPATHROOT__\winrt\_winrt.pyd" signType="AuthenticodeFormer" dest="__INPATHROOT__\winrt\_winrt.pyd" />
+  </job>
+</SignConfigXML>

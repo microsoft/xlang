@@ -1,4 +1,4 @@
-import _%
+from . import _%
 _%.init_apartment()
 
 def _import_ns_module(ns):
