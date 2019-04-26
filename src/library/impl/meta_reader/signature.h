@@ -262,6 +262,10 @@ namespace xlang::meta::reader
         {
         }
 
+        explicit ParamSig(TypeSig const& type)
+            : m_type{ type }
+        {}
+
         auto CustomMod() const noexcept
         {
             return std::pair{ m_cmod.cbegin(), m_cmod.cend() };
@@ -300,6 +304,10 @@ namespace xlang::meta::reader
                 m_type.emplace(table, data);
             }
         }
+
+        explicit RetTypeSig(std::optional<TypeSig> const& type)
+            : m_type{ type }
+        {}
 
         auto CustomMod() const noexcept
         {
@@ -345,6 +353,14 @@ namespace xlang::meta::reader
                 m_params.emplace_back(table, data);
             }
         }
+
+        explicit MethodDefSig(RetTypeSig const& ret_type, std::vector<ParamSig> const& param_type)
+            : m_ret_type(ret_type), m_params(param_type)
+        {}
+
+        explicit MethodDefSig(RetTypeSig&& type, std::vector<ParamSig> && param_type)
+            : m_ret_type(std::move(type)), m_params(std::move(param_type))
+        {}
 
         CallingConvention CallConvention() const noexcept
         {

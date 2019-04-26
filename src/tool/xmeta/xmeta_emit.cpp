@@ -101,6 +101,70 @@ namespace
         }
     }
 
+    ElementType to_ElementType(simple_type arg)
+    {
+        switch (arg)
+        {
+        case simple_type::String:
+            return ElementType::String;
+        case simple_type::Int8:
+            return ElementType::I1;
+        case simple_type::UInt8:
+            return ElementType::U1;
+        case simple_type::Int16:
+            return ElementType::I2;
+        case simple_type::UInt16:
+            return ElementType::U2;
+        case simple_type::Int32:
+            return ElementType::I4;
+        case simple_type::UInt32:
+            return ElementType::U4;
+        case simple_type::Int64:
+            return ElementType::I8;
+        case simple_type::UInt64:
+            return ElementType::U8;
+        case simple_type::Char16:
+            return ElementType::Char;
+        case simple_type::Single:
+            return ElementType::R4;
+        case simple_type::Double:
+            return ElementType::R8;
+        default:
+            XLANG_ASSERT(false);
+            return ElementType::Void;
+        }
+    }
+
+    inline std::variant<std::string, simple_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
+    {
+        type_semantics const& ts = semantic_type.get_resolved_target();
+        if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
+        {
+            return std::get<std::shared_ptr<class_model>>(ts)->get_id();
+        }
+        if (std::holds_alternative<std::shared_ptr<enum_model>>(ts))
+        {
+            return std::get<std::shared_ptr<enum_model>>(ts)->get_id();
+        }
+        if (std::holds_alternative<std::shared_ptr<interface_model>>(ts))
+        {
+            return std::get<std::shared_ptr<interface_model>>(ts)->get_id();
+        }
+        if (std::holds_alternative<std::shared_ptr<struct_model>>(ts))
+        {
+            return std::get<std::shared_ptr<struct_model>>(ts)->get_id();
+        }
+        if (std::holds_alternative<simple_type>(ts))
+        {
+            return std::get<simple_type>(ts);
+        }
+        if (std::holds_alternative<object_type>(ts))
+        {
+            return std::get<object_type>(ts);
+        }
+        assert(false);
+    }
+
     std::string remove_extension(const std::string& filename) {
         size_t lastdot = filename.find_last_of(".");
         if (lastdot == std::string::npos) return filename;
@@ -493,7 +557,7 @@ namespace xlang::xmeta
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
     {
         auto const& type_name = model->get_id();
-        static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;
+        static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         auto token_enum_type_def = define_type_def(type_name, enum_type_flag, token_enum, implements);
         
@@ -545,18 +609,147 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_delegate_model(delegate_model const& model) 
     {
+        auto const& type_name = model.get_id();
+        static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
-        auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
+        mdTypeDef token_delegate_type_def = define_type_def(type_name, delegate_type_flag, token_delegate, implements);
 
+        auto iter = type_references.find(type_name);
+        if (iter == type_references.end())
+        {
+            throw_invalid("Failed to find TypeRef for: " + type_name);
+        }
+        TypeRef const& token_delegate_type_ref = iter->second;
+
+        // Constructor
+        static constexpr DWORD delegate_constructor_flag = fdRTSpecialName | fdSpecialName | mdHideBySig;
+        signature_blob delegate_constructor_sig;
+        std::vector<ParamSig> param_types = { ParamSig{  TypeSig{ElementType::Object} }, ParamSig{  TypeSig{ElementType::I} } };
+        delegate_constructor_sig.add_signature(MethodDefSig{ RetTypeSig{ std::nullopt }, param_types }); // nullopt means returntype is void
+        mdMethodDef token_delegate_constructor_def;
+        check_hresult(m_metadata_emitter->DefineMethod(
+            token_delegate_type_def,
+            L".ctor",
+            delegate_constructor_flag,
+            delegate_constructor_sig.data(),
+            delegate_constructor_sig.size(),
+            0,
+            miRuntime,
+            &token_delegate_constructor_def));
+
+        mdParamDef constructor_param_1;
+        check_hresult(m_metadata_emitter->DefineParam(
+            token_delegate_constructor_def,
+            1,  // Index Zero represents the return value.
+            L"object",
+            0,  // return tyes have no flag set
+            (DWORD)-1,  // Ignore dwCPlusTypeFlag
+            nullptr,    // No constant value
+            0,
+            &constructor_param_1));
+
+        mdParamDef constructor_param_2;
+        check_hresult(m_metadata_emitter->DefineParam(
+            token_delegate_constructor_def,
+            2,  // Index Zero represents the return value.
+            L"method",
+            0,  // return tyes have no flag set
+            (DWORD)-1,  // Ignore dwCPlusTypeFlag
+            nullptr,    // No constant value
+            0,
+            &constructor_param_2));
+        
+        // Invoke
+        signature_blob delegate_invoke_sig;
+        std::optional<type_ref> return_type_ref = model.get_return_type();
+        std::vector<ParamSig> param_sigs;
+        RetTypeSig return_sig{ std::nullopt };
+        if (return_type_ref) // Return type is not void
+        {
+            std::variant<std::string, simple_type, object_type> semantic = to_simple_type_or_id(return_type_ref->get_semantic());
+            if (std::holds_alternative<std::string>(semantic))
+            {
+                std::string return_name = std::get<std::string>(semantic);
+                auto iter = type_references.find(return_name);
+                TypeRef ref;
+                if (iter == type_references.end())
+                {
+                    mdTypeRef md_ref;
+                    m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
+                    auto result = type_references.insert(std::make_pair(return_name, to_TypeRef(md_ref)));
+                    if (!result.second)
+                    {
+                        throw_invalid("Encountered duplicate TypeRef: " + return_name);
+                    }
+                    ref = to_TypeRef(md_ref);
+                }
+                ref = iter->second;
+                return_sig = RetTypeSig{ TypeSig{ ElementType::ValueType, ref.coded_index<TypeDefOrRef>() } };
+            }
+            else if (std::holds_alternative<object_type>(semantic))
+            {
+                return_sig = RetTypeSig{ TypeSig{ ElementType::Object } };
+            }
+            else // holds simple type
+            {
+                return_sig = RetTypeSig{ TypeSig{ to_ElementType(std::get<simple_type>(semantic)) } };
+            }
+        }
+        for (formal_parameter_model const& val : model.get_formal_parameters())
+        {
+            std::variant<std::string, simple_type, object_type> semantic = to_simple_type_or_id(val.get_type().get_semantic());
+            if (std::holds_alternative<std::string>(semantic))
+            {
+                std::string param_name = std::get<std::string>(semantic);
+                auto iter = type_references.find(param_name);
+                TypeRef ref;
+                if (iter == type_references.end())
+                {
+                    mdTypeRef md_ref;
+                    m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(param_name).c_str(), &md_ref);
+                    auto result = type_references.insert(std::make_pair(param_name, to_TypeRef(md_ref)));
+                    if (!result.second)
+                    {
+                        throw_invalid("Encountered duplicate TypeRef: " + param_name);
+                    }
+                    ref = to_TypeRef(md_ref);
+                }
+                ref = iter->second;
+                param_sigs.emplace_back(ParamSig{ TypeSig{ ElementType::ValueType, ref.coded_index<TypeDefOrRef>() } });
+            }
+            else if (std::holds_alternative<object_type>(semantic))
+            {
+                param_sigs.emplace_back(ParamSig{ TypeSig{ ElementType::Object } });
+            }
+            else // holds simple type
+            {
+                param_sigs.emplace_back(ParamSig{ TypeSig{ to_ElementType(std::get<simple_type>(semantic)) } });
+            }
+        }
+        delegate_invoke_sig.add_signature(MethodDefSig{ return_sig, param_sigs });
+        
+        static constexpr DWORD delegate_invoke_flag = mdVirtual | fdSpecialName | mdHideBySig;
+        mdMethodDef token_delegate_invoke_def;
+        check_hresult(m_metadata_emitter->DefineMethod(
+            token_delegate_type_def,
+            L".ctor",
+            delegate_constructor_flag,
+            delegate_invoke_sig.data(),
+            delegate_invoke_sig.size(),
+            0,
+            miRuntime,
+            &token_delegate_invoke_def));
+
+        /** Defining parameters and return **/
         /* Define return value */
         // To be used for attributes later
-        mdParamDef token_return = define_return(model.get_return_type(), token_delegate_type_def);
+        mdParamDef token_return = define_return(model.get_return_type(), token_delegate_invoke_def);
 
         /* Define formal parameters */
         int index = 1;
         for (auto const& val : model.get_formal_parameters())
         {
-            define_parameters(val, token_delegate_type_def, index);
+            define_parameters(val, token_delegate_invoke_def, index);
             index++;
         }
     }
@@ -565,11 +758,10 @@ namespace xlang::xmeta
     {
         /* Define return value */
         mdParamDef token_param_return;
-        std::string return_name = type_semantics_to_string(retun_type->get_semantic());
         check_hresult(m_metadata_emitter->DefineParam(
             type_def,
             0,  // Index Zero represents the return value.
-            s2ws(return_name).c_str(),
+            L"returnVal",
             0,  // return tyes have no flag set
             (DWORD)-1,  // Ignore dwCPlusTypeFlag
             nullptr,    // No constant value
@@ -606,68 +798,6 @@ namespace xlang::xmeta
             0,
             &token_param_def));
     }
-    
-
-    inline std::string type_semantics_to_string(model_ref<type_semantics> const& semantic_type)
-    {
-        type_semantics const& ts = semantic_type.get_resolved_target();
-        if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
-        {
-            return std::get<std::shared_ptr<class_model>>(ts)->get_id();
-        }
-        if (std::holds_alternative<std::shared_ptr<enum_model>>(ts))
-        {
-            return std::get<std::shared_ptr<enum_model>>(ts)->get_id();
-        }
-        if (std::holds_alternative<std::shared_ptr<interface_model>>(ts))
-        {
-            return std::get<std::shared_ptr<interface_model>>(ts)->get_id();
-        }
-        if (std::holds_alternative<std::shared_ptr<struct_model>>(ts))
-        {
-            return std::get<std::shared_ptr<struct_model>>(ts)->get_id();
-        }
-        if (std::holds_alternative<simple_type>(ts))
-        {
-            switch (std::get<simple_type>(ts))
-            {
-            case simple_type::Boolean:
-                return std::string("Boolean");
-            case simple_type::String:
-                return std::string("String");
-            case simple_type::Int8:
-                return std::string("Int8");
-            case simple_type::Int16:
-                return std::string("Int16");
-            case simple_type::Int32:
-                return std::string("Int32");
-            case simple_type::Int64:
-                return std::string("Int64");
-            case simple_type::UInt8:
-                return std::string("Uint8");
-            case simple_type::UInt16:
-                return std::string("Uint16");
-			case simple_type::UInt32:
-				return std::string("Uint32");
-			case simple_type::UInt64:
-				return std::string("Uint64");
-			case simple_type::Char16:
-                return std::string("Char16");
-            case simple_type::Guid:
-                return std::string("Guid");
-            case simple_type::Single:
-                return std::string("Single");
-            case simple_type::Double:
-                return std::string("Double");
-            }
-        }
-        if (std::holds_alternative<object_type>(ts))
-        {
-            return std::string("Object");
-        }
-        assert(false);
-    }
-
 }
 
 

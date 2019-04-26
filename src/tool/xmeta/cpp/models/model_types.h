@@ -26,7 +26,6 @@ namespace xlang::xmeta
         UInt32,
         UInt64,
         Char16,
-        Guid,
         Single,
         Double,
     };
