@@ -15,33 +15,33 @@ namespace xlang::impl
         switch (error)
         {
         case S_OK:
-            return xlang_result::xlang_success;
+            return xlang_result::success;
         case E_ACCESSDENIED:
-            return xlang_result::xlang_access_denied;
+            return xlang_result::access_denied;
         case E_BOUNDS:
-            return xlang_result::xlang_bounds;
+            return xlang_result::bounds;
         case E_FAIL:
-            return xlang_result::xlang_fail;
+            return xlang_result::fail;
         case E_HANDLE:
-            return xlang_result::xlang_handle;
+            return xlang_result::handle;
         case E_INVALIDARG:
-            return xlang_result::xlang_invalid_arg;
+            return xlang_result::invalid_arg;
         case E_ILLEGAL_STATE_CHANGE:
-            return xlang_result::xlang_invalid_state;
+            return xlang_result::invalid_state;
         case E_NOINTERFACE:
-            return xlang_result::xlang_no_interface;
+            return xlang_result::no_interface;
         case E_NOTIMPL:
-            return xlang_result::xlang_not_impl;
+            return xlang_result::not_impl;
         case E_OUTOFMEMORY:
-            return xlang_result::xlang_out_of_memory;
+            return xlang_result::out_of_memory;
         case E_POINTER:
-            return xlang_result::xlang_pointer;
+            return xlang_result::pointer;
         case static_cast<HRESULT>(0x80040154):
         case static_cast<HRESULT>(0x80131522):
-            return xlang_result::xlang_type_load;
+            return xlang_result::type_load;
         }
 
-        return xlang_result::xlang_fail;
+        return xlang_result::fail;
     }
 
     [[noreturn]] inline void throw_last_error()

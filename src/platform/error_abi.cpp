@@ -146,17 +146,17 @@ namespace xlang::impl
     };
 
     error_info error_code_errors [] = {
-        error_info {xlang_result::xlang_access_denied},
-        error_info {xlang_result::xlang_bounds},
-        error_info {xlang_result::xlang_fail},
-        error_info {xlang_result::xlang_handle},
-        error_info {xlang_result::xlang_invalid_arg},
-        error_info {xlang_result::xlang_invalid_state},
-        error_info {xlang_result::xlang_no_interface},
-        error_info {xlang_result::xlang_not_impl},
-        error_info {xlang_result::xlang_out_of_memory},
-        error_info {xlang_result::xlang_pointer},
-        error_info {xlang_result::xlang_type_load}
+        error_info {xlang_result::access_denied},
+        error_info {xlang_result::bounds},
+        error_info {xlang_result::fail},
+        error_info {xlang_result::handle},
+        error_info {xlang_result::invalid_arg},
+        error_info {xlang_result::invalid_state},
+        error_info {xlang_result::no_interface},
+        error_info {xlang_result::not_impl},
+        error_info {xlang_result::out_of_memory},
+        error_info {xlang_result::pointer},
+        error_info {xlang_result::type_load}
     };
 }
 

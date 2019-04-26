@@ -19,17 +19,17 @@ namespace xlang::impl
             if (pfn)
             {
                 xlang_result result = (*pfn)(class_name, iid, factory);
-                if (result == xlang_result::xlang_success)
+                if (result == xlang_result::success)
                 {
                     return nullptr;
                 }
-                else if (result != xlang_result::xlang_type_load)
+                else if (result != xlang_result::type_load)
                 {
                     throw_result(result);
                 }
             }
         }
-        return xlang_originate_error(xlang_result::xlang_type_load);
+        return xlang_originate_error(xlang_result::type_load);
     }
 }
 
@@ -44,7 +44,7 @@ try
 {
     if (!class_name)
     {
-        xlang::throw_result(xlang_result::xlang_invalid_arg);
+        xlang::throw_result(xlang_result::invalid_arg);
     }
 
     auto const encoding = xlang_get_string_encoding(class_name);

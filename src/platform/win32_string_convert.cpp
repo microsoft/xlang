@@ -38,13 +38,13 @@ namespace xlang::impl
             switch (GetLastError())
             {
             case ERROR_INSUFFICIENT_BUFFER:
-                throw_result(xlang_result::xlang_invalid_arg, "Insufficient buffer size");
+                throw_result(xlang_result::invalid_arg, "Insufficient buffer size");
 
             case ERROR_NO_UNICODE_TRANSLATION:
-                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
+                throw_result(xlang_result::invalid_arg, "Untranslatable string");
 
             default:
-                throw_result(xlang_result::xlang_fail);
+                throw_result(xlang_result::fail);
             }
         }
     }
@@ -70,13 +70,13 @@ namespace xlang::impl
             switch (GetLastError())
             {
             case ERROR_INSUFFICIENT_BUFFER:
-                throw_result(xlang_result::xlang_invalid_arg, "Insufficient buffer size");
+                throw_result(xlang_result::invalid_arg, "Insufficient buffer size");
 
             case ERROR_NO_UNICODE_TRANSLATION:
-                throw_result(xlang_result::xlang_invalid_arg, "Untranslatable string");
+                throw_result(xlang_result::invalid_arg, "Untranslatable string");
 
             default:
-                throw_result(xlang_result::xlang_fail);
+                throw_result(xlang_result::fail);
             }
         }
     }

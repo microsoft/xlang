@@ -406,7 +406,7 @@ void convert_string()
             result = xlang_get_string_raw_buffer<other_type>(str, &buffer, &length);
             REQUIRE(result != nullptr);
             result->GetError(&error_code);
-            REQUIRE(error_code == xlang_result::xlang_invalid_arg);
+            REQUIRE(error_code == xlang_result::invalid_arg);
             REQUIRE(buffer == nullptr);
             REQUIRE(length == 0);
         }
@@ -490,7 +490,7 @@ void convert_string_reference()
             result = xlang_get_string_raw_buffer<other_type>(str_ref, &buffer_ref, &length_ref);
             REQUIRE(result != nullptr);
             result->GetError(&error_code);
-            REQUIRE(error_code == xlang_result::xlang_invalid_arg);
+            REQUIRE(error_code == xlang_result::invalid_arg);
             REQUIRE(buffer_ref == nullptr);
             REQUIRE(length_ref == 0);
         }

@@ -97,7 +97,7 @@ struct widget_factory : iwidget_factory
         *instance = new (std::nothrow) widget{};
         if (!*instance)
         {
-            return xlang_originate_error(xlang_result::xlang_out_of_memory);
+            return xlang_originate_error(xlang_result::out_of_memory);
         }
 
         return nullptr; // xlang_error_ok;
@@ -130,14 +130,14 @@ extern "C" xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_s
 
             if (!*factory)
             {
-                return xlang_originate_error(xlang_result::xlang_out_of_memory);
+                return xlang_originate_error(xlang_result::out_of_memory);
             }
 
             return nullptr; // xlang_error_ok;
         }
 
-        return xlang_originate_error(xlang_result::xlang_no_interface);
+        return xlang_originate_error(xlang_result::no_interface);
     }
 
-    return xlang_originate_error(xlang_result::xlang_type_load);
+    return xlang_originate_error(xlang_result::type_load);
 }

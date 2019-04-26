@@ -58,10 +58,10 @@ TEST_CASE("Error origination with only result and message")
     REQUIRE(xlang_create_string_utf8(message.data(), message.size(), &abi_message) == nullptr);
     
     INFO("Originating error");
-    xlang_error_info* result = xlang_originate_error(xlang_result::xlang_access_denied, abi_message);
+    xlang_error_info* result = xlang_originate_error(xlang_result::access_denied, abi_message);
     REQUIRE(result != nullptr);
 
-    verify_error_info(result, xlang_result::xlang_access_denied, abi_message);
+    verify_error_info(result, xlang_result::access_denied, abi_message);
     REQUIRE(result->Release() == 0);
     result = nullptr;
 }
@@ -143,7 +143,7 @@ TEST_CASE("Error origination with all parameters")
 
     INFO("Originating error");
     xlang_error_info* result = xlang_originate_error(
-        xlang_result::xlang_invalid_arg,
+        xlang_result::invalid_arg,
         message,
         projection_identifier,
         language_error,
@@ -153,7 +153,7 @@ TEST_CASE("Error origination with all parameters")
 
     verify_error_info(
         result,
-        xlang_result::xlang_invalid_arg,
+        xlang_result::invalid_arg,
         message,
         projection_identifier,
         language_error,
@@ -173,7 +173,7 @@ TEST_CASE("Error origination with all parameters")
     result->PropagateError(projection_identifier2, language_error2, execution_trace2, language_information2);
     verify_error_info(
         result,
-        xlang_result::xlang_invalid_arg,
+        xlang_result::invalid_arg,
         message,
         projection_identifier,
         language_error,
@@ -186,7 +186,7 @@ TEST_CASE("Error origination with all parameters")
     REQUIRE(propagated_error != nullptr);
     verify_error_info(
         propagated_error,
-        xlang_result::xlang_invalid_arg,
+        xlang_result::invalid_arg,
         message,
         projection_identifier2,
         language_error2,
@@ -201,7 +201,7 @@ TEST_CASE("Error origination with all parameters")
     REQUIRE(propagated_error2 != nullptr);
     verify_error_info(
         propagated_error2,
-        xlang_result::xlang_invalid_arg,
+        xlang_result::invalid_arg,
         message,
         projection_identifier);
 

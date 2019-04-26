@@ -34,7 +34,7 @@ namespace xlang
         }
         catch (std::bad_alloc const&)
         {
-            return xlang_originate_error(xlang_result::xlang_out_of_memory);
+            return xlang_originate_error(xlang_result::out_of_memory);
         }
         catch (...)
         {

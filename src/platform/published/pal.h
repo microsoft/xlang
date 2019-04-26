@@ -187,18 +187,18 @@ extern "C"
 #ifdef __cplusplus
     enum class xlang_result : uint32_t
     {
-        xlang_success = 0,
-        xlang_access_denied = 1,
-        xlang_bounds = 2,
-        xlang_fail = 3,
-        xlang_handle = 4,
-        xlang_invalid_arg = 5,
-        xlang_invalid_state = 6,
-        xlang_no_interface = 7,
-        xlang_not_impl = 8,
-        xlang_out_of_memory = 9,
-        xlang_pointer = 10,
-        xlang_type_load = 11
+        success = 0,
+        access_denied = 1,
+        bounds = 2,
+        fail = 3,
+        handle = 4,
+        invalid_arg = 5,
+        invalid_state = 6,
+        no_interface = 7,
+        not_impl = 8,
+        out_of_memory = 9,
+        pointer = 10,
+        type_load = 11
     };
 #else
     enum xlang_result
