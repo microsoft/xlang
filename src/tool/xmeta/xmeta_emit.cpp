@@ -624,7 +624,7 @@ namespace xlang::xmeta
         // Constructor
         static constexpr DWORD delegate_constructor_flag = fdRTSpecialName | fdSpecialName | mdHideBySig;
         signature_blob delegate_constructor_sig;
-        std::vector<ParamSig> param_types = { ParamSig{  TypeSig{ElementType::Object} }, ParamSig{  TypeSig{ElementType::I} } };
+        std::vector<ParamSig> param_types = { ParamSig{ TypeSig{ElementType::Object} }, ParamSig{  TypeSig{ElementType::I} } };
         delegate_constructor_sig.add_signature(MethodDefSig{ RetTypeSig{ std::nullopt }, param_types }); // nullopt means returntype is void
         mdMethodDef token_delegate_constructor_def;
         check_hresult(m_metadata_emitter->DefineMethod(
@@ -664,7 +664,6 @@ namespace xlang::xmeta
         std::optional<type_ref> return_type_ref = model.get_return_type();
         std::vector<ParamSig> param_sigs;
         RetTypeSig return_sig = RetTypeSig{ create_paramater_signature(model.get_return_type()) };
-       
         for (formal_parameter_model const& val : model.get_formal_parameters())
         {
             ParamSig param_sig = ParamSig{ create_paramater_signature(val.get_type()).value() };
@@ -676,7 +675,7 @@ namespace xlang::xmeta
         mdMethodDef token_delegate_invoke_def;
         check_hresult(m_metadata_emitter->DefineMethod(
             token_delegate_type_def,
-            L".ctor",
+            L"Invoke",
             delegate_constructor_flag,
             delegate_invoke_sig.data(),
             delegate_invoke_sig.size(),
@@ -730,7 +729,6 @@ namespace xlang::xmeta
                 param_flags |= pdOut;
             }
         }
-        throw EXCEPTION_ACCESS_VIOLATION;
         mdParamDef token_param_def; //To be used for attributes later
         check_hresult(m_metadata_emitter->DefineParam(
             token_method_def,

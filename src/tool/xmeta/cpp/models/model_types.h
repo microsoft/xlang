@@ -47,6 +47,12 @@ namespace xlang::xmeta
             m_semantic{ std::string(id) }
         { }
 
+        type_ref(type_semantics const& type) :
+            m_semantic{ std::string() }
+        {
+            m_semantic.resolve(type);
+        }
+
         auto const& get_semantic() const noexcept
         {
             return m_semantic;

@@ -17,6 +17,7 @@ namespace xlang::xmeta
 
         model_ref() = delete;
         model_ref& operator=(model_ref const& other) = default;
+
         explicit model_ref(std::string_view const& name) :
             m_ref{ std::string(name) }
         { }
