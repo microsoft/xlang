@@ -12,8 +12,7 @@
     <tags>Python, WinRT</tags>
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <license type="file">LICENSE</license>
-    <projectUrl>https://github.com/Microsoft/xlang/tree/master/src/tool/python</projectUrl>
-    <iconUrl>https://aka.ms/cppwinrt.ico</iconUrl>
+    <projectUrl>https://github.com/Microsoft/xlang/src/package/pywinrt/tool</projectUrl>
   </metadata>
   <files>
     <file src="..\LICENSE"/>
