@@ -181,7 +181,7 @@ TEST_CASE("Delegate metadata")
     xlang::meta::writer::pe_writer writer;
     writer.add_metadata(emitter.save_to_memory());
     xlang::meta::reader::database db{ writer.save_to_memory() };
-    //writer.save_to_file(std::filesystem::current_path().append(std::string(assembly_name) + ".winmd"));
+    writer.save_to_file(std::filesystem::current_path().append(std::string(assembly_name) + ".winmd"));
 
     REQUIRE(db.TypeDef.size() == 2);
 
@@ -192,8 +192,8 @@ TEST_CASE("Delegate metadata")
     auto const& delegate_constructor = db.MethodDef[0];
     REQUIRE(delegate_constructor.Name() == ".ctor");
     REQUIRE(delegate_constructor.Parent().TypeName() == "testdelegate");
-    //auto const& coded_type = std::get<ElementType>(delegate_constructor.Signature().ReturnType().Type().Type());
-    //REQUIRE(coded_type == ElementType::Void);
+    auto const& coded_type = std::get<ElementType>(delegate_constructor.Signature().ReturnType().Type().Type());
+    REQUIRE(coded_type == ElementType::Void);
 
 
     //db.Param;

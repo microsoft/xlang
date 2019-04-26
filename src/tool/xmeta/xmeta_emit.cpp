@@ -640,10 +640,10 @@ namespace xlang::xmeta
         mdParamDef constructor_param_1;
         check_hresult(m_metadata_emitter->DefineParam(
             token_delegate_constructor_def,
-            1,  // Index Zero represents the return value.
+            1, 
             L"object",
-            0,  // return tyes have no flag set
-            (DWORD)-1,  // Ignore dwCPlusTypeFlag
+            0,  // these needs to be set
+            (DWORD)-1,
             nullptr,    // No constant value
             0,
             &constructor_param_1));
@@ -651,10 +651,10 @@ namespace xlang::xmeta
         mdParamDef constructor_param_2;
         check_hresult(m_metadata_emitter->DefineParam(
             token_delegate_constructor_def,
-            2,  // Index Zero represents the return value.
+            2, 
             L"method",
-            0,  // return tyes have no flag set
-            (DWORD)-1,  // Ignore dwCPlusTypeFlag
+            0,  // these needs to be set
+            (DWORD)-1, 
             nullptr,    // No constant value
             0,
             &constructor_param_2));
