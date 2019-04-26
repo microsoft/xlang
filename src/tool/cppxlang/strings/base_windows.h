@@ -320,9 +320,9 @@ namespace xlang::Windows::Foundation
         return !(left < right);
     }
 
-    struct IInspectable : IUnknown
+    struct IXlangObject : IUnknown
     {
-        IInspectable(std::nullptr_t = nullptr) noexcept {}
-        IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
+        IXlangObject(std::nullptr_t = nullptr) noexcept {}
+        IXlangObject(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
     };
 }

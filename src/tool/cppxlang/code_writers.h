@@ -643,7 +643,7 @@ namespace xlang
         {
             auto format = R"(    template <> struct abi<%>
     {
-        struct XLANG_NOVTABLE type : inspectable_abi
+        struct XLANG_NOVTABLE type : xlang_object_abi
         {
 )";
 
@@ -653,7 +653,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct abi<%>
     {
-        struct XLANG_NOVTABLE type : inspectable_abi
+        struct XLANG_NOVTABLE type : xlang_object_abi
         {
 )";
 
@@ -1340,7 +1340,7 @@ namespace xlang
         else if (optional)
         {
             auto format = R"(            if (%) *% = nullptr;
-            Windows::Foundation::IInspectable xlang_impl_%;
+            Windows::Foundation::IXlangObject xlang_impl_%;
 )";
 
             w.write(format, param_name, param_name, param_name);
@@ -1663,7 +1663,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
 
         if (!found)
         {
-            w.write(", Windows::Foundation::IInspectable");
+            w.write(", Windows::Foundation::IXlangObject");
         }
     }
 
@@ -1957,11 +1957,11 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
         if (empty(generics))
         {
             auto format = R"(    struct XLANG_EBO % :
-        Windows::Foundation::IInspectable,
+        Windows::Foundation::IXlangObject,
         impl::consume_t<%>%
     {
         %(std::nullptr_t = nullptr) noexcept {}
-        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IXlangObject(ptr, take_ownership_from_abi) {}
 %%    };
 )";
 
@@ -1980,11 +1980,11 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
 
             auto format = R"(    template <%>
     struct XLANG_EBO % :
-        Windows::Foundation::IInspectable,
+        Windows::Foundation::IXlangObject,
         impl::consume_t<%>%
     {
         %(std::nullptr_t = nullptr) noexcept {}
-        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IXlangObject(ptr, take_ownership_from_abi) {}
 %%    };
 )";
 
@@ -2471,7 +2471,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
 
         auto format = R"(    inline %::%(%)
     {
-        Windows::Foundation::IInspectable %, %;
+        Windows::Foundation::IXlangObject %, %;
         *this = impl::call_factory<%, %>([&](auto&& f) { return f.%(%%%, %); });
     }
 )";
