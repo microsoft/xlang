@@ -1,7 +1,6 @@
 #include "pch.h"
 #include <iostream>
 
-#include "antlr4-runtime.h"
 #include "XlangParser.h"
 #include "XlangLexer.h"
 #include "xlang_model_walker.h"
