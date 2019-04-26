@@ -13,6 +13,7 @@ add_custom_target(cppwinrt_test ALL DEPENDS cppwinrt
     COMMAND ${cppwinrt_exe} -in sdk -out ${CMAKE_CURRENT_BINARY_DIR} -verbose
     COMMAND ${build} /t:test
     COMMAND ${build} /t:test_fast
+    COMMAND ${build} /t:test_fast_fwd
     COMMAND ${build} /t:old_tests\\test_old
 )
 

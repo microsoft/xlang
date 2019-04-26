@@ -11,6 +11,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CanReferenceWinRT>true</CanReferenceWinRT>
         <CppWinRTPackage Condition="'$(CppWinRTEnabled)' != 'true'">true</CppWinRTPackage>
         <CppWinRTPackage Condition="'$(CppWinRTPackage)' != 'true'">false</CppWinRTPackage>
+        <CppWinRTPackageDir Condition="'$(CppWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\</CppWinRTPackageDir>
         <XamlLanguage Condition="'$(CppWinRTProjectLanguage)' != 'C++/CX'">CppWinRT</XamlLanguage>
         <IsNativeLanguage>true</IsNativeLanguage>
     </PropertyGroup>

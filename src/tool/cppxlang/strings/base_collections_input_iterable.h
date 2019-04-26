@@ -2,7 +2,7 @@
 namespace xlang::impl
 {
     template <typename T, typename Container>
-    struct input_iterable final :
+    struct input_iterable :
         implements<input_iterable<T, Container>, non_agile, no_weak_ref, wfc::IIterable<T>>,
         iterable_base<input_iterable<T, Container>, T>
     {
@@ -23,7 +23,7 @@ namespace xlang::impl
     };
 
     template <typename T, typename InputIt>
-    struct scoped_input_iterable final :
+    struct scoped_input_iterable :
         input_scope,
         implements<scoped_input_iterable<T, InputIt>, non_agile, no_weak_ref, wfc::IIterable<T>>,
         iterable_base<scoped_input_iterable<T, InputIt>, T>
@@ -41,6 +41,12 @@ namespace xlang::impl
         {
             return range_container<InputIt>{ m_begin, m_end };
         }
+
+#ifdef _DEBUG
+        void use_make_function_to_create_this_object() final
+        {
+        }
+#endif
 
     private:
 
@@ -129,6 +135,11 @@ namespace xlang::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_pair.first;
+        }
+
     private:
 
         std::pair<interface_type, impl::input_scope*> m_pair;
@@ -201,6 +212,11 @@ namespace xlang::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_pair.first;
+        }
+
     private:
 
         std::pair<interface_type, impl::input_scope*> m_pair;
@@ -256,6 +272,11 @@ namespace xlang::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
+        }
+
     private:
 
         interface_type m_interface;
@@ -309,6 +330,11 @@ namespace xlang::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:

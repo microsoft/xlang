@@ -101,7 +101,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -127,7 +127,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -153,7 +153,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -183,7 +183,7 @@
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
