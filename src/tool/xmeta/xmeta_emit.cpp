@@ -492,7 +492,8 @@ namespace xlang::xmeta
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
     {
-        auto const& type_name = model->get_id();
+        auto const& namespace_name = model->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id();
+        auto const& type_name = namespace_name + "." +  model->get_id();
         static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         auto token_enum_type_def = define_type_def(type_name, enum_type_flag, token_enum, implements);

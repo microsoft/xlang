@@ -80,7 +80,6 @@ TEST_CASE("Enum metadata")
     xlang::xmeta::xmeta_emit emitter(assembly_name);
     xlang::xmeta::xlang_model_walker walker(reader.get_namespaces(), emitter);
     
-
     walker.register_listener(emitter);
     walker.walk();
 
@@ -90,9 +89,9 @@ TEST_CASE("Enum metadata")
     REQUIRE(db.TypeDef.size() == 2);
 
     auto const& enum_type = db.TypeDef[1];
+    REQUIRE(enum_type.TypeNamespace() == "Windows.Test");
     REQUIRE(enum_type.TypeName() == "Color");
     REQUIRE(enum_type.Flags().value == (tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime));
-    // REQUIRE(enum_type.TypeNamespace() == "Xmeta.Test"); // TODO: populate metadata with namespace
     test_enum_type_properties(enum_type);
 
     auto const& fields = enum_type.FieldList();
@@ -124,7 +123,7 @@ TEST_CASE("Enum metadata")
 
         auto const& type_ref = coded_type.TypeRef();
         REQUIRE(type_ref.TypeName() == "Color");
-        // REQUIRE(type_ref.TypeNamespace() == "Xmeta.Test"); // TODO: populate metadata with namespace
+        REQUIRE(type_ref.TypeNamespace() == "Windows.Test");
         REQUIRE(type_ref.ResolutionScope().type() == ResolutionScope::Module);
     }
 }
