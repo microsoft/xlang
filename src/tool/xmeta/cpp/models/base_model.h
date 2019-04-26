@@ -1,8 +1,11 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
+#include <map>
 
 namespace xlang::xmeta
 {

@@ -50,7 +50,6 @@ value_type
 class_type
     : type_name
     | OBJECT
-    | NILL
     ;
 
 array_type
@@ -270,7 +269,12 @@ class_event_declaration
     ;
 
 class_property_declaration
-    : attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : property_declaration
+    ;
+
+property_declaration
+    : attributes? property_modifier* type property_identifier SEMICOLON
+    | attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
     ;
 
 class_constructor_declaration
@@ -325,13 +329,29 @@ property_identifier
 property_modifier
     : PROTECTED
     | STATIC
-    | OVERRIDABLE
     ;
 
 property_accessors
+    : get_set_property_accessors
+    | set_get_property_accessors
+    | get_property_accessor
+    | set_property_accessor
+    ;
+
+get_set_property_accessors
+    : get_property_accessor set_property_accessor
+	;
+
+set_get_property_accessors
+    : set_property_accessor get_property_accessor
+	;
+
+get_property_accessor
     : attributes? GET SEMICOLON
-    | attributes? SET SEMICOLON
-    | attributes? GET SEMICOLON SET SEMICOLON
+    ;
+
+set_property_accessor
+    : attributes? SET SEMICOLON
     ;
 
 event_modifier
@@ -386,7 +406,7 @@ interface_method_declaration
     ;
 
 interface_property_declaration
-    : attributes? type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : property_declaration
     ;
 
 interface_event_declaration
@@ -454,7 +474,6 @@ delegate_declaration
 
 delegate_modifier
     : NEW
-    | PUBLIC
     | PROTECTED
     | PRIVATE
     ;

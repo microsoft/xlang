@@ -22,7 +22,7 @@ namespace xlang::xmeta
         xmeta_idl_reader(std::string_view const& idl_assembly_name)
         {
             m_assembly_names.emplace_back(idl_assembly_name);
-            m_current_assembly = m_assembly_names.back();
+            m_cur_assembly = m_assembly_names.back();
         }
         friend struct ast_to_st_listener;
 
@@ -44,7 +44,7 @@ namespace xlang::xmeta
 
         auto const& get_cur_assembly() const
         {
-            return m_current_assembly;
+            return m_cur_assembly;
         }
 
         void set_cur_namespace_body(std::shared_ptr<namespace_body_model> const& cur_namespace_body)
@@ -63,7 +63,7 @@ namespace xlang::xmeta
         std::shared_ptr<interface_model> m_cur_interface;
         std::shared_ptr<struct_model> m_cur_struct;
 
-        std::string_view m_current_assembly;
+        std::string_view m_cur_assembly;
         std::vector<std::string> m_assembly_names;
 
         size_t m_num_semantic_errors = 0;
@@ -75,12 +75,18 @@ namespace xlang::xmeta
         void pop_namespace();
 
         void write_error(size_t decl_line, std::string_view const& msg);
+
+        void write_duplicate_modifier_error(size_t decl_line, std::string_view const& modifier_name, std::string_view const& member_name);
         void write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name);
         void write_enum_member_expr_ref_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name);
         void write_enum_circular_dependency(size_t decl_line, std::string_view const& invalid_member_id, std::string_view const& enum_name);
         void write_enum_const_expr_range_error(size_t decl_line, std::string_view const& invalid_expr, std::string_view const& enum_name);
         void write_namespace_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& original_name);
         void write_namespace_member_name_error(size_t decl_line, std::string_view const& invalid_name);
+        void write_property_duplicate_get_error(size_t decl_line, std::string_view const& container_name, std::string_view const& property_name);
+        void write_property_duplicate_set_error(size_t decl_line, std::string_view const& container_name, std::string_view const& property_name);
+
+        inline std::string const get_cur_ns_name() const;
     };
     std::string copy_to_lower(std::string_view sv);
 }

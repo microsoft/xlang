@@ -4,6 +4,7 @@
 #include "ast_to_st_listener.h"
 #include "xmeta_idl_reader.h"
 #include "models/xmeta_models.h"
+#include "XlangParser.h"
 
 using namespace xlang::xmeta;
 
@@ -45,10 +46,30 @@ enum_semantics str_to_enum_semantics(std::string const& val)
     return enum_semantics::Int32;
 }
 
+simple_type str_to_simple_type(std::string const& val)
+{
+    const std::map<std::string, simple_type> str_to_simple_type_map = {
+        { "Boolean", simple_type::Boolean },
+        { "String", simple_type::String },
+        { "Int8", simple_type::Int8 },
+        { "Int16", simple_type::Int16 },
+        { "Int32", simple_type::Int32 },
+        { "Int64", simple_type::Int64 },
+        { "UInt8", simple_type::UInt8 },
+        { "UInt16", simple_type::UInt16 },
+        { "UInt32", simple_type::UInt32 },
+        { "UInt64", simple_type::UInt64 },
+        { "Char16", simple_type::Char16 },
+        { "Single", simple_type::Single },
+        { "Double", simple_type::Double },
+    };
+    assert(str_to_simple_type_map.find(val) != str_to_simple_type_map.end());
+    return str_to_simple_type_map.at(val);
+}
+
 ast_to_st_listener::ast_to_st_listener(xmeta_idl_reader& reader) :
     m_reader{ reader }
 { }
-
 
 listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_declarationContext *ast_enum_member, std::shared_ptr<enum_model> const& new_enum)
 {
@@ -169,6 +190,277 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     return listener_error::passed;
 }
 
+void extract_property_accessors(XlangParser::Property_accessorsContext *ctx, bool& get_declared, bool& set_declared, bool& get_declared_first)
+{
+    if (!ctx)
+    {
+        get_declared = true;
+        set_declared = true;
+        get_declared_first = true;
+        return;
+    }
+
+    if (ctx->get_set_property_accessors())
+    {
+        get_declared = set_declared = true;
+    }
+    else if (ctx->set_get_property_accessors())
+    {
+        get_declared = set_declared = true;
+        get_declared_first = false;
+    }
+    else if (ctx->get_property_accessor())
+    {
+        get_declared = ctx->get_property_accessor() != nullptr;
+    }
+    else if (ctx->set_property_accessor())
+    {
+        set_declared = ctx->set_property_accessor() != nullptr;
+        get_declared_first = false;
+    }
+}
+
+listener_error ast_to_st_listener::extract_type(XlangParser::TypeContext *tc, type_ref& tr)
+{
+    if (tc->value_type())
+    {
+        tr.set_semantic(str_to_simple_type(tc->getText()));
+    }
+    else if (tc->class_type())
+    {
+        if (tc->class_type()->OBJECT())
+        {
+            tr.set_semantic(object_type{});
+        }
+    }
+    else if (tc->array_type())
+    {
+        assert(tc->array_type()->non_array_type());
+        if (tc->array_type()->non_array_type()->value_type())
+        {
+            tr.set_semantic(str_to_simple_type(tc->getText()));
+        }
+        else if (tc->array_type()->non_array_type()->class_type())
+        {
+            if (tc->array_type()->non_array_type()->class_type()->OBJECT())
+            {
+                tr.set_semantic(object_type{});
+            }
+        }
+    }
+    return listener_error::passed;
+}
+
+void ast_to_st_listener::extract_to_existing_property(std::shared_ptr<property_model> const& prop, bool get_declared, bool set_declared, size_t decl_line, std::string_view const& container_name)
+{
+    if (prop->get_get_method() && get_declared)
+    {
+        m_reader.write_property_duplicate_get_error(decl_line, container_name, prop->get_id());
+        return;
+    }
+    if (prop->get_set_method() && set_declared)
+    {
+        m_reader.write_property_duplicate_set_error(decl_line, container_name, prop->get_id());
+        return;
+    }
+    if (get_declared)
+    {
+        prop->create_get_method();
+    }
+    if (set_declared)
+    {
+        prop->create_set_method();
+    }
+}
+
+listener_error ast_to_st_listener::extract_type(XlangParser::Return_typeContext *rtc, std::optional<type_ref>& tr)
+{
+    assert(rtc);
+    if (rtc->VOID())
+    {
+        tr = std::nullopt;
+        return listener_error::passed;
+    }
+
+    assert(rtc->type());
+    return extract_type(rtc->type(), *tr);
+}
+
+void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_parameterContext *> const& ast_formal_params, std::shared_ptr<delegate_model> const& dm)
+{
+    for (auto fixed_param : ast_formal_params)
+    {
+        auto id = fixed_param->IDENTIFIER();
+        std::string formal_param_name{ id->getText() };
+        auto decl_line = id->getSymbol()->getLine();
+        type_ref tr{ fixed_param->type()->getText() };
+        extract_type(fixed_param->type(), tr);
+        parameter_semantics sem = parameter_semantics::in;
+        if (fixed_param->parameter_modifier() != nullptr)
+        {
+            if (fixed_param->parameter_modifier()->CONST())
+            {
+                sem = parameter_semantics::const_ref;
+            }
+            else if (fixed_param->parameter_modifier()->REF())
+            {
+                sem = parameter_semantics::ref;
+            }
+            else if (fixed_param->parameter_modifier()->OUT())
+            {
+                sem = parameter_semantics::out;
+            }
+        }
+        dm->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_reader.m_cur_assembly, sem, std::move(tr) });
+    }
+}
+
+template<class T>
+listener_error ast_to_st_listener::extract_property_declaration(XlangParser::Property_declarationContext *ctx, std::shared_ptr<T> const& model)
+{
+    assert(ctx->property_identifier());
+    assert(model != nullptr);
+
+    auto id = ctx->property_identifier()->IDENTIFIER();
+    auto decl_line = id->getSymbol()->getLine();
+    std::string prop_name{ id->getText() };
+    assert(ctx->type() != nullptr);
+    type_ref tr{ ctx->type()->getText() };
+    extract_type(ctx->type(), tr);
+    bool is_array = ctx->type()->array_type() != nullptr;
+    bool get_declared = false;
+    bool set_declared = false;
+    bool get_declared_first = true;
+    extract_property_accessors(ctx->property_accessors(), get_declared, set_declared, get_declared_first);
+
+    auto it = get_it(model->get_properties(), prop_name);
+    if (it != model->get_properties().end())
+    {
+        std::shared_ptr<property_model> const& prop = *it;
+        extract_to_existing_property(prop, get_declared, set_declared, decl_line, model->get_id());
+        return listener_error::passed;
+    }
+
+    property_semantics sem;
+    if (extract_property_semantic(ctx->property_modifier(), sem, decl_line, prop_name) == listener_error::failed)
+    {
+        return listener_error::failed;
+    }
+
+    auto pm = std::make_shared<property_model>(
+        prop_name,
+        decl_line,
+        m_reader.get_cur_assembly(),
+        std::move(tr),
+        is_array,
+        std::move(sem),
+        get_declared,
+        set_declared,
+        get_declared_first);
+
+    model->add_member(pm);
+
+    return listener_error::passed;
+}
+
+listener_error ast_to_st_listener::extract_property_semantic(std::vector<XlangParser::Property_modifierContext *> mods, property_semantics& sem, size_t decl_line, std::string_view const& id)
+{
+    for (auto property_mod : mods)
+    {
+        if (property_mod->PROTECTED())
+        {
+            if (sem.is_protected)
+            {
+                m_reader.write_duplicate_modifier_error(decl_line, "protected", id);
+                return listener_error::failed;
+            }
+            sem.is_protected = true;
+        }
+        else if (property_mod->STATIC())
+        {
+            if (sem.is_static)
+            {
+                m_reader.write_duplicate_modifier_error(decl_line, "protected", id);
+                return listener_error::failed;
+            }
+            sem.is_static = true;
+        }
+    }
+    return listener_error::passed;
+}
+
+
+void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationContext *ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    if (id)
+    {
+        std::string class_name{ id->getText() };
+        std::string class_base{ "" };
+        auto decl_line = id->getSymbol()->getLine();
+        if (m_reader.get_cur_namespace_body()->member_id_exists(class_name))
+        {
+            // Semantically invalid by check 3 for namespace members.
+            m_reader.write_namespace_member_name_error(decl_line, class_name);
+            return;
+        }
+
+        class_semantics sem = class_semantics::sealed_instance_class;
+        for (auto const& mod : ctx->class_modifier())
+        {
+            if (mod->UNSEALED())
+            {
+                sem = class_semantics::unsealed_class;
+            }
+            else if (mod->STATIC())
+            {
+                sem = class_semantics::static_class;
+            }
+        }
+        m_reader.m_cur_class = std::make_shared<class_model>(
+            class_name,
+            decl_line,
+            m_reader.get_cur_assembly(),
+            m_reader.get_cur_namespace_body(),
+            sem,
+            ctx->class_base()
+            ? ctx->class_base()->getText()
+            : "");
+        m_reader.m_cur_namespace_body->add_class(m_reader.m_cur_class);
+    }
+}
+
+void ast_to_st_listener::exitClass_declaration(XlangParser::Class_declarationContext *ctx)
+{
+    m_reader.m_cur_class = nullptr;
+}
+
+void ast_to_st_listener::exitClass_property_declaration(XlangParser::Class_property_declarationContext *ctx)
+{
+    assert(ctx->property_declaration());
+    extract_property_declaration(ctx->property_declaration(), m_reader.m_cur_class);
+}
+
+void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarationContext *ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    std::string delegate_name{ id->getText() };
+    auto decl_line = id->getSymbol()->getLine();
+    std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };
+    extract_type(ctx->return_type(), tr);
+    auto dm = std::make_shared<delegate_model>(delegate_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), std::move(tr));
+
+    // TODO: Type params
+
+    auto formal_params = ctx->formal_parameter_list();
+    if (formal_params)
+    {
+        extract_formal_params(formal_params->fixed_parameter(), dm);
+    }
+
+    m_reader.m_cur_namespace_body->add_delegate(dm);
+}
+
 void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationContext *ctx)
 {
     auto id = ctx->IDENTIFIER();
@@ -206,6 +498,35 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
     }
 
     m_reader.m_cur_namespace_body->add_enum(new_enum);
+}
+
+void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_declarationContext *ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    if (id)
+    {
+        std::string interface_name{ id->getText() };
+        auto decl_line = id->getSymbol()->getLine();
+        if (m_reader.m_cur_namespace_body->get_containing_namespace()->member_id_exists(interface_name))
+        {
+            // Semantically invalid by check 3 for namespace members.
+            m_reader.write_namespace_member_name_error(decl_line, interface_name);
+            return;
+        }
+        m_reader.m_cur_interface = std::make_shared<interface_model>(interface_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
+        m_reader.m_cur_namespace_body->add_interface(m_reader.m_cur_interface);
+    }
+}
+
+void ast_to_st_listener::exitInterface_declaration(XlangParser::Interface_declarationContext *ctx)
+{
+    m_reader.m_cur_interface = nullptr;
+}
+
+void ast_to_st_listener::exitInterface_property_declaration(XlangParser::Interface_property_declarationContext *ctx)
+{
+    assert(ctx->property_declaration());
+    extract_property_declaration(ctx->property_declaration(), m_reader.m_cur_interface);
 }
 
 void ast_to_st_listener::enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx)

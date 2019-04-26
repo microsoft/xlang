@@ -73,7 +73,7 @@ namespace xlang::xmeta
             {
                 if (!cur_ns->child_namespace_exists(name))
                 {
-                    cur_ns->add_child_namespace(std::make_shared<namespace_model>(name, decl_line, m_current_assembly, cur_ns));
+                    cur_ns->add_child_namespace(std::make_shared<namespace_model>(name, decl_line, m_cur_assembly, cur_ns));
                 }
                 setup_cur_ns_body(cur_ns->get_child_namespaces().at(name));
             }
@@ -91,7 +91,7 @@ namespace xlang::xmeta
             auto it2 = m_namespaces.find(name);
             if (it2 == m_namespaces.end())
             {
-                auto new_ns = std::make_shared<namespace_model>(name, decl_line, m_current_assembly, nullptr /* No parent */);
+                auto new_ns = std::make_shared<namespace_model>(name, decl_line, m_cur_assembly, nullptr /* No parent */);
                 m_namespaces[new_ns->get_id()] = new_ns;
             }
             assert(m_namespaces.find(name) != m_namespaces.end());
@@ -119,7 +119,7 @@ namespace xlang::xmeta
     {
         m_assembly_names.clear();
         m_assembly_names.emplace_back(assembly_name);
-        m_current_assembly = m_assembly_names.back();
+        m_cur_assembly = m_assembly_names.back();
         m_namespaces.clear();
         m_cur_namespace_body = nullptr;
         m_cur_class = nullptr;
@@ -137,14 +137,14 @@ namespace xlang::xmeta
     void xmeta_idl_reader::write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
     {
         std::ostringstream oss;
-        oss << "Enum member '" << invalid_name << "' already defined in enum '" << m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() << "." << enum_name << "'";
+        oss << "Enum member '" << invalid_name << "' already defined in enum '" << get_cur_ns_name() << "." << enum_name << "'";
         write_error(decl_line, oss.str());
     }
 
     void xmeta_idl_reader::write_enum_member_expr_ref_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
     {
         std::ostringstream oss;
-        oss << "Enum member '" << invalid_name << "' not defined in enum '" << m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() << "." << enum_name << "'";
+        oss << "Enum member '" << invalid_name << "' not defined in enum '" << get_cur_ns_name() << "." << enum_name << "'";
         write_error(decl_line, oss.str());
     }
 
@@ -159,7 +159,7 @@ namespace xlang::xmeta
     {
         std::ostringstream oss;
         oss << "Constant expression '" << invalid_expr << "' not in range of enum '";
-        oss << m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() << "." << enum_name << "'";
+        oss << get_cur_ns_name() << "." << enum_name << "'";
         write_error(decl_line, oss.str());
     }
 
@@ -173,9 +173,41 @@ namespace xlang::xmeta
     void xmeta_idl_reader::write_namespace_member_name_error(size_t decl_line, std::string_view const& invalid_name)
     {
         std::ostringstream oss;
-        oss << "Member name '" << invalid_name << "' already defined in namespace '" << m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() << "'";
+        oss << "Member name '" << invalid_name << "' already defined in namespace '" << get_cur_ns_name() << "'";
         write_error(decl_line, oss.str());
     }
 
+    void xmeta_idl_reader::write_property_duplicate_get_error(size_t decl_line, std::string_view const& container_name, std::string_view const& invalid_name)
+    {
+        std::ostringstream oss;
+        oss << "Property '" << get_cur_ns_name() << "." << container_name << "." << invalid_name << "' defines get more than once.";
+        write_error(decl_line, oss.str());
+    }
+
+    void xmeta_idl_reader::write_property_duplicate_set_error(size_t decl_line, std::string_view const& container_name, std::string_view const& invalid_name)
+    {
+        std::ostringstream oss;
+        oss << "Property '" << get_cur_ns_name() << "." << container_name << "." << invalid_name << "' defines set more than once.";
+        write_error(decl_line, oss.str());
+    }
+
+    void xmeta_idl_reader::write_duplicate_modifier_error(size_t decl_line, std::string_view const& modifier_name, std::string_view const& member_name)
+    {
+        std::ostringstream oss;
+        oss << "'" << modifier_name << "' modifier defined twice on member '" << get_cur_ns_name() << "." << member_name;
+        write_error(decl_line, oss.str());
+    }
+
+    std::string copy_to_lower(std::string_view sv)
+    {
+        std::string s{ sv };
+        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+        return s;
+    }
+
+    inline std::string const xmeta_idl_reader::get_cur_ns_name() const
+    {
+        return m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id();
+    }
 }
 
