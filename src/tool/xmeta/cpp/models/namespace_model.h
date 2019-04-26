@@ -2,6 +2,7 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -128,11 +129,12 @@ namespace xlang::xmeta
         // Used for semantic check #3 for namespace members
         bool member_id_exists(std::string_view const& member_id) const;
         bool child_namespace_exists(std::string_view const& member_id) const;
-        std::string get_full_name() const;
+        std::string const& get_fully_qualified_id() const;
 
     private:
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> m_child_namespaces;
         std::vector<std::shared_ptr<namespace_body_model>> m_namespace_bodies;
         std::shared_ptr<namespace_model> m_parent_namespace;
+        mutable std::optional<std::string> m_fully_qualified_id;
     };
 }

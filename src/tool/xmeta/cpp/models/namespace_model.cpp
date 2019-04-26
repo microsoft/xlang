@@ -19,32 +19,37 @@ namespace xlang::xmeta
 {
     void namespace_body_model::add_class(std::shared_ptr<class_model> const& cm)
     {
-        m_classes.insert(std::pair(std::string_view{ cm->get_id() }, cm));
+        auto [x, succeeded] = m_classes.insert(std::pair(std::string_view{ cm->get_id() }, cm));
+        assert(succeeded);
     }
 
     void namespace_body_model::add_struct(std::shared_ptr<struct_model> const& sm)
     {
-        m_structs.insert(std::pair(std::string_view{ sm->get_id() }, sm));
+        auto [x, succeeded] = m_structs.insert(std::pair(std::string_view{ sm->get_id() }, sm));
+        assert(succeeded);
     }
 
     void namespace_body_model::add_interface(std::shared_ptr<interface_model> const& im)
     {
-        m_interfaces.insert(std::pair(std::string_view{ im->get_id() }, im));
+        auto [x, succeeded] = m_interfaces.insert(std::pair(std::string_view{ im->get_id() }, im));
+        assert(succeeded);
     }
 
     void namespace_body_model::add_enum(std::shared_ptr<enum_model> const& em)
     {
-        m_enums.insert(std::pair(std::string_view{ em->get_id() }, em));
+        auto [x, succeeded] = m_enums.insert(std::pair(std::string_view{ em->get_id() }, em));
+        assert(succeeded);
     }
 
     void namespace_body_model::add_delegate(std::shared_ptr<delegate_model> const& dm)
     {
-        m_delegates.insert(std::pair(std::string_view{ dm->get_id() }, dm));
+        auto [x, succeeded] = m_delegates.insert(std::pair(std::string_view{ dm->get_id() }, dm));
+        assert(succeeded);
     }
 
     void namespace_body_model::add_using_alias_directive(std::shared_ptr<using_alias_directive_model> const& uad)
     {
-        m_using_alias_directives.insert(std::pair(std::string_view{ uad->get_id() }, uad));
+        auto [x, succeeded] = m_using_alias_directives.insert(std::pair(std::string_view{ uad->get_id() }, uad));
     }
 
     void namespace_body_model::add_using_namespace_directive(std::shared_ptr<using_namespace_directive_model> const& und)
@@ -111,10 +116,15 @@ namespace xlang::xmeta
         return m_child_namespaces.find(member_id) != m_child_namespaces.end();
     }
 
-    std::string namespace_model::get_full_name() const
+    std::string const& namespace_model::get_fully_qualified_id() const
     {
-        return m_parent_namespace != nullptr
-            ? m_parent_namespace->get_full_name() + "." + get_id()
-            : get_id();
+        if (!m_fully_qualified_id.has_value())
+        {
+            m_fully_qualified_id = m_parent_namespace == nullptr
+                ? m_parent_namespace->get_fully_qualified_id() + "." + get_id()
+                : get_id();
+        }
+        assert(m_fully_qualified_id.has_value());
+        return m_fully_qualified_id.value();
     }
 }

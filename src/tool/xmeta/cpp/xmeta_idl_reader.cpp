@@ -142,14 +142,14 @@ namespace xlang::xmeta
     void xmeta_idl_reader::write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
     {
         std::ostringstream oss;
-        oss << "Enum member '" << invalid_name << "' already defined in enum '" << m_cur_namespace_body->get_containing_namespace()->get_full_name() << "." << enum_name << "'";
+        oss << "Enum member '" << invalid_name << "' already defined in enum '" << m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() << "." << enum_name << "'";
         write_error(decl_line, oss.str());
     }
 
     void xmeta_idl_reader::write_enum_member_expr_ref_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
     {
         std::ostringstream oss;
-        oss << "Enum member '" << invalid_name << "' not defined in enum '" << m_cur_namespace_body->get_containing_namespace()->get_full_name() << "." << enum_name << "'";
+        oss << "Enum member '" << invalid_name << "' not defined in enum '" << m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() << "." << enum_name << "'";
         write_error(decl_line, oss.str());
     }
 
@@ -164,7 +164,7 @@ namespace xlang::xmeta
     {
         std::ostringstream oss;
         oss << "Constant expression '" << invalid_expr << "' not in range of enum '";
-        oss << m_cur_namespace_body->get_containing_namespace()->get_full_name() << "." << enum_name << "'";
+        oss << m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() << "." << enum_name << "'";
         write_error(decl_line, oss.str());
     }
 
@@ -178,7 +178,7 @@ namespace xlang::xmeta
     void xmeta_idl_reader::write_namespace_member_name_error(size_t decl_line, std::string_view const& invalid_name)
     {
         std::ostringstream oss;
-        oss << "Member name '" << invalid_name << "' already defined in namespace '" << m_cur_namespace_body->get_containing_namespace()->get_full_name() << "'";
+        oss << "Member name '" << invalid_name << "' already defined in namespace '" << m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() << "'";
         write_error(decl_line, oss.str());
     }
 

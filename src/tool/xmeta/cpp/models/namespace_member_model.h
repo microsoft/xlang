@@ -22,27 +22,18 @@ namespace xlang::xmeta
             return m_containing_namespace_body;
         }
 
-        auto const& get_fully_qualified_name()
+        std::string const& get_fully_qualified_id() const
         {
-            auto const& ns_name = m_containing_namespace_body->get_containing_namespace()->get_full_name();
-            return (ns_name == "")
-                ? get_id()
-                : ns_name + "." + get_id();
-        }
-
-        std::string const& get_fully_qualified_member_name(std::shared_ptr<base_model> const& member) const
-        {
-            if (namespace_id.has_value())
+            if (!m_fully_qualified_id.has_value())
             {
-                return namespace_id.value();
+                m_fully_qualified_id = m_containing_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + get_id();
             }
-            namespace_id = m_containing_namespace_body->get_containing_namespace()->get_full_name();
-            assert(namespace_id != "");
-            return namespace_id.value();
+            assert(m_fully_qualified_id.has_value());
+            return m_fully_qualified_id.value();
         }
 
     private:
         std::shared_ptr<namespace_body_model> m_containing_namespace_body;
-        mutable std::optional<std::string> namespace_id = std::nullopt;
+        mutable std::optional<std::string> m_fully_qualified_id;
     };
 }

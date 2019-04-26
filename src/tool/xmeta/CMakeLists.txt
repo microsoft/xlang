@@ -2,14 +2,19 @@ cmake_minimum_required(VERSION 3.9)
 
 project(xmeta)
 
-add_executable(xmeta
-    main.cpp
-)
+if (WIN32)
+    add_executable(xmeta
+        main.cpp
+    )
+endif ()
 
-add_library(xmeta_model
-    cpp/xmeta_idl_reader.cpp
-    cpp/ast_to_st_listener.cpp
-    cpp/models/namespace_model.cpp)
+if (WIN32)
+    add_library(xmeta_model
+        cpp/xmeta_idl_reader.cpp
+        cpp/ast_to_st_listener.cpp
+        cpp/models/namespace_model.cpp)
+endif ()
+
 target_include_directories(xmeta_model PUBLIC cpp/models cpp)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/antlr4-runtime/cmake)
@@ -29,7 +34,9 @@ set(antlr_inputs ${CMAKE_CURRENT_SOURCE_DIR}/grammar/XlangLexer.g4 ${CMAKE_CURRE
 set(antlr_generated_dir ${CMAKE_CURRENT_BINARY_DIR}/antlr_generated)
 set(antlr_generated_src ${antlr_generated_dir}/XlangLexer.cpp ${antlr_generated_dir}/XlangParser.cpp)
 
-add_library(xmeta_antlr)
+if (WIN32)
+    add_library(xmeta_antlr)
+endif ()
 
 add_custom_command(OUTPUT ${antlr_generated_src}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${antlr_generated_dir}
@@ -41,15 +48,18 @@ target_include_directories(xmeta_antlr PUBLIC
     ${antlr_generated_dir}
     ${ANTLR4_INCLUDE_DIRS} # antlr4cpp artifacts
 )
+
 target_link_libraries(xmeta_antlr PUBLIC antlr4_static)
 
 # required if linking to static library
 target_compile_definitions(xmeta_antlr PUBLIC -DANTLR4CPP_STATIC)
 
-target_link_libraries(xmeta_model PUBLIC xmeta_antlr)
+if (WIN32)
+    target_link_libraries(xmeta_model PUBLIC xmeta_antlr)
+endif ()
 
 if (MSVC)
     target_compile_definitions(xmeta_antlr PUBLIC -D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
-endif()
+endif ()
 
 target_link_libraries(xmeta xmeta_antlr xmeta_model)
