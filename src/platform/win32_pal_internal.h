@@ -36,7 +36,6 @@ namespace xlang::impl
             return xlang_result::xlang_out_of_memory;
         case E_POINTER:
             return xlang_result::xlang_pointer;
-        case static_cast<HRESULT>(0x80040154) :
         case static_cast<HRESULT>(0x80131522):
             return xlang_result::xlang_type_load;
         }

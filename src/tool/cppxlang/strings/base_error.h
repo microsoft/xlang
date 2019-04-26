@@ -38,7 +38,7 @@ namespace xlang::impl
         case xlang_result::xlang_pointer:
             return static_cast<hresult>(0x80004003);
         case xlang_result::xlang_type_load:
-            return static_cast<hresult>(0x80040154);
+            return static_cast<hresult>(0x80131522);
         }
 
         return error_fail;
@@ -311,7 +311,7 @@ namespace xlang
         if (result != nullptr)
         {
             xlang_result error;
-            result->get_error(&error);
+            result->GetError(&error);
             throw_hresult(impl::hresult_from_xlang_result(error));
         }
     }

@@ -139,5 +139,5 @@ extern "C" xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_s
         return xlang_originate_error(xlang_result::xlang_no_interface);
     }
 
-    return xlang_originate_error(xlang_result::xlang_type_load);
+    return xlang_originate_error(xlang_result::xlang_no_interface);
 }

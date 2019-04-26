@@ -15,31 +15,31 @@ void verify_error_info(
 {
     INFO("Verifying properties of xlang error info");
     xlang_result error{};
-    error_info->get_error(&error);
+    error_info->GetError(&error);
     REQUIRE(error == expected_error);
 
     xlang_string message{};
-    error_info->get_message(&message);
+    error_info->GetMessage(&message);
     REQUIRE(message == expected_message);
 
     xlang_string projection_identifier{};
-    error_info->get_projection_identifier(&projection_identifier);
+    error_info->GetProjectionIdentifier(&projection_identifier);
     REQUIRE(projection_identifier == expected_projection_identifier);
 
     xlang_unknown* execution_trace{};
-    error_info->get_execution_trace(&execution_trace);
+    error_info->GetExecutionTrace(&execution_trace);
     REQUIRE(execution_trace == expected_execution_trace);
 
     xlang_string language_error;
-    error_info->get_language_error(&language_error);
+    error_info->GetLanguageError(&language_error);
     REQUIRE(language_error == expected_language_error);
 
     xlang_unknown* language_information{};
-    error_info->get_language_information(&language_information);
+    error_info->GetLanguageInformation(&language_information);
     REQUIRE(language_information == expected_language_information);
 
     xlang_error_info* propagated_error;
-    error_info->get_propagated_error(&propagated_error);
+    error_info->GetPropagatedError(&propagated_error);
     if (has_propagated_error)
     {
         REQUIRE(propagated_error != nullptr);
@@ -170,7 +170,7 @@ TEST_CASE("Error origination with all parameters")
     xlang_unknown* execution_trace2 = new information(false);
     xlang_unknown* language_information2 = new information(true);
 
-    result->propagate_error(projection_identifier2, language_error2, execution_trace2, language_information2);
+    result->PropagateError(projection_identifier2, language_error2, execution_trace2, language_information2);
     verify_error_info(
         result,
         xlang_result::xlang_invalid_arg,
@@ -182,7 +182,7 @@ TEST_CASE("Error origination with all parameters")
         true);
 
     xlang_error_info* propagated_error{};
-    result->get_propagated_error(&propagated_error);
+    result->GetPropagatedError(&propagated_error);
     REQUIRE(propagated_error != nullptr);
     verify_error_info(
         propagated_error,
@@ -194,10 +194,10 @@ TEST_CASE("Error origination with all parameters")
         language_information2);
 
     INFO("Propagating error with only projection identifier");
-    result->propagate_error(projection_identifier, nullptr, nullptr, nullptr);
+    result->PropagateError(projection_identifier, nullptr, nullptr, nullptr);
 
     xlang_error_info* propagated_error2{};
-    propagated_error->get_propagated_error(&propagated_error2);
+    propagated_error->GetPropagatedError(&propagated_error2);
     REQUIRE(propagated_error2 != nullptr);
     verify_error_info(
         propagated_error2,
