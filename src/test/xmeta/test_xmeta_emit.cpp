@@ -1,7 +1,6 @@
 #include "pch.h"
 #include <iostream>
 
-#include "antlr4-runtime.h"
 #include "XlangParser.h"
 #include "XlangLexer.h"
 #include "xlang_model_walker.h"
@@ -107,12 +106,13 @@ TEST_CASE("Enum metadata")
     )" };
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
     REQUIRE(db.TypeDef.size() == 2);
 
     auto const& enum_type = db.TypeDef[1];
+    REQUIRE(enum_type.TypeNamespace() == "Windows.Test");
     REQUIRE(enum_type.TypeName() == "Color");
     REQUIRE(enum_type.Flags().value == (tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime));
-    // REQUIRE(enum_type.TypeNamespace() == "Xmeta.Test"); // TODO: populate metadata with namespace
     test_enum_type_properties(enum_type);
 
     auto const& fields = enum_type.FieldList();
@@ -144,7 +144,7 @@ TEST_CASE("Enum metadata")
 
         auto const& type_ref = coded_type.TypeRef();
         REQUIRE(type_ref.TypeName() == "Color");
-        // REQUIRE(type_ref.TypeNamespace() == "Xmeta.Test"); // TODO: populate metadata with namespace
+        REQUIRE(type_ref.TypeNamespace() == "Windows.Test");
         REQUIRE(type_ref.ResolutionScope().type() == ResolutionScope::Module);
     }
 }
@@ -160,17 +160,17 @@ TEST_CASE("Delegate metadata")
     std::string assembly_name = "testidl";
 
     std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> v;
-    std::string ns_name("test");
+    std::string ns_name("Windows.Test");
     std::shared_ptr<namespace_model> ns(new namespace_model(ns_name, 0, assembly_name, nullptr));
     std::shared_ptr<namespace_body_model> ns_bm = std::make_shared<namespace_body_model>(namespace_body_model(ns));
     std::string delegate_name("testdelegate");
-    delegate_model delegate_model_m(delegate_name, 0, assembly_name, type_ref(simple_type::Int32));
+    std::shared_ptr<delegate_model> delegate_model_m = std::make_shared<delegate_model>(delegate_name, 0, assembly_name, ns_bm, type_ref(simple_type::Int32));
     formal_parameter_model param1("c", 0, assembly_name, parameter_semantics::in, type_ref(simple_type::Int32));
     formal_parameter_model param2("d", 0, assembly_name, parameter_semantics::in, type_ref(simple_type::Double));
 
-    delegate_model_m.add_formal_parameter(std::move(param1));
-    delegate_model_m.add_formal_parameter(std::move(param2));
-    ns_bm->add_delegate(std::move(delegate_model_m));
+    delegate_model_m->add_formal_parameter(std::move(param1));
+    delegate_model_m->add_formal_parameter(std::move(param2));
+    ns_bm->add_delegate(delegate_model_m);
     ns->add_namespace_body(ns_bm);
 
     v["test"] = ns;
@@ -181,11 +181,11 @@ TEST_CASE("Delegate metadata")
     xlang::meta::writer::pe_writer writer;
     writer.add_metadata(emitter.save_to_memory());
     xlang::meta::reader::database db{ writer.save_to_memory() };
-    writer.save_to_file(std::filesystem::current_path().append(std::string(assembly_name) + ".winmd"));
 
     REQUIRE(db.TypeDef.size() == 2);
 
     auto const& delegate_type = db.TypeDef[1];
+    REQUIRE(delegate_type.TypeNamespace() == "Windows.Test");
     REQUIRE(delegate_type.TypeName() == "testdelegate");
     REQUIRE(delegate_type.Flags().value == (tdPublic | tdSealed | tdClass | tdWindowsRuntime));
     
@@ -193,8 +193,14 @@ TEST_CASE("Delegate metadata")
     REQUIRE(delegate_constructor.Name() == ".ctor");
     REQUIRE(delegate_constructor.Parent().TypeName() == "testdelegate");
     auto const& coded_type = std::get<ElementType>(delegate_constructor.Signature().ReturnType().Type().Type());
-    REQUIRE(coded_type == ElementType::Void);
+    REQUIRE(std::holds_alternative<ElementType>(delegate_constructor.Signature().ReturnType().Type().Type()));
+    //REQUIRE(coded_type == ElementType::Void);
+    for (auto const& param : delegate_constructor.Signature().Params())
+    {
 
+        auto const& coded_type = std::get<ElementType>(param.Type().Type());
+        REQUIRE(coded_type == ElementType::Void);
+    }
 
     //db.Param;
     //auto const& delegate_invoke = db.MethodDef[1];

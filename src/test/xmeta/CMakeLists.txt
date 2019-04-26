@@ -5,7 +5,9 @@ project(test_xmeta)
 # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
 set(ANTLR4_WITH_STATIC_CRT ON)
 
-add_executable(test_xmeta "")
+if (WIN32)
+    add_executable(test_xmeta "")
+endif ()
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")
     add_custom_command(TARGET test_xmeta POST_BUILD
@@ -46,6 +48,4 @@ endif()
 target_sources(test_xmeta PUBLIC main.cpp)
 
 install(TARGETS test_xmeta DESTINATION "test/xmeta")
-if (WIN32)
-    install(FILES $<TARGET_PDB_FILE:test_xmeta> DESTINATION "test/xmeta" OPTIONAL)
-endif ()
+install(FILES $<TARGET_PDB_FILE:test_xmeta> DESTINATION "test/xmeta" OPTIONAL)

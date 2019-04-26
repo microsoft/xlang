@@ -180,7 +180,7 @@ namespace xlang::xmeta
         : m_assembly_name(std::string(assembly_name))
     {
         // Getting the meta data dispenser
-        check_hresult(CoInitialize(NULL));
+        check_hresult(CoInitialize(nullptr));
 
         // Windows only for now
         check_hresult(CoCreateInstance(CLSID_CorMetaDataDispenser,
@@ -223,14 +223,14 @@ namespace xlang::xmeta
         m_metadata_emitter->Save((s2ws(remove_extension(m_assembly_name)) + L".xmeta").c_str(), 0);
     }
 
-	std::vector<uint8_t> xmeta_emit::save_to_memory() const
+    std::vector<uint8_t> xmeta_emit::save_to_memory() const
     {
         DWORD save_size;
         m_metadata_emitter->GetSaveSize(CorSaveSize::cssAccurate, &save_size);
-		std::vector<uint8_t> metadata;
+        std::vector<uint8_t> metadata;
         metadata.resize(save_size);
         check_hresult(m_metadata_emitter->SaveToMemory(metadata.data(), save_size));
-		return metadata;
+        return metadata;
     }
 
     void xmeta_emit::define_assembly()
@@ -556,8 +556,9 @@ namespace xlang::xmeta
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
     {
-        auto const& type_name = model->get_id();
-        static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdWindowsRuntime;
+        auto const& namespace_name = model->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id();
+        auto const& type_name = namespace_name + "." +  model->get_id();
+        static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         auto token_enum_type_def = define_type_def(type_name, enum_type_flag, token_enum, implements);
         
@@ -607,9 +608,10 @@ namespace xlang::xmeta
         }
     }
     
-    void xmeta_emit::listen_delegate_model(delegate_model const& model) 
+    void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model)
     {
-        auto const& type_name = model.get_id();
+        auto const& namespace_name = model->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id();
+        auto const& type_name = namespace_name + "." + model->get_id();
         static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         mdTypeDef token_delegate_type_def = define_type_def(type_name, delegate_type_flag, token_delegate, implements);
@@ -661,10 +663,10 @@ namespace xlang::xmeta
         
         // Invoke
         signature_blob delegate_invoke_sig;
-        std::optional<type_ref> return_type_ref = model.get_return_type();
+        std::optional<type_ref> return_type_ref = model->get_return_type();
         std::vector<ParamSig> param_sigs;
-        RetTypeSig return_sig = RetTypeSig{ create_paramater_signature(model.get_return_type()) };
-        for (formal_parameter_model const& val : model.get_formal_parameters())
+        RetTypeSig return_sig = RetTypeSig{ create_paramater_signature(model->get_return_type()) };
+        for (formal_parameter_model const& val : model->get_formal_parameters())
         {
             ParamSig param_sig = ParamSig{ create_paramater_signature(val.get_type()).value() };
             param_sigs.emplace_back(param_sig);
@@ -686,15 +688,16 @@ namespace xlang::xmeta
         /** Defining parameters and return **/
         /* Define return value */
         // To be used for attributes later
-        mdParamDef token_return = define_return(model.get_return_type(), token_delegate_invoke_def);
+        mdParamDef token_return = define_return(model->get_return_type(), token_delegate_invoke_def);
 
         /* Define formal parameters */
         int index = 1;
-        for (auto const& val : model.get_formal_parameters())
+        for (auto const& val : model->get_formal_parameters())
         {
             define_parameters(val, token_delegate_invoke_def, index);
             index++;
         }
+
     }
 
     mdParamDef xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def)

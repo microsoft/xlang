@@ -8,8 +8,8 @@
 #include <vector>
 #include <variant>
 
-#include "base_model.h"
 #include "model_ref.h"
+#include "namespace_member_model.h"
 
 namespace xlang::xmeta
 {
@@ -58,12 +58,10 @@ namespace xlang::xmeta
             return std::visit(
                 [&](auto&& value) -> enum_value_semantics
                 {
-                    if constexpr (!std::is_integral_v<std::decay_t<decltype(value)>>)
-                    {
-                        throw_invalid("Unresolved enumerator: " + m_id);
-                    }
+                    static_assert(std::is_integral_v<std::decay_t<decltype(value)>>);
                     return value;
-                }, m_value.get_resolved_target());
+                }, 
+                m_value.get_resolved_target());
         }
         
         std::errc increment(enum_semantics type)
@@ -159,11 +157,15 @@ namespace xlang::xmeta
         }
     };
 
-    struct enum_model : base_model
+    struct enum_model : namespace_member_model
     {
         enum_model() = delete;
-        enum_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, enum_semantics t) :
-            base_model{ id, decl_line, assembly_name },
+        enum_model(std::string_view const& id,
+                   size_t decl_line,
+                   std::string_view const& assembly_name,
+                   std::shared_ptr<namespace_body_model> const& containing_ns_body,
+                   enum_semantics t) :
+            namespace_member_model{ id, decl_line, assembly_name, containing_ns_body },
             m_type{ t }
         { }
 
