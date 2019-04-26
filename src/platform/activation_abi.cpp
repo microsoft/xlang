@@ -23,13 +23,13 @@ namespace xlang::impl
                 {
                     return nullptr;
                 }
-                else if (result != xlang_result::xlang_no_interface)
+                else if (result != xlang_result::xlang_type_load)
                 {
                     throw_result(result);
                 }
             }
         }
-        return xlang_originate_error(xlang_result::xlang_no_interface);
+        return xlang_originate_error(xlang_result::xlang_type_load);
     }
 }
 
