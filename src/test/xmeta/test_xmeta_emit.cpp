@@ -192,24 +192,28 @@ TEST_CASE("Delegate metadata")
     auto const& delegate_constructor = db.MethodDef[0];
     REQUIRE(delegate_constructor.Name() == ".ctor");
     REQUIRE(delegate_constructor.Parent().TypeName() == "testdelegate");
-    auto const& coded_type = std::get<ElementType>(delegate_constructor.Signature().ReturnType().Type().Type());
-    REQUIRE(std::holds_alternative<ElementType>(delegate_constructor.Signature().ReturnType().Type().Type()));
-    //REQUIRE(coded_type == ElementType::Void);
-    for (auto const& param : delegate_constructor.Signature().Params())
+    //auto const& coded_type = std::get<ElementType>(delegate_constructor.Signature().ReturnType().Type().Type());
+    REQUIRE(!delegate_constructor.Signature().ReturnType());
+    auto const& param = delegate_constructor.Signature().Params();
+    auto const& test = param.first;
+ /*   for (auto const& param : delegate_constructor.Signature().Params())
     {
-
-        auto const& coded_type = std::get<ElementType>(param.Type().Type());
+        auto const& coded_type = param.Type().element_type();
         REQUIRE(coded_type == ElementType::Void);
-    }
+    }*/
 
     //db.Param;
-    //auto const& delegate_invoke = db.MethodDef[1];
-    //REQUIRE(delegate_constructor.Name() == "Invoke");
-    //REQUIRE(delegate_constructor.Parent().TypeName() == "testdelegate");
-    //REQUIRE(delegate_constructor.Flags == (mdVirtual | fdSpecialName | mdHideBySig));
-    //REQUIRE(delegate_constructor.ImplFlags == miRuntime);
+    auto const& delegate_invoke = db.MethodDef[1];
+    REQUIRE(delegate_invoke.Name() == "Invoke");
+    REQUIRE(delegate_invoke.Parent().TypeName() == "testdelegate");
+    REQUIRE(delegate_invoke.Flags().value == (mdVirtual | fdSpecialName | mdHideBySig));
+    REQUIRE(std::holds_alternative<ElementType>(delegate_invoke.Signature().ReturnType().Type().Type()));
+    REQUIRE(std::get<ElementType>(delegate_invoke.Signature().ReturnType().Type().Type()) == ElementType::I4);
 
-
+    for (auto const& param : delegate_constructor.Signature().Params())
+    {
+        REQUIRE(std::holds_alternative<ElementType>(param.Type().Type()));
+    }
   /*  for (auto const& method : db.Param)
     {
         std::cout << method. << std::endl;

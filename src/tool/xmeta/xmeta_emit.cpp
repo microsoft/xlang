@@ -678,7 +678,7 @@ namespace xlang::xmeta
         check_hresult(m_metadata_emitter->DefineMethod(
             token_delegate_type_def,
             L"Invoke",
-            delegate_constructor_flag,
+            delegate_invoke_flag,
             delegate_invoke_sig.data(),
             delegate_invoke_sig.size(),
             0,
