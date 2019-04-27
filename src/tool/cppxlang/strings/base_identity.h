@@ -635,21 +635,9 @@ namespace xlang::impl
     };
 
     template <>
-    struct name<hresult>
-    {
-        static constexpr auto & value{ u8"Windows.Foundation.HResult" };
-    };
-
-    template <>
-    struct category<hresult>
-    {
-        using type = struct_category<int32_t>;
-    };
-
-    template <>
     struct name<event_token>
     {
-        static constexpr auto & value{ u8"Windows.Foundation.EventRegistrationToken" };
+        static constexpr auto & value{ u8"Foundation.EventRegistrationToken" };
     };
 
     template <>

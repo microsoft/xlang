@@ -112,11 +112,11 @@ namespace xlang
         com_ptr<impl::IContextCallback> m_context;
     };
 
-    [[nodiscard]] inline auto resume_after(Windows::Foundation::TimeSpan duration) noexcept
+    [[nodiscard]] inline auto resume_after(Foundation::TimeSpan duration) noexcept
     {
         struct awaitable
         {
-            explicit awaitable(Windows::Foundation::TimeSpan duration) noexcept :
+            explicit awaitable(Foundation::TimeSpan duration) noexcept :
                 m_duration(duration)
             {
             }
@@ -160,24 +160,24 @@ namespace xlang
             };
 
             handle_type<timer_traits> m_timer;
-            Windows::Foundation::TimeSpan m_duration;
+            Foundation::TimeSpan m_duration;
         };
 
         return awaitable{ duration };
     }
 
 #ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
-    inline auto operator co_await(Windows::Foundation::TimeSpan duration)
+    inline auto operator co_await(Foundation::TimeSpan duration)
     {
         return resume_after(duration);
     }
 #endif
 
-    [[nodiscard]] inline auto resume_on_signal(void* handle, Windows::Foundation::TimeSpan timeout = {}) noexcept
+    [[nodiscard]] inline auto resume_on_signal(void* handle, Foundation::TimeSpan timeout = {}) noexcept
     {
         struct awaitable
         {
-            awaitable(void* handle, Windows::Foundation::TimeSpan timeout) noexcept :
+            awaitable(void* handle, Foundation::TimeSpan timeout) noexcept :
                 m_timeout(timeout),
                 m_handle(handle)
             {}
@@ -226,7 +226,7 @@ namespace xlang
             };
 
             handle_type<wait_traits> m_wait;
-            Windows::Foundation::TimeSpan m_timeout;
+            Foundation::TimeSpan m_timeout;
             void* m_handle;
             uint32_t m_result{};
             std::experimental::coroutine_handle<> m_resume{ nullptr };

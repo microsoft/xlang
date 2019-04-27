@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
     struct input_map :
-        implements<input_map<K, V, Container>, wfc::IMap<K, V>, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
+        implements<input_map<K, V, Container>, fc::IMap<K, V>, fc::IMapView<K, V>, fc::IIterable<fc::IKeyValuePair<K, V>>>,
         map_base<input_map<K, V, Container>, K, V>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -39,8 +39,8 @@ namespace xlang::param
     template <typename K, typename V>
     struct map
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IMap<K, V>;
+        using value_type = Foundation::Collections::IKeyValuePair<K, V>;
+        using interface_type = Foundation::Collections::IMap<K, V>;
 
         map(std::nullptr_t) noexcept
         {

@@ -9,14 +9,14 @@ namespace xlang::impl
 
         bool await_ready() const
         {
-            return async.Status() == Windows::Foundation::AsyncStatus::Completed;
+            return async.Status() == Foundation::AsyncStatus::Completed;
         }
 
         void await_suspend(std::experimental::coroutine_handle<> handle) const
         {
             auto context = capture<IContextCallback>(XLANG_CoGetObjectContext);
 
-            async.Completed([handle, context = std::move(context)](auto const&, Windows::Foundation::AsyncStatus)
+            async.Completed([handle, context = std::move(context)](auto const&, Foundation::AsyncStatus)
             {
                 com_callback_args args{};
                 args.data = handle.address();
@@ -39,7 +39,7 @@ namespace xlang::impl
 }
 
 #ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
-namespace xlang::Windows::Foundation
+namespace xlang::Foundation
 {
     inline impl::await_adapter<IAsyncAction> operator co_await(IAsyncAction const& async)
     {
@@ -108,7 +108,7 @@ namespace xlang::impl
 
         bool operator()() const noexcept
         {
-            return m_promise->Status() == Windows::Foundation::AsyncStatus::Canceled;
+            return m_promise->Status() == Foundation::AsyncStatus::Canceled;
         }
 
         void callback(xlang::delegate<>&& cancel) noexcept
@@ -154,9 +154,9 @@ namespace xlang::impl
     };
 
     template <typename Derived, typename AsyncInterface, typename CompletedHandler, typename TProgress = void>
-    struct promise_base : implements<Derived, AsyncInterface, Windows::Foundation::IAsyncInfo>
+    struct promise_base : implements<Derived, AsyncInterface>
     {
-        using AsyncStatus = Windows::Foundation::AsyncStatus;
+        using AsyncStatus = Foundation::AsyncStatus;
 
         unsigned long XLANG_CALL Release() noexcept
         {

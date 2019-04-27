@@ -3,7 +3,7 @@ namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
     struct input_map_view :
-        implements<input_map_view<K, V, Container>, non_agile, no_weak_ref, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
+        implements<input_map_view<K, V, Container>, non_agile, no_weak_ref, fc::IMapView<K, V>, fc::IIterable<fc::IKeyValuePair<K, V>>>,
         map_view_base<input_map_view<K, V, Container>, K, V>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -25,7 +25,7 @@ namespace xlang::impl
     template <typename K, typename V, typename Container>
     struct scoped_input_map_view :
         input_scope,
-        implements<scoped_input_map_view<K, V, Container>, non_agile, no_weak_ref, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
+        implements<scoped_input_map_view<K, V, Container>, non_agile, no_weak_ref, fc::IMapView<K, V>, fc::IIterable<fc::IKeyValuePair<K, V>>>,
         map_view_base<scoped_input_map_view<K, V, Container>, K, V>
     {
         void abi_enter() const
@@ -62,7 +62,7 @@ namespace xlang::impl
     template <typename K, typename V, typename Container>
     auto make_scoped_input_map_view(Container const& values)
     {
-        using interface_type = wfc::IMapView<K, V>;
+        using interface_type = fc::IMapView<K, V>;
         std::pair<interface_type, input_scope*> result;
         auto ptr = new scoped_input_map_view<K, V, Container>(values);
         *put_abi(result.first) = to_abi<interface_type>(ptr);
@@ -76,8 +76,8 @@ namespace xlang::param
     template <typename K, typename V>
     struct map_view
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IMapView<K, V>;
+        using value_type = Foundation::Collections::IKeyValuePair<K, V>;
+        using interface_type = Foundation::Collections::IMapView<K, V>;
 
         map_view(std::nullptr_t) noexcept
         {
@@ -154,8 +154,8 @@ namespace xlang::param
     template <typename K, typename V>
     struct async_map_view
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IMapView<K, V>;
+        using value_type = Foundation::Collections::IKeyValuePair<K, V>;
+        using interface_type = Foundation::Collections::IMapView<K, V>;
 
         async_map_view(std::nullptr_t) noexcept
         {
