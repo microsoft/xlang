@@ -139,6 +139,7 @@ if (WIN32)
 endif()
 
 add_subdirectory(tool)
+add_subdirectory(foundation)
 add_subdirectory(platform)
 add_subdirectory(test)
 add_subdirectory(package)

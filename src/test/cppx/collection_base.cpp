@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <xlang/Foundation.Collections.h>
 #include "catch.hpp"
 
 using namespace xlang;
