@@ -1,5 +1,6 @@
 #include "iwidget.h"
-#include <pal_error.h>
+#include <pal.h>
+#include <atomic_ref_count.h>
 #include <string_view>
 
 struct widget : iwidget
@@ -19,7 +20,7 @@ struct widget : iwidget
         }
         else
         {
-            return xlang_error_no_interface;
+            return xlang_hresult_no_interface;
         }
 
         AddRef();
@@ -69,7 +70,7 @@ struct widget_factory : iwidget_factory
         else
         {
             *object = nullptr;
-            return xlang_error_no_interface;
+            return xlang_hresult_no_interface;
         }
 
         AddRef();
@@ -96,7 +97,7 @@ struct widget_factory : iwidget_factory
         *instance = new (std::nothrow) widget{};
         if (!*instance)
         {
-            return xlang::originate_error(xlang_error_out_of_memory);
+            return xlang_originate_error(xlang_result::out_of_memory);
         }
 
         return nullptr; // xlang_error_ok;
@@ -129,14 +130,14 @@ extern "C" xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_s
 
             if (!*factory)
             {
-                return xlang::originate_error(xlang_error_out_of_memory);
+                return xlang_originate_error(xlang_result::out_of_memory);
             }
 
             return nullptr; // xlang_error_ok;
         }
 
-        return xlang::originate_error(xlang_error_no_interface);
+        return xlang_originate_error(xlang_result::no_interface);
     }
 
-    return xlang::originate_error(xlang_error_class_not_available);
+    return xlang_originate_error(xlang_result::type_load);
 }
