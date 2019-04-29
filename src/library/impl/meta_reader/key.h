@@ -119,6 +119,11 @@ namespace xlang::meta::reader
         return extends_type(*this, "System"sv, "Enum"sv);
     }
 
+    inline bool TypeDef::is_delegate() const
+    {
+        return extends_type(*this, "System"sv, "MulticastDelegate"sv);
+    }
+
     struct EnumDefinition
     {
         explicit EnumDefinition(TypeDef const& type)

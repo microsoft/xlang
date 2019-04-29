@@ -28,6 +28,15 @@ const TypeAttributes enum_type_attributes()
     return result;
 }
 
+const TypeAttributes delegate_type_attributes()
+{
+    TypeAttributes result{};
+    result.Visibility(TypeVisibility::Public);
+    result.Sealed(true);
+    result.WindowsRuntime(true);
+    return result;
+}
+
 void test_enum_type_properties(TypeDef const& enum_type)
 {
     auto const& enum_flags = enum_type.Flags();
@@ -42,21 +51,18 @@ void test_enum_type_properties(TypeDef const& enum_type)
     REQUIRE(empty(enum_type.MethodImplList()));
     REQUIRE(empty(enum_type.PropertyList()));
 }
-//void test_delegate_type_properties(TypeDef const& delegate_type)
-//{
-//    auto const& enum_flags = delegate_type.Flags();
-//    REQUIRE(enum_flags.value == enum_type_attributes().value); // TODO: Revisit reader flags to enable easy OR'ing together of values
-//    // These are basic things that should be true of all enums.
-//    // Offload these to a helper test method so we don't have to duplicate this level of paranoia everywhere.
-//    REQUIRE(delegate_type.is_enum());
-//    REQUIRE(empty(delegate_type.MethodList()));
-//    REQUIRE(empty(delegate_type.EventList()));
-//    REQUIRE(empty(delegate_type.GenericParam()));
-//    REQUIRE(empty(delegate_type.InterfaceImpl()));
-//    REQUIRE(empty(delegate_type.MethodImplList()));
-//    REQUIRE(empty(delegate_type.PropertyList()));
-//}
 
+void test_delegate_type_properties(TypeDef const& delegate_type)
+{
+    auto const& enum_flags = delegate_type.Flags();
+    REQUIRE(enum_flags.value == enum_type_attributes().value);
+    REQUIRE(delegate_type.is_delegate());
+    REQUIRE(empty(delegate_type.EventList()));
+    REQUIRE(empty(delegate_type.GenericParam())); // Not in the future
+    REQUIRE(empty(delegate_type.InterfaceImpl()));
+    REQUIRE(empty(delegate_type.MethodImplList()));
+    REQUIRE(empty(delegate_type.PropertyList()));
+}
 
 std::vector<uint8_t> run_and_save_to_memory(std::istringstream &test_idl, std::string_view assembly_name)
 {
@@ -154,7 +160,7 @@ TEST_CASE("Delegate metadata")
     std::istringstream test_idl{ R"(
         namespace Windows.Test
         {
-            delegate Int32 testdelegate(Int32 c, Double d);
+            delegate Int32 testdelegate(Int32 c, Int32 d);
         }
     )" };
     std::string assembly_name = "testidl";
@@ -166,7 +172,7 @@ TEST_CASE("Delegate metadata")
     std::string delegate_name("testdelegate");
     std::shared_ptr<delegate_model> delegate_model_m = std::make_shared<delegate_model>(delegate_name, 0, assembly_name, ns_bm, type_ref(simple_type::Int32));
     formal_parameter_model param1("c", 0, assembly_name, parameter_semantics::in, type_ref(simple_type::Int32));
-    formal_parameter_model param2("d", 0, assembly_name, parameter_semantics::in, type_ref(simple_type::Double));
+    formal_parameter_model param2("d", 0, assembly_name, parameter_semantics::in, type_ref(simple_type::Int32));
 
     delegate_model_m->add_formal_parameter(std::move(param1));
     delegate_model_m->add_formal_parameter(std::move(param2));
@@ -183,39 +189,37 @@ TEST_CASE("Delegate metadata")
     xlang::meta::reader::database db{ writer.save_to_memory() };
 
     REQUIRE(db.TypeDef.size() == 2);
-
     auto const& delegate_type = db.TypeDef[1];
+    test_delegate_type_properties(delegate_type);
     REQUIRE(delegate_type.TypeNamespace() == "Windows.Test");
     REQUIRE(delegate_type.TypeName() == "testdelegate");
     REQUIRE(delegate_type.Flags().value == (tdPublic | tdSealed | tdClass | tdWindowsRuntime));
-    
+    // Param Table
+    REQUIRE(db.Param.size() == 5);
+
+    REQUIRE(db.MethodDef.size() == 2);
+    // Testing constructor method
     auto const& delegate_constructor = db.MethodDef[0];
     REQUIRE(delegate_constructor.Name() == ".ctor");
     REQUIRE(delegate_constructor.Parent().TypeName() == "testdelegate");
-    //auto const& coded_type = std::get<ElementType>(delegate_constructor.Signature().ReturnType().Type().Type());
     REQUIRE(!delegate_constructor.Signature().ReturnType());
     auto const& param = delegate_constructor.Signature().Params();
     auto const& test = param.first;
- /*   for (auto const& param : delegate_constructor.Signature().Params())
-    {
-        auto const& coded_type = param.Type().element_type();
-        REQUIRE(coded_type == ElementType::Void);
-    }*/
 
-    //db.Param;
+    // Testing invoke method
     auto const& delegate_invoke = db.MethodDef[1];
     REQUIRE(delegate_invoke.Name() == "Invoke");
     REQUIRE(delegate_invoke.Parent().TypeName() == "testdelegate");
     REQUIRE(delegate_invoke.Flags().value == (mdVirtual | fdSpecialName | mdHideBySig));
-    REQUIRE(std::holds_alternative<ElementType>(delegate_invoke.Signature().ReturnType().Type().Type()));
-    REQUIRE(std::get<ElementType>(delegate_invoke.Signature().ReturnType().Type().Type()) == ElementType::I4);
-
-    for (auto const& param : delegate_constructor.Signature().Params())
+    auto const& delegate_sig = delegate_invoke.Signature();
+    // Checking return type signatures
+    REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+    REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::I4);
+    // Checking paramater signatures
+    for (auto const& delegate_param : delegate_sig.Params())
     {
-        REQUIRE(std::holds_alternative<ElementType>(param.Type().Type()));
+        REQUIRE(std::holds_alternative<ElementType>(delegate_param.Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_param.Type().Type()) == ElementType::I4);
     }
-  /*  for (auto const& method : db.Param)
-    {
-        std::cout << method. << std::endl;
-    }*/
+
 }
