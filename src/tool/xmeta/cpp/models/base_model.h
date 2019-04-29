@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <string>
 #include <string_view>
+#include <map>
+#include <vector>
 
 namespace xlang::xmeta
 {

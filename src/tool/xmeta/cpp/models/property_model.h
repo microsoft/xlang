@@ -23,7 +23,13 @@ namespace xlang::xmeta
     struct property_model : base_model
     {
         property_model() = delete;
-        property_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, property_semantics const& sem, property_type_semantics&& type, std::shared_ptr<method_model> const& get_method, std::shared_ptr<method_model> const& set_method) :
+        property_model(std::string_view const& id, 
+                size_t decl_line, 
+                std::string_view const& assembly_name, 
+                property_semantics const& sem, 
+                property_type_semantics&& type, 
+                std::shared_ptr<method_model> const& get_method, 
+                std::shared_ptr<method_model> const& set_method) :
             base_model{ id, decl_line, assembly_name },
             m_semantic{ sem },
             m_type{ std::move(type) },

@@ -20,7 +20,11 @@ namespace xlang::xmeta
     struct method_model : base_model
     {
         method_model() = delete;
-        method_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::optional<type_ref>&& return_type, std::vector<formal_parameter_model>&& formal_params, method_semantics const& sem) :
+        method_model(std::string_view const& id, size_t decl_line, 
+                std::string_view const& assembly_name, 
+                std::optional<type_ref>&& return_type, 
+                std::vector<formal_parameter_model>&& formal_params,
+                method_semantics const& sem) :
             base_model{ id, decl_line, assembly_name },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
@@ -28,14 +32,19 @@ namespace xlang::xmeta
             m_implemented_method_ref{ "" }
         { }
 
-        method_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::optional<type_ref>&& return_type, std::vector<formal_parameter_model>&& formal_params, std::string_view const& overridden_method_ref) :
+        method_model(std::string_view const& id, 
+                size_t decl_line, 
+                std::string_view const& assembly_name, 
+                std::optional<type_ref>&& return_type, 
+                std::vector<formal_parameter_model>&& formal_params,
+                std::string_view const& overridden_method_ref) :
             base_model{ id, decl_line, assembly_name },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
             m_implemented_method_ref{ std::string(overridden_method_ref) }
         { }
 
-        auto const& get_formal_params() const noexcept
+        auto const& get_formal_parameters() const noexcept
         {
             return m_formal_parameters;
         }

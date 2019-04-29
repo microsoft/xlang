@@ -13,6 +13,8 @@ namespace xlang::xmeta
     template <typename T, typename... Ts>
     struct model_ref
     {
+        using resolved_type = std::conditional_t<sizeof...(Ts) == 0, T, std::variant<T, Ts...>>;
+
         model_ref() = delete;
         model_ref& operator=(model_ref const& other) = default;
         explicit model_ref(std::string_view const& name) :
@@ -30,11 +32,10 @@ namespace xlang::xmeta
             return std::holds_alternative<H>(m_ref);
         }
 
-        template<typename R>
         auto const& get_resolved_target() const noexcept
         {
-            assert(std::holds_alternative<R>(m_ref));
-            return std::get<R>(m_ref);
+            assert(std::holds_alternative<resolved_type>(m_ref));
+            return std::get<resolved_type>(m_ref);
         }
 
         std::string const& get_ref_name() const noexcept
@@ -50,6 +51,6 @@ namespace xlang::xmeta
         }
 
     private:
-        std::variant<std::string, T, Ts...> m_ref;
+        std::variant<std::string, resolved_type> m_ref;
     };
 }

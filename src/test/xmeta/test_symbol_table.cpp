@@ -72,11 +72,11 @@ TEST_CASE("Enum test")
     auto const& val3 = enum_members[2].get_value();
     auto const& val4 = enum_members[3].get_value();
     auto const& val5 = enum_members[4].get_value();
-    REQUIRE((val1.is_resolved() && val1.get_resolved_target<int32_t>() == 0));
-    REQUIRE((val2.is_resolved() && val2.get_resolved_target<int32_t>() == 3));
-    REQUIRE((val3.is_resolved() && val3.get_resolved_target<int32_t>() == 4));
-    REQUIRE((val4.is_resolved() && val4.get_resolved_target<int32_t>() == 0x21));
-    REQUIRE((val5.is_resolved() && val5.get_resolved_target<int32_t>() == 0x21));
+    REQUIRE((val1.is_resolved() && std::get<int32_t>(val1.get_resolved_target()) == 0));
+    REQUIRE((val2.is_resolved() && std::get<int32_t>(val2.get_resolved_target()) == 3));
+    REQUIRE((val3.is_resolved() && std::get<int32_t>(val3.get_resolved_target()) == 4));
+    REQUIRE((val4.is_resolved() && std::get<int32_t>(val4.get_resolved_target()) == 0x21));
+    REQUIRE((val5.is_resolved() && std::get<int32_t>(val5.get_resolved_target()) == 0x21));
 }
 
 TEST_CASE("Enum circular dependency")

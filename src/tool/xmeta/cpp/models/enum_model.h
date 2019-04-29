@@ -25,7 +25,7 @@ namespace xlang::xmeta
         UInt64
     };
 
-    using enum_value_semantics = model_ref<int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t>;
+    using enum_value_semantics = std::variant<int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t>;
 
     struct enum_member : base_model
     {
@@ -46,11 +46,24 @@ namespace xlang::xmeta
             return m_value;
         }
 
-        void set_value(enum_value_semantics const& value)
+
+        void set_value(model_ref<enum_value_semantics> const& value)
         {
             m_value = value;
         }
 
+        enum_value_semantics get_resolved_value() const
+        {
+            assert(m_value.is_resolved());
+            return std::visit(
+                [&](auto&& value) -> enum_value_semantics
+                {
+                    static_assert(std::is_integral_v<std::decay_t<decltype(value)>>);
+                    return value;
+                }, 
+                m_value.get_resolved_target());
+        }
+        
         std::errc increment(enum_semantics type)
         {
             switch (type)
@@ -88,7 +101,7 @@ namespace xlang::xmeta
         }
 
     private:
-        enum_value_semantics m_value;
+        model_ref<enum_value_semantics> m_value;
 
         std::errc resolve_numeric_val(enum_semantics type, int base) noexcept
         {
@@ -134,7 +147,7 @@ namespace xlang::xmeta
         template<typename T>
         std::errc increment()
         {
-            auto val = m_value.get_resolved_target<T>();
+            auto val = std::get<T>(m_value.get_resolved_target());
             if (val == std::numeric_limits<T>::max())
             {
                 return std::errc::result_out_of_range;

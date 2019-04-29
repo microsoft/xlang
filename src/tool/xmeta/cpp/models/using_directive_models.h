@@ -22,12 +22,14 @@ namespace xlang::xmeta
 
         bool is_namespace_ref() const noexcept
         {
-            return m_type_or_namespace_ref.holds_type<std::shared_ptr<namespace_model>>();
+            return m_type_or_namespace_ref.is_resolved() && 
+                std::holds_alternative<std::shared_ptr<namespace_model>>(m_type_or_namespace_ref.get_resolved_target());
         }
 
         bool is_type_ref() const noexcept
         {
-            return m_type_or_namespace_ref.holds_type<type_semantics>();
+            return m_type_or_namespace_ref.is_resolved() &&
+                std::holds_alternative<type_semantics>(m_type_or_namespace_ref.get_resolved_target());
         }
 
         auto const& get_type_or_namespace_ref() const noexcept
