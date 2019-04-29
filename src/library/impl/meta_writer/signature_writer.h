@@ -117,6 +117,7 @@ namespace xlang::meta::writer
                 },
                 [&](reader::coded_index<reader::TypeDefOrRef> const& arg)
                 {
+                    add_compressed_enum(sig.element_type());
                     add_type_ref(arg);
                 },
                 [&](reader::GenericTypeIndex const& arg)

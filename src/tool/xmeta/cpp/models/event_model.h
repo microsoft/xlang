@@ -17,22 +17,28 @@ namespace xlang::xmeta
     struct event_model : base_model
     {
         event_model() = delete;
-        event_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, event_semantics const& sem, std::shared_ptr<method_model> const& add_method_ref, std::shared_ptr<method_model> const& remove_method_ref, type_ref&& t) :
+        event_model(std::string_view const& id, 
+                size_t decl_line, 
+                std::string_view const& assembly_name, 
+                event_semantics const& sem, 
+                std::shared_ptr<method_model> const& add_method, 
+                std::shared_ptr<method_model> const& remove_method,
+                type_ref&& t) :
             base_model{ id, decl_line, assembly_name },
             m_semantic{ sem },
-            m_add_method_ref{ add_method_ref },
-            m_remove_method_ref{ remove_method_ref },
+            m_add_method{ add_method },
+            m_remove_method{ remove_method },
             m_type{ std::move(t) }
         { }
 
-        auto const& get_add_method_ref() const noexcept
+        auto const& get_add_method() const noexcept
         {
-            return m_add_method_ref;
+            return m_add_method;
         }
 
-        auto const& get_remove_method_ref() const noexcept
+        auto const& get_remove_method() const noexcept
         {
-            return m_remove_method_ref;
+            return m_remove_method;
         }
 
         auto const& get_semantic() const noexcept
@@ -49,7 +55,7 @@ namespace xlang::xmeta
         event_semantics m_semantic;
         type_ref m_type;
 
-        std::shared_ptr<method_model> m_add_method_ref;
-        std::shared_ptr<method_model> m_remove_method_ref;
+        std::shared_ptr<method_model> m_add_method;
+        std::shared_ptr<method_model> m_remove_method;
     };
 }

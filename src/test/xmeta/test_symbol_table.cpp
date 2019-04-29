@@ -72,11 +72,11 @@ TEST_CASE("Enum test")
     auto const& val3 = enum_members[2].get_value();
     auto const& val4 = enum_members[3].get_value();
     auto const& val5 = enum_members[4].get_value();
-    REQUIRE((val1.is_resolved() && val1.get_resolved_target<int32_t>() == 0));
-    REQUIRE((val2.is_resolved() && val2.get_resolved_target<int32_t>() == 3));
-    REQUIRE((val3.is_resolved() && val3.get_resolved_target<int32_t>() == 4));
-    REQUIRE((val4.is_resolved() && val4.get_resolved_target<int32_t>() == 0x21));
-    REQUIRE((val5.is_resolved() && val5.get_resolved_target<int32_t>() == 0x21));
+    REQUIRE((val1.is_resolved() && std::get<int32_t>(val1.get_resolved_target()) == 0));
+    REQUIRE((val2.is_resolved() && std::get<int32_t>(val2.get_resolved_target()) == 3));
+    REQUIRE((val3.is_resolved() && std::get<int32_t>(val3.get_resolved_target()) == 4));
+    REQUIRE((val4.is_resolved() && std::get<int32_t>(val4.get_resolved_target()) == 0x21));
+    REQUIRE((val5.is_resolved() && std::get<int32_t>(val5.get_resolved_target()) == 0x21));
 }
 
 TEST_CASE("Enum circular dependency")
@@ -117,7 +117,7 @@ TEST_CASE("Delegate test")
         namespace N
         {
             enum E { }
-            enum F{}
+enum F{}
             delegate Int32 D1(Int32 i, Double d, E e);
             delegate void D2();
         }
@@ -137,7 +137,7 @@ TEST_CASE("Delegate test")
     REQUIRE(delegates.find("D1") != delegates.end());
     REQUIRE(delegates.at("D1")->get_return_type() != std::nullopt);
     auto del0_return_type = delegates.at("D1")->get_return_type()->get_semantic();
-    REQUIRE((del0_return_type.is_resolved() && std::get<simple_type>(del0_return_type.get_resolved_target<type_semantics>()) == simple_type::Int32));
+    REQUIRE((del0_return_type.is_resolved() && std::get<simple_type>(del0_return_type.get_resolved_target()) == simple_type::Int32));
     auto del0_formal_params = delegates.at("D1")->get_formal_parameters();
     REQUIRE(del0_formal_params.size() == 3);
     auto del0_formal_param_0_type = del0_formal_params[0].get_type().get_semantic();
@@ -146,8 +146,8 @@ TEST_CASE("Delegate test")
     REQUIRE(del0_formal_params[0].get_id() == "i");
     REQUIRE(del0_formal_params[1].get_id() == "d");
     REQUIRE(del0_formal_params[2].get_id() == "e");
-    REQUIRE((del0_formal_param_0_type.is_resolved() && std::get<simple_type>(del0_formal_param_0_type.get_resolved_target<type_semantics>()) == simple_type::Int32));
-    REQUIRE((del0_formal_param_1_type.is_resolved() && std::get<simple_type>(del0_formal_param_1_type.get_resolved_target<type_semantics>()) == simple_type::Double));
+    REQUIRE((del0_formal_param_0_type.is_resolved() && std::get<simple_type>(del0_formal_param_0_type.get_resolved_target()) == simple_type::Int32));
+    REQUIRE((del0_formal_param_1_type.is_resolved() && std::get<simple_type>(del0_formal_param_1_type.get_resolved_target()) == simple_type::Double));
     REQUIRE((!del0_formal_param_2_type.is_resolved() && del0_formal_param_2_type.get_ref_name() == "E"));
 
     REQUIRE(delegates.find("D2") != delegates.end());

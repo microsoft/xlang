@@ -189,16 +189,28 @@ namespace xlang::meta::reader
         TypeSig(table_base const* table, byte_view& data)
             : m_is_szarray(parse_szarray(table, data))
             , m_cmod(parse_cmods(table, data))
+            , m_element_type(parse_element_type(data))
             , m_type(ParseType(table, data))
         {}
 
-        TypeSig(value_type&& type)
-            : m_type(std::move(type))
+        explicit TypeSig(ElementType type)
+            : m_element_type{ type }
+            , m_type{ type }
+        {}
+
+        explicit TypeSig(ElementType element_type, coded_index<TypeDefOrRef> const& type_ref)
+            : m_element_type{ element_type }
+            , m_type{ type_ref }
         {}
 
         value_type const& Type() const noexcept
         {
             return m_type;
+        }
+
+        ElementType element_type() const noexcept
+        {
+            return m_element_type;
         }
 
         bool is_szarray() const noexcept
@@ -221,6 +233,7 @@ namespace xlang::meta::reader
         static value_type ParseType(table_base const* table, byte_view& data);
         bool m_is_szarray{ false };
         std::vector<CustomModSig> m_cmod;
+        ElementType m_element_type;
         value_type m_type;
     };
 
