@@ -17,8 +17,8 @@ and familiar way.
 Python/WinRT can be installed from the [Python Package Index](https://pypi.org/) via pip. Assuming
 pip is on the path, Python/WinRT can be installed from the command line with the following command:
 
-``` bash
-> pip install -i https://pypi.org/simple/ winrt
+``` shell
+> pip install winrt
 ```
 
 You can test that Python/WinRT is installed correctly by launching Python and running the following
