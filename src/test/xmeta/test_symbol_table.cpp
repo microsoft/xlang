@@ -117,7 +117,7 @@ TEST_CASE("Delegate test")
         namespace N
         {
             enum E { }
-enum F{}
+            enum F{}
             delegate Int32 D1(Int32 i, Double d, E e);
             delegate void D2();
         }
