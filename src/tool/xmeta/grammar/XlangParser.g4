@@ -35,6 +35,7 @@ type
 value_type
     : BOOLEAN
     | STRING
+    | INT8
     | INT16
     | INT32
     | INT64

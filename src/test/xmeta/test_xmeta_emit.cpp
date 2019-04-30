@@ -64,7 +64,7 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
     REQUIRE(empty(delegate_type.PropertyList()));
 }
 
-std::vector<uint8_t> run_and_save_to_memory(std::istringstream &test_idl, std::string_view assembly_name)
+std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::string_view assembly_name)
 {
     xmeta_idl_reader reader{ "" };
     REQUIRE(reader.read(test_idl) == 0);
@@ -80,7 +80,7 @@ std::vector<uint8_t> run_and_save_to_memory(std::istringstream &test_idl, std::s
     return writer.save_to_memory();
 }
 
-TEST_CASE("Assemblies metadata") 
+TEST_CASE("Assemblies metadata")
 {
     constexpr char assembly_name[] = "testidl";
     constexpr char common_assembly_ref[] = "mscorlib";
@@ -111,18 +111,8 @@ TEST_CASE("Enum metadata")
         }
     )" };
     std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
-    xlang::xmeta::xmeta_emit emitter(assembly_name);
-    xlang::xmeta::xlang_model_walker walker(reader.get_namespaces(), emitter);
-    
-    walker.register_listener(emitter);
-    walker.walk();
-
-    xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter.save_to_memory());
-    xlang::meta::reader::database db{ writer.save_to_memory() };
     REQUIRE(db.TypeDef.size() == 2);
 
     auto const& enum_type = db.TypeDef[1];
@@ -174,40 +164,17 @@ TEST_CASE("Delegate metadata")
         }
     )" };
     std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> v;
-    std::string ns_name("Windows.Test");
-    std::shared_ptr<namespace_model> ns(new namespace_model(ns_name, 0, assembly_name, nullptr));
-    std::shared_ptr<namespace_body_model> ns_bm = std::make_shared<namespace_body_model>(namespace_body_model(ns));
-    std::string delegate_name("testdelegate");
-    std::shared_ptr<delegate_model> delegate_model_m = std::make_shared<delegate_model>(delegate_name, 0, assembly_name, ns_bm, type_ref(simple_type::Int32));
-    formal_parameter_model param1("c", 0, assembly_name, parameter_semantics::in, type_ref(simple_type::Int32));
-    formal_parameter_model param2("d", 0, assembly_name, parameter_semantics::in, type_ref(simple_type::Int32));
-
-    delegate_model_m->add_formal_parameter(std::move(param1));
-    delegate_model_m->add_formal_parameter(std::move(param2));
-    ns_bm->add_delegate(delegate_model_m);
-    ns->add_namespace_body(ns_bm);
-
-    v["test"] = ns;
-    xlang::xmeta::xmeta_emit emitter(assembly_name);
-    xlang::xmeta::xlang_model_walker walker(v, emitter);
-    walker.walk();
-
-    xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter.save_to_memory());
-    xlang::meta::reader::database db{ writer.save_to_memory() };
-
-    REQUIRE(db.TypeDef.size() == 2);
     auto const& delegate_type = db.TypeDef[1];
     test_delegate_type_properties(delegate_type);
+    REQUIRE(db.TypeDef.size() == 2);
+    REQUIRE(db.Param.size() == 5);
+    REQUIRE(db.MethodDef.size() == 2);
     REQUIRE(delegate_type.TypeNamespace() == "Windows.Test");
     REQUIRE(delegate_type.TypeName() == "testdelegate");
     REQUIRE(delegate_type.Flags().value == (tdPublic | tdSealed | tdClass | tdWindowsRuntime));
-    // Param Table
-    REQUIRE(db.Param.size() == 5);
 
-    REQUIRE(db.MethodDef.size() == 2);
     // Testing constructor method
     auto const& delegate_constructor = db.MethodDef[0];
     REQUIRE(delegate_constructor.Name() == ".ctor");
@@ -230,5 +197,186 @@ TEST_CASE("Delegate metadata")
     {
         REQUIRE(std::holds_alternative<ElementType>(delegate_param.Type().Type()));
         REQUIRE(std::get<ElementType>(delegate_param.Type().Type()) == ElementType::I4);
+    }
+}
+
+TEST_CASE("Parameter signature simple type metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace Windows.Test
+        {
+            delegate String d1();
+            delegate Int8 d2();
+            delegate Int16 d3();
+            delegate Int32 d4();
+            delegate Int64 d5();
+            delegate UInt8 d6();
+            delegate UInt16 d7();
+            delegate UInt32 d8();
+            delegate UInt64 d9();
+            delegate Single e1();
+            delegate Double e2();
+            delegate Char16 e3();
+            delegate Boolean e4();
+            delegate void e5();
+        }
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+    REQUIRE(db.MethodDef.size() == 28);
+    // Testing invoke method
+    {
+        auto const& delegate_invoke = db.MethodDef[1];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::String);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[3];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d2");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::I1);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[5];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d3");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::I2);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[7];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d4");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::I4);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[9];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d5");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::I8);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[11];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d6");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::U1);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[13];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d7");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::U2);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[15];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d8");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::U4);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[17];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d9");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::U8);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[19];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "e1");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::R4);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[21];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "e2");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::R8);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[23];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "e3");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::Char);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[25];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "e4");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
+        REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::Boolean);
+    }
+    {
+        auto const& delegate_invoke = db.MethodDef[27];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "e5");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(!delegate_invoke.Signature().ReturnType());
+    }
+}
+
+// This test is disabled because type references are not able to be resolve yet in the models. TODO: resolve types. 
+// In this particular case, we want to show that TypeRefByName is able to be defined first, even if there is no TypeDef
+TEST_CASE("Parameter signature unresolved reference type metadata", "[!hide]")
+{
+    std::istringstream test_idl{ R"(
+        namespace Windows.Test
+        {
+            delegate MyClass d1();
+            enum MyClass
+            {
+            }
+        }
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+    REQUIRE(db.MethodDef.size() == 2);
+    REQUIRE(db.TypeRef.size() == 5);
+    REQUIRE(db.TypeRef[4].TypeName() == "MyClass");
+    // Testing invoke method
+    {
+        auto const& delegate_invoke = db.MethodDef[1];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[4]);
+    }
+}
+
+// This test is disabled because type references are not able to be resolve yet in the models. TODO: resolve types. 
+TEST_CASE("Parameter signature resolved reference type metadata", "[!hide]")
+{
+    std::istringstream test_idl{ R"(
+        namespace Windows.Test
+        {
+            enum MyClass
+            {
+            }
+            delegate MyClass d1();
+        }
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+
+    REQUIRE(db.MethodDef.size() == 2);
+    REQUIRE(db.TypeRef.size() == 5);
+    REQUIRE(db.TypeDef.size() == 3);
+    REQUIRE(db.TypeRef[4].TypeName() == "MyClass");
+
+
+    // Testing invoke method
+    {
+        auto const& delegate_invoke = db.MethodDef[1];
+        REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
+        auto const& delegate_sig = delegate_invoke.Signature();
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[4]);
     }
 }

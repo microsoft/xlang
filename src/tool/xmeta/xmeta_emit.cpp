@@ -129,6 +129,8 @@ namespace
             return ElementType::R4;
         case simple_type::Double:
             return ElementType::R8;
+        case simple_type::Boolean:
+            return ElementType::Boolean;
         default:
             XLANG_ASSERT(false);
             return ElementType::Void;
@@ -137,6 +139,10 @@ namespace
 
     inline std::variant<std::string, simple_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
     {
+        if (!semantic_type.is_resolved())
+        {
+            return semantic_type.get_ref_name();
+        }
         type_semantics const& ts = semantic_type.get_resolved_target();
         if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
         {
@@ -766,7 +772,10 @@ namespace xlang::xmeta
                     }
                     ref = to_TypeRef(md_ref);
                 }
-                ref = iter->second;
+                else
+                {
+                    ref = iter->second;
+                }
                 return TypeSig{ ElementType::ValueType, ref.coded_index<TypeDefOrRef>() };
             }
             else if (std::holds_alternative<object_type>(semantic))
