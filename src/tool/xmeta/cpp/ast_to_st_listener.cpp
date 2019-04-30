@@ -346,3 +346,13 @@ void ast_to_st_listener::exitNamespace_declaration(XlangParser::Namespace_declar
         m_reader.pop_namespace();
     }
 }
+
+void ast_to_st_listener::exitUsing_alias_directive(XlangParser::Using_alias_directiveContext *ctx)
+{
+
+}
+
+void ast_to_st_listener::exitUsing_namespace_directive(XlangParser::Using_namespace_directiveContext *ctx)
+{
+
+}

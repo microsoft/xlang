@@ -68,6 +68,10 @@ namespace xlang::xmeta
 
         size_t m_num_semantic_errors = 0;
 
+        std::vector<std::vector<std::string>> m_using_namespace_directives;
+        std::map<std::string, std::vector<std::string>> m_using_alias_directives;
+
+
         // Pushes a namespace to the current namespace scope, and adds it to the symbol table if necessary.
         void push_namespace(std::string_view const& name, size_t decl_line);
 
@@ -81,6 +85,22 @@ namespace xlang::xmeta
         void write_enum_const_expr_range_error(size_t decl_line, std::string_view const& invalid_expr, std::string_view const& enum_name);
         void write_namespace_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& original_name);
         void write_namespace_member_name_error(size_t decl_line, std::string_view const& invalid_name);
+
+        
+        //void add_namespace_alias_identifier(std::string_view identifier)
+        //{
+        //    std::vector<std::string> alias;
+        //    size_t dot = identifier.find_first_of(".");
+        //    identifiers.push_back(std::string(identifier.substr(0, dot)));
+        //    while (dot != std::string::npos)
+        //    {
+        //        identifier = identifier.substr(dot);
+        //        size_t dot = identifier.find_first_of(".");
+        //        identifiers.push_back(std::string(identifier.substr(0, dot)));
+
+        //    }
+        //}
+        
     };
     std::string copy_to_lower(std::string_view sv);
 }
