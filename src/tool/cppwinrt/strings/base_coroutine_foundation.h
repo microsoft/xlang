@@ -41,7 +41,7 @@ namespace winrt::impl
     inline void check_sta_blocking_wait() noexcept
     {
         // Note: A blocking wait on the UI thread for an asynchronous operation can cause a deadlock.
-        // See https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/concurrency#block-the-calling-thread
+        // See https://docs.microsoft.com/windows/uwp/cpp-and-winrt-apis/concurrency#block-the-calling-thread
         WINRT_ASSERT(!is_sta());
     }
 
