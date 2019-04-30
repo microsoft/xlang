@@ -54,6 +54,7 @@ namespace xlang::xmeta
             m_cur_namespace_body = std::make_shared<namespace_body_model>(child_ns);
             child_ns->add_namespace_body(m_cur_namespace_body);
         };
+
         if (m_cur_namespace_body != nullptr)
         {
             auto const& cur_ns = m_cur_namespace_body->get_containing_namespace();

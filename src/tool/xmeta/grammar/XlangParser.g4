@@ -12,20 +12,13 @@ compilation_unit
     ;
 
 /* Basic Concepts */
-namespace_name
-    : namespace_or_type_name
-    ;
-
 type_name
-    : namespace_or_type_name
-    ;
-
-namespace_or_type_name
-    : IDENTIFIER type_argument_list?
-    | namespace_or_type_name . IDENTIFIER type_argument_list?
+    : (IDENTIFIER .)* IDENTIFIER type_argument_list?
     | qualified_alias_member
     ;
 
+// Type is used in parameters and return types
+// It can refer to another type that was declared via type_name
 type
     : value_type
     | class_type
@@ -61,7 +54,6 @@ non_array_type
     : value_type
     | class_type
     ;
-
 
 enum_integral_type
     : INT8
@@ -167,11 +159,11 @@ using_directive
     ;
 
 using_alias_directive
-    : USING IDENTIFIER EQUAL namespace_or_type_name SEMICOLON
+    : USING IDENTIFIER EQUAL type_name SEMICOLON
     ;
 
 using_namespace_directive
-    : USING namespace_name SEMICOLON
+    : USING (IDENTIFIER .)* IDENTIFIER SEMICOLON
     ;
 
 namespace_member_declaration
