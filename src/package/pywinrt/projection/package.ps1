@@ -13,6 +13,10 @@ else {
     exit 
 }
 
+$today = Get-Date
+$doy = $today.DayOfYear
+$env:Build_BuildNumber = "local.$($today.ToString("yy.MMdd")).$doy.99"
+
 Push-Location $PSScriptRoot/pywinrt 
 
 if ($clean) {
