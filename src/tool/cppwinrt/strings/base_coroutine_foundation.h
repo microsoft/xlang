@@ -38,12 +38,12 @@ namespace winrt::impl
         return (error_ok == WINRT_CoGetApartmentType(&aptType, &aptTypeQualifier)) && ((aptType == 0 /*APTTYPE_STA*/) || (aptType == 3 /*APTTYPE_MAINSTA*/));
     }
 
-	inline void check_sta_blocking_wait() noexcept
-	{
-		// Note: A blocking wait on the UI thread for an asynchronous operation can cause a deadlock.
-		// See https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/concurrency#block-the-calling-thread
-		WINRT_ASSERT(!is_sta());
-	}
+    inline void check_sta_blocking_wait() noexcept
+    {
+        // Note: A blocking wait on the UI thread for an asynchronous operation can cause a deadlock.
+        // See https://docs.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/concurrency#block-the-calling-thread
+        WINRT_ASSERT(!is_sta());
+    }
 
     template <typename Async>
     void wait_for_completed(Async const& async, uint32_t const timeout)
@@ -63,15 +63,15 @@ namespace winrt::impl
     template <typename Async>
     auto wait_for(Async const& async, Windows::Foundation::TimeSpan const& timeout)
     {
-		check_sta_blocking_wait();
-		wait_for_completed(async, static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
+        check_sta_blocking_wait();
+        wait_for_completed(async, static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
         return async.Status();
     }
 
     template <typename Async>
     auto wait_get(Async const& async)
     {
-		check_sta_blocking_wait();
+        check_sta_blocking_wait();
 
         if (async.Status() == Windows::Foundation::AsyncStatus::Started)
         {
