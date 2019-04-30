@@ -17,11 +17,6 @@ namespace winrt::impl
     using srwlock = struct srwlock_*;
     using condition_variable = struct condition_variable_*;
     using bstr = wchar_t*;
-
-    inline bool is_guid_equal(uint32_t const* const left, uint32_t const* const right) noexcept
-    {
-        return left[0] == right[0] && left[1] == right[1] && left[2] == right[2] && left[3] == right[3];
-    }
 }
 
 namespace winrt
@@ -80,7 +75,7 @@ namespace winrt
 
     inline bool operator==(guid const& left, guid const& right) noexcept
     {
-        return impl::is_guid_equal(reinterpret_cast<uint32_t const*>(&left), reinterpret_cast<uint32_t const*>(&right));
+        return !memcmp(&left, &right, sizeof(guid));
     }
 
     inline bool operator!=(guid const& left, guid const& right) noexcept
