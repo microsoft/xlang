@@ -16,15 +16,15 @@ using namespace xlang::xmeta;
 TEST_CASE("Duplicate Namespaces")
 {
     std::istringstream test_idl(R"(
-        namespace n { }
-        namespace n { }
+        namespace N { }
+        namespace N { }
     )");
 
     xmeta_idl_reader reader{ "" };
     REQUIRE(reader.read(test_idl) == 0);
 
     auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("n");
+    auto it = namespaces.find("N");
     REQUIRE(it != namespaces.end());
     auto ns = it->second;
     REQUIRE(ns->get_namespace_bodies().size() == 2);
@@ -35,9 +35,9 @@ TEST_CASE("Duplicate Namespaces")
 TEST_CASE("Enum test")
 {
     std::istringstream test_idl{ R"(
-        namespace n
+        namespace N
         {
-            enum e
+            enum E
             {
                 e_member_1,
                 e_member_2 = 3,
@@ -52,15 +52,15 @@ TEST_CASE("Enum test")
     REQUIRE(reader.read(test_idl) == 0);
 
     auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("n");
+    auto it = namespaces.find("N");
     REQUIRE(it != namespaces.end());
     auto ns = it->second;
     REQUIRE(ns->get_namespace_bodies().size() == 1);
     auto ns_body = ns->get_namespace_bodies()[0];
 
     auto enums = ns_body->get_enums();
-    REQUIRE(enums.find("e") != enums.end());
-    auto const& enum_members = enums["e"]->get_members();
+    REQUIRE(enums.find("E") != enums.end());
+    auto const& enum_members = enums["E"]->get_members();
     REQUIRE(enum_members.size() == 5);
     REQUIRE(enum_members[0].get_id() == "e_member_1");
     REQUIRE(enum_members[1].get_id() == "e_member_2");
@@ -82,9 +82,9 @@ TEST_CASE("Enum test")
 TEST_CASE("Enum circular dependency")
 {
     std::istringstream implicit_dependency_error_idl{ R"(
-        namespace n
+        namespace N
         {
-            enum e
+            enum E
             {
                 e_member_1 = e_member_3,
                 e_member_2,
@@ -93,9 +93,9 @@ TEST_CASE("Enum circular dependency")
         }
     )" };
     std::istringstream explicit_dependency_error_idl{ R"(
-        namespace n
+        namespace N
         {
-            enum e
+            enum E
             {
                 e_member_1 = e_member_2,
                 e_member_2 = e_member_1
@@ -109,4 +109,48 @@ TEST_CASE("Enum circular dependency")
     reader.reset("");
     REQUIRE(reader.read(explicit_dependency_error_idl) == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
+}
+
+TEST_CASE("Delegate test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            enum E { }
+            enum F{}
+            delegate Int32 D1(Int32 i, Double d, E e);
+            delegate void D2();
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto namespaces = reader.get_namespaces();
+    auto it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto delegates = ns_bodies[0]->get_delegates();
+    REQUIRE(delegates.size() == 2);
+
+    REQUIRE(delegates.find("D1") != delegates.end());
+    REQUIRE(delegates.at("D1")->get_return_type() != std::nullopt);
+    auto del0_return_type = delegates.at("D1")->get_return_type()->get_semantic();
+    REQUIRE((del0_return_type.is_resolved() && std::get<simple_type>(del0_return_type.get_resolved_target()) == simple_type::Int32));
+    auto del0_formal_params = delegates.at("D1")->get_formal_parameters();
+    REQUIRE(del0_formal_params.size() == 3);
+    auto del0_formal_param_0_type = del0_formal_params[0].get_type().get_semantic();
+    auto del0_formal_param_1_type = del0_formal_params[1].get_type().get_semantic();
+    auto del0_formal_param_2_type = del0_formal_params[2].get_type().get_semantic();
+    REQUIRE(del0_formal_params[0].get_id() == "i");
+    REQUIRE(del0_formal_params[1].get_id() == "d");
+    REQUIRE(del0_formal_params[2].get_id() == "e");
+    REQUIRE((del0_formal_param_0_type.is_resolved() && std::get<simple_type>(del0_formal_param_0_type.get_resolved_target()) == simple_type::Int32));
+    REQUIRE((del0_formal_param_1_type.is_resolved() && std::get<simple_type>(del0_formal_param_1_type.get_resolved_target()) == simple_type::Double));
+    REQUIRE((!del0_formal_param_2_type.is_resolved() && del0_formal_param_2_type.get_ref_name() == "E"));
+
+    REQUIRE(delegates.find("D2") != delegates.end());
+    REQUIRE(delegates.at("D2")->get_return_type() == std::nullopt);
+    REQUIRE(delegates.at("D2")->get_formal_parameters().empty());
 }

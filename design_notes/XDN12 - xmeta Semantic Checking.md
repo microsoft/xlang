@@ -113,7 +113,7 @@ Class B was referenced, but its declaration space was not included. This is an e
 
 ### Classes
 #### Definitions:
-A **class modifier** can be added to a class declaration. These include `sealed` and `static`.
+A **class modifier** can be added to a class declaration. A class can be modified as either `unsealed` or `static`, but not both. This is guaranteed by the xmeta parser. Classes are sealed by default, and must be declared as `unsealed` if you wish to inherit from it.
 
 You can define a class as **partial** with syntax `partial <class-name>`.
 
@@ -134,8 +134,7 @@ Here, class D depends on classes A, B, and C.
 #### Semantic checks:
 1) Classes must override all type members specified in all interfaces in its inheritance tree.
 
-2) Rules for sealed classes:
-* You cannot derive from a sealed class.
+2) You can only derive from an `unsealed` class.
 
 3) Rules for static classes:
 * It cannot be used as a type, and it can only contain static members. This means all members must explicitly include a `static` modifier.
@@ -150,14 +149,15 @@ Here, class D depends on classes A, B, and C.
 * Type parameters cannot have the same name as the type itself.
 
 5) Rules for base classes:
-* Base classes cannot be the same as a type parameter.
+* Base classes cannot have the same identifier as a type parameter.
 * A class cannot depend on itself.
 
 6) Rules for partial classes:
-* Same as regular classes. 
+* Same as regular classes.
+
+7) You can only define the same class modifier once in a class declaration.
 
 ### Class members
-
 #### Definitions:
 
 Class members include **methods**, **properties**, **events**, and **instance constructors**.
@@ -180,16 +180,12 @@ Note: inherited members are not considered to be within the class declaration sp
 
 1) No members other than instance constructors may have the same name as the immediately enclosing class.
 
-2) A class member declaration can have at most one accessibility modifier, which can be one of `public` or `protected`.
+2) The constituent types of a member must be at least as accessible as that member itself.
 
-3) The constituent types of a member must be at least as accessible as that member itself.
-
-4) Rules for methods:
+3) Rules for methods:
 * The name of each method must differ from all other non-method members declared in the same class.
 * The signature of each method must differ from the signatures of all other methods declared in the same class. It must also differ from methods declared in inherited classes, unless the override modifier is used. Signatures cannot differ solely by ref and out.
 * Methods may not match the signature of a reserved member name. Even if class B derives from class A, B's methods cannot match the signature of reserved member names created by A.
-* If a method is declared as `sealed`, it must also have the `override` modifier.
-* If a method is `partial`, it does not include the modifiers: `public`, `protcted`, `sealed`, or `override`.
 * The return type of each parameter type must be at least as accessible as the method itself.
 * All formal parameters and type parameters of a method declaration must have different names.
 * For overridden methods:
@@ -197,21 +193,19 @@ Note: inherited members are not considered to be within the class declaration sp
   * There is exactly one overridden base method that matches.
   * The overridden base method is not static.
   * The method cannot change the accessibility of the overriden base method.
-  * The overridden base method cannot be sealed.
 
-5) Rules for properties:
+4) Rules for properties:
 * The name of each property must differ from all other member names declared in the same class.
-* If a property is declared as `sealed`, it must also have the `override` modifier.
-* If a property is `partial`, it does not include the modifiers: `public`, `protected`, `sealed`, or `override`.
 * The type of a property must be at least as accessible as the property itself.
 * `get` and `set` accessors of properties can only be declared once.
 * A property cannot be passed as a parameter of type `ref` or `out`.
 
-6) Rules for events:
+5) Rules for events:
 * The name of each event must differ from all other member names declared in the same class.
 * The type of the event must be at least as accessible as the event itself.
+* You can only define the same event modifier once in an event declaration.
 
-7) Rules for instance constructors:
+6) Rules for instance constructors:
 * Must have the same name as the immediately enclosing class.
 * The signatures of each instance constructor must be unique, and they cannot differ solely by ref and out.
 * All formal parameters of an instance constructor must have different names.
@@ -331,7 +325,6 @@ Versioning: Enums are additively versionable. Subsequent versions of a given enu
 -->
 
 ### Enum members
-
 #### Definitions:
 Each enum member has its own constant value. This can be assigned **explicitly** or **implicitly**. Explicitly the syntax is `<member-name> = <constant-expression>` followed by an optional comma. Implicitly you just leave the `<member-name>`. Implicit assignment works with the following rules:
 * If it is the first member, assign it zero.

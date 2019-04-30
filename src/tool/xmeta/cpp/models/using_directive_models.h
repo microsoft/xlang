@@ -20,37 +20,48 @@ namespace xlang::xmeta
             m_type_or_namespace_ref{ type_or_ns_name }
         { }
 
-        bool is_namespace_ref() const noexcept
-        {
-            return m_type_or_namespace_ref.is_resolved() && 
-                std::holds_alternative<std::shared_ptr<namespace_model>>(m_type_or_namespace_ref.get_resolved_target());
-        }
-
-        bool is_type_ref() const noexcept
-        {
-            return m_type_or_namespace_ref.is_resolved() &&
-                std::holds_alternative<type_semantics>(m_type_or_namespace_ref.get_resolved_target());
-        }
-
         auto const& get_type_or_namespace_ref() const noexcept
         {
             return m_type_or_namespace_ref;
         }
 
-        void set_type_ref(type_semantics const& sem) noexcept
+        void set_namespace_ref(std::shared_ptr<class_model> const& nm) noexcept
         {
-            assert(is_type_ref());
-            m_type_or_namespace_ref.resolve(sem);
+            assert(m_type_or_namespace_ref.holds_type<std::shared_ptr<class_model>>());
+            m_type_or_namespace_ref.resolve(nm);
+        }
+
+        void set_namespace_ref(std::shared_ptr<enum_model> const& nm) noexcept
+        {
+            assert(m_type_or_namespace_ref.holds_type<std::shared_ptr<enum_model>>());
+            m_type_or_namespace_ref.resolve(nm);
+        }
+
+        void set_namespace_ref(std::shared_ptr<interface_model> const& nm) noexcept
+        {
+            assert(m_type_or_namespace_ref.holds_type<std::shared_ptr<interface_model>>());
+            m_type_or_namespace_ref.resolve(nm);
+        }
+
+        void set_namespace_ref(std::shared_ptr<struct_model> const& nm) noexcept
+        {
+            assert(m_type_or_namespace_ref.holds_type<std::shared_ptr<struct_model>>());
+            m_type_or_namespace_ref.resolve(nm);
         }
 
         void set_namespace_ref(std::shared_ptr<namespace_model> const& nm) noexcept
         {
-            assert(is_namespace_ref());
+            assert(m_type_or_namespace_ref.holds_type<std::shared_ptr<namespace_model>>());
             m_type_or_namespace_ref.resolve(nm);
         }
 
     private:
-        model_ref<type_semantics, std::shared_ptr<namespace_model>> m_type_or_namespace_ref;
+        model_ref<
+            std::shared_ptr<class_model>,
+            std::shared_ptr<enum_model>,
+            std::shared_ptr<interface_model>,
+            std::shared_ptr<struct_model>,
+            std::shared_ptr<namespace_model>> m_type_or_namespace_ref;
     };
 
     struct using_namespace_directive_model : base_model

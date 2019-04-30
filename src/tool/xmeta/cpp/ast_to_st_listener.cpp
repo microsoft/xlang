@@ -4,6 +4,7 @@
 #include "ast_to_st_listener.h"
 #include "xmeta_idl_reader.h"
 #include "models/xmeta_models.h"
+#include "XlangParser.h"
 
 using namespace xlang::xmeta;
 
@@ -45,10 +46,103 @@ enum_semantics str_to_enum_semantics(std::string const& val)
     return enum_semantics::Int32;
 }
 
+simple_type str_to_simple_type(std::string const& val)
+{
+    const std::map<std::string, simple_type> str_to_simple_type_map = {
+        { "Boolean", simple_type::Boolean },
+        { "String", simple_type::String },
+        { "Int8", simple_type::Int8 },
+        { "Int16", simple_type::Int16 },
+        { "Int32", simple_type::Int32 },
+        { "Int64", simple_type::Int64 },
+        { "UInt8", simple_type::UInt8 },
+        { "UInt16", simple_type::UInt16 },
+        { "UInt32", simple_type::UInt32 },
+        { "UInt64", simple_type::UInt64 },
+        { "Char16", simple_type::Char16 },
+        { "Single", simple_type::Single },
+        { "Double", simple_type::Double },
+    };
+    assert(str_to_simple_type_map.find(val) != str_to_simple_type_map.end());
+    return str_to_simple_type_map.at(val);
+}
+
 ast_to_st_listener::ast_to_st_listener(xmeta_idl_reader& reader) :
     m_reader{ reader }
 { }
 
+listener_error ast_to_st_listener::extract_type(XlangParser::Return_typeContext* rtc, std::optional<type_ref>& tr)
+{
+    assert(rtc);
+    if (rtc->VOID())
+    {
+        tr = std::nullopt;
+        return listener_error::passed;
+    }
+
+    assert(rtc->type());
+    return extract_type(rtc->type(), *tr);
+}
+
+listener_error ast_to_st_listener::extract_type(XlangParser::TypeContext* tc, type_ref& tr)
+{
+    if (tc->value_type())
+    {
+        tr.set_semantic(str_to_simple_type(tc->getText()));
+    }
+    else if (tc->class_type())
+    {
+        if (tc->class_type()->OBJECT())
+        {
+            tr.set_semantic(object_type{});
+        }
+    }
+    else if (tc->array_type())
+    {
+        assert(tc->array_type()->non_array_type());
+        if (tc->array_type()->non_array_type()->value_type())
+        {
+            tr.set_semantic(str_to_simple_type(tc->getText()));
+        }
+        else if (tc->array_type()->non_array_type()->class_type())
+        {
+            if (tc->array_type()->non_array_type()->class_type()->OBJECT())
+            {
+                tr.set_semantic(object_type{});
+            }
+        }
+    }
+    return listener_error::passed;
+}
+
+void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, std::shared_ptr<delegate_model> const& dm)
+{
+    for (auto fixed_param : ast_formal_params)
+    {
+        auto id = fixed_param->IDENTIFIER();
+        std::string formal_param_name{ id->getText() };
+        auto decl_line = id->getSymbol()->getLine();
+        type_ref tr{ fixed_param->type()->getText() };
+        extract_type(fixed_param->type(), tr);
+        parameter_semantics sem = parameter_semantics::in;
+        if (fixed_param->parameter_modifier() != nullptr)
+        {
+            if (fixed_param->parameter_modifier()->CONST())
+            {
+                sem = parameter_semantics::const_ref;
+            }
+            else if (fixed_param->parameter_modifier()->REF())
+            {
+                sem = parameter_semantics::ref;
+            }
+            else if (fixed_param->parameter_modifier()->OUT())
+            {
+                sem = parameter_semantics::out;
+            }
+        }
+        dm->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_reader.m_current_assembly, sem, std::move(tr) });
+    }
+}
 
 listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_declarationContext *ast_enum_member, std::shared_ptr<enum_model> const& new_enum)
 {
@@ -167,6 +261,26 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     }
     e_member.set_value(ref_member.get_value());
     return listener_error::passed;
+}
+
+void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarationContext* ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    std::string delegate_name{ id->getText() };
+    auto decl_line = id->getSymbol()->getLine();
+    std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };
+    extract_type(ctx->return_type(), tr);
+    auto dm = std::make_shared<delegate_model>(delegate_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), std::move(tr));
+
+    // TODO: Type params
+
+    auto formal_params = ctx->formal_parameter_list();
+    if (formal_params)
+    {
+        extract_formal_params(formal_params->fixed_parameter(), dm);
+    }
+
+    m_reader.m_cur_namespace_body->add_delegate(dm);
 }
 
 void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationContext *ctx)

@@ -61,7 +61,7 @@ namespace xlang::xmeta
         static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
         static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract
 
-                // A generic assembly metadata struct.
+        // A generic assembly metadata struct.
         static constexpr ASSEMBLYMETADATA s_genericMetadata =
         {
             // usMajorVersion - Unspecified major version

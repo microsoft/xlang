@@ -30,7 +30,7 @@ namespace xlang::xmeta
         template<typename H>
         bool holds_type() const noexcept
         {
-            return std::holds_alternative<H>(m_ref);
+            return std::holds_alternative<H>(std::get<resolved_type>(m_ref));
         }
 
         auto const& get_resolved_target() const noexcept

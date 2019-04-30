@@ -111,8 +111,18 @@ TEST_CASE("Enum metadata")
         }
     )" };
     std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+    xlang::xmeta::xmeta_emit emitter(assembly_name);
+    xlang::xmeta::xlang_model_walker walker(reader.get_namespaces(), emitter);
+    
+    walker.register_listener(emitter);
+    walker.walk();
+
+    xlang::meta::writer::pe_writer writer;
+    writer.add_metadata(emitter.save_to_memory());
+    xlang::meta::reader::database db{ writer.save_to_memory() };
     REQUIRE(db.TypeDef.size() == 2);
 
     auto const& enum_type = db.TypeDef[1];
@@ -221,5 +231,4 @@ TEST_CASE("Delegate metadata")
         REQUIRE(std::holds_alternative<ElementType>(delegate_param.Type().Type()));
         REQUIRE(std::get<ElementType>(delegate_param.Type().Type()) == ElementType::I4);
     }
-
 }

@@ -23,17 +23,17 @@ void xlang_test_listener::enterEnum_member_declaration(XlangParser::Enum_member_
     {
         return;
     }
-    XlangParser::Enum_expressionContext *expressions = ctx->enum_expression();
-    if (expressions->enum_decimal_integer() != NULL)
+    XlangParser::Enum_expressionContext *enum_expression = ctx->enum_expression();
+    if (enum_expression->enum_decimal_integer() != NULL)
     {
-        enums.insert(expressions->enum_decimal_integer()->getText());
+        enums.insert(enum_expression->enum_decimal_integer()->getText());
     }
-    if (expressions->enum_expresssion_identifier() != NULL)
+    if (enum_expression->enum_expresssion_identifier() != NULL)
     {
-        enums.insert(expressions->enum_expresssion_identifier()->getText());
+        enums.insert(enum_expression->enum_expresssion_identifier()->getText());
     }
-    if (expressions->enum_hexdecimal_integer() != NULL)
+    if (enum_expression->enum_hexdecimal_integer() != NULL)
     {
-        enums.insert(expressions->enum_hexdecimal_integer()->getText());
+        enums.insert(enum_expression->enum_hexdecimal_integer()->getText());
     }
 }

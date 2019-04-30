@@ -63,6 +63,31 @@ namespace xlang::xmeta
             m_semantic.resolve(sem);
         }
 
+        void set_semantic(std::shared_ptr<enum_model> const& sem) noexcept
+        {
+            m_semantic.resolve(sem);
+        }
+
+        void set_semantic(std::shared_ptr<interface_model> const& sem) noexcept
+        {
+            m_semantic.resolve(sem);
+        }
+
+        void set_semantic(std::shared_ptr<struct_model> const& sem) noexcept
+        {
+            m_semantic.resolve(sem);
+        }
+
+        void set_semantic(simple_type st)
+        {
+            m_semantic.resolve(st);
+        }
+
+        void set_semantic(object_type o)
+        {
+            m_semantic.resolve(o);
+        }
+
     private:
         model_ref<type_semantics> m_semantic;
     };
