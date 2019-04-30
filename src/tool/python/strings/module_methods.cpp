@@ -142,7 +142,7 @@ static PyObject* uninit_apartment(PyObject* /*unused*/, PyObject* /*unused*/) no
 }
 
 static PyMethodDef module_methods[]{
-    { "init_apartment", init_apartment, METH_NOARGS, "initialize the apartment" },
+    { "init_apartment", init_apartment, METH_VARARGS, "initialize the apartment" },
     { "uninit_apartment", uninit_apartment, METH_NOARGS, "uninitialize the apartment" },
     { nullptr }
 };
