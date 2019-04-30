@@ -227,9 +227,9 @@ namespace xlang::xmeta
     }
 
 
-    void xmeta_emit::listen_namespace_model(std::shared_ptr<namespace_model> const& model) {};
+    void xmeta_emit::listen_namespace_model(std::shared_ptr<namespace_model> const& /*model*/) {};
     
-    void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& model) 
+    void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& /*model*/) 
     {
         //mdTypeDef token_class_type_def = mdTokenNil;
         //mdTypeRef token_local_type_ref = mdTokenNil;
@@ -274,7 +274,7 @@ namespace xlang::xmeta
         //}
     }
 
-    void xmeta_emit::define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def) 
+    void xmeta_emit::define_method(std::shared_ptr<method_model> const& /*model*/, mdTypeDef const& /*token_def*/) 
     {
         //std::wstring method_name = s2ws(model->get_id());
 
@@ -300,7 +300,7 @@ namespace xlang::xmeta
         //}
     }
 
-    void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def) 
+    void xmeta_emit::define_property(std::shared_ptr<property_model> const& /*model*/, mdTypeDef const& /*token_def*/) 
     {
         //std::wstring property_name = s2ws(model->get_id());
         //
@@ -360,7 +360,7 @@ namespace xlang::xmeta
         ////    &token_property);
     }
 
-    void xmeta_emit::define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def)
+    void xmeta_emit::define_event(std::shared_ptr<event_model> const& /*model*/, mdTypeDef const& /*token_def*/)
     {
         //std::wstring event_name = s2ws(model->get_id());
 
@@ -420,7 +420,7 @@ namespace xlang::xmeta
         ////    &token_event);
     }
     
-    void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
+    void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& /*model*/) 
     {
         //auto const& type_name = model->get_id();
         //static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime;
@@ -458,7 +458,7 @@ namespace xlang::xmeta
         //}
     }
     
-    void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model) 
+    void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& /*model*/) 
     {
         //DWORD type_flag = interface_type_flag;
         ////if (pInterface->HasExclusiveToAttribute())
@@ -544,7 +544,7 @@ namespace xlang::xmeta
         }
     }
     
-    void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model)
+    void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& /*model*/)
     {
         //mdTypeDef implements[] = { mdTokenNil };
         //auto token_delegate_type_def = define_type_def(model.get_id(), delegate_type_flag, token_delegate, implements);
@@ -595,7 +595,6 @@ namespace xlang::xmeta
                 param_flags |= pdOut;
             }
         }
-        throw EXCEPTION_ACCESS_VIOLATION;
         mdParamDef token_param_def; //To be used for attributes later
         check_hresult(m_metadata_emitter->DefineParam(
             token_method_def,
@@ -667,6 +666,7 @@ namespace xlang::xmeta
             return std::string("Object");
         }
         assert(false);
+        return std::string();
     }
 
 }
