@@ -1,5 +1,12 @@
 from . import _%
-_%.init_apartment()
+import enum
+
+class ApartmentType(enum.IntEnum):
+    SINGLE_THREADED = 0
+    MULTI_THREADED = 1
+
+init_apartment = _%.init_apartment
+uninit_apartment = _%.uninit_apartment
 
 def _import_ns_module(ns):
     import importlib.machinery

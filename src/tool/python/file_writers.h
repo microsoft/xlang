@@ -155,8 +155,8 @@ namespace pywinrt
         w.write("\"./%/src/py.%.cpp\"", settings.module, ns);
     }
 
-    
-    inline void write_setup_py(stdfs::path const& folder, std::vector<std::string> const& namespaces)
+    // TODO: update strings::setup to support basic setuptool extension compilation (which will need namespaces param)
+    inline void write_setup_py(stdfs::path const& folder, std::vector<std::string> const& /*namespaces*/)
     {
         writer w;
 
@@ -170,7 +170,7 @@ namespace pywinrt
         writer w;
 
         write_license(w, "#");
-        w.write(strings::package_init, settings.module, settings.module, settings.module, settings.module);
+        w.write(strings::package_init, settings.module, settings.module, settings.module, settings.module, settings.module);
         w.flush_to_file(folder / "__init__.py");
     }
 

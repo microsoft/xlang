@@ -96,16 +96,41 @@ PyObject* py::wrapped_instance(std::size_t key)
     //return it->second;
 }
 
-static PyObject* init_apartment(PyObject* /*unused*/, PyObject* /*unused*/) noexcept
+static PyObject* init_apartment(PyObject* /*unused*/, PyObject* args) noexcept
 {
-    try
+    Py_ssize_t arg_count = PyTuple_Size(args);
+
+    if (arg_count == 0)
     {
-        winrt::init_apartment();
-        Py_RETURN_NONE;
+        try
+        {
+            winrt::init_apartment();
+            Py_RETURN_NONE;
+        }
+        catch (...)
+        {
+            py::to_PyErr();
+            return nullptr;
+        }
     }
-    catch (...)
+    else if (arg_count == 1)
     {
-        py::to_PyErr();
+        try
+        {
+            auto param0 = py::convert_to<int32_t>(args, 0);
+
+            winrt::init_apartment(static_cast<winrt::apartment_type>(param0));
+            Py_RETURN_NONE;
+        }
+        catch (...)
+        {
+            py::to_PyErr();
+            return nullptr;
+        }
+    }
+    else
+    {
+        py::set_invalid_arg_count_error(arg_count);
         return nullptr;
     }
 }
@@ -126,6 +151,9 @@ static int module_exec(PyObject* module) noexcept
 {
     try
     {
+        void* cookie;
+        winrt::check_hresult(WINRT_CoIncrementMTAUsage(&cookie));
+
         py::winrt_type<py::winrt_base>::python_type = py::register_python_type(module, _type_name_winrt_base, &winrt_base_type_spec, nullptr);
 
         return 0;
