@@ -346,16 +346,3 @@ void ast_to_st_listener::exitNamespace_declaration(XlangParser::Namespace_declar
         m_reader.pop_namespace();
     }
 }
-
-void ast_to_st_listener::exitUsing_namespace_directive(XlangParser::Using_namespace_directiveContext *ctx)
-{
-    auto id = ctx->IDENTIFIER();
-    std::string ns = ctx->IDENTIFIER(0)->getText();
-    auto decl_line = ctx->IDENTIFIER(0)->getSymbol()->getLine();
-    for (size_t i = 1; i < ctx->IDENTIFIER().size(); i++)
-    {
-        ns.append("." + ctx->IDENTIFIER(i)->getText());
-    }
-    auto model = std::make_shared<using_namespace_directive_model>("", decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), ns);
-    m_reader.m_cur_namespace_body->add_using_namespace_directive(model);
-}

@@ -27,9 +27,6 @@ struct ast_to_st_listener : XlangParserBaseListener
     void enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
     void exitNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
 
-    void exitUsing_alias_directive(XlangParser::Using_alias_directiveContext *ctx) override;
-    void exitUsing_namespace_directive(XlangParser::Using_namespace_directiveContext *ctx) override;
-
 private:
     xlang::xmeta::xmeta_idl_reader& m_reader;
 
