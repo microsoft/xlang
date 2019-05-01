@@ -5,10 +5,10 @@
 #include "ast_to_st_listener.h"
 #include "XlangLexer.h"
 #include "XlangParser.h"
-
+#include "xlang_model_walker.h"
+#include "xlang_model_resolver.h"
 namespace xlang::xmeta
 {
-
     size_t xmeta_idl_reader::read(std::istream& idl_contents, bool disable_error_reporting)
     {
         ast_to_st_listener listener{ *this };
@@ -30,6 +30,10 @@ namespace xlang::xmeta
 
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+        xlang_model_resolver resolver;
+        xlang_model_walker walker(m_namespaces, resolver);
+        walker.walk();
+
         return parser.getNumberOfSyntaxErrors();
     }
 

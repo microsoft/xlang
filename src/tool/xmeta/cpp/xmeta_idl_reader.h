@@ -7,10 +7,10 @@
 #include <sstream>
 #include <string>
 #include <string_view>
-
+#include "xlang_model_listener.h"
 #include "antlr4-runtime.h"
 #include "XlangParserBaseListener.h"
-
+#include "xlang_model_listener.h"
 #include "models/xmeta_models.h"
 
 struct ast_to_st_listener;
@@ -58,7 +58,10 @@ namespace xlang::xmeta
 
     private:
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> m_namespaces;
-        std::shared_ptr<namespace_body_model> m_cur_namespace_body;
+        std::map<std::string_view, std::shared_ptr<using_alias_directive_model>, std::less<>> m_using_alias_directives;
+        std::vector<std::shared_ptr<using_namespace_directive_model>> m_using_namespace_directives;
+
+        std::shared_ptr<namespace_body_model> m_cur_namespace_body = nullptr;
         std::shared_ptr<class_model> m_cur_class;
         std::shared_ptr<interface_model> m_cur_interface;
         std::shared_ptr<struct_model> m_cur_struct;
@@ -81,6 +84,7 @@ namespace xlang::xmeta
         void write_enum_const_expr_range_error(size_t decl_line, std::string_view const& invalid_expr, std::string_view const& enum_name);
         void write_namespace_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& original_name);
         void write_namespace_member_name_error(size_t decl_line, std::string_view const& invalid_name);
+       
     };
     std::string copy_to_lower(std::string_view sv);
 }

@@ -13,7 +13,8 @@ if (WIN32)
         cpp/xmeta_idl_reader.cpp
         cpp/ast_to_st_listener.cpp
         cpp/models/namespace_model.cpp
-        cpp/xlang_model_walker.cpp)
+        cpp/xlang_model_walker.cpp
+        cpp/xlang_model_resolver.cpp)
 endif ()
 
 target_include_directories(xmeta_model PUBLIC cpp/models cpp)
