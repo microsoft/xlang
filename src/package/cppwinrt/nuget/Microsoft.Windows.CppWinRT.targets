@@ -338,6 +338,7 @@ $(XamlMetaDataProviderPch)
     </Target>
 
     <Target Name="CppWinRTMakePlatformProjection"
+            Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'"
             DependsOnTargets="GetCppWinRTPlatformWinMDInputs;$(CppWinRTMakePlatformProjectionDependsOn)"
             Inputs="@(CppWinRTPlatformWinMDInputs)"
             Outputs="$(GeneratedFilesDir)winrt\base.h">
