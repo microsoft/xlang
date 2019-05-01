@@ -110,7 +110,7 @@ MINUS: '-';
 // semantic checking.
 IDENTIFIER
     : IdentifierOrKeyword
-    | IdentifierOrKeyword ('.' IdentifierOrKeyword)*
+    | IdentifierOrKeyword ('.' IdentifierOrKeyword)* // Identifier may not need a . here
     ;
     
 UUID

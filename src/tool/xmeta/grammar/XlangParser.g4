@@ -11,7 +11,7 @@ compilation_unit
     : using_directive* namespace_declaration*
     ;
 
-/* Basic Concepts */
+/* Basic Concepts */ //This could be namespace or type name
 type_name
     : (IDENTIFIER .)* IDENTIFIER type_argument_list?
     | qualified_alias_member
@@ -55,7 +55,7 @@ non_array_type
     | class_type
     ;
 
-enum_integral_type
+enum_integral_type // Bool is intentionally excluded
     : INT8
     | UINT8
     | INT16
@@ -71,7 +71,7 @@ type_argument_list
     ;
 
 /* Expression */
-expression
+expression //Maybe separate expression and literal later when we do real expression
     : DECIMAL_INTEGER_LITERAL
     | HEXADECIMAL_INTEGER_LITERAL
     | BOOLEAN_LITERAL
@@ -83,16 +83,16 @@ expression
     | NILL
     ;
 
-/* Variables */ // TODO: Later
-variable_declarator
-    : IDENTIFIER
-    | IDENTIFIER EQUAL variable_initializer
-    ;
+// /* Variables */ // this is not used anywhere
+// variable_declarator
+//     : IDENTIFIER
+//     | IDENTIFIER EQUAL variable_initializer
+//     ;
 
-variable_initializer
-    : expression
-    | array_type
-    ;
+// variable_initializer
+//     : expression
+//     | array_type
+//     ;
 
 /* Attributes */
 attributes
@@ -104,7 +104,7 @@ attribute_section
     ;
 
 // Attributes targets are subject to change
-attribute_target
+attribute_target // Method, Param, Type, Attribute
     : ASSEMBLY
     | MODULE
     | FIELD
@@ -136,7 +136,7 @@ positional_argument
     : IDENTIFIER? expression
     ;
 
-named_argument_list
+named_argument_list // Name arguments may not be needed in xlang. 
     : named_argument (COMMA named_argument)*
     ;
 
@@ -145,8 +145,8 @@ named_argument
     ;
 
 /* Namespaces */
-namespace_declaration
-    : NAMESPACE IDENTIFIER namespace_body SEMICOLON?
+namespace_declaration // add (. IDentifier)
+    : NAMESPACE IDENTIFIER namespace_body SEMICOLON? // namespace windows.name.test {}
     ;
 
 namespace_body
@@ -173,7 +173,7 @@ namespace_member_declaration
     | interface_declaration
     | enum_declaration
     | delegate_declaration
-    | apicontract_declaration
+    | apicontract_declaration 
     | attribute_declaration
     ;
 
@@ -200,12 +200,12 @@ class_declaration
         class_base? class_body SEMICOLON?
     ;
 
-class_modifier
+class_modifier // Explicit Seal? allow it to be explicitly sealed
     : UNSEALED
     | STATIC
     ;
 
-type_parameter_list
+type_parameter_list // attributes on generic types? Something<[Attribute] K> 
     : LESS_THAN attributes? IDENTIFIER (COMMA attributes? IDENTIFIER)* GREATER_THAN
     ;
 
@@ -233,7 +233,7 @@ interface_type_list
     ;
 
 interface_type_base
-    : attributes? type_name
+    : attributes? type_name //class_type
     ;
 
 class_body
@@ -252,16 +252,16 @@ class_member_declaration
     | class_constructor_declaration
     ;
 
-class_method_declaration
-    : attributes? method_modifier* return_type IDENTIFIER type_parameter_list? OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+class_method_declaration //Do not need generics in method
+    : attributes? method_modifier* return_type IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
-class_event_declaration
+class_event_declaration // this has to be a delegate type aka class_type
     : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
     | attributes? event_modifier* EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
 
-class_property_declaration
+class_property_declaration // Restrict property_identifier first ///TODO: Property accessors are optional
     : attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
     ;
 
@@ -284,7 +284,7 @@ fixed_parameter
     : attributes? parameter_modifier? type IDENTIFIER
     ;
 
-parameter_modifier
+parameter_modifier // More restrictive?
     : CONST REF
     | REF CONST
     | REF
@@ -296,7 +296,7 @@ return_type
     | VOID
     ;
 
-property_identifier
+property_identifier // more restrictive
     : IDENTIFIER
     | BOOLEAN
     | STRING
@@ -323,7 +323,7 @@ property_modifier
 property_accessors
     : attributes? GET SEMICOLON
     | attributes? SET SEMICOLON
-    | attributes? GET SEMICOLON SET SEMICOLON
+    | attributes? GET SEMICOLON SET SEMICOLON // allow set and get
     ;
 
 event_modifier
@@ -331,7 +331,7 @@ event_modifier
     | STATIC
     ;
 
-event_accessors
+event_accessors // add and remove implicit?
     : attributes? ADD SEMICOLON attributes? REMOVE SEMICOLON
     ;
 
@@ -340,9 +340,9 @@ class_constructor_modifier
     ;
 
 /* Structs */
-struct_declaration
-    : attributes? STRUCT IDENTIFIER type_parameter_list?
-        struct_body SEMICOLON
+struct_declaration // we don't have paramaterized structs yet in V1
+    : attributes? STRUCT IDENTIFIER // type_parameter_list?
+        struct_body SEMICOLON?
     ;
 
 struct_body
