@@ -27,8 +27,9 @@ struct ast_to_st_listener : XlangParserBaseListener
     void enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
     void exitNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
 
-    void exitUsing_alias_directive(XlangParser::Using_alias_directiveContext *ctx) override;
     void exitUsing_namespace_directive(XlangParser::Using_namespace_directiveContext *ctx) override;
+
+    void exitStruct_declaration(XlangParser::Struct_declarationContext *ctx) override;
 
 private:
     xlang::xmeta::xmeta_idl_reader& m_reader;
@@ -39,4 +40,6 @@ private:
     listener_error extract_type(XlangParser::TypeContext* tc, xlang::xmeta::type_ref& tr);
     listener_error extract_type(XlangParser::Return_typeContext* rtc, std::optional<xlang::xmeta::type_ref>& tr);
     void extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, std::shared_ptr<xlang::xmeta::delegate_model> const& dm);
+
+    template<class T> listener_error extract_field_declaration(XlangParser::Field_declarationContext *ctx, std::shared_ptr<T> const& model);
 };

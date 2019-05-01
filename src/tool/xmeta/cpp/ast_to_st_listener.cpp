@@ -356,6 +356,23 @@ void ast_to_st_listener::exitUsing_namespace_directive(XlangParser::Using_namesp
     {
         ns.append("." + ctx->IDENTIFIER(i)->getText());
     }
-    auto model = std::make_shared<using_namespace_directive_model>("", decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), ns);
-    m_reader.m_cur_namespace_body->add_using_namespace_directive(model);
+    //auto model = std::make_shared<using_namespace_directive_model>("", decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), ns);
+    //m_reader.m_cur_namespace_body->add_using_namespace_directive(model);
+}
+
+void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationContext *ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    auto decl_line = id->getSymbol()->getLine();
+
+    std::shared_ptr<struct_model> new_struct = std::make_shared<struct_model>(id->getText(), decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
+
+    for (auto field : ctx->struct_body()->field_declaration())
+    {
+        type_ref tr{ field->type()->getText() };
+        extract_type(field->type(), tr);
+        new_struct->add_field(std::pair(tr, field->IDENTIFIER()->getText()));
+    }
+
+    m_reader.m_cur_namespace_body->add_struct(new_struct);
 }
