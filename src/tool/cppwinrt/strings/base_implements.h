@@ -109,12 +109,23 @@ namespace winrt::impl
         }
     };
 
+    template <typename T>
+    struct producer_vtable
+    {
+        void* value;
+    };
+
     template <typename D, typename I, typename Enable>
     struct producer_convert : producer<D, typename default_interface<I>::type>
     {
         operator producer_ref<I> const() const noexcept
         {
             return { (produce<D, typename default_interface<I>::type>*)this };
+        }
+
+        operator producer_vtable<I> const() const noexcept
+        {
+            return { (void*)this };
         }
     };
 
@@ -1287,6 +1298,12 @@ namespace winrt
             com_ptr<D> result;
             result.copy_from(static_cast<D*>(this));
             return result;
+        }
+
+        template <typename T>
+        void* get_abi() const noexcept
+        {
+            return static_cast<impl::producer_vtable<T>>(*this).value;
         }
 
         operator IInspectable() const noexcept

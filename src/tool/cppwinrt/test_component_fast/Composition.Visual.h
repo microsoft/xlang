@@ -14,7 +14,7 @@ namespace winrt::test_component_fast::Composition::implementation
 
         auto base_CompositionObject() const
         {
-            return static_cast<impl::producer_abi<Composition::CompositionObject>>(*this).value;
+            return get_abi<Composition::CompositionObject>();
         }
 
     private:

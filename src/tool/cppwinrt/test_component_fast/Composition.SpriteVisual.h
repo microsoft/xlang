@@ -13,7 +13,7 @@ namespace winrt::test_component_fast::Composition::implementation
 
         auto base_Visual()
         {
-            return static_cast<impl::producer_abi<Composition::Visual>>(*this).value;
+            return get_abi<Composition::Visual>();
         }
     };
 }
