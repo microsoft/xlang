@@ -12,9 +12,9 @@ namespace winrt::test_component_fast::Composition::implementation
         void Offset(int32_t value);
         void ParentForTransform(Composition::Visual const& value);
 
-        auto base_CompositionObject()
+        auto base_CompositionObject() const
         {
-            return get_abi(static_cast<Composition::CompositionObject const&>(*this));
+            return static_cast<impl::producer_abi<Composition::CompositionObject>>(*this).value;
         }
 
     private:

@@ -1137,30 +1137,26 @@ namespace xlang
         method_signature signature{ method };
         w.async_types = is_async(method, signature);
 
-        std::string_view format;
+        //
+        // Note: this use of a lambda is a workaround for a Visual C++ compiler bug:
+        // https://developercommunity.visualstudio.com/content/problem/554130/incorrect-code-gen-when-invoking-a-conversion-oper.html
+        // Once fixed, revert the function body back to this:
+        //
+        // return static_cast<% const&>(*this).%(%);
+        //
 
-        if (is_noexcept(method))
-        {
-            format = R"(    inline % %::%(%) const noexcept
+        std::string_view format = R"(    inline % %::%(%) const%
     {
-        return static_cast<% const&>(*this).%(%);
+        return [&](% const& winrt_impl_base) { return winrt_impl_base.%(%); }(*this);
     }
 )";
-        }
-        else
-        {
-            format = R"(    inline % %::%(%) const
-    {
-        return static_cast<% const&>(*this).%(%);
-    }
-)";
-        }
 
         w.write(format,
             signature.return_signature(),
             class_type.TypeName(),
             method_name,
             bind<write_consume_params>(signature),
+            is_noexcept(method) ? " noexcept" : "",
             base_type,
             method_name,
             bind<write_consume_args>(signature));

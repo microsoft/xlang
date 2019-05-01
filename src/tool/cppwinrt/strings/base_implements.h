@@ -761,6 +761,8 @@ namespace winrt::impl
 
         uint32_t WINRT_CALL AddRef() noexcept
         {
+            puts("AddRef");
+
             if (this->outer())
             {
                 return this->outer()->AddRef();
@@ -771,6 +773,8 @@ namespace winrt::impl
 
         uint32_t WINRT_CALL Release() noexcept
         {
+            puts("Release");
+
             if (this->outer())
             {
                 return this->outer()->Release();
