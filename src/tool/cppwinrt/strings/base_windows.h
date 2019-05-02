@@ -20,7 +20,6 @@ namespace winrt::impl
         template <typename T>
         void add_query()
         {
-            printf("QI: %ls\n", name_of<T>().data());
             slim_lock_guard const guard(m_lock);
             ++m_info.queries[name_of<T>()];
         }
