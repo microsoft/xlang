@@ -9,13 +9,6 @@
 
 namespace xlang::xmeta
 {
-    using class_type_semantics = std::variant<
-        std::shared_ptr<class_model>,
-        std::shared_ptr<enum_model>,
-        std::shared_ptr<interface_model>,
-        std::shared_ptr<struct_model>,
-        std::shared_ptr<delegate_model>>;
-
     struct namespace_member_model : base_model
     {
         namespace_member_model() = delete;

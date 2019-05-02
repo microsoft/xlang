@@ -8,12 +8,6 @@
 
 namespace xlang::xmeta
 {
-    struct class_model;
-    struct enum_model;
-    struct interface_model;
-    struct struct_model;
-    struct delegate_model;
-
     enum class simple_type
     {
         Boolean,

@@ -35,6 +35,26 @@ namespace xlang::xmeta
             return m_type;
         }
 
+        // NOTE: fully_qualified_id will be a vector of strings once  we have using directives
+        void resolve(std::map<std::string, class_type_semantics> const& symbols, std::string fully_qualified_id)
+        {
+            if (!m_type.get_semantic().is_resolved())
+            {
+                std::string ref_name = m_type.get_semantic().get_ref_name();
+                std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : fully_qualified_id + "." + ref_name;
+
+                auto iter = symbols.find(symbol);
+                if (iter == symbols.end())
+                {
+                    // Reccord the unresolved type and continue
+                }
+                else
+                {
+                    m_type.set_semantic(iter->second);
+                }
+            }
+        }
+
     private:
         parameter_semantics m_semantic;
         type_ref m_type;

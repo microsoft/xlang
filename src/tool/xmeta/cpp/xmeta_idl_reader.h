@@ -60,6 +60,7 @@ namespace xlang::xmeta
 
         void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
         void listen_delegate_model(std::shared_ptr<delegate_model> const& model) final;
+        bool type_declaration_exists(std::string symbol);
 
     private:
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> m_namespaces;
@@ -87,6 +88,7 @@ namespace xlang::xmeta
         void pop_namespace();
 
         void write_error(size_t decl_line, std::string_view const& msg);
+        void write_redeclaration_error(std::string symbol, size_t decl_line);
         void write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name);
         void write_enum_member_expr_ref_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name);
         void write_enum_circular_dependency(size_t decl_line, std::string_view const& invalid_member_id, std::string_view const& enum_name);

@@ -342,7 +342,7 @@ class_constructor_modifier
 /* Structs */
 struct_declaration
     : attributes? STRUCT IDENTIFIER type_parameter_list?
-        struct_body SEMICOLON
+        struct_body SEMICOLON?
     ;
 
 struct_body

@@ -35,13 +35,14 @@ namespace xlang::xmeta
                 type_ref & field_type = field.first;
                 if (!field_type.get_semantic().is_resolved())
                 {
+                    // TODO: Once we have using directives, we will need to go through many fully_qualified_ids here
                     std::string ref_name = field_type.get_semantic().get_ref_name();
                     std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
 
                     auto iter = symbols.find(symbol);
                     if (iter == symbols.end())
                     {
-                        // Reccord the unresolved type and continue
+                        // TODO: Reccord the unresolved type and continue
                     }
                     else
                     {

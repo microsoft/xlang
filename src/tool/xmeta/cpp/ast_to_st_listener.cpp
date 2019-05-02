@@ -268,11 +268,17 @@ void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarat
     auto id = ctx->IDENTIFIER();
     std::string delegate_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
+
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + delegate_name;
+    if (m_reader.type_declaration_exists(symbol))
+    {
+        m_reader.write_redeclaration_error(symbol, decl_line);
+        return;
+    }
+
     std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };
     extract_type(ctx->return_type(), tr);
     auto dm = std::make_shared<delegate_model>(delegate_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), std::move(tr));
-
-    // TODO: Type params
 
     auto formal_params = ctx->formal_parameter_list();
     if (formal_params)
@@ -281,7 +287,6 @@ void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarat
     }
 
     m_reader.m_cur_namespace_body->add_delegate(dm);
-    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + dm->get_id();
     m_reader.symbols[symbol] = dm;
 }
 
@@ -291,6 +296,12 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
     std::string enum_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
     enum_semantics type = enum_semantics::Int32;
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + enum_name;
+    if (m_reader.type_declaration_exists(symbol))
+    {
+        m_reader.write_redeclaration_error(symbol, decl_line);
+        return;
+    }
 
     if (ctx->enum_base())
     {
@@ -298,7 +309,7 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
         type = str_to_enum_semantics(ctx->enum_base()->enum_integral_type()->getText());
     }
 
-    std::shared_ptr<enum_model> new_enum = std::make_shared<enum_model>(id->getText(), decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), type);
+    std::shared_ptr<enum_model> new_enum = std::make_shared<enum_model>(enum_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), type);
 
     for (auto field : ctx->enum_body()->enum_member_declaration())
     {
@@ -322,7 +333,6 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
     }
 
     m_reader.m_cur_namespace_body->add_enum(new_enum);
-    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + new_enum->get_id();
     m_reader.symbols[symbol] = new_enum;
 }
 
@@ -330,8 +340,17 @@ void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationC
 {
     auto id = ctx->IDENTIFIER();
     auto decl_line = id->getSymbol()->getLine();
+    std::string struct_name{ id->getText() };
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + struct_name;
 
-    std::shared_ptr<struct_model> new_struct = std::make_shared<struct_model>(id->getText(), decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
+    if (m_reader.type_declaration_exists(symbol))
+    {
+        // TODO: Reccord the semantic error and continue
+        m_reader.write_redeclaration_error(symbol, decl_line);
+        return;
+    }
+
+    std::shared_ptr<struct_model> new_struct = std::make_shared<struct_model>(struct_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
 
     for (auto field : ctx->struct_body()->field_declaration())
     {
@@ -341,7 +360,6 @@ void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationC
     }
 
     m_reader.m_cur_namespace_body->add_struct(new_struct);
-    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + new_struct->get_id();
     m_reader.symbols[symbol] = new_struct;
 }
 

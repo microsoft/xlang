@@ -10,8 +10,6 @@
 
 namespace xlang::xmeta
 {
-    struct namespace_model;
-
     struct using_alias_directive_model : base_model
     {
         using_alias_directive_model() = delete;

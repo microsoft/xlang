@@ -32,6 +32,27 @@ TEST_CASE("Duplicate Namespaces")
     REQUIRE(ns->get_namespace_bodies()[1]->get_containing_namespace() == ns);
 }
 
+TEST_CASE("Multiple definition error test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            enum E {}
+            enum E {}
+
+            delegate void D();
+            delegate void D();
+
+            struct S {}
+            struct S {}
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 3);
+}
+
 TEST_CASE("Enum test")
 {
     std::istringstream test_idl{ R"(
@@ -79,7 +100,7 @@ TEST_CASE("Enum test")
     REQUIRE((val5.is_resolved() && std::get<int32_t>(val5.get_resolved_target()) == 0x21));
 }
 
-TEST_CASE("Enum circular dependency")
+TEST_CASE("Enum circular implicit dependency")
 {
     std::istringstream implicit_dependency_error_idl{ R"(
         namespace N
@@ -92,6 +113,14 @@ TEST_CASE("Enum circular dependency")
             }
         }
     )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(implicit_dependency_error_idl) == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 1);
+}
+
+TEST_CASE("Enum circular explicit dependency")
+{
     std::istringstream explicit_dependency_error_idl{ R"(
         namespace N
         {
@@ -104,9 +133,6 @@ TEST_CASE("Enum circular dependency")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(implicit_dependency_error_idl) == 0);
-    REQUIRE(reader.get_num_semantic_errors() == 1);
-    reader.reset("");
     REQUIRE(reader.read(explicit_dependency_error_idl) == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
 }
@@ -148,8 +174,8 @@ TEST_CASE("Delegate test")
     REQUIRE(del0_formal_params[2].get_id() == "e");
     REQUIRE((del0_formal_param_0_type.is_resolved() && std::get<simple_type>(del0_formal_param_0_type.get_resolved_target()) == simple_type::Int32));
     REQUIRE((del0_formal_param_1_type.is_resolved() && std::get<simple_type>(del0_formal_param_1_type.get_resolved_target()) == simple_type::Double));
-    REQUIRE((!del0_formal_param_2_type.is_resolved() && del0_formal_param_2_type.get_ref_name() == "E"));
-
+    REQUIRE(del0_formal_param_2_type.is_resolved());
+    REQUIRE(std::get<std::shared_ptr<enum_model>>(del0_formal_param_2_type.get_resolved_target())->get_id() == "E");
     REQUIRE(delegates.find("D2") != delegates.end());
     REQUIRE(delegates.at("D2")->get_return_type() == std::nullopt);
     REQUIRE(delegates.at("D2")->get_formal_parameters().empty());
@@ -228,6 +254,65 @@ TEST_CASE("Struct test")
     REQUIRE(std::get<simple_type>(type11.get_resolved_target()) == simple_type::Double);
 }
 
+TEST_CASE("Resolving delegates types test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct S1
+            {
+            };
+
+            enum E1
+            {
+            }
+
+            delegate E1 D1(S1 param1, E1 param2);
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto namespaces = reader.get_namespaces();
+    auto it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto ns = it->second;
+    REQUIRE(ns->get_namespace_bodies().size() == 1);
+    auto ns_body = ns->get_namespace_bodies()[0];
+
+    auto delegates = ns_body->get_delegates();
+    REQUIRE(delegates.size() == 1);
+    REQUIRE(delegates.find("D1") != delegates.end());
+    auto delegate1 = delegates.at("D1");
+    auto return_semantic = delegate1->get_return_type()->get_semantic();
+    REQUIRE(return_semantic.is_resolved());
+    auto resolved_return_semantic = return_semantic.get_resolved_target();
+    REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(resolved_return_semantic));
+    REQUIRE(std::get<std::shared_ptr<enum_model>>(resolved_return_semantic)->get_id() == "E1");
+
+    {
+        auto param = delegate1->get_formal_parameters()[0];
+        param.get_type().get_semantic();
+        REQUIRE(param.get_id() == "param1");
+        auto type = param.get_type().get_semantic();
+        REQUIRE(type.is_resolved());
+        auto target = type.get_resolved_target();
+        REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(target));
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(target)->get_id() == "S1");
+    }
+    {
+        auto param = delegate1->get_formal_parameters()[1];
+        param.get_type().get_semantic();
+        REQUIRE(param.get_id() == "param2");
+        auto type = param.get_type().get_semantic();
+        REQUIRE(type.is_resolved());
+        auto target = type.get_resolved_target();
+        REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(target));
+        REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
+    }
+}
+
 TEST_CASE("Resolving struct types test")
 {
     std::istringstream struct_test_idl{ R"(
@@ -283,43 +368,62 @@ TEST_CASE("Resolving struct types test")
     }
 }
 
-//TEST_CASE("Resolving delegates types test")
-//{
-//    std::istringstream struct_test_idl{ R"(
-//        namespace N
-//        {
-//            enum E1
-//            {
-//            }
-//
-//            struct S1
-//            {
-//                E1 field1;
-//            };
-//        }
-//    )" };
-//
-//    xmeta_idl_reader reader{ "" };
-//    REQUIRE(reader.read(struct_test_idl) == 0);
-//
-//    auto namespaces = reader.get_namespaces();
-//    auto it = namespaces.find("N");
-//    REQUIRE(it != namespaces.end());
-//    auto ns = it->second;
-//    REQUIRE(ns->get_namespace_bodies().size() == 1);
-//    auto ns_body = ns->get_namespace_bodies()[0];
-//
-//    auto structs = ns_body->get_structs();
-//    REQUIRE(structs.size() == 1);
-//    REQUIRE(structs.find("S1") != structs.end());
-//    auto struct2 = structs.at("S1");
-//    auto fields = struct2->get_fields();
-//    REQUIRE(fields.size() == 1);
-//
-//    auto type = fields[0].first.get_semantic();
-//    REQUIRE(type.is_resolved());
-//    auto target = type.get_resolved_target();
-//    REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(target));
-//    REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
-//    
-//}
+TEST_CASE("Resolving types across namespaces test")
+{
+    std::istringstream test_idl{ R"(
+        namespace A
+        {
+            struct S1
+            {
+            };
+        }
+
+        namespace N
+        {
+            delegate Boolean D1(A.S1 param1, B.C.E1 param2);
+        }
+
+        namespace B.C
+        {
+            enum E1
+            {
+            }
+        }
+
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto namespaces = reader.get_namespaces();
+    auto it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto ns = it->second;
+    REQUIRE(ns->get_namespace_bodies().size() == 1);
+    auto ns_body = ns->get_namespace_bodies()[0];
+
+    auto delegates = ns_body->get_delegates();
+    REQUIRE(delegates.size() == 1);
+    REQUIRE(delegates.find("D1") != delegates.end());
+    auto delegate1 = delegates.at("D1");
+    {
+        auto param = delegate1->get_formal_parameters()[0];
+        param.get_type().get_semantic();
+        REQUIRE(param.get_id() == "param1");
+        auto type = param.get_type().get_semantic();
+        REQUIRE(type.is_resolved());
+        auto target = type.get_resolved_target();
+        REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(target));
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(target)->get_id() == "S1");
+    }
+    {
+        auto param = delegate1->get_formal_parameters()[1];
+        param.get_type().get_semantic();
+        REQUIRE(param.get_id() == "param2");
+        auto type = param.get_type().get_semantic();
+        REQUIRE(type.is_resolved());
+        auto target = type.get_resolved_target();
+        REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(target));
+        REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
+    }
+}

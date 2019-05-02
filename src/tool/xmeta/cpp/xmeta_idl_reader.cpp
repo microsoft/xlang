@@ -122,6 +122,10 @@ namespace xlang::xmeta
             }
         }
     }
+    bool xmeta_idl_reader::type_declaration_exists(std::string symbol)
+    {
+        return symbols.find(symbol) != symbols.end();
+    }
 
     void xmeta_idl_reader::reset(std::string_view const& assembly_name)
     {
@@ -140,6 +144,13 @@ namespace xlang::xmeta
     {
         std::cerr << "Semantic error (line " << decl_line << "): " << msg << std::endl;
         m_num_semantic_errors++;
+    }
+
+    void xmeta_idl_reader::write_redeclaration_error(std::string symbol, size_t decl_line)
+    {
+        std::ostringstream oss;
+        oss << "Redeclaration; type already declared: " << symbol;
+        write_error(decl_line, oss.str());
     }
 
     void xmeta_idl_reader::write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
