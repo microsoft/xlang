@@ -2,8 +2,6 @@
 #include "catch.hpp"
 #include "winrt/base.h"
 
-using namespace winrt::test_component_fast::Composition;
-
 using namespace winrt;
 
 int main(int const argc, char** argv)
