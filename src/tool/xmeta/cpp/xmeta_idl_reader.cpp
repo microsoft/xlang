@@ -153,6 +153,20 @@ namespace xlang::xmeta
         write_error(decl_line, oss.str());
     }
 
+    void xmeta_idl_reader::write_unresolved_type_error(std::string symbol, size_t decl_line)
+    {
+        std::ostringstream oss;
+        oss << "Unable to resolve type: " << symbol;
+        write_error(decl_line, oss.str());
+    }
+
+    void xmeta_idl_reader::write_struct_field_error(std::string symbol, size_t decl_line)
+    {
+        std::ostringstream oss;
+        oss << "Struct has circular fields: " << symbol;
+        write_error(decl_line, oss.str());
+    }
+
     void xmeta_idl_reader::write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
     {
         std::ostringstream oss;
@@ -199,6 +213,10 @@ namespace xlang::xmeta
     void xmeta_idl_reader::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
         model->resolve(symbols);
+        if (model->has_circular_struct_declarations(symbols))
+        {
+            m_num_semantic_errors++;
+        }
     }
 
     void xmeta_idl_reader::listen_delegate_model(std::shared_ptr<delegate_model> const& model) 

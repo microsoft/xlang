@@ -4,11 +4,12 @@
 #include <string_view>
 #include <utility>
 #include <vector>
-
+#include <variant>
 #include "model_types.h"
 #include "namespace_member_model.h"
 #include "property_model.h"
 #include "iostream"
+
 namespace xlang::xmeta
 {
     struct struct_model : namespace_member_model
@@ -28,7 +29,7 @@ namespace xlang::xmeta
             m_fields.emplace_back(std::move(field));
         }
 
-        void resolve(std::map<std::string, class_type_semantics> const& symbols)
+        void resolve(std::map<std::string, class_type_semantics> symbols)
         {
             for (auto & field : m_fields)
             {
@@ -42,12 +43,7 @@ namespace xlang::xmeta
                     auto iter = symbols.find(symbol);
                     if (iter == symbols.end())
                     {
-                        // TODO: Reccord the unresolved type and continue
-                    }
-                    else if (symbol == this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + this->get_id())
-                    {
-                        // This is a case of a semantic caught in the resolving phase
-                        // will need to percolate errors up to the m_reader somehow
+                        // TODO: Reccord the unresolved type and continue. Fix once we have a good error story
                     }
                     else
                     {
@@ -55,6 +51,34 @@ namespace xlang::xmeta
                     }
                 }
             }
+        }
+
+        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> symbols)
+        {
+            std::string symbol = this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + this->get_id();
+            return has_circular_struct_declarations(symbols, symbol);
+        }
+
+        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> symbols, std::string_view const& symbol_to_check)
+        {
+            for (auto const& field : m_fields)
+            {
+                auto field_type = field.first.get_semantic().get_resolved_target();
+                if (std::holds_alternative<std::shared_ptr<struct_model>>(field_type))
+                {
+                    auto struct_field = std::get<std::shared_ptr<struct_model>>(field_type);
+                    struct_field->resolve(symbols); // TODO: This is hiding a resolve error. Fix once we have a good error story
+                    if (struct_field->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + struct_field->get_id() == symbol_to_check)
+                    {
+                        return true;
+                    }
+                    if (struct_field->has_circular_struct_declarations(symbols, symbol_to_check))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
     private:

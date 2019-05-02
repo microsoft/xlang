@@ -36,7 +36,7 @@ namespace xlang::xmeta
         simple_type,
         object_type>;
 
-    struct type_ref
+    struct type_ref // TODO: needs to have decl
     {
         type_ref() = delete;
         type_ref(std::string_view const& id) :
