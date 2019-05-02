@@ -23,10 +23,10 @@ struct ast_to_st_listener : XlangParserBaseListener
 
     void exitDelegate_declaration(XlangParser::Delegate_declarationContext* ctx) override;
     void exitEnum_declaration(XlangParser::Enum_declarationContext *ctx) override;
+    void exitStruct_declaration(XlangParser::Struct_declarationContext *ctx) override;
 
     void enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
     void exitNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
-    void exitStruct_declaration(XlangParser::Struct_declarationContext *ctx) override;
 
 private:
     xlang::xmeta::xmeta_idl_reader& m_reader;

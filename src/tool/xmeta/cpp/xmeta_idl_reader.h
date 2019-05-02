@@ -67,6 +67,7 @@ namespace xlang::xmeta
         void listen_delegate_model(std::shared_ptr<delegate_model> const& model) final;
         bool type_declaration_exists(std::string symbol);
 
+        // TODO: For a good implementation of an error story, we might want to separate this out from this class. 
         void write_error(size_t decl_line, std::string_view const& msg);
         void write_redeclaration_error(std::string symbol, size_t decl_line);
         void write_unresolved_type_error(std::string symbol, size_t decl_line);

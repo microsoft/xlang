@@ -8,7 +8,6 @@
 #include "model_types.h"
 #include "namespace_member_model.h"
 #include "property_model.h"
-#include "iostream"
 
 namespace xlang::xmeta
 {

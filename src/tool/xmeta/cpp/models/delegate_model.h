@@ -3,6 +3,7 @@
 #include <string_view>
 #include <optional>
 #include <vector>
+
 #include "namespace_member_model.h"
 #include "formal_parameter_model.h"
 #include "model_types.h"

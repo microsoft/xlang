@@ -6,9 +6,9 @@
 #include "XlangLexer.h"
 #include "XlangParser.h"
 #include "xlang_model_walker.h"
+
 namespace xlang::xmeta
 {
-
     size_t xmeta_idl_reader::read(std::istream& idl_contents, bool disable_error_reporting)
     {
         ast_to_st_listener listener{ *this };

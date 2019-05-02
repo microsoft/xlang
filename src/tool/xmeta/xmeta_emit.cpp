@@ -650,9 +650,9 @@ namespace xlang::xmeta
             token_delegate_constructor_def,
             1, 
             L"object",
-            0,  // these needs to be set
+            0,
             (DWORD)-1,
-            nullptr,    // No constant value
+            nullptr,
             0,
             &constructor_param_1));
 
@@ -661,9 +661,9 @@ namespace xlang::xmeta
             token_delegate_constructor_def,
             2, 
             L"method",
-            0,  // these needs to be set
+            0,
             (DWORD)-1, 
-            nullptr,    // No constant value
+            nullptr,
             0,
             &constructor_param_2));
         

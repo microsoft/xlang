@@ -84,6 +84,7 @@ listener_error ast_to_st_listener::extract_type(XlangParser::Return_typeContext*
     return extract_type(rtc->type(), *tr);
 }
 
+// Class types are to be resolved later in thse second pass
 listener_error ast_to_st_listener::extract_type(XlangParser::TypeContext* tc, type_ref& tr)
 {
     if (tc->value_type())

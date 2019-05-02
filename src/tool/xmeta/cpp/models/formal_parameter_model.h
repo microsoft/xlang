@@ -35,7 +35,7 @@ namespace xlang::xmeta
             return m_type;
         }
 
-        // NOTE: fully_qualified_id will be a vector of strings once  we have using directives
+        // TODO: fully_qualified_id will be a vector of strings once  we have using directives
         void resolve(std::map<std::string, class_type_semantics> const& symbols, std::string fully_qualified_id)
         {
             if (!m_type.get_semantic().is_resolved())
@@ -46,7 +46,7 @@ namespace xlang::xmeta
                 auto iter = symbols.find(symbol);
                 if (iter == symbols.end())
                 {
-                    // Reccord the unresolved type and continue
+                    // TODO: Record the unresolved type and continue once we have a good error story for reporting errors in models
                 }
                 else
                 {

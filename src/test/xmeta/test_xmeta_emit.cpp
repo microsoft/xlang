@@ -327,9 +327,7 @@ TEST_CASE("Parameter signature simple type metadata")
     }
 }
 
-// This test is disabled because type references are not able to be resolve yet in the models. TODO: resolve types. 
-// In this particular case, we want to show that TypeRefByName is able to be defined first, even if there is no TypeDef
-TEST_CASE("Parameter signature unresolved reference type metadata")
+TEST_CASE("Parameter signature class reference type metadata across namespace")
 {
     std::istringstream test_idl{ R"(
         namespace Windows.Test
@@ -362,8 +360,7 @@ TEST_CASE("Parameter signature unresolved reference type metadata")
     }
 }
 
-// This test is disabled because type references are not able to be resolve yet in the models. TODO: resolve types. 
-TEST_CASE("Parameter signature resolved reference type metadata")
+TEST_CASE("Parameter signature class reference type metadata")
 {
     std::istringstream test_idl{ R"(
         namespace Windows.Test
