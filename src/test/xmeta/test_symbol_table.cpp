@@ -155,24 +155,146 @@ TEST_CASE("Delegate test")
     REQUIRE(delegates.at("D2")->get_formal_parameters().empty());
 }
 
-//TEST_CASE("Struct test")
+TEST_CASE("Struct test")
+{
+    std::istringstream struct_test_idl{ R"(
+        namespace N
+        {
+            struct S
+            {
+                Boolean field_1;
+                String field_2;
+                Int16 field_3;
+                Int32 field_4;
+                Int64 field_5;
+                UInt8 field_6;
+                UInt16 field_7;
+                UInt32 field_8;
+                Char16 field_9;
+                Single field_10;
+                Double field_11;
+            };
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(struct_test_idl) == 0);
+
+    auto namespaces = reader.get_namespaces();
+    auto it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto ns = it->second;
+    REQUIRE(ns->get_namespace_bodies().size() == 1);
+    auto ns_body = ns->get_namespace_bodies()[0];
+
+    auto structs = ns_body->get_structs();
+    REQUIRE(structs.size() == 1);
+    REQUIRE(structs.find("S") != structs.end());
+    auto struct1 = structs.at("S");
+    auto fields = struct1->get_fields();
+    REQUIRE(fields.size() == 11);
+    REQUIRE(fields[0].second == "field_1");
+    auto type1 = fields[0].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type1.get_resolved_target()) == simple_type::Boolean);
+    REQUIRE(fields[1].second == "field_2");
+    auto type2 = fields[1].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type2.get_resolved_target()) == simple_type::String);
+    REQUIRE(fields[2].second == "field_3");
+    auto type3 = fields[2].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type3.get_resolved_target()) == simple_type::Int16);
+    REQUIRE(fields[3].second == "field_4");
+    auto type4 = fields[3].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type4.get_resolved_target()) == simple_type::Int32);
+    REQUIRE(fields[4].second == "field_5");
+    auto type5 = fields[4].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type5.get_resolved_target()) == simple_type::Int64);
+    REQUIRE(fields[5].second == "field_6");
+    auto type6 = fields[5].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type6.get_resolved_target()) == simple_type::UInt8);
+    REQUIRE(fields[6].second == "field_7");
+    auto type7 = fields[6].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type7.get_resolved_target()) == simple_type::UInt16);
+    REQUIRE(fields[7].second == "field_8");
+    auto type8 = fields[7].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type8.get_resolved_target()) == simple_type::UInt32);
+    REQUIRE(fields[8].second == "field_9");
+    auto type9 = fields[8].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type9.get_resolved_target()) == simple_type::Char16);
+    REQUIRE(fields[9].second == "field_10");
+    auto type10 = fields[9].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type10.get_resolved_target()) == simple_type::Single);
+    REQUIRE(fields[10].second == "field_11");
+    auto type11 = fields[10].first.get_semantic();
+    REQUIRE(std::get<simple_type>(type11.get_resolved_target()) == simple_type::Double);
+}
+
+TEST_CASE("Resolving struct types test")
+{
+    std::istringstream struct_test_idl{ R"(
+        namespace N
+        {
+            struct S1
+            {
+            };
+
+            enum E1
+            {
+            }
+
+            struct S2
+            {
+                S1 field_1;
+                E1 field_2;
+            };
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(struct_test_idl) == 0);
+
+    auto namespaces = reader.get_namespaces();
+    auto it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto ns = it->second;
+    REQUIRE(ns->get_namespace_bodies().size() == 1);
+    auto ns_body = ns->get_namespace_bodies()[0];
+
+    auto structs = ns_body->get_structs();
+    REQUIRE(structs.find("S2") != structs.end());
+    auto struct2 = structs.at("S2");
+    auto fields = struct2->get_fields();
+    REQUIRE(fields.size() == 2);
+    {
+        REQUIRE(fields[0].second == "field_1");
+        auto type = fields[0].first.get_semantic();
+        REQUIRE(type.is_resolved());
+        auto target = type.get_resolved_target();
+        REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(target));
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(target)->get_id() == "S1");
+    }
+    {
+        REQUIRE(fields[1].second == "field_2");
+        auto type = fields[1].first.get_semantic();
+        REQUIRE(type.is_resolved());
+        auto target = type.get_resolved_target();
+        REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(target));
+        REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
+
+    }
+}
+
+//TEST_CASE("Resolving delegates types test")
 //{
 //    std::istringstream struct_test_idl{ R"(
 //        namespace N
 //        {
-//            struct S
+//            enum E1
 //            {
-//                Boolean field_1;
-//                String field_2;
-//                Int16 field_3;
-//                Int32 field_4;
-//                Int64 field_5;
-//                UInt8 field_6;
-//                UInt16 field_7;
-//                UInt32 field_8;
-//                Char16 field_9;
-//                Single field_10;
-//                Double field_11;
+//            }
+//
+//            struct S1
+//            {
+//                E1 field1;
 //            };
 //        }
 //    )" };
@@ -189,97 +311,15 @@ TEST_CASE("Delegate test")
 //
 //    auto structs = ns_body->get_structs();
 //    REQUIRE(structs.size() == 1);
-//    REQUIRE(structs.find("S") != structs.end());
-//    auto struct1 = structs.at("S");
-//    auto fields = struct1->get_fields();
-//    REQUIRE(fields.size() == 11);
-//    REQUIRE(fields[0].second == "field_1");
-//    auto type1 = fields[0].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type1.get_resolved_target()) == simple_type::Boolean);
-//    REQUIRE(fields[1].second == "field_2");
-//    auto type2 = fields[1].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type2.get_resolved_target()) == simple_type::String);
-//    REQUIRE(fields[2].second == "field_3");
-//    auto type3 = fields[2].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type3.get_resolved_target()) == simple_type::Int16);
-//    REQUIRE(fields[3].second == "field_4");
-//    auto type4 = fields[3].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type4.get_resolved_target()) == simple_type::Int32);
-//    REQUIRE(fields[4].second == "field_5");
-//    auto type5 = fields[4].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type5.get_resolved_target()) == simple_type::Int64);
-//    REQUIRE(fields[5].second == "field_6");
-//    auto type6 = fields[5].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type6.get_resolved_target()) == simple_type::UInt8);
-//    REQUIRE(fields[6].second == "field_7");
-//    auto type7 = fields[6].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type7.get_resolved_target()) == simple_type::UInt16);
-//    REQUIRE(fields[7].second == "field_8");
-//    auto type8 = fields[7].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type8.get_resolved_target()) == simple_type::UInt32);
-//    REQUIRE(fields[8].second == "field_9");
-//    auto type9 = fields[8].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type9.get_resolved_target()) == simple_type::Char16);
-//    REQUIRE(fields[9].second == "field_10");
-//    auto type10 = fields[9].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type10.get_resolved_target()) == simple_type::Single);
-//    REQUIRE(fields[10].second == "field_11");
-//    auto type11 = fields[10].first.get_semantic();
-//    REQUIRE(std::get<simple_type>(type11.get_resolved_target()) == simple_type::Double);
+//    REQUIRE(structs.find("S1") != structs.end());
+//    auto struct2 = structs.at("S1");
+//    auto fields = struct2->get_fields();
+//    REQUIRE(fields.size() == 1);
+//
+//    auto type = fields[0].first.get_semantic();
+//    REQUIRE(type.is_resolved());
+//    auto target = type.get_resolved_target();
+//    REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(target));
+//    REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
+//    
 //}
-
-TEST_CASE("Struct nested test")
-{
-    std::istringstream struct_test_idl{ R"(
-        namespace N
-        {
-            struct S1
-            {
-                Boolean field_1;
-            };
-
-            struct S2
-            {
-                S1 field_1;
-                Int32 field_2;
-            };
-        }
-    )" };
-
-    xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(struct_test_idl) == 0);
-
-    auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto ns = it->second;
-    REQUIRE(ns->get_namespace_bodies().size() == 1);
-    auto ns_body = ns->get_namespace_bodies()[0];
-
-    auto structs = ns_body->get_structs();
-    REQUIRE(structs.size() == 2);
-    REQUIRE(structs.find("S1") != structs.end());
-    auto struct1 = structs.at("S1");
-    auto fields1 = struct1->get_fields();
-    REQUIRE(fields1.size() == 1);
-
-    REQUIRE(structs.find("S2") != structs.end());
-    auto struct2 = structs.at("S2");
-    auto fields2 = struct2->get_fields();
-    REQUIRE(fields2.size() == 2);
-
-    REQUIRE(fields1[0].second == "field_1");
-    auto type1 = fields1[0].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type1.get_resolved_target()) == simple_type::Boolean);
-
-    REQUIRE(fields2[0].second == "field_1");
-    auto type2 = fields2[0].first.get_semantic();
-    REQUIRE(type2.is_resolved());
-    auto target = type2.get_resolved_target();
-    REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(target));
-    //REQUIRE(std::get<struct_model>(target).get_id() == "S1");
-
-    REQUIRE(fields2[1].second == "field_2");
-    auto type3 = fields2[1].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type3.get_resolved_target()) == simple_type::Int32);
-}
