@@ -205,6 +205,10 @@ TEST_CASE("Parameter signature simple type metadata")
     std::istringstream test_idl{ R"(
         namespace Windows.Test
         {
+            struct test1
+            {
+            };
+
             delegate String d1();
             delegate Int8 d2();
             delegate Int16 d3();
@@ -325,22 +329,30 @@ TEST_CASE("Parameter signature simple type metadata")
 
 // This test is disabled because type references are not able to be resolve yet in the models. TODO: resolve types. 
 // In this particular case, we want to show that TypeRefByName is able to be defined first, even if there is no TypeDef
-TEST_CASE("Parameter signature unresolved reference type metadata", "[!hide]")
+TEST_CASE("Parameter signature unresolved reference type metadata")
 {
     std::istringstream test_idl{ R"(
         namespace Windows.Test
         {
-            delegate MyClass d1();
             enum MyClass
             {
             }
         }
+        namespace A
+        {
+            delegate Windows.Test.MyClass d1();
+        }
     )" };
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
     REQUIRE(db.MethodDef.size() == 2);
     REQUIRE(db.TypeRef.size() == 5);
+    REQUIRE(db.TypeDef.size() == 3);
+
     REQUIRE(db.TypeRef[4].TypeName() == "MyClass");
+    REQUIRE(db.TypeRef[3].TypeName() == "d1");
+
     // Testing invoke method
     {
         auto const& delegate_invoke = db.MethodDef[1];
@@ -351,7 +363,7 @@ TEST_CASE("Parameter signature unresolved reference type metadata", "[!hide]")
 }
 
 // This test is disabled because type references are not able to be resolve yet in the models. TODO: resolve types. 
-TEST_CASE("Parameter signature resolved reference type metadata", "[!hide]")
+TEST_CASE("Parameter signature resolved reference type metadata")
 {
     std::istringstream test_idl{ R"(
         namespace Windows.Test
@@ -365,18 +377,18 @@ TEST_CASE("Parameter signature resolved reference type metadata", "[!hide]")
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-
     REQUIRE(db.MethodDef.size() == 2);
     REQUIRE(db.TypeRef.size() == 5);
     REQUIRE(db.TypeDef.size() == 3);
-    REQUIRE(db.TypeRef[4].TypeName() == "MyClass");
 
+    REQUIRE(db.TypeRef[3].TypeName() == "MyClass");
+    REQUIRE(db.TypeRef[4].TypeName() == "d1");
 
     // Testing invoke method
     {
         auto const& delegate_invoke = db.MethodDef[1];
         REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
         auto const& delegate_sig = delegate_invoke.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[4]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[3]);
     }
 }

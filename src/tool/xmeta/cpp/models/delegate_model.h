@@ -3,7 +3,6 @@
 #include <string_view>
 #include <optional>
 #include <vector>
-
 #include "namespace_member_model.h"
 #include "formal_parameter_model.h"
 #include "model_types.h"
@@ -28,6 +27,47 @@ namespace xlang::xmeta
         auto const& get_formal_parameters() const noexcept
         {
             return m_formal_parameters;
+        }
+
+        void resolve(std::map<std::string, class_type_semantics> const& symbols)
+        {
+            if (m_return_type)
+            {
+                if (!m_return_type->get_semantic().is_resolved())
+                {
+                    std::string ref_name = m_return_type->get_semantic().get_ref_name();
+                    std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
+                    auto iter = symbols.find(symbol);
+                    if (iter == symbols.end())
+                    {
+                        // Reccord the unresolved type and continue
+                    }
+                    else
+                    {
+                        m_return_type->set_semantic(iter->second);
+                    }
+                }
+            }
+
+            for (formal_parameter_model & param : m_formal_parameters)
+            {
+                type_ref type = param.get_type();
+                if (!type.get_semantic().is_resolved())
+                {
+                    std::string ref_name = type.get_semantic().get_ref_name();
+                    std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
+
+                    auto iter = symbols.find(symbol);
+                    if (iter == symbols.end())
+                    {
+                        // Reccord the unresolved type and continue
+                    }
+                    else
+                    {
+                        type.set_semantic(iter->second);
+                    }
+                }
+            }
         }
 
         void add_formal_parameter(formal_parameter_model&& formal_param)

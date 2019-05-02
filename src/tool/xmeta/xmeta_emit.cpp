@@ -137,28 +137,32 @@ namespace
         }
     }
 
-    inline std::variant<std::string, simple_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
+    std::variant<std::string, simple_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
     {
         if (!semantic_type.is_resolved())
         {
-            return semantic_type.get_ref_name();
+            assert(false);
         }
         type_semantics const& ts = semantic_type.get_resolved_target();
         if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
         {
-            return std::get<std::shared_ptr<class_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<class_model>>(ts)->get_id();
+        }
+        if (std::holds_alternative<std::shared_ptr<delegate_model>>(ts))
+        {
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<delegate_model>>(ts)->get_id();
         }
         if (std::holds_alternative<std::shared_ptr<enum_model>>(ts))
         {
-            return std::get<std::shared_ptr<enum_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<enum_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<enum_model>>(ts)->get_id();
         }
         if (std::holds_alternative<std::shared_ptr<interface_model>>(ts))
         {
-            return std::get<std::shared_ptr<interface_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<interface_model>>(ts)->get_id();
         }
         if (std::holds_alternative<std::shared_ptr<struct_model>>(ts))
         {
-            return std::get<std::shared_ptr<struct_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<struct_model>>(ts)->get_id();
         }
         if (std::holds_alternative<simple_type>(ts))
         {
@@ -285,13 +289,7 @@ namespace xlang::xmeta
         mdTypeRef token_typeref;
 
         check_hresult(m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &token_typeref));
-
         auto result = type_references.insert(std::make_pair(name, to_TypeRef(token_typeref)));
-        if (!result.second)
-        {
-            throw_invalid("Encountered duplicate TypeRef: " + name);
-        }
-
         return token_typedef;
     }
 
@@ -673,7 +671,7 @@ namespace xlang::xmeta
         signature_blob delegate_invoke_sig;
         std::optional<type_ref> return_type_ref = model->get_return_type();
         std::vector<ParamSig> param_sigs;
-        RetTypeSig return_sig = RetTypeSig{ create_paramater_signature(model->get_return_type()) };
+        RetTypeSig return_sig = RetTypeSig{ create_paramater_signature(return_type_ref) };
         for (formal_parameter_model const& val : model->get_formal_parameters())
         {
             ParamSig param_sig = ParamSig{ create_paramater_signature(val.get_type()).value() };
@@ -766,10 +764,6 @@ namespace xlang::xmeta
                     mdTypeRef md_ref;
                     m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
                     auto result = type_references.insert(std::make_pair(return_name, to_TypeRef(md_ref)));
-                    if (!result.second)
-                    {
-                        throw_invalid("Encountered duplicate TypeRef: " + return_name);
-                    }
                     ref = to_TypeRef(md_ref);
                 }
                 else

@@ -5,7 +5,7 @@
 #include "ast_to_st_listener.h"
 #include "XlangLexer.h"
 #include "XlangParser.h"
-
+#include "xlang_model_walker.h"
 namespace xlang::xmeta
 {
 
@@ -30,7 +30,14 @@ namespace xlang::xmeta
 
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+        resolve();
         return parser.getNumberOfSyntaxErrors();
+    }
+
+    void xmeta_idl_reader::resolve()
+    {
+        xlang_model_walker walker(m_namespaces, *this);
+        walker.walk();
     }
 
     struct invalid_ns_id
@@ -178,5 +185,14 @@ namespace xlang::xmeta
         write_error(decl_line, oss.str());
     }
 
+    void xmeta_idl_reader::listen_struct_model(std::shared_ptr<struct_model> const& model) 
+    {
+        model->resolve(symbols);
+    }
+
+    void xmeta_idl_reader::listen_delegate_model(std::shared_ptr<delegate_model> const& model) 
+    {
+        model->resolve(symbols);
+    }
 }
 

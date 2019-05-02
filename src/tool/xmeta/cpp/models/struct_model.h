@@ -8,7 +8,7 @@
 #include "model_types.h"
 #include "namespace_member_model.h"
 #include "property_model.h"
-
+#include "iostream"
 namespace xlang::xmeta
 {
     struct struct_model : namespace_member_model
@@ -26,6 +26,29 @@ namespace xlang::xmeta
         void add_field(std::pair<type_ref, std::string>&& field)
         {
             m_fields.emplace_back(std::move(field));
+        }
+
+        void resolve(std::map<std::string, class_type_semantics> const& symbols)
+        {
+            for (auto & field : m_fields)
+            {
+                type_ref & field_type = field.first;
+                if (!field_type.get_semantic().is_resolved())
+                {
+                    std::string ref_name = field_type.get_semantic().get_ref_name();
+                    std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
+
+                    auto iter = symbols.find(symbol);
+                    if (iter == symbols.end())
+                    {
+                        // Reccord the unresolved type and continue
+                    }
+                    else
+                    {
+                        field_type.set_semantic(iter->second);
+                    }
+                }
+            }
         }
 
     private:

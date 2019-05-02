@@ -281,6 +281,8 @@ void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarat
     }
 
     m_reader.m_cur_namespace_body->add_delegate(dm);
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + dm->get_id();
+    m_reader.symbols[symbol] = dm;
 }
 
 void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationContext *ctx)
@@ -320,6 +322,27 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
     }
 
     m_reader.m_cur_namespace_body->add_enum(new_enum);
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + new_enum->get_id();
+    m_reader.symbols[symbol] = new_enum;
+}
+
+void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationContext *ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    auto decl_line = id->getSymbol()->getLine();
+
+    std::shared_ptr<struct_model> new_struct = std::make_shared<struct_model>(id->getText(), decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
+
+    for (auto field : ctx->struct_body()->field_declaration())
+    {
+        type_ref tr{ field->type()->getText() };
+        extract_type(field->type(), tr);
+        new_struct->add_field(std::pair(tr, field->IDENTIFIER()->getText()));
+    }
+
+    m_reader.m_cur_namespace_body->add_struct(new_struct);
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + new_struct->get_id();
+    m_reader.symbols[symbol] = new_struct;
 }
 
 void ast_to_st_listener::enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx)
@@ -345,21 +368,4 @@ void ast_to_st_listener::exitNamespace_declaration(XlangParser::Namespace_declar
     {
         m_reader.pop_namespace();
     }
-}
-
-void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationContext *ctx)
-{
-    auto id = ctx->IDENTIFIER();
-    auto decl_line = id->getSymbol()->getLine();
-
-    std::shared_ptr<struct_model> new_struct = std::make_shared<struct_model>(id->getText(), decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
-
-    for (auto field : ctx->struct_body()->field_declaration())
-    {
-        type_ref tr{ field->type()->getText() };
-        extract_type(field->type(), tr);
-        new_struct->add_field(std::pair(tr, field->IDENTIFIER()->getText()));
-    }
-
-    m_reader.m_cur_namespace_body->add_struct(new_struct);
 }

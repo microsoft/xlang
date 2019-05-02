@@ -10,14 +10,14 @@
 
 #include "antlr4-runtime.h"
 #include "XlangParserBaseListener.h"
-
+#include "xlang_model_listener.h"
 #include "models/xmeta_models.h"
 
 struct ast_to_st_listener;
 
 namespace xlang::xmeta
 {
-    struct xmeta_idl_reader
+    struct xmeta_idl_reader : public xlang_model_listener
     {
         xmeta_idl_reader(std::string_view const& idl_assembly_name)
         {
@@ -29,6 +29,8 @@ namespace xlang::xmeta
         size_t read(std::istream& idl_contents, bool disable_error_reporting = false);
 
         size_t read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting = false);
+
+        void resolve();
 
         void reset(std::string_view const& assembly_name);
 
@@ -56,6 +58,9 @@ namespace xlang::xmeta
             return m_num_semantic_errors;
         }
 
+        void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
+        void listen_delegate_model(std::shared_ptr<delegate_model> const& model) final;
+
     private:
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> m_namespaces;
         std::shared_ptr<namespace_body_model> m_cur_namespace_body;
@@ -65,6 +70,13 @@ namespace xlang::xmeta
 
         std::string_view m_current_assembly;
         std::vector<std::string> m_assembly_names;
+
+        std::map<std::string, std::variant<
+            std::shared_ptr<class_model>,
+            std::shared_ptr<enum_model>,
+            std::shared_ptr<interface_model>,
+            std::shared_ptr<struct_model>,
+            std::shared_ptr<delegate_model>>> symbols;
 
         size_t m_num_semantic_errors = 0;
 
@@ -81,6 +93,9 @@ namespace xlang::xmeta
         void write_enum_const_expr_range_error(size_t decl_line, std::string_view const& invalid_expr, std::string_view const& enum_name);
         void write_namespace_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& original_name);
         void write_namespace_member_name_error(size_t decl_line, std::string_view const& invalid_name);
+
+        bool namespace_exist(std::string_view const ref_name);
     };
+
     std::string copy_to_lower(std::string_view sv);
 }

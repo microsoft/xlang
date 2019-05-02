@@ -12,6 +12,7 @@ namespace xlang::xmeta
     struct enum_model;
     struct interface_model;
     struct struct_model;
+    struct delegate_model;
 
     enum class simple_type
     {
@@ -37,6 +38,7 @@ namespace xlang::xmeta
         std::shared_ptr<enum_model>,
         std::shared_ptr<interface_model>,
         std::shared_ptr<struct_model>,
+        std::shared_ptr<delegate_model>,
         simple_type,
         object_type>;
 
@@ -63,6 +65,40 @@ namespace xlang::xmeta
             m_semantic.resolve(sem);
         }
 
+        void set_semantic(std::variant<
+            std::shared_ptr<class_model>,
+            std::shared_ptr<enum_model>,
+            std::shared_ptr<interface_model>,
+            std::shared_ptr<struct_model>,
+            std::shared_ptr<delegate_model>> const& sem) noexcept
+        {
+            if (std::holds_alternative<std::shared_ptr<delegate_model>>(sem))
+            {
+                m_semantic.resolve(std::get<std::shared_ptr<delegate_model>>(sem));
+            }
+            if (std::holds_alternative<std::shared_ptr<class_model>>(sem))
+            {
+                m_semantic.resolve(std::get<std::shared_ptr<class_model>>(sem));
+            }
+            if (std::holds_alternative<std::shared_ptr<interface_model>>(sem))
+            {
+                m_semantic.resolve(std::get<std::shared_ptr<interface_model>>(sem));
+            }
+            if (std::holds_alternative<std::shared_ptr<enum_model>>(sem))
+            {
+                m_semantic.resolve(std::get<std::shared_ptr<enum_model>>(sem));
+            }
+            if (std::holds_alternative<std::shared_ptr<struct_model>>(sem))
+            {
+                m_semantic.resolve(std::get<std::shared_ptr<struct_model>>(sem));
+            }
+        }
+
+        void set_semantic(std::shared_ptr<class_model> const& sem) noexcept
+        {
+            m_semantic.resolve(sem);
+        }
+
         void set_semantic(std::shared_ptr<enum_model> const& sem) noexcept
         {
             m_semantic.resolve(sem);
@@ -74,6 +110,11 @@ namespace xlang::xmeta
         }
 
         void set_semantic(std::shared_ptr<struct_model> const& sem) noexcept
+        {
+            m_semantic.resolve(sem);
+        }
+
+        void set_semantic(std::shared_ptr<delegate_model> const& sem) noexcept
         {
             m_semantic.resolve(sem);
         }
