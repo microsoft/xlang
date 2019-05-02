@@ -254,6 +254,37 @@ TEST_CASE("Struct test")
     REQUIRE(std::get<simple_type>(type11.get_resolved_target()) == simple_type::Double);
 }
 
+TEST_CASE("Struct circular test")
+{
+    std::istringstream struct_test_idl{ R"(
+        namespace N
+        {
+            struct S
+            {
+                S field_1;
+            };
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(struct_test_idl) == 0);
+
+    auto namespaces = reader.get_namespaces();
+    auto it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto ns = it->second;
+    REQUIRE(ns->get_namespace_bodies().size() == 1);
+    auto ns_body = ns->get_namespace_bodies()[0];
+
+    auto structs = ns_body->get_structs();
+    auto struct1 = structs.at("S");
+    auto fields = struct1->get_fields();
+    REQUIRE(fields[0].second == "field_1");
+    REQUIRE(!fields[0].first.get_semantic().is_resolved());
+
+    // TODO: make this case a semantic error
+}
+
 TEST_CASE("Resolving delegates types test")
 {
     std::istringstream test_idl{ R"(

@@ -44,6 +44,11 @@ namespace xlang::xmeta
                     {
                         // TODO: Reccord the unresolved type and continue
                     }
+                    else if (symbol == this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + this->get_id())
+                    {
+                        // This is a case of a semantic caught in the resolving phase
+                        // will need to percolate errors up to the m_reader somehow
+                    }
                     else
                     {
                         field_type.set_semantic(iter->second);
