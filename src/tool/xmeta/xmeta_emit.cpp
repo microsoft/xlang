@@ -492,8 +492,7 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
-        auto const& namespace_name = model->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id();
-        auto const& struct_name = namespace_name + "." + model->get_id();
+        auto const& struct_name = model->get_fully_qualified_id();
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         auto token_enum_type_def = define_type_def(struct_name, struct_type_flag, token_value_type, implements);
@@ -503,7 +502,6 @@ namespace xlang::xmeta
         {
             assert(struct_member.first.get_semantic().is_resolved());
             auto const& field_name = s2ws(struct_member.second);
-
 
             signature_blob field_signature;
             field_signature.add_signature(FieldSig{ create_paramater_signature(struct_member.first).value() });

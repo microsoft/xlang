@@ -78,6 +78,7 @@ namespace xlang::meta::reader
 
         bool is_enum() const;
         bool is_delegate() const;
+        bool is_struct() const;
         auto get_enum_definition() const;
     };
 
