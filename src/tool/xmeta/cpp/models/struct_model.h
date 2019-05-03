@@ -54,7 +54,7 @@ namespace xlang::xmeta
 
         bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> symbols)
         {
-            std::string symbol = this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + this->get_id();
+            std::string symbol = this->get_fully_qualified_id();
             return has_circular_struct_declarations(symbols, symbol);
         }
 
@@ -67,7 +67,7 @@ namespace xlang::xmeta
                 {
                     auto struct_field = std::get<std::shared_ptr<struct_model>>(field_type);
                     struct_field->resolve(symbols); // TODO: This is hiding a resolve error. Fix once we have a good error story
-                    if (struct_field->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + struct_field->get_id() == symbol_to_check)
+                    if (struct_field->get_fully_qualified_id() == symbol_to_check)
                     {
                         return true;
                     }
