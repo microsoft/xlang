@@ -146,7 +146,7 @@ namespace
         type_semantics const& ts = semantic_type.get_resolved_target();
         if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
         {
-            return std::get<std::shared_ptr<delegate_model>>(ts)->get_fully_qualified_id();
+            return std::get<std::shared_ptr<class_model>>(ts)->get_fully_qualified_id();
         }
         if (std::holds_alternative<std::shared_ptr<delegate_model>>(ts))
         {
@@ -158,11 +158,11 @@ namespace
         }
         if (std::holds_alternative<std::shared_ptr<interface_model>>(ts))
         {
-            return std::get<std::shared_ptr<delegate_model>>(ts)->get_fully_qualified_id();
+            return std::get<std::shared_ptr<interface_model>>(ts)->get_fully_qualified_id();
         }
         if (std::holds_alternative<std::shared_ptr<struct_model>>(ts))
         {
-            return std::get<std::shared_ptr<delegate_model>>(ts)->get_fully_qualified_id();
+            return std::get<std::shared_ptr<struct_model>>(ts)->get_fully_qualified_id();
         }
         if (std::holds_alternative<simple_type>(ts))
         {
