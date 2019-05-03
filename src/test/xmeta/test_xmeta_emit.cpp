@@ -208,10 +208,6 @@ TEST_CASE("Parameter signature simple type metadata")
     std::istringstream test_idl{ R"(
         namespace Windows.Test
         {
-            struct test1
-            {
-            };
-
             delegate String d1();
             delegate Int8 d2();
             delegate Int16 d3();
