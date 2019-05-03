@@ -18,6 +18,9 @@ using namespace antlr4;
 using namespace xlang::xmeta;
 using namespace xlang::meta::reader;
 
+constexpr int TYPE_DEF_OFFSET = 1; // Module
+constexpr int TYPE_REF_OFFSET = 3; // System: Enum, Delegate, ValueType
+
 // In-depth checking of type properties of enums
 const TypeAttributes enum_type_attributes()
 {
@@ -113,7 +116,7 @@ TEST_CASE("Enum metadata")
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeDef.size() == 2);
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
 
     auto const& enum_type = db.TypeDef[1];
     REQUIRE(enum_type.TypeNamespace() == "Windows.Test");
@@ -165,12 +168,12 @@ TEST_CASE("Delegate metadata")
     )" };
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
-
+    
     auto const& delegate_type = db.TypeDef[1];
     test_delegate_type_properties(delegate_type);
-    REQUIRE(db.TypeDef.size() == 2);
-    REQUIRE(db.Param.size() == 5);
-    REQUIRE(db.MethodDef.size() == 2);
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
+    REQUIRE(db.Param.size() == 5); // return type + two formal parameters + two from delegate constructor parameter
+    REQUIRE(db.MethodDef.size() == 2); // One constructor and one invoke method
     REQUIRE(delegate_type.TypeNamespace() == "Windows.Test");
     REQUIRE(delegate_type.TypeName() == "testdelegate");
     REQUIRE(delegate_type.Flags().value == (tdPublic | tdSealed | tdClass | tdWindowsRuntime));
@@ -205,10 +208,6 @@ TEST_CASE("Parameter signature simple type metadata")
     std::istringstream test_idl{ R"(
         namespace Windows.Test
         {
-            struct test1
-            {
-            };
-
             delegate String d1();
             delegate Int8 d2();
             delegate Int16 d3();
@@ -227,7 +226,7 @@ TEST_CASE("Parameter signature simple type metadata")
     )" };
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
-    REQUIRE(db.MethodDef.size() == 28);
+    REQUIRE(db.MethodDef.size() == 28); // Each delegate defines two method defs
     // Testing invoke method
     {
         auto const& delegate_invoke = db.MethodDef[1];
@@ -345,8 +344,8 @@ TEST_CASE("Parameter signature class reference type metadata across namespace")
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
     REQUIRE(db.MethodDef.size() == 2);
-    REQUIRE(db.TypeRef.size() == 5);
-    REQUIRE(db.TypeDef.size() == 3);
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
 
     REQUIRE(db.TypeRef[4].TypeName() == "MyClass");
     REQUIRE(db.TypeRef[3].TypeName() == "d1");
@@ -375,8 +374,8 @@ TEST_CASE("Parameter signature class reference type metadata")
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
     REQUIRE(db.MethodDef.size() == 2);
-    REQUIRE(db.TypeRef.size() == 5);
-    REQUIRE(db.TypeDef.size() == 3);
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
 
     REQUIRE(db.TypeRef[3].TypeName() == "MyClass");
     REQUIRE(db.TypeRef[4].TypeName() == "d1");
