@@ -28,6 +28,7 @@ const TypeAttributes enum_type_attributes()
     result.Visibility(TypeVisibility::Public);
     result.Sealed(true);
     result.WindowsRuntime(true);
+    result.Layout(TypeLayout::AutoLayout);
     return result;
 }
 
