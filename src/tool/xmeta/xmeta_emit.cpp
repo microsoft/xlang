@@ -289,7 +289,7 @@ namespace xlang::xmeta
         mdTypeRef token_typeref;
 
         check_hresult(m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &token_typeref));
-        auto result = type_references.insert(std::make_pair(name, to_TypeRef(token_typeref)));
+        type_references.emplace(name, to_TypeRef(token_typeref));
         return token_typedef;
     }
 
@@ -761,7 +761,7 @@ namespace xlang::xmeta
                 {
                     mdTypeRef md_ref;
                     m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
-                    auto result = type_references.insert(std::make_pair(return_name, to_TypeRef(md_ref)));
+                    type_references.emplace(return_name, to_TypeRef(md_ref));
                     ref = to_TypeRef(md_ref);
                 }
                 else

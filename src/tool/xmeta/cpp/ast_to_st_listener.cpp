@@ -10,40 +10,18 @@ using namespace xlang::xmeta;
 
 enum_semantics str_to_enum_semantics(std::string const& val)
 {
-    if (val == "Int8")
-    {
-        return enum_semantics::Int8;
-    }
-    else if (val == "UInt8")
-    {
-        return enum_semantics::UInt8;
-    }
-    else if (val == "Int16")
-    {
-        return enum_semantics::Int16;
-    }
-    else if (val == "UInt16")
-    {
-        return enum_semantics::UInt16;
-    }
-    else if (val == "Int32")
-    {
-        return enum_semantics::Int32;
-    }
-    else if (val == "UInt32")
-    {
-        return enum_semantics::UInt32;
-    }
-    else if (val == "Int64")
-    {
-        return enum_semantics::Int64;
-    }
-    else if (val == "UInt64")
-    {
-        return enum_semantics::UInt64;
-    }
-    assert(false);
-    return enum_semantics::Int32;
+    const std::map<std::string, enum_semantics> str_to_enum_type_map = {
+        { "Int8", enum_semantics::Int8 },
+        { "Int16", enum_semantics::Int16 },
+        { "Int32", enum_semantics::Int32 },
+        { "Int64", enum_semantics::Int64 },
+        { "UInt8", enum_semantics::UInt8 },
+        { "UInt16", enum_semantics::UInt16 },
+        { "UInt32", enum_semantics::UInt32 },
+        { "UInt64", enum_semantics::UInt64 },
+    };
+    assert(str_to_enum_type_map.find(val) != str_to_enum_type_map.end());
+    return str_to_enum_type_map.at(val);
 }
 
 simple_type str_to_simple_type(std::string const& val)
@@ -79,7 +57,6 @@ listener_error ast_to_st_listener::extract_type(XlangParser::Return_typeContext*
         tr = std::nullopt;
         return listener_error::passed;
     }
-
     assert(rtc->type());
     return extract_type(rtc->type(), *tr);
 }
@@ -310,7 +287,7 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
         type = str_to_enum_semantics(ctx->enum_base()->enum_integral_type()->getText());
     }
 
-    std::shared_ptr<enum_model> new_enum = std::make_shared<enum_model>(enum_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), type);
+    auto new_enum = std::make_shared<enum_model>(enum_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), type);
 
     for (auto field : ctx->enum_body()->enum_member_declaration())
     {
@@ -351,7 +328,7 @@ void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationC
         return;
     }
 
-    std::shared_ptr<struct_model> new_struct = std::make_shared<struct_model>(struct_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
+    auto new_struct = std::make_shared<struct_model>(struct_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
 
     for (auto field : ctx->struct_body()->field_declaration())
     {

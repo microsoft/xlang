@@ -213,6 +213,7 @@ namespace xlang::xmeta
     void xmeta_idl_reader::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
         model->resolve(symbols);
+        // TODO: Temporary for the test to work. Will wework when there is a good error reporting story
         if (model->has_circular_struct_declarations(symbols))
         {
             m_num_semantic_errors++;
