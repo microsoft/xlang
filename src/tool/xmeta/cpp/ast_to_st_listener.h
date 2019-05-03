@@ -37,6 +37,4 @@ private:
     listener_error extract_type(XlangParser::TypeContext* tc, xlang::xmeta::type_ref& tr);
     listener_error extract_type(XlangParser::Return_typeContext* rtc, std::optional<xlang::xmeta::type_ref>& tr);
     void extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, std::shared_ptr<xlang::xmeta::delegate_model> const& dm);
-
-    template<class T> listener_error extract_field_declaration(XlangParser::Field_declarationContext *ctx, std::shared_ptr<T> const& model);
 };

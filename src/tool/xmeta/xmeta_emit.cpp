@@ -146,23 +146,23 @@ namespace
         type_semantics const& ts = semantic_type.get_resolved_target();
         if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
         {
-            return std::get<std::shared_ptr<delegate_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<class_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_fully_qualified_id();
         }
         if (std::holds_alternative<std::shared_ptr<delegate_model>>(ts))
         {
-            return std::get<std::shared_ptr<delegate_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<delegate_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_fully_qualified_id();
         }
         if (std::holds_alternative<std::shared_ptr<enum_model>>(ts))
         {
-            return std::get<std::shared_ptr<enum_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<enum_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<enum_model>>(ts)->get_fully_qualified_id();
         }
         if (std::holds_alternative<std::shared_ptr<interface_model>>(ts))
         {
-            return std::get<std::shared_ptr<delegate_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<interface_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_fully_qualified_id();
         }
         if (std::holds_alternative<std::shared_ptr<struct_model>>(ts))
         {
-            return std::get<std::shared_ptr<delegate_model>>(ts)->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + std::get<std::shared_ptr<struct_model>>(ts)->get_id();
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_fully_qualified_id();
         }
         if (std::holds_alternative<simple_type>(ts))
         {
@@ -289,7 +289,7 @@ namespace xlang::xmeta
         mdTypeRef token_typeref;
 
         check_hresult(m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &token_typeref));
-        auto result = type_references.insert(std::make_pair(name, to_TypeRef(token_typeref)));
+        type_references.emplace(name, to_TypeRef(token_typeref));
         return token_typedef;
     }
 
@@ -554,8 +554,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
     {
-        auto const& namespace_name = model->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id();
-        auto const& type_name = namespace_name + "." +  model->get_id();
+        auto const& type_name = model->get_fully_qualified_id();
         static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         auto token_enum_type_def = define_type_def(type_name, enum_type_flag, token_enum, implements);
@@ -608,8 +607,7 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model)
     {
-        auto const& namespace_name = model->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id();
-        auto const& type_name = namespace_name + "." + model->get_id();
+        auto const& type_name = model->get_fully_qualified_id();
         static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         mdTypeDef token_delegate_type_def = define_type_def(type_name, delegate_type_flag, token_delegate, implements);
@@ -755,7 +753,7 @@ namespace xlang::xmeta
                 {
                     mdTypeRef md_ref;
                     m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
-                    auto result = type_references.insert(std::make_pair(return_name, to_TypeRef(md_ref)));
+                    type_references.emplace(return_name, to_TypeRef(md_ref));
                     ref = to_TypeRef(md_ref);
                 }
                 else
