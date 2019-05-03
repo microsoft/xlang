@@ -501,14 +501,15 @@ namespace xlang::xmeta
         static constexpr DWORD struct_field_flag = fdPublic;
         for (std::pair<type_ref, std::string> const& struct_member : model->get_fields())
         {
-            model_ref<type_semantics> type = struct_member.first.get_semantic();
-            assert(type.is_resolved());
+            assert(struct_member.first.get_semantic().is_resolved());
+            auto const& field_name = s2ws(struct_member.second);
+
 
             signature_blob field_signature;
             field_signature.add_signature(FieldSig{ create_paramater_signature(struct_member.first).value() });
             mdFieldDef field_token;
             check_hresult(m_metadata_emitter->DefineField(token_enum_type_def,
-                L"value__",
+                field_name.c_str(),
                 struct_field_flag,
                 field_signature.data(),
                 field_signature.size(),
