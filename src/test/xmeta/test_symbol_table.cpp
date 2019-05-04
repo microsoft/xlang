@@ -137,6 +137,110 @@ TEST_CASE("Enum circular explicit dependency")
     REQUIRE(reader.get_num_semantic_errors() == 1);
 }
 
+TEST_CASE("Interface methods test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl
+            {
+                void Paint();
+                Int32 Draw(Int32 i, Int32 d);
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& methods = model->get_methods();
+    REQUIRE(methods.size() == 2);
+
+    auto const& method0 = methods[0];
+    REQUIRE(method0->get_id() == "Paint");
+    REQUIRE(method0->get_return_type() == std::nullopt);
+    REQUIRE(method0->get_formal_parameters().size() == 0);
+
+    auto const& method1 = methods[1];
+    REQUIRE(method1->get_id() == "Draw");
+    auto const& method1_return_type = method1->get_return_type()->get_semantic();
+    REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
+    auto const& method1_formal_parameters = method1->get_formal_parameters();
+    REQUIRE(method1_formal_parameters.size() == 2);
+    REQUIRE(method1_formal_parameters[0].get_id() == "i");
+    REQUIRE(std::get<simple_type>(method1_formal_parameters[0].get_type().get_semantic().get_resolved_target()) == simple_type::Int32);
+    REQUIRE(method1_formal_parameters[1].get_id() == "d");
+    REQUIRE(std::get<simple_type>(method1_formal_parameters[1].get_type().get_semantic().get_resolved_target()) == simple_type::Int32);
+}
+
+TEST_CASE("Interface property test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl
+            {
+                Int32 property1 { get; set; };
+                Int32 property2 { get; };
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& properties = model->get_properties();
+    REQUIRE(properties[0]->get_id() == "property1");
+    REQUIRE(properties[1]->get_id() == "property2");
+    {
+        auto const& property_type = properties[0]->get_type().get_semantic();
+        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+    }
+    {
+        auto const& property_type = properties[1]->get_type().get_semantic();
+        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+    }
+    auto const& methods = model->get_methods();
+    REQUIRE(methods.size() == 3);
+
+    auto const& method0 = methods[0];
+    REQUIRE(method0->get_id() == "get_property1");
+    auto method0_return_type = method0->get_return_type()->get_semantic();
+    REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
+
+    auto const& method1 = methods[1];
+    REQUIRE(method1->get_id() == "set_property1");
+    auto const& method1_return_type = method1->get_return_type()->get_semantic();
+    REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
+    
+    auto const& method2 = methods[2];
+    REQUIRE(method2->get_id() == "get_property2");
+    auto method2_return_type = method2->get_return_type()->get_semantic();
+    REQUIRE((method2_return_type.is_resolved() && std::get<simple_type>(method2_return_type.get_resolved_target()) == simple_type::Int32));
+}
+
 TEST_CASE("Delegate test")
 {
     std::istringstream test_idl{ R"(

@@ -32,6 +32,15 @@ namespace xlang::xmeta
             m_implemented_method_ref{ "" }
         { }
 
+        method_model(std::string_view const& id, size_t decl_line,
+                std::string_view const& assembly_name,
+                std::optional<type_ref>&& return_type) :
+            base_model{ id, decl_line, assembly_name },
+            m_return_type{ std::move(return_type) },
+            m_implemented_method_ref{ "" }
+        { }
+
+
         method_model(std::string_view const& id, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
@@ -67,6 +76,11 @@ namespace xlang::xmeta
         void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept
         {
             m_implemented_method_ref.resolve(ref);
+        }
+
+        void add_formal_parameter(formal_parameter_model&& formal_param)
+        {
+            m_formal_parameters.emplace_back(std::move(formal_param));
         }
 
     private:

@@ -21,9 +21,10 @@ struct ast_to_st_listener : XlangParserBaseListener
     ast_to_st_listener() = delete;
     ast_to_st_listener(xlang::xmeta::xmeta_idl_reader& reader);
 
-    void exitDelegate_declaration(XlangParser::Delegate_declarationContext* ctx) override;
-    void exitEnum_declaration(XlangParser::Enum_declarationContext *ctx) override;
-    void exitStruct_declaration(XlangParser::Struct_declarationContext *ctx) override;
+    void enterInterface_declaration(XlangParser::Interface_declarationContext *ctx) override;
+    void enterDelegate_declaration(XlangParser::Delegate_declarationContext* ctx) override;
+    void enterEnum_declaration(XlangParser::Enum_declarationContext *ctx) override;
+    void enterStruct_declaration(XlangParser::Struct_declarationContext *ctx) override;
 
     void enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
     void exitNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
@@ -36,5 +37,6 @@ private:
   
     listener_error extract_type(XlangParser::TypeContext* tc, xlang::xmeta::type_ref& tr);
     listener_error extract_type(XlangParser::Return_typeContext* rtc, std::optional<xlang::xmeta::type_ref>& tr);
-    void extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, std::shared_ptr<xlang::xmeta::delegate_model> const& dm);
+    void extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, 
+        std::variant<std::shared_ptr<xlang::xmeta::delegate_model>, std::shared_ptr<xlang::xmeta::method_model>> const& model);
 };

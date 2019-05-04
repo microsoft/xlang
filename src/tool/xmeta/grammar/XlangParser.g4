@@ -262,7 +262,7 @@ class_event_declaration // this has to be a delegate type aka class_type
     ;
 
 class_property_declaration // Restrict property_identifier first ///TODO: Property accessors are optional
-    : attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : attributes? property_modifier* type IDENTIFIER property_accessors
     ;
 
 class_constructor_declaration
@@ -296,24 +296,6 @@ return_type
     | VOID
     ;
 
-property_identifier // more restrictive
-    : IDENTIFIER
-    | BOOLEAN
-    | STRING
-    | INT8
-    | INT16
-    | INT32
-    | INT64
-    | UINT8
-    | UINT16
-    | UINT32
-    | UINT64
-    | CHAR16
-    | SINGLE
-    | DOUBLE
-    | OBJECT
-    | NILL;
-
 property_modifier
     : PROTECTED
     | STATIC
@@ -321,10 +303,15 @@ property_modifier
     ;
 
 property_accessors
-    : attributes? GET SEMICOLON
-    | attributes? SET SEMICOLON
-    | attributes? GET SEMICOLON SET SEMICOLON // allow set and get
+    : OPEN_BRACE attributes? property_accessor_method? property_accessor_method? CLOSE_BRACE SEMICOLON?
+    | SEMICOLON
     ;
+
+property_accessor_method
+    : GET SEMICOLON
+    | SET SEMICOLON
+    ;
+
 
 event_modifier
     : PROTECTED
@@ -378,7 +365,7 @@ interface_method_declaration
     ;
 
 interface_property_declaration
-    : attributes? type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : attributes? type IDENTIFIER property_accessors
     ;
 
 interface_event_declaration
