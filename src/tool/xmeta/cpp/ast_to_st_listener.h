@@ -39,4 +39,7 @@ private:
     listener_error extract_type(XlangParser::Return_typeContext* rtc, std::optional<xlang::xmeta::type_ref>& tr);
     void extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, 
         std::variant<std::shared_ptr<xlang::xmeta::delegate_model>, std::shared_ptr<xlang::xmeta::method_model>> const& model);
+
+    listener_error extract_property_accessors(XlangParser::Interface_property_declarationContext* interface_property,
+        std::shared_ptr<xlang::xmeta::class_or_interface_model> model);
 };
