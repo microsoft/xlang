@@ -10,10 +10,5 @@ namespace winrt::test_component_fast::Composition::implementation
 
         void Brush();
         void Shadow();
-
-        auto base_Visual()
-        {
-            return get_abi<Composition::Visual>();
-        }
     };
 }
