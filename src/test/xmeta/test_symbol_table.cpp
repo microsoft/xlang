@@ -439,6 +439,50 @@ TEST_CASE("Interface event test")
     REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
 }
 
+TEST_CASE("Interface event test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl
+            {
+                void Paint();
+            }
+            interface ITextBox: IControl
+            {
+                void SetText(String text);
+            }
+            interface IListBox: IControl
+            {
+               void SetItems(String[] items);
+            }
+            interface IComboBox: ITextBox, IListBox {}
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 3);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& events = model->get_events();
+    REQUIRE(events[0]->get_id() == "Changed");
+
+    auto const& property_type = events[0]->get_type().get_semantic();
+    REQUIRE(property_type.is_resolved());
+    REQUIRE(std::holds_alternative<std::shared_ptr<delegate_model>>(property_type.get_resolved_target()));
+    REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
+}
+
 TEST_CASE("Delegate test")
 {
     std::istringstream test_idl{ R"(

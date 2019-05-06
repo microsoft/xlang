@@ -291,6 +291,14 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             extract_event_accessors(interface_member->interface_event_declaration(), model);
         }
     }
+    if (ctx->interface_base())
+    {
+        auto const& interface_bases = ctx->interface_base()->type_list()->type_base();
+        for (auto const& interface_base : interface_bases)
+        {
+            model->add_interface_base_ref(interface_base->type()->getText());
+        }
+    }
     m_reader.m_cur_namespace_body->add_interface(model);
 }
 

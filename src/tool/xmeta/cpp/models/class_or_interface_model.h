@@ -37,13 +37,7 @@ namespace xlang::xmeta
 
         void add_interface_base_ref(std::string_view const& interface_base_ref)
         {
-            m_interface_base_refs.emplace_back(std::string(interface_base_ref));
-        }
-
-        void add_interface_base_ref(size_t index, std::shared_ptr<interface_model> interface_base_ref)
-        {
-            assert(index < m_interface_base_refs.size());
-            m_interface_base_refs[index].resolve(interface_base_ref);
+            m_interface_base_refs.emplace_back(interface_base_ref);
         }
 
         void add_member(std::shared_ptr<property_model> const& member)
@@ -82,10 +76,40 @@ namespace xlang::xmeta
             {
                 m_event->resolve(symbols, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
             }
+
+            for (auto & interface_base : m_interface_base_refs)
+            {
+                if (interface_base.get_semantic().is_resolved())
+                {
+                    /* Events should not have been resolved. If it was, it means it was not a
+                    class type and not a delegate type */
+                    return;
+                }
+                std::string ref_name = interface_base.get_semantic().get_ref_name();
+                std::string symbol = ref_name.find(".") != std::string::npos
+                    ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
+                auto iter = symbols.find(symbol);
+                if (iter == symbols.end())
+                {
+                    // TODO: Record the unresolved type and continue once we have a good error story for reporting errors in models
+                }
+                else
+                {
+                    if (std::holds_alternative<std::shared_ptr<interface_model>>(iter->second))
+                    {
+                        interface_base.set_semantic(iter->second);
+                    }
+                    else
+                    {
+                        // TODO: Error report the non-interface type
+                    }
+                }
+            }
+
         }
 
     private:
-        std::vector<model_ref<std::shared_ptr<interface_model>>> m_interface_base_refs;
+        std::vector<type_ref> m_interface_base_refs;
         // TODO: Add type parameters (generic types)
 
         // Members

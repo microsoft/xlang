@@ -209,31 +209,16 @@ type_parameter_list // attributes on generic types? Something<[Attribute] K>
     : LESS_THAN attributes? IDENTIFIER (COMMA attributes? IDENTIFIER)* GREATER_THAN
     ;
 
-class_base
-    : COLON class_type_base
-    | COLON interface_type_list
-    | COLON class_type_base COMMA interface_type_list
+class_base // Semantically check for one class and multiple interfaces restriction
+    : COLON type_list
     ;
 
-/* TODO: Determine whether class_type_base and interface_type_base should exist
- The only difference between class_type_base and interface_type_base is that
- class_type base can be Object or NULL which doesn't make sense in terms of inheritance.
-
- You can't really inherit from NULL. We can just remove this part of the grammar
- and have it referto just type_name.
- Let the semantic checking do the work of determining whether it is a class type or
- interface type.
-*/
-class_type_base
-    : attributes? class_type
+type_list
+    : type_base (COMMA type_base)*
     ;
 
-interface_type_list
-    : interface_type_base (COMMA interface_type_base)*
-    ;
-
-interface_type_base
-    : attributes? type_name //class_type
+type_base
+    : attributes? type //class_type
     ;
 
 class_body
@@ -346,7 +331,7 @@ interface_declaration
     ;
 
 interface_base
-    : REQUIRES interface_type_list
+    : REQUIRES type_list
     ;
 
 interface_body
