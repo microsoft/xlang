@@ -89,12 +89,7 @@ namespace xlang::xmeta
         std::string_view m_current_assembly;
         std::vector<std::string> m_assembly_names;
 
-        std::map<std::string, std::variant<
-            std::shared_ptr<class_model>,
-            std::shared_ptr<enum_model>,
-            std::shared_ptr<interface_model>,
-            std::shared_ptr<struct_model>,
-            std::shared_ptr<delegate_model>>> symbols;
+        std::map<std::string, class_semantics> symbols;
 
         size_t m_num_semantic_errors = 0;
 
