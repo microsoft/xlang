@@ -42,4 +42,7 @@ private:
 
     listener_error extract_property_accessors(XlangParser::Interface_property_declarationContext* interface_property,
         std::shared_ptr<xlang::xmeta::class_or_interface_model> model);
+    
+    listener_error extract_event_accessors(XlangParser::Interface_event_declarationContext* interface_property,
+        std::shared_ptr<xlang::xmeta::class_or_interface_model> model);
 };

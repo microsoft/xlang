@@ -257,8 +257,7 @@ class_method_declaration //Do not need generics in method
     ;
 
 class_event_declaration // this has to be a delegate type aka class_type
-    : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
-    | attributes? event_modifier* EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    : attributes? event_modifier* EVENT type IDENTIFIER event_accessors
     ;
 
 class_property_declaration // Restrict property_identifier first ///TODO: Property accessors are optional
@@ -303,7 +302,7 @@ property_modifier
     ;
 
 property_accessors
-    : OPEN_BRACE attributes? property_accessor_method? property_accessor_method? CLOSE_BRACE SEMICOLON?
+    : OPEN_BRACE attributes? property_accessor_method+ CLOSE_BRACE SEMICOLON?
     | SEMICOLON
     ;
 
@@ -312,14 +311,14 @@ property_accessor_method
     | SET SEMICOLON
     ;
 
-
 event_modifier
     : PROTECTED
     | STATIC
     ;
 
 event_accessors // add and remove implicit?
-    : attributes? ADD SEMICOLON attributes? REMOVE SEMICOLON
+    : OPEN_BRACE attributes? ADD SEMICOLON attributes? REMOVE SEMICOLON CLOSE_BRACE SEMICOLON?
+    | SEMICOLON
     ;
 
 class_constructor_modifier
@@ -369,8 +368,7 @@ interface_property_declaration
     ;
 
 interface_event_declaration
-    : attributes? EVENT type IDENTIFIER SEMICOLON
-    | attributes? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
+    : attributes? EVENT type IDENTIFIER event_accessors
     ;
 
 /* Enums */

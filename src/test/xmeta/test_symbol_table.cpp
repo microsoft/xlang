@@ -184,6 +184,70 @@ TEST_CASE("Interface methods test")
     REQUIRE(std::get<simple_type>(method1_formal_parameters[1].get_type().get_semantic().get_resolved_target()) == simple_type::Int32);
 }
 
+TEST_CASE("Resolving interface method type ref test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct S1
+            {
+            };
+
+            interface IControl
+            {
+                E1 Draw(S1 p1, M.S2 p2);
+            }
+
+            enum E1
+            {
+            }
+        }
+        namespace M
+        {
+            struct S2
+            {
+            };
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& methods = model->get_methods();
+    REQUIRE(methods[0]->get_id() == "Draw");
+    
+    auto const& return_type = methods[0]->get_return_type()->get_semantic();
+    REQUIRE(return_type.is_resolved());
+    REQUIRE(std::get<std::shared_ptr<enum_model>>(return_type.get_resolved_target())->get_id() == "E1");
+    
+    auto const& params = methods[0]->get_formal_parameters();
+    auto const& param_type = params[0].get_type().get_semantic();
+    auto const& properties = model->get_properties();
+    {
+        REQUIRE(params[0].get_id() == "p1");
+        auto const& param_type = params[0].get_type().get_semantic();
+        REQUIRE(param_type.is_resolved());
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(param_type.get_resolved_target())->get_id() == "S1");
+    }
+    {
+        REQUIRE(params[1].get_id() == "p2");
+        auto const& param_type = params[1].get_type().get_semantic();
+        REQUIRE(param_type.is_resolved());
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(param_type.get_resolved_target())->get_id() == "S2");
+    }
+}
+
 TEST_CASE("Interface property test")
 {
     std::istringstream test_idl{ R"(
@@ -239,6 +303,140 @@ TEST_CASE("Interface property test")
     REQUIRE(method2->get_id() == "get_property2");
     auto method2_return_type = method2->get_return_type()->get_semantic();
     REQUIRE((method2_return_type.is_resolved() && std::get<simple_type>(method2_return_type.get_resolved_target()) == simple_type::Int32));
+}
+
+TEST_CASE("Interface property implicit accessors test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl
+            {
+                Int32 property1;
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& properties = model->get_properties();
+    REQUIRE(properties[0]->get_id() == "property1");
+    
+    auto const& property_type = properties[0]->get_type().get_semantic();
+    REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+    
+    auto const& methods = model->get_methods();
+    REQUIRE(methods.size() == 2);
+
+    auto const& method0 = methods[0];
+    REQUIRE(method0->get_id() == "get_property1");
+    auto method0_return_type = method0->get_return_type()->get_semantic();
+    REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
+
+    auto const& method1 = methods[1];
+    REQUIRE(method1->get_id() == "set_property1");
+    auto const& method1_return_type = method1->get_return_type()->get_semantic();
+    REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
+}
+
+TEST_CASE("Resolving Interface property type ref test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct S1
+            {
+            };
+
+            interface IControl
+            {
+                S1 property1;
+                M.S2 property2;
+            }
+        }
+        namespace M
+        {
+            struct S2
+            {
+            };
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& properties = model->get_properties();
+    {
+        REQUIRE(properties[0]->get_id() == "property1");
+        auto const& property_type = properties[0]->get_type().get_semantic();
+        REQUIRE(property_type.is_resolved());
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(property_type.get_resolved_target())->get_id() == "S1");
+    }
+    {
+        REQUIRE(properties[1]->get_id() == "property2");
+        auto const& property_type = properties[1]->get_type().get_semantic();
+        REQUIRE(property_type.is_resolved());
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(property_type.get_resolved_target())->get_id() == "S2");
+    }
+}
+
+TEST_CASE("Interface event test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(IStringList sender);
+            interface IControl
+            {
+                event StringListEvent Changed;
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    REQUIRE(reader.read(test_idl) == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& events = model->get_events();
+    REQUIRE(events[0]->get_id() == "Changed");
+
+    auto const& property_type = events[0]->get_type().get_semantic();
+    REQUIRE(property_type.is_resolved());
+    REQUIRE(std::holds_alternative<std::shared_ptr<delegate_model>>(property_type.get_resolved_target()));
+    REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
 }
 
 TEST_CASE("Delegate test")
@@ -384,7 +582,7 @@ TEST_CASE("Struct circular test")
     auto namespaces = reader.get_namespaces();
 }
 
-TEST_CASE("Resolving delegates types test")
+TEST_CASE("Resolving delegates type ref test")
 {
     std::istringstream test_idl{ R"(
         namespace N
@@ -443,7 +641,7 @@ TEST_CASE("Resolving delegates types test")
     }
 }
 
-TEST_CASE("Resolving struct types test")
+TEST_CASE("Resolving struct type ref test")
 {
     std::istringstream struct_test_idl{ R"(
         namespace N
@@ -498,7 +696,7 @@ TEST_CASE("Resolving struct types test")
     }
 }
 
-TEST_CASE("Resolving types across namespaces test")
+TEST_CASE("Resolving type ref across namespaces test")
 {
     std::istringstream test_idl{ R"(
         namespace A

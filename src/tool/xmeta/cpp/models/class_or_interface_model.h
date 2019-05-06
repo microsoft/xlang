@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include "namespace_member_model.h"
+#include "property_model.h"
 
 namespace xlang::xmeta
 {
@@ -65,6 +66,22 @@ namespace xlang::xmeta
             return contains_id(m_properties, id) ||
                 contains_id(m_methods, id) ||
                 contains_id(m_events, id);
+        }
+
+        void resolve(std::map<std::string, class_type_semantics> symbols)
+        {
+            for (auto & m_method : m_methods)
+            {
+                m_method->resolve(symbols, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
+            }
+            for (auto & m_property : m_properties)
+            {
+                m_property->resolve(symbols, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
+            }
+            for (auto & m_event : m_events)
+            {
+                m_event->resolve(symbols, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
+            }
         }
 
     private:

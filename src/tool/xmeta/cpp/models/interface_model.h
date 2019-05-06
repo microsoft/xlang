@@ -19,5 +19,10 @@ namespace xlang::xmeta
         interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body }
         { }
+
+        void resolve(std::map<std::string, class_type_semantics> symbols)
+        {
+            class_or_interface_model::resolve(symbols);
+        }
     };
 }

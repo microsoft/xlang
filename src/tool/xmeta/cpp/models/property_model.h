@@ -69,6 +69,26 @@ namespace xlang::xmeta
             m_set_method = m;
         }
 
+        void resolve(std::map<std::string, class_type_semantics> symbols, std::string fully_qualified_id)
+        {
+            if (!m_type.get_semantic().is_resolved())
+            {
+                /* Events should not have been resolved. If it was, it means it was not a
+                class type and not a delegate type */
+                std::string ref_name = m_type.get_semantic().get_ref_name();
+                std::string symbol = ref_name.find(".") != std::string::npos
+                    ? ref_name : fully_qualified_id + "." + ref_name;
+                auto iter = symbols.find(symbol);
+                if (iter == symbols.end())
+                {
+                    // TODO: Record the unresolved type and continue once we have a good error story for reporting errors in models
+                }
+                else
+                {
+                    m_type.set_semantic(iter->second);
+                }
+            }
+        }
 
     private:
         property_semantics m_semantic;

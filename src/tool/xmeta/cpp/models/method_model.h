@@ -83,6 +83,32 @@ namespace xlang::xmeta
             m_formal_parameters.emplace_back(std::move(formal_param));
         }
 
+        void resolve(std::map<std::string, class_type_semantics> const& symbols, std::string fully_qualified_id)
+        {
+            if (m_return_type)
+            {
+                if (!m_return_type->get_semantic().is_resolved())
+                {
+                    // TODO: Once we have using directives, we will need to go through many fully_qualified_ids here
+                    std::string ref_name = m_return_type->get_semantic().get_ref_name();
+                    std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : fully_qualified_id + "." + ref_name;
+                    auto iter = symbols.find(symbol);
+                    if (iter == symbols.end())
+                    {
+                        // TODO: Reccord the unresolved type and continue
+                    }
+                    else
+                    {
+                        m_return_type->set_semantic(iter->second);
+                    }
+                }
+            }
+            for (formal_parameter_model & param : m_formal_parameters)
+            {
+                param.resolve(symbols, fully_qualified_id);
+            }
+        }
+
     private:
         method_semantics m_semantic;
         std::optional<type_ref> m_return_type;

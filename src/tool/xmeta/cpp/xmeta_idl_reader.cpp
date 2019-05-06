@@ -210,6 +210,11 @@ namespace xlang::xmeta
         write_error(decl_line, oss.str());
     }
 
+    void xmeta_idl_reader::listen_interface_model(std::shared_ptr<interface_model> const& model)
+    {
+        model->resolve(symbols);
+    }
+
     void xmeta_idl_reader::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
         model->resolve(symbols);

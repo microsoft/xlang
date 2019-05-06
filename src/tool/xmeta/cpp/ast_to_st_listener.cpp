@@ -288,7 +288,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
         }
         if (interface_member->interface_event_declaration())
         {
-
+            extract_event_accessors(interface_member->interface_event_declaration(), model);
         }
     }
     m_reader.m_cur_namespace_body->add_interface(model);
@@ -299,17 +299,19 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
     std::string property_id = interface_property->IDENTIFIER()->getText();
     type_ref tr{ interface_property->type()->getText() };
     extract_type(interface_property->type(), tr);
+    auto decl_line = interface_property->IDENTIFIER()->getSymbol()->getLine();
 
     std::shared_ptr<method_model> get_method = nullptr;
     std::shared_ptr<method_model> set_method = nullptr;
-    if (interface_property->property_accessors() && interface_property->property_accessors()->property_accessor_method().size() > 0)
+    if (interface_property->property_accessors()->property_accessor_method().size() > 0)
     {
         auto const& property_accessor_methods = interface_property->property_accessors()->property_accessor_method();
         if (property_accessor_methods.size() == 1)
         {
             if (!property_accessor_methods[0]->GET())
             {
-                // WRITE SEMANTIC ERROR
+                // WRITE SEMANTIC ERROR. Always need a get property.
+                return listener_error::failed;
             }
         }
         else if (property_accessor_methods.size() == 2)
@@ -318,11 +320,13 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
                 || (property_accessor_methods[0]->SET() && property_accessor_methods[1]->SET()))
             {
                 // WRITE SEMANTIC ERROR
+                return listener_error::failed;
             }
         }
         else if (property_accessor_methods.size() > 2)
         {
-            // THIS PARSER IS TRIPPING :O
+            // THIS PARSER BE TRIPPING :O
+            return listener_error::failed;
         }
 
         for (auto const& property_accessor : property_accessor_methods)
@@ -338,12 +342,36 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
                 model->add_member(set_method);
             }
         }
+    } 
+    else // Implicity declaration
+    {
+        get_method = std::make_shared<method_model>("get_" + property_id, decl_line, m_reader.get_cur_assembly(), std::move(tr));
+        model->add_member(get_method);
+        set_method = std::make_shared<method_model>("set_" + property_id, decl_line, m_reader.get_cur_assembly(), std::move(tr));
+        model->add_member(set_method);    
     }
+    
 
-    auto prop_model = std::make_shared<property_model>(property_id, interface_property->IDENTIFIER()->getSymbol()->getLine(), m_reader.get_cur_assembly(), std::move(tr));
+    auto prop_model = std::make_shared<property_model>(property_id, decl_line, m_reader.get_cur_assembly(), std::move(tr));
     prop_model->set_get_method(get_method);
     prop_model->set_set_method(set_method);
     model->add_member(prop_model);
+    return listener_error::passed;
+}
+
+listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interface_event_declarationContext* interface_event, std::shared_ptr<class_or_interface_model> model)
+{
+    std::string event_id = interface_event->IDENTIFIER()->getText();
+    type_ref tr{ interface_event->type()->getText() };
+    extract_type(interface_event->type(), tr);
+    auto decl_line = interface_event->IDENTIFIER()->getSymbol()->getLine();
+    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event_id, decl_line, m_reader.get_cur_assembly(), std::move(tr));
+    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event_id, decl_line, m_reader.get_cur_assembly(), std::move(tr));
+
+    model->add_member(add_method);
+    model->add_member(remove_method);
+    auto event = std::make_shared<event_model>(event_id, decl_line, m_reader.get_cur_assembly(), add_method, remove_method, std::move(tr));
+    model->add_member(event);
     return listener_error::passed;
 }
 

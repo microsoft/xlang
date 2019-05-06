@@ -63,6 +63,7 @@ namespace xlang::xmeta
             return m_num_semantic_errors;
         }
 
+        void listen_interface_model(std::shared_ptr<interface_model> const& model) final;
         void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
         void listen_delegate_model(std::shared_ptr<delegate_model> const& model) final;
         bool type_declaration_exists(std::string symbol);
