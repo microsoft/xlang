@@ -40,24 +40,15 @@ namespace xlang::xmeta
         walker.walk();
     }
 
-    bool xmeta_idl_reader::type_declaration_exists(std::string symbol)
-    {
-        return symbols.find(symbol) != symbols.end();
-    }
-
     void xmeta_idl_reader::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
-        model->resolve(symbols);
-        // TODO: Temporary for the test to work. Will wework when there is a good error reporting story
-        if (model->has_circular_struct_declarations(symbols))
-        {
-            m_error_manager.increment_semantic_error_count();
-        }
+        model->resolve(symbols, m_error_manager);
+        model->has_circular_struct_declarations(symbols, m_error_manager);
     }
 
     void xmeta_idl_reader::listen_delegate_model(std::shared_ptr<delegate_model> const& model) 
     {
-        model->resolve(symbols);
+        model->resolve(symbols, m_error_manager);
     }
 }
 

@@ -8,21 +8,14 @@ namespace xlang::xmeta
         m_num_semantic_errors++;
     }
 
-    void xlang_error_manager::write_redeclaration_error(std::string symbol, size_t decl_line)
-    {
-        std::ostringstream oss;
-        oss << "Redeclaration; type already declared: " << symbol;
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_unresolved_type_error(std::string symbol, size_t decl_line)
+    void xlang_error_manager::write_unresolved_type_error(size_t decl_line, std::string symbol)
     {
         std::ostringstream oss;
         oss << "Unable to resolve type: " << symbol;
         write_error(decl_line, oss.str());
     }
 
-    void xlang_error_manager::write_struct_field_error(std::string symbol, size_t decl_line)
+    void xlang_error_manager::write_struct_field_error(size_t decl_line, std::string symbol)
     {
         std::ostringstream oss;
         oss << "Struct has circular fields: " << symbol;

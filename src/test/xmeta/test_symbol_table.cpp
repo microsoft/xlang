@@ -266,6 +266,10 @@ TEST_CASE("Struct circular test")
     std::istringstream struct_test_idl{ R"(
         namespace N
         {
+            struct S0
+            {
+                S1 field_1;
+            }
             struct S1
             {
                 S2 field_1;
@@ -284,7 +288,7 @@ TEST_CASE("Struct circular test")
     xmeta_idl_reader reader{ "" };
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-    REQUIRE(reader.get_num_semantic_errors() == 3);
+    REQUIRE(reader.get_num_semantic_errors() == 4);
     auto namespaces = reader.get_namespaces();
 }
 

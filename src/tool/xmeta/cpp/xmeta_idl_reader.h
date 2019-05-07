@@ -51,19 +51,13 @@ namespace xlang::xmeta
             return m_error_manager.get_num_of_syntax_errors();
         }
 
-        bool set_symbol(std::string_view symbol, class_type_semantics class_type)
+        bool set_symbol(std::string_view symbol, class_type_semantics const& class_type)
         {
-            auto iter = symbols.insert(std::pair<std::string, class_type_semantics>(symbol, class_type));
-            if (!iter.second)
-            {
-                return false;
-            }
-            return true;
+            return symbols.insert(std::pair<std::string, class_type_semantics>(symbol, class_type)).second;
         }
 
         void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
         void listen_delegate_model(std::shared_ptr<delegate_model> const& model) final;
-        bool type_declaration_exists(std::string symbol);
 
     private:
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> m_namespaces;

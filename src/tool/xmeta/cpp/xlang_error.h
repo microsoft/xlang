@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <map>
 #include <memory>
@@ -11,9 +13,8 @@ namespace xlang::xmeta
     {
     public:
         void write_error(size_t decl_line, std::string_view const& msg);
-        void write_redeclaration_error(std::string symbol, size_t decl_line);
-        void write_unresolved_type_error(std::string symbol, size_t decl_line);
-        void write_struct_field_error(std::string symbol, size_t decl_line);
+        void write_unresolved_type_error(size_t decl_line, std::string symbol);
+        void write_struct_field_error(size_t decl_line, std::string symbol);
         void write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id);
         void write_enum_member_expr_ref_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id);
         void write_enum_circular_dependency(size_t decl_line, std::string_view const& invalid_member_id, std::string_view const& enum_name);
