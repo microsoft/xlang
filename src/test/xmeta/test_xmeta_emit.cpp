@@ -32,7 +32,6 @@ const TypeAttributes struct_type_attributes()
     return result;
 }
 
-// All the flags use in the metadata representation
 const FieldAttributes struct_field_attributes()
 {
     FieldAttributes result{};

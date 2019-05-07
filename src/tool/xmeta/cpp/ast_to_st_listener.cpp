@@ -56,6 +56,18 @@ namespace
         }
         return iter->second;
     }
+
+    struct invalid_ns_id
+    {
+        invalid_ns_id(std::string_view const& name) : new_name{ name } { }
+        bool operator()(std::pair<std::string_view, std::shared_ptr<namespace_model>> const& v) const
+        {
+            auto old_name = v.first;
+            return stricmp(new_name.data(), old_name.data()) == 0 && new_name != old_name;
+        }
+    private:
+        std::string_view new_name;
+    };
 }
 
 ast_to_st_listener::ast_to_st_listener(xmeta_idl_reader& reader) :
@@ -131,7 +143,7 @@ void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_pa
                 sem = parameter_semantics::out;
             }
         }
-        dm->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_reader.m_current_assembly, sem, std::move(tr) });
+        dm->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_cur_assembly, sem, std::move(tr) });
     }
 }
 
@@ -145,10 +157,11 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
      {
          if (new_enum->member_exists(enum_member_id))
          {
-             m_reader.write_enum_member_name_error(
+             m_reader.m_error_manager.write_enum_member_name_error(
                  decl_line,
                  enum_member_id,
-                 new_enum->get_id());
+                 new_enum->get_id(),
+                 m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
              return listener_error::failed;
          }
          std::string str_val = expr->getText();
@@ -193,7 +206,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
              auto const& val = new_enum->get_members().back().get_value();
              if (!val.is_resolved() && val.get_ref_name() == e_member.get_id())
              {
-                 m_reader.write_enum_circular_dependency(
+                 m_reader.m_error_manager.write_enum_circular_dependency(
                      e_member.get_decl_line(),
                      e_member.get_id(),
                      new_enum->get_id());
@@ -210,10 +223,11 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
 
      if (ec == std::errc::result_out_of_range)
      {
-         m_reader.write_enum_const_expr_range_error(
+         m_reader.m_error_manager.write_enum_const_expr_range_error(
              decl_line,
              expr->getText(),
-             enum_member_id);
+             enum_member_id,
+             m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
          return listener_error::failed;
      }
      else
@@ -232,7 +246,7 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     }
     if (dependents.find(e_member.get_id()) != dependents.end())
     {
-        m_reader.write_enum_circular_dependency(
+        m_reader.m_error_manager.write_enum_circular_dependency(
             e_member.get_decl_line(),
             e_member.get_id(),
             new_enum->get_id());
@@ -242,7 +256,7 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     auto const& ref_name = val.get_ref_name();
     if (!new_enum->member_exists(ref_name))
     {
-        m_reader.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_id());
+        m_reader.m_error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_id(), m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return listener_error::failed;
     }
     auto ref_member = new_enum->get_member(ref_name);
@@ -260,16 +274,16 @@ void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarat
     std::string delegate_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
 
-    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + delegate_name;
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + delegate_name;
     if (m_reader.type_declaration_exists(symbol))
     {
-        m_reader.write_redeclaration_error(symbol, decl_line);
+        m_reader.m_error_manager.write_redeclaration_error(symbol, decl_line);
         return;
     }
 
     std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };
     extract_type(ctx->return_type(), tr);
-    auto dm = std::make_shared<delegate_model>(delegate_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), std::move(tr));
+    auto dm = std::make_shared<delegate_model>(delegate_name, decl_line, m_cur_assembly, m_cur_namespace_body, std::move(tr));
 
     auto formal_params = ctx->formal_parameter_list();
     if (formal_params)
@@ -277,7 +291,7 @@ void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarat
         extract_formal_params(formal_params->fixed_parameter(), dm);
     }
 
-    m_reader.m_cur_namespace_body->add_delegate(dm);
+    m_cur_namespace_body->add_delegate(dm);
     m_reader.symbols[symbol] = dm;
 }
 
@@ -287,10 +301,10 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
     std::string enum_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
     enum_semantics type = enum_semantics::Int32;
-    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + enum_name;
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + enum_name;
     if (m_reader.type_declaration_exists(symbol))
     {
-        m_reader.write_redeclaration_error(symbol, decl_line);
+        m_reader.m_error_manager.write_redeclaration_error(symbol, decl_line);
         return;
     }
 
@@ -300,7 +314,7 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
         type = str_to_enum_semantics(ctx->enum_base()->enum_integral_type()->getText());
     }
 
-    auto new_enum = std::make_shared<enum_model>(enum_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), type);
+    auto new_enum = std::make_shared<enum_model>(enum_name, decl_line, m_cur_assembly, m_cur_namespace_body, type);
 
     for (auto field : ctx->enum_body()->enum_member_declaration())
     {
@@ -323,8 +337,8 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
         }
     }
 
-    m_reader.m_cur_namespace_body->add_enum(new_enum);
-    m_reader.symbols[symbol] = new_enum;
+    m_cur_namespace_body->add_enum(new_enum);
+    m_reader.set_symbol(symbol, new_enum);
 }
 
 void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationContext *ctx)
@@ -332,16 +346,16 @@ void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationC
     auto id = ctx->IDENTIFIER();
     auto decl_line = id->getSymbol()->getLine();
     std::string struct_name{ id->getText() };
-    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + struct_name;
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + struct_name;
 
     if (m_reader.type_declaration_exists(symbol))
     {
         // TODO: Reccord the semantic error and continue
-        m_reader.write_redeclaration_error(symbol, decl_line);
+        m_reader.m_error_manager.write_redeclaration_error(symbol, decl_line);
         return;
     }
 
-    auto new_struct = std::make_shared<struct_model>(struct_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
+    auto new_struct = std::make_shared<struct_model>(struct_name, decl_line, m_cur_assembly, m_cur_namespace_body);
 
     for (auto field : ctx->struct_body()->field_declaration())
     {
@@ -350,7 +364,7 @@ void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationC
         new_struct->add_field(std::pair(tr, field->IDENTIFIER()->getText()));
     }
 
-    m_reader.m_cur_namespace_body->add_struct(new_struct);
+    m_cur_namespace_body->add_struct(new_struct);
     m_reader.symbols[symbol] = new_struct;
 }
 
@@ -363,7 +377,7 @@ void ast_to_st_listener::enterNamespace_declaration(XlangParser::Namespace_decla
         std::istringstream tokenStream(id->getText());
         while (std::getline(tokenStream, token, '.'))
         {
-            m_reader.push_namespace(token, id->getSymbol()->getLine());
+            push_namespace(token, id->getSymbol()->getLine());
         }
     }
 }
@@ -375,6 +389,78 @@ void ast_to_st_listener::exitNamespace_declaration(XlangParser::Namespace_declar
     size_t num_of_ns = std::count(id_text.begin(), id_text.end(), '.') + 1;
     for (size_t i = 0; i < num_of_ns; ++i)
     {
-        m_reader.pop_namespace();
+        pop_namespace();
+    }
+}
+
+
+// Pushes a namespace to the current namespace scope, and adds it to the symbol table if necessary.
+void ast_to_st_listener::push_namespace(std::string_view const& name, size_t decl_line)
+{
+    auto setup_cur_ns_body = [&](std::shared_ptr<namespace_model> const& child_ns)
+    {
+        assert(child_ns->get_id() == name);
+        m_cur_namespace_body = std::make_shared<namespace_body_model>(child_ns);
+        child_ns->add_namespace_body(m_cur_namespace_body);
+    };
+
+    if (m_cur_namespace_body != nullptr)
+    {
+        auto const& cur_ns = m_cur_namespace_body->get_containing_namespace();
+        if (cur_ns->member_id_exists(name))
+        {
+            if (cur_ns->child_namespace_exists(name))
+            {
+                setup_cur_ns_body(cur_ns->get_child_namespaces().at(name));
+            }
+            else
+            {
+                m_reader.m_error_manager.write_namespace_member_name_error(decl_line, name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+                return;
+            }
+        }
+        else
+        {
+            if (!cur_ns->child_namespace_exists(name))
+            {
+                cur_ns->add_child_namespace(std::make_shared<namespace_model>(name, decl_line, m_cur_assembly, cur_ns));
+            }
+            setup_cur_ns_body(cur_ns->get_child_namespaces().at(name));
+        }
+    }
+    else
+    {
+        auto it1 = std::find_if(m_reader.m_namespaces.begin(), m_reader.m_namespaces.end(), invalid_ns_id(name));
+        if (it1 != m_reader.m_namespaces.end())
+        {
+            // Semantically invalid by check 4 for namespace members.
+            m_reader.m_error_manager.write_namespace_name_error(decl_line, name, it1->second->get_id());
+            return;
+        }
+
+        auto it2 = m_reader.m_namespaces.find(name);
+        if (it2 == m_reader.m_namespaces.end())
+        {
+            auto new_ns = std::make_shared<namespace_model>(name, decl_line, m_cur_assembly, nullptr /* No parent */);
+            m_reader.m_namespaces[new_ns->get_id()] = new_ns;
+        }
+        assert(m_reader.m_namespaces.find(name) != m_reader.m_namespaces.end());
+        setup_cur_ns_body(m_reader.m_namespaces.at(name));
+    }
+}
+
+// Pops a namespace from the namespace scope.
+void ast_to_st_listener::pop_namespace()
+{
+    if (m_cur_namespace_body != nullptr)
+    {
+        if (m_cur_namespace_body->get_containing_namespace()->get_parent_namespace() != nullptr)
+        {
+            m_cur_namespace_body = m_cur_namespace_body->get_containing_namespace()->get_parent_namespace()->get_namespace_bodies().back();
+        }
+        else
+        {
+            m_cur_namespace_body = nullptr;
+        }
     }
 }

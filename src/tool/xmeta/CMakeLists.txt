@@ -10,6 +10,7 @@ endif ()
 
 if (WIN32)
     add_library(xmeta_model
+        cpp/xlang_error.cpp
         cpp/xmeta_idl_reader.cpp
         cpp/ast_to_st_listener.cpp
         cpp/models/namespace_model.cpp
