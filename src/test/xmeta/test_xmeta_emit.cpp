@@ -22,7 +22,7 @@ constexpr int TYPE_DEF_OFFSET = 1; // Module
 constexpr int TYPE_REF_OFFSET = 3; // System: Enum, Delegate, ValueType
 
 
-// In-depth checking of type properties of enums
+// All the flags use in the metadata representation
 const TypeAttributes struct_type_attributes()
 {
     TypeAttributes result{};
@@ -33,7 +33,6 @@ const TypeAttributes struct_type_attributes()
     return result;
 }
 
-// All the flags use in the metadata representation
 const TypeAttributes enum_type_attributes()
 {
     TypeAttributes result{};
