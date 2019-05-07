@@ -89,7 +89,7 @@ namespace xlang::xmeta
         std::string_view m_current_assembly;
         std::vector<std::string> m_assembly_names;
 
-        std::map<std::string, class_semantics> symbols;
+        std::map<std::string, class_type_semantics> symbols;
 
         size_t m_num_semantic_errors = 0;
 
