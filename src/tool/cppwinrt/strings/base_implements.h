@@ -1297,6 +1297,12 @@ namespace winrt
         }
 
         template <typename T>
+        auto get_abi(T const& value) const noexcept
+        {
+            return winrt::get_abi(value);
+        }
+
+        template <typename T>
         void* get_abi() const noexcept
         {
             return static_cast<impl::producer_vtable<T>>(*this).value;
