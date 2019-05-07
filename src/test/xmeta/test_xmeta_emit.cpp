@@ -358,13 +358,13 @@ TEST_CASE("Parameter signature class reference type metadata across namespace")
     std::istringstream test_idl{ R"(
         namespace Windows.Test
         {
-            enum MyClass
+            enum e1
             {
             }
         }
         namespace A
         {
-            delegate Windows.Test.MyClass d1();
+            delegate Windows.Test.e1 d1();
         }
     )" };
     std::string assembly_name = "testidl";
@@ -372,15 +372,19 @@ TEST_CASE("Parameter signature class reference type metadata across namespace")
     REQUIRE(db.MethodDef.size() == 2);
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
-    REQUIRE(db.TypeRef[4].TypeName() == "MyClass");
-    REQUIRE(db.TypeRef[3].TypeName() == "d1");
-    REQUIRE(db.TypeDef[2].TypeName() == "MyClass");
-    REQUIRE(db.TypeDef[1].TypeName() == "d1");
-    test_enum_type_properties(db.TypeDef[2]);
-    test_delegate_type_properties(db.TypeDef[1]);
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 1].TypeName() == "e1");
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "d1");
+
+    auto const e1 = db.TypeDef[TYPE_DEF_OFFSET + 1];
+    auto const d1 = db.TypeDef[TYPE_DEF_OFFSET];
+    REQUIRE(e1.TypeName() == "e1");
+    REQUIRE(d1.TypeName() == "d1");
+    test_enum_type_properties(e1);
+    test_delegate_type_properties(d1);
+
     // Check that type Ref is cottrect
     {
-        auto const& delegate_invoke = db.MethodDef[1];
+        auto const& delegate_invoke = d1.MethodList().first[1];
         REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
         auto const& delegate_sig = delegate_invoke.Signature();
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[4]);
@@ -392,10 +396,10 @@ TEST_CASE("Parameter signature class reference type metadata")
     std::istringstream test_idl{ R"(
         namespace Windows.Test
         {
-            enum MyClass
+            enum e1
             {
             }
-            delegate MyClass d1();
+            delegate e1 d1();
         }
     )" };
     std::string assembly_name = "testidl";
@@ -403,15 +407,18 @@ TEST_CASE("Parameter signature class reference type metadata")
     REQUIRE(db.MethodDef.size() == 2);
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
-    REQUIRE(db.TypeRef[3].TypeName() == "MyClass");
-    REQUIRE(db.TypeRef[4].TypeName() == "d1");
-    REQUIRE(db.TypeDef[1].TypeName() == "MyClass");
-    REQUIRE(db.TypeDef[2].TypeName() == "d1");
-    test_enum_type_properties(db.TypeDef[1]);
-    test_delegate_type_properties(db.TypeDef[2]);
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "e1");
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 1].TypeName() == "d1");
+
+    auto const e1 = db.TypeDef[TYPE_DEF_OFFSET];
+    auto const d1 = db.TypeDef[TYPE_DEF_OFFSET + 1];
+    REQUIRE(e1.TypeName() == "e1");
+    REQUIRE(d1.TypeName() == "d1");
+    test_enum_type_properties(e1);
+    test_delegate_type_properties(d1);
     // Check that type Ref is cottrect
     {
-        auto const& delegate_invoke = db.MethodDef[1];
+        auto const& delegate_invoke = d1.MethodList().first[1];
         REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
         auto const& delegate_sig = delegate_invoke.Signature();
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[3]);
