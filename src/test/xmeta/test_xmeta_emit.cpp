@@ -483,14 +483,15 @@ TEST_CASE("Struct simple type metadata")
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
     REQUIRE(db.Field.size() == 11);
 
-    REQUIRE(db.TypeRef[3].TypeName() == "S");
-    REQUIRE(db.TypeDef[1].TypeName() == "S");
+    auto const struct0 = db.TypeDef[TYPE_DEF_OFFSET];
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "S");
+    REQUIRE(struct0.TypeName() == "S");
+    REQUIRE(struct0.TypeNamespace() == "N");
+    test_struct_type_properties(struct0);
 
-    test_struct_type_properties(db.TypeDef[1]);
-
-    for (size_t i = 0; i < size(db.TypeDef[1].FieldList()) ; i++)
+    for (size_t i = 0; i < size(struct0.FieldList()) ; i++)
     {
-        auto const& struct_field = db.TypeDef[1].FieldList().first[i];
+        auto const& struct_field = struct0.FieldList().first[i];
         REQUIRE(struct_field.Parent().TypeName() == "S");
         REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
         auto const& struct_field_sig = struct_field.Signature();
@@ -529,12 +530,13 @@ TEST_CASE("Struct class type metadata")
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
 
-    REQUIRE(db.TypeRef[3].TypeName() == "S0");
-    REQUIRE(db.TypeRef[4].TypeName() == "S1");
-    REQUIRE(db.TypeRef[5].TypeName() == "E0");
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 0].TypeName() == "S0");
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 1].TypeName() == "S1");
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 2].TypeName() == "E0");
 
-    auto const& struct0 = db.TypeDef[1];
+    auto const& struct0 = db.TypeDef[TYPE_DEF_OFFSET];
     REQUIRE(struct0.TypeName() == "S0");
+    REQUIRE(struct0.TypeNamespace() == "N");
     test_struct_type_properties(struct0);
 
     REQUIRE(db.Field.size() == 3);
