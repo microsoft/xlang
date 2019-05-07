@@ -61,6 +61,13 @@ const MethodAttributes delegate_invoke_attributes()
     return result;
 }
 
+const MethodImplAttributes delegate_method_impl_attribtes()
+{
+    MethodImplAttributes result{};
+    result.CodeType(CodeType::Runtime);
+    return result;
+}
+
 const FieldAttributes enum_value_field_attributes()
 {
     FieldAttributes result{};
@@ -142,7 +149,7 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
     REQUIRE(!delegate_constructor.Signature().ReturnType());
     REQUIRE(size(delegate_constructor.Signature().Params()) == 2);
     REQUIRE(size(delegate_constructor.ParamList()) == 2);
-    REQUIRE(delegate_constructor.ImplFlags().value == miRuntime);
+    REQUIRE(delegate_constructor.ImplFlags().value == delegate_method_impl_attribtes().value);
     REQUIRE(delegate_constructor.Flags().value == delegate_constructor_attributes().value);
     auto const& delegate_constructor_sig = delegate_constructor.Signature();
 
