@@ -8,9 +8,9 @@
 
 using namespace xlang::xmeta;
 
-enum_semantics str_to_enum_semantics(std::string const& val)
+namespace
 {
-    const std::map<std::string, enum_semantics> str_to_enum_type_map = {
+    static const std::map<std::string, enum_semantics> str_to_enum_type_map = {
         { "Int8", enum_semantics::Int8 },
         { "Int16", enum_semantics::Int16 },
         { "Int32", enum_semantics::Int32 },
@@ -20,13 +20,18 @@ enum_semantics str_to_enum_semantics(std::string const& val)
         { "UInt32", enum_semantics::UInt32 },
         { "UInt64", enum_semantics::UInt64 },
     };
-    assert(str_to_enum_type_map.find(val) != str_to_enum_type_map.end());
-    return str_to_enum_type_map.at(val);
-}
 
-simple_type str_to_simple_type(std::string const& val)
-{
-    const std::map<std::string, simple_type> str_to_simple_type_map = {
+    enum_semantics str_to_enum_semantics(std::string const& val)
+    {
+        auto const iter = str_to_enum_type_map.find(val);
+        if (iter == str_to_enum_type_map.end())
+        {
+            throw std::invalid_argument("Can't convert " + val + "to simple type");
+        }
+        return iter->second;
+    }
+
+    static const std::map<std::string, simple_type> str_to_simple_type_map = {
         { "Boolean", simple_type::Boolean },
         { "String", simple_type::String },
         { "Int8", simple_type::Int8 },
@@ -41,8 +46,16 @@ simple_type str_to_simple_type(std::string const& val)
         { "Single", simple_type::Single },
         { "Double", simple_type::Double },
     };
-    assert(str_to_simple_type_map.find(val) != str_to_simple_type_map.end());
-    return str_to_simple_type_map.at(val);
+
+    simple_type str_to_simple_type(std::string const& val)
+    {
+        auto const iter = str_to_simple_type_map.find(val);
+        if (str_to_simple_type_map.find(val) == str_to_simple_type_map.end())
+        {
+            throw std::invalid_argument("Can't convert " + val + "to simple type");
+        }
+        return iter->second;
+    }
 }
 
 ast_to_st_listener::ast_to_st_listener(xmeta_idl_reader& reader) :

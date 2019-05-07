@@ -30,7 +30,7 @@ namespace xlang::xmeta
             m_fields.emplace_back(std::move(field));
         }
 
-        void resolve(std::map<std::string, class_type_semantics> symbols)
+        void resolve(std::map<std::string, class_type_semantics> const& symbols)
         {
             for (auto & field : m_fields)
             {
