@@ -21,7 +21,6 @@ using namespace xlang::meta::reader;
 constexpr int TYPE_DEF_OFFSET = 1; // Module
 constexpr int TYPE_REF_OFFSET = 3; // System: Enum, Delegate, ValueType
 
-
 // All the flags use in the metadata representation
 const TypeAttributes struct_type_attributes()
 {
@@ -30,6 +29,14 @@ const TypeAttributes struct_type_attributes()
     result.Sealed(true);
     result.WindowsRuntime(true);
     result.Layout(TypeLayout::SequentialLayout);
+    return result;
+}
+
+// All the flags use in the metadata representation
+const FieldAttributes struct_field_attributes()
+{
+    FieldAttributes result{};
+    result.Access(MemberAccess::Public);
     return result;
 }
 
@@ -50,19 +57,6 @@ const TypeAttributes delegate_type_attributes()
     result.Sealed(true);
     result.WindowsRuntime(true);
     return result;
-}
-
-void test_struct_type_properties(TypeDef const& struct_type)
-{
-    auto const& struct_flags = struct_type.Flags();
-    REQUIRE(struct_flags.value == struct_type_attributes().value);
-    REQUIRE(struct_type.is_struct());
-    REQUIRE(empty(struct_type.MethodList()));
-    REQUIRE(empty(struct_type.EventList()));
-    REQUIRE(empty(struct_type.GenericParam()));
-    REQUIRE(empty(struct_type.InterfaceImpl()));
-    REQUIRE(empty(struct_type.MethodImplList()));
-    REQUIRE(empty(struct_type.PropertyList()));
 }
 
 const MethodAttributes delegate_constructor_attributes()
@@ -122,6 +116,20 @@ const ParamAttributes param_attributes_out_flag()
     ParamAttributes result{};
     result.Out(true);
     return result;
+}
+
+// In-depth checking of type properties of structs
+void test_struct_type_properties(TypeDef const& struct_type)
+{
+    auto const& struct_flags = struct_type.Flags();
+    REQUIRE(struct_flags.value == struct_type_attributes().value);
+    REQUIRE(struct_type.is_struct());
+    REQUIRE(empty(struct_type.MethodList()));
+    REQUIRE(empty(struct_type.EventList()));
+    REQUIRE(empty(struct_type.GenericParam()));
+    REQUIRE(empty(struct_type.InterfaceImpl()));
+    REQUIRE(empty(struct_type.MethodImplList()));
+    REQUIRE(empty(struct_type.PropertyList()));
 }
 
 // In-depth checking of type properties of enums
@@ -484,6 +492,7 @@ TEST_CASE("Struct simple type metadata")
     {
         auto const& struct_field = db.TypeDef[1].FieldList().first[i];
         REQUIRE(struct_field.Parent().TypeName() == "S");
+        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
         auto const& struct_field_sig = struct_field.Signature();
         REQUIRE(struct_field_sig.Type().element_type() == elements_to_check[i]);
     }
@@ -533,12 +542,14 @@ TEST_CASE("Struct class type metadata")
         auto const& struct_field = struct0.FieldList().first[0];
         REQUIRE(struct_field.Parent().TypeName() == db.TypeDef[1].TypeName());
         auto const& struct_field_sig = struct_field.Signature();
+        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[4]);
     }
     {
         auto const& struct_field = struct0.FieldList().first[1];
         REQUIRE(struct_field.Parent().TypeName() == db.TypeDef[1].TypeName());
         auto const& struct_field_sig = struct_field.Signature();
+        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[5]);
     }
 }
