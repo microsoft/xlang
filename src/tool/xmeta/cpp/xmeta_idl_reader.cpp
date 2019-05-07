@@ -9,13 +9,13 @@
 
 namespace xlang::xmeta
 {
-    size_t xmeta_idl_reader::read(std::istream& idl_contents, bool disable_error_reporting)
+    void xmeta_idl_reader::read(std::istream& idl_contents, bool disable_error_reporting)
     {
         ast_to_st_listener listener{ *this };
-        return read(idl_contents, listener, disable_error_reporting);
+        read(idl_contents, listener, disable_error_reporting);
     }
 
-    size_t xmeta_idl_reader::read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting)
+    void xmeta_idl_reader::read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting)
     {
         antlr4::ANTLRInputStream input{ idl_contents };
         XlangLexer lexer{ &input };
@@ -31,7 +31,7 @@ namespace xlang::xmeta
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
         resolve();
-        return parser.getNumberOfSyntaxErrors();
+        m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());
     }
 
     void xmeta_idl_reader::resolve()

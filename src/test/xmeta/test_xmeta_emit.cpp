@@ -211,7 +211,9 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
 std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::string_view assembly_name)
 {
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+
     xlang::xmeta::xmeta_emit emitter(assembly_name);
     xlang::xmeta::xlang_model_walker walker(reader.get_namespaces(), emitter);
 

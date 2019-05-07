@@ -27,11 +27,9 @@ namespace xlang::xmeta
 
         friend struct ast_to_st_listener;
 
-        size_t read(std::istream& idl_contents, bool disable_error_reporting = false);
-        size_t read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting = false);
-
+        void read(std::istream& idl_contents, bool disable_error_reporting = false);
+        void read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting = false);
         void resolve();
-        void reset(std::string_view const& assembly_name);
 
         auto const& get_namespaces() const
         {
@@ -46,6 +44,11 @@ namespace xlang::xmeta
         size_t get_num_semantic_errors()
         {
             return m_error_manager.get_num_of_semantic_errors();
+        }
+
+        size_t get_num_syntax_errors()
+        {
+            return m_error_manager.get_num_of_syntax_errors();
         }
 
         bool set_symbol(std::string_view symbol, class_type_semantics class_type)

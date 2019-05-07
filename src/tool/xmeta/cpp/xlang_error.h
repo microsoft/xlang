@@ -41,6 +41,11 @@ namespace xlang::xmeta
             m_num_semantic_errors++;
         }
 
+        void set_num_syntax_error(size_t const& count)
+        {
+            m_num_syntax_errors = count;
+        }
+
     private:
         size_t m_num_semantic_errors = 0;
         size_t m_num_syntax_errors = 0;

@@ -21,7 +21,8 @@ TEST_CASE("Duplicate Namespaces")
     )");
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -49,7 +50,8 @@ TEST_CASE("Multiple definition error test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 3);
 }
 
@@ -70,7 +72,8 @@ TEST_CASE("Enum test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -115,7 +118,8 @@ TEST_CASE("Enum circular implicit dependency")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(implicit_dependency_error_idl) == 0);
+    reader.read(implicit_dependency_error_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
 }
 
@@ -133,7 +137,8 @@ TEST_CASE("Enum circular explicit dependency")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(explicit_dependency_error_idl) == 0);
+    reader.read(explicit_dependency_error_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
 }
 
@@ -150,7 +155,8 @@ TEST_CASE("Delegate test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -204,7 +210,8 @@ TEST_CASE("Struct test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(struct_test_idl) == 0);
+    reader.read(struct_test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -275,7 +282,8 @@ TEST_CASE("Struct circular test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(struct_test_idl) == 0);
+    reader.read(struct_test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 3);
     auto namespaces = reader.get_namespaces();
 }
@@ -298,7 +306,8 @@ TEST_CASE("Resolving delegates types test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -361,7 +370,8 @@ TEST_CASE("Resolving struct types test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(struct_test_idl) == 0);
+    reader.read(struct_test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -419,7 +429,8 @@ TEST_CASE("Resolving types across namespaces test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
