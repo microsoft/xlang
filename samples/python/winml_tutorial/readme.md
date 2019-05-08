@@ -1,6 +1,6 @@
 # Tutorial: Create a Windows Machine Learning application with Python/WinRT
 
-This tutorial is a port of the [WinML C++/WinRT tutorial](https://docs.microsoft.com/en-us/windows/ai/get-started-desktop)
+This tutorial is a port of the [WinML C++/WinRT tutorial](https://docs.microsoft.com/windows/ai/windows-ml/get-started-desktop)
 to Python. Please review the original documentation for background on WinML. This document will only
 focus on the differences related to using Python/WinRT instead of C++/WinRT.
 
@@ -12,7 +12,7 @@ focus on the differences related to using Python/WinRT instead of C++/WinRT.
 
 ## Prerequisites
 
-* [Windows 10](https://www.microsoft.com/en-us/windows), October 2018 Update or later.
+* [Windows 10](https://www.microsoft.com/windows), October 2018 Update or later.
 * [Python for Windows](https://docs.python.org/3.7/using/windows.html), version 3.7 or later
 * [pip](https://pypi.org/project/pip/), version 19 or later
 
@@ -39,7 +39,7 @@ tutorial, if you'd rather not type the code in yourself.
 Now that the Python/WinRT  module has been installed, it can be imported for use in Python. We will
 use the [LearningModel.LoadFromFilePath](https://docs.microsoft.com/uwp/api/windows.ai.machinelearning.learningmodel.loadfromfilepath)
 API to load the ONNX model from disk, as per the
-[load the model](https://docs.microsoft.com/en-us/windows/ai/get-started-desktop#load-the-model)
+[load the model](https://docs.microsoft.com/windows/ai/windows-ml/get-started-desktop#load-the-model)
 step from the original tutorial.
 
 First, instead of manually adding timing code to every function like the C++/WinRT version does,
@@ -106,7 +106,7 @@ load_model took 0.7060564 seconds
 
 ## Load the Image to Evaluate
 
-Next, we'll [load an image](https://docs.microsoft.com/en-us/windows/ai/get-started-desktop#load-the-image)
+Next, we'll [load an image](https://docs.microsoft.com/windows/ai/windows-ml/get-started-desktop#load-the-image)
 that we are going to evaluate with the loaded model.
 
 This step requires the use of async WinRT methods. Python/WinRT projects async methods as
@@ -167,7 +167,7 @@ We haven't added any async code yet, but we should still be able to run the pyth
 result similar to what we saw in the previous step.
 
 With these helpers now in place, we can write an async python function to load an image and convert
-it into a [VideoFrame](https://docs.microsoft.com/en-us/uwp/api/Windows.Media.VideoFrame)
+it into a [VideoFrame](https://docs.microsoft.com/uwp/api/Windows.Media.VideoFrame)
 for use with the LearningModel we created earlier. Note the use of `await` on methods that have
 an "Async" suffix. The "Async" suffix is often (but not always) used to indicate the method call
 should be awaited.
@@ -214,7 +214,7 @@ load_image_file took 0.17086919999999994 seconds
 ## Bind Input and Output
 
 Now that the model and image to be evaluated are loaded, we create a LearningModelSession to
-[bind them together](https://docs.microsoft.com/en-us/windows/ai/get-started-desktop#bind-the-input-and-output).
+[bind them together](https://docs.microsoft.com/windows/ai/windows-ml/get-started-desktop#bind-the-input-and-output).
 
 ``` python
 @timed_op
@@ -234,15 +234,15 @@ A few things to note about the `bind_model` function:
 * Instead of using global variables like the C++/WinRT version, this Python code is passing all state
   as parameters and return values. In `bind_model`, we need to return two values - the session and the
   binding - so we group them into a tuple.
-* [LearningModelDeviceKind](https://docs.microsoft.com/en-us/uwp/api/windows.ai.machinelearning.learningmodeldevicekind)
+* [LearningModelDeviceKind](https://docs.microsoft.com/uwp/api/windows.ai.machinelearning.learningmodeldevicekind)
   is an enum type. Like namespaces and class methods, Python/WinRT projects enum type values using
   Python naming conventions. For enum type values, this is UPPER_SNAKE_CASE.
-* [TensorFlow.Create](https://docs.microsoft.com/en-us/uwp/api/windows.ai.machinelearning.tensorfloat.create)
+* [TensorFloat.Create](https://docs.microsoft.com/uwp/api/windows.ai.machinelearning.tensorfloat.create)
   is overloaded - there is a version of Create that takes zero zero parameters and a version that takes
   one parameter. Python/WinRT determines which version of an overloaded method to call based on the
   number of parameters provided
 * The single parameter version of
-  [TensorFlow.Create](https://docs.microsoft.com/en-us/uwp/api/windows.ai.machinelearning.tensorfloat.create#Windows_AI_MachineLearning_TensorFloat_Create_Windows_Foundation_Collections_IIterable_System_Int64__)
+  [TensorFloat.Create](https://docs.microsoft.com/uwp/api/windows.ai.machinelearning.tensorfloat.create#Windows_AI_MachineLearning_TensorFloat_Create_Windows_Foundation_Collections_IIterable_System_Int64__)
   takes a WinRT iterable of 64-bit integers. Python/WinRT enables any Python object implementing the
   [Iterator Protocol](https://docs.python.org/3/c-api/iter.html) to work as  a WinRT iteratble.
 
@@ -276,7 +276,7 @@ bind_model took 0.020646799999999965 seconds
 
 ## Evaluate the Model
 
-We are now ready to [evaluate the model](https://docs.microsoft.com/en-us/windows/ai/get-started-desktop#evaluate-the-model)
+We are now ready to [evaluate the model](https://docs.microsoft.com/windows/ai/windows-ml/get-started-desktop#evaluate-the-model)
 and find out what the image represents.
 
 ``` python
@@ -290,7 +290,7 @@ def evaluate_model(session, binding):
 
 A few things to note about the `evaluate_model` function:
 
-* The [LearningModelEvaluationResult.Outputs](https://docs.microsoft.com/en-us/uwp/api/windows.ai.machinelearning.learningmodelevaluationresult.outputs)
+* The [LearningModelEvaluationResult.Outputs](https://docs.microsoft.com/uwp/api/windows.ai.machinelearning.learningmodelevaluationresult.outputs)
   property returns a WinRT map of string to object. Python/WinRT implements Python's
   [mapping protocol](https://docs.python.org/3/c-api/mapping.html) for WinRT maps. This enables
   us to index into the output property using the square bracket syntax.
@@ -298,7 +298,7 @@ A few things to note about the `evaluate_model` function:
   statically typed. Since the Outputs property is a WinRT map of string to object, we do need to
   convert the softmaxout_1 output object to the correct type in order to use it from Python.
   To convert a WinRT base object to a different static type, all WinRT classes and interfaces
-  support [QueryInterface](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nf-unknwn-iunknown-queryinterface(q_)).
+  support [QueryInterface](https://docs.microsoft.com/windows/desktop/api/unknwn/nf-unknwn-iunknown-queryinterface%28refiid_void%29).
   In Python, QueryInterface is projected as a _from static method on the type we want to convert to.
   All WinRT classes and non-parameterized interfaces expose a _from method.
 

@@ -12,14 +12,14 @@ rev = buildNumber[4]
 long_description = """# Python/WinRT
 
 The Windows Runtime Python Projection (Python/WinRT) enables Python developers to access
-[Windows Runtime APIs](https://docs.microsoft.com/en-us/uwp/api/) directly from Python in a natural
+[Windows Runtime APIs](https://docs.microsoft.com/uwp/api/) directly from Python in a natural
 and familiar way.
 
 ## Getting Started
 
 ### Prerequisites
 
-* [Windows 10](https://www.microsoft.com/en-us/windows), October 2018 Update or later.
+* [Windows 10](https://www.microsoft.com/windows), October 2018 Update or later.
 * [Python for Windows](https://docs.python.org/3.7/using/windows.html), version 3.7 or later
 * [pip](https://pypi.org/project/pip/), version 19 or later
 
