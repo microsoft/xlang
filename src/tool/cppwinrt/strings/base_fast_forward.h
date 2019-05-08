@@ -1033,8 +1033,8 @@ namespace winrt::impl
         guid m_iid;
         std::atomic<uint32_t> m_references{ 1 };
 
-        fast_abi_forwarder(inspectable_abi* owner, guid const& iid, std::size_t offset) noexcept :
-            m_vfptr(s_vtable), m_owner(owner), m_iid(iid), m_offset(offset)
+        fast_abi_forwarder(void* owner, guid const& iid, std::size_t offset) noexcept :
+            m_vfptr(s_vtable), m_owner(static_cast<inspectable_abi*>(owner)), m_iid(iid), m_offset(offset)
         {
             m_owner->AddRef();
         }
@@ -1055,7 +1055,7 @@ namespace winrt::impl
             return 0;
         }
 
-        // Note:  COM interfaces use stdcall, not thiscall, ('this' gets no special treatment), permitting static implementations
+        // Note: COM interfaces use stdcall, not thiscall, ('this' gets no special treatment), permitting static implementations
         static uint32_t WINRT_CALL AddRef(fast_abi_forwarder* self) noexcept
         {
             return 1 + self->m_references.fetch_add(1, std::memory_order_relaxed);
