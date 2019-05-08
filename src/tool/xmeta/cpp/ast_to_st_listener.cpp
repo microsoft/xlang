@@ -1,10 +1,8 @@
-#include <algorithm>
-#include <stdexcept>
-
 #include "ast_to_st_listener.h"
 #include "xmeta_idl_reader.h"
 #include "models/xmeta_models.h"
 #include "XlangParser.h"
+#include "impl/base.h"
 
 using namespace xlang::xmeta;
 
@@ -26,7 +24,7 @@ namespace
         auto const iter = str_to_enum_type_map.find(val);
         if (iter == str_to_enum_type_map.end())
         {
-            throw std::invalid_argument("Can't convert " + val + "to simple type");
+            xlang::throw_invalid("Can't convert ", val, " to enum simple type");
         }
         return iter->second;
     }
@@ -52,7 +50,7 @@ namespace
         auto const iter = str_to_simple_type_map.find(val);
         if (str_to_simple_type_map.find(val) == str_to_simple_type_map.end())
         {
-            throw std::invalid_argument("Can't convert " + val + "to simple type");
+            xlang::throw_invalid("Can't convert ", val, " to simple type");
         }
         return iter->second;
     }
@@ -77,7 +75,7 @@ ast_to_st_listener::ast_to_st_listener(compilation_unit & xlang_model, xlang_err
 listener_error ast_to_st_listener::extract_type(XlangParser::Return_typeContext* rtc, std::optional<type_ref>& tr)
 {
     assert(rtc);
-    if (rtc->VOID())
+    if (rtc->VOID_LXR())
     {
         tr = std::nullopt;
         return listener_error::passed;
@@ -130,7 +128,7 @@ void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_pa
         parameter_semantics sem = parameter_semantics::in;
         if (fixed_param->parameter_modifier() != nullptr)
         {
-            if (fixed_param->parameter_modifier()->CONST())
+            if (fixed_param->parameter_modifier()->CONST_LXR())
             {
                 sem = parameter_semantics::const_ref;
             }
@@ -138,7 +136,7 @@ void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_pa
             {
                 sem = parameter_semantics::ref;
             }
-            else if (fixed_param->parameter_modifier()->OUT())
+            else if (fixed_param->parameter_modifier()->OUT_LXR())
             {
                 sem = parameter_semantics::out;
             }
