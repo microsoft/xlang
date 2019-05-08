@@ -30,8 +30,8 @@ namespace xlang::xmeta
 
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
-        pass1();
         m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());
+        pass1();
     }
 
     void xmeta_idl_reader::pass1()
