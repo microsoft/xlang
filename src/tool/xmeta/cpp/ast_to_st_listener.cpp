@@ -347,9 +347,17 @@ void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationC
 
     for (auto field : ctx->struct_body()->field_declaration())
     {
-        type_ref tr{ field->type()->getText() };
-        extract_type(field->type(), tr);
-        new_struct->add_field(std::pair(tr, field->IDENTIFIER()->getText()));
+        std::string field_name{ field->IDENTIFIER()->getText() };
+        if (new_struct->member_exists(field_name))
+        {
+            error_manager.write_struct_field_error(field->IDENTIFIER()->getSymbol()->getLine(), field_name, struct_name);
+        }
+        else
+        {
+            type_ref tr{ field->type()->getText() };
+            extract_type(field->type(), tr);
+            new_struct->add_field(std::pair(tr, field_name));
+        }
     }
     if (!xlang_model.set_symbol(symbol, new_struct))
     {

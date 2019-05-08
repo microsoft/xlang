@@ -22,6 +22,13 @@ namespace xlang::xmeta
         write_error(decl_line, oss.str());
     }
 
+    void xlang_error_manager::write_struct_field_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& struct_name)
+    {
+        std::ostringstream oss;
+        oss << "Struct member " << invalid_name << " already defined in struct " << struct_name;
+        write_error(decl_line, oss.str());
+    }
+
     void xlang_error_manager::write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id)
     {
         std::ostringstream oss;

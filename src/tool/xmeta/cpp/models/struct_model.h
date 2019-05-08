@@ -97,6 +97,15 @@ namespace xlang::xmeta
             return false;
         }
 
+        bool member_exists(std::string_view const& id) const
+        {
+            auto same_id = [&id](std::pair<type_ref, std::string> const& field)
+            {
+                return field.second == id;
+            };
+            return std::find_if(m_fields.begin(), m_fields.end(), same_id) != m_fields.end();
+        }
+
     private:
         std::vector<std::pair<type_ref, std::string>> m_fields;
         bool contains_itself = false;

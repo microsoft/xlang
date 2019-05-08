@@ -292,6 +292,26 @@ TEST_CASE("Struct circular test")
     auto namespaces = reader.get_namespaces();
 }
 
+TEST_CASE("Struct duplicate member test")
+{
+    std::istringstream struct_test_idl{ R"(
+        namespace N
+        {
+            struct S0
+            {
+                Int32 field_1;
+                Int32 field_1;
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(struct_test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 1);
+    auto namespaces = reader.get_namespaces();
+}
+
 TEST_CASE("Resolving delegates types test")
 {
     std::istringstream test_idl{ R"(

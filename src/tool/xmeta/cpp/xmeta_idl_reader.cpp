@@ -51,4 +51,3 @@ namespace xlang::xmeta
         model->resolve(m_xlang_model.symbols, m_error_manager);
     }
 }
-

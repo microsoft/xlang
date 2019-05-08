@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -15,6 +16,7 @@ namespace xlang::xmeta
         void write_error(size_t decl_line, std::string_view const& msg);
         void write_unresolved_type_error(size_t decl_line, std::string symbol);
         void write_struct_field_error(size_t decl_line, std::string symbol);
+        void write_struct_field_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& struct_name);
         void write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id);
         void write_enum_member_expr_ref_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id);
         void write_enum_circular_dependency(size_t decl_line, std::string_view const& invalid_member_id, std::string_view const& enum_name);
@@ -50,5 +52,19 @@ namespace xlang::xmeta
     private:
         size_t m_num_semantic_errors = 0;
         size_t m_num_syntax_errors = 0;
+
+        /* Prototyping how I would do the errors, I would store each type of error in these vectors.
+            And then they will be used to print out the actual error statements later. These vectors would
+            contain a struct with an error code, the symbol associated with it, and the decl line
+            
+            struct error_model
+            {
+                size_t error_code;
+                size_t decl_line;
+                std::string symbol;
+
+            }
+          
+            std::vector<error_model> errors; */
     };
 }
