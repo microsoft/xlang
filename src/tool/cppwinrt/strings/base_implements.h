@@ -1234,6 +1234,10 @@ namespace winrt
     template <typename D, typename... Args>
     auto make(Args&&... args)
     {
+        // Note: https://aka.ms/cppwinrt/detect_direct_allocations
+        static_assert(std::is_destructible_v<D>, "C++/WinRT implementation types must have a public destructor");
+        static_assert(!std::is_final_v<D>, "C++/WinRT implementation types must not be final");
+
         using I = typename impl::implements_default_interface<D>::type;
 
         if constexpr (std::is_same_v<I, Windows::Foundation::IActivationFactory>)
@@ -1260,6 +1264,10 @@ namespace winrt
     template <typename D, typename... Args>
     com_ptr<D> make_self(Args&&... args)
     {
+        // Note: https://aka.ms/cppwinrt/detect_direct_allocations
+        static_assert(std::is_destructible_v<D>, "C++/WinRT implementation types must have a public destructor");
+        static_assert(!std::is_final_v<D>, "C++/WinRT implementation types must not be final");
+
         return { new impl::heap_implements<D>(std::forward<Args>(args)...), take_ownership_from_abi };
     }
 
