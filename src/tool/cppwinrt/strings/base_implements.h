@@ -811,12 +811,12 @@ namespace winrt::impl
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
 
-        int32_t query_interface_tearoff(guid const&, void**) const noexcept
+    protected:
+
+        virtual int32_t query_interface_tearoff(guid const&, void**) const noexcept
         {
             return error_no_interface;
         }
-
-    protected:
 
         root_implements() noexcept
         {
@@ -1111,7 +1111,7 @@ namespace winrt::impl
                 }
             }
 
-            return static_cast<D*>(this)->query_interface_tearoff(id, object);
+            return query_interface_tearoff(id, object);
         }
 
         impl::IWeakReferenceSource* make_weak_ref() noexcept
