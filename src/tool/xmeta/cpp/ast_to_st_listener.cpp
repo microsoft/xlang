@@ -70,8 +70,8 @@ namespace
     };
 }
 
-ast_to_st_listener::ast_to_st_listener(xmeta_idl_reader& reader) :
-    m_reader{ reader }
+ast_to_st_listener::ast_to_st_listener(compilation_unit & xlang_model, xlang_error_manager & error_manager) 
+    : xlang_model{ xlang_model }, error_manager{ error_manager }
 { }
 
 listener_error ast_to_st_listener::extract_type(XlangParser::Return_typeContext* rtc, std::optional<type_ref>& tr)
@@ -157,7 +157,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
      {
          if (new_enum->member_exists(enum_member_id))
          {
-             m_reader.m_error_manager.write_enum_member_name_error(
+             error_manager.write_enum_member_name_error(
                  decl_line,
                  enum_member_id,
                  new_enum->get_id(),
@@ -206,7 +206,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
              auto const& val = new_enum->get_members().back().get_value();
              if (!val.is_resolved() && val.get_ref_name() == e_member.get_id())
              {
-                 m_reader.m_error_manager.write_enum_circular_dependency(
+                 error_manager.write_enum_circular_dependency(
                      e_member.get_decl_line(),
                      e_member.get_id(),
                      new_enum->get_id());
@@ -223,7 +223,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
 
      if (ec == std::errc::result_out_of_range)
      {
-         m_reader.m_error_manager.write_enum_const_expr_range_error(
+         error_manager.write_enum_const_expr_range_error(
              decl_line,
              expr->getText(),
              enum_member_id,
@@ -246,7 +246,7 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     }
     if (dependents.find(e_member.get_id()) != dependents.end())
     {
-        m_reader.m_error_manager.write_enum_circular_dependency(
+        error_manager.write_enum_circular_dependency(
             e_member.get_decl_line(),
             e_member.get_id(),
             new_enum->get_id());
@@ -256,7 +256,7 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     auto const& ref_name = val.get_ref_name();
     if (!new_enum->member_exists(ref_name))
     {
-        m_reader.m_error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_id(), m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_id(), m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return listener_error::failed;
     }
     auto ref_member = new_enum->get_member(ref_name);
@@ -285,9 +285,9 @@ void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarat
     {
         extract_formal_params(formal_params->fixed_parameter(), dm);
     }
-    if (!m_reader.set_symbol(symbol, dm))
+    if (!xlang_model.set_symbol(symbol, dm))
     {
-        m_reader.m_error_manager.write_namespace_member_name_error(decl_line, delegate_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_namespace_member_name_error(decl_line, delegate_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
     }
     m_cur_namespace_body->add_delegate(dm);
@@ -328,9 +328,9 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
             return;
         }
     }
-    if (!m_reader.set_symbol(symbol, new_enum))
+    if (!xlang_model.set_symbol(symbol, new_enum))
     {
-        m_reader.m_error_manager.write_namespace_member_name_error(decl_line, enum_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_namespace_member_name_error(decl_line, enum_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
     }
     m_cur_namespace_body->add_enum(new_enum);
@@ -351,9 +351,9 @@ void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationC
         extract_type(field->type(), tr);
         new_struct->add_field(std::pair(tr, field->IDENTIFIER()->getText()));
     }
-    if (!m_reader.set_symbol(symbol, new_struct))
+    if (!xlang_model.set_symbol(symbol, new_struct))
     {
-        m_reader.m_error_manager.write_namespace_member_name_error(decl_line, struct_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_namespace_member_name_error(decl_line, struct_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
     }
     m_cur_namespace_body->add_struct(new_struct);
@@ -406,7 +406,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
             }
             else
             {
-                m_reader.m_error_manager.write_namespace_member_name_error(decl_line, name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+                error_manager.write_namespace_member_name_error(decl_line, name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
                 return;
             }
         }
@@ -421,22 +421,22 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
     }
     else
     {
-        auto it1 = std::find_if(m_reader.m_namespaces.begin(), m_reader.m_namespaces.end(), invalid_ns_id(name));
-        if (it1 != m_reader.m_namespaces.end())
+        auto it1 = std::find_if(xlang_model.namespaces.begin(), xlang_model.namespaces.end(), invalid_ns_id(name));
+        if (it1 != xlang_model.namespaces.end())
         {
             // Semantically invalid by check 4 for namespace members.
-            m_reader.m_error_manager.write_namespace_name_error(decl_line, name, it1->second->get_id());
+            error_manager.write_namespace_name_error(decl_line, name, it1->second->get_id());
             return;
         }
 
-        auto it2 = m_reader.m_namespaces.find(name);
-        if (it2 == m_reader.m_namespaces.end())
+        auto it2 = xlang_model.namespaces.find(name);
+        if (it2 == xlang_model.namespaces.end())
         {
             auto new_ns = std::make_shared<namespace_model>(name, decl_line, m_cur_assembly, nullptr /* No parent */);
-            m_reader.m_namespaces[new_ns->get_id()] = new_ns;
+            xlang_model.namespaces[new_ns->get_id()] = new_ns;
         }
-        assert(m_reader.m_namespaces.find(name) != m_reader.m_namespaces.end());
-        setup_cur_ns_body(m_reader.m_namespaces.at(name));
+        assert(xlang_model.namespaces.find(name) != xlang_model.namespaces.end());
+        setup_cur_ns_body(xlang_model.namespaces.at(name));
     }
 }
 

@@ -11,7 +11,7 @@ namespace xlang::xmeta
 {
     void xmeta_idl_reader::read(std::istream& idl_contents, bool disable_error_reporting)
     {
-        ast_to_st_listener listener{ *this };
+        ast_to_st_listener listener{ m_xlang_model, m_error_manager };
         read(idl_contents, listener, disable_error_reporting);
     }
 
@@ -36,19 +36,19 @@ namespace xlang::xmeta
 
     void xmeta_idl_reader::resolve()
     {
-        xlang_model_walker walker(m_namespaces, *this);
+        xlang_model_walker walker(m_xlang_model.namespaces, *this);
         walker.walk();
     }
 
     void xmeta_idl_reader::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
-        model->resolve(symbols, m_error_manager);
-        model->has_circular_struct_declarations(symbols, m_error_manager);
+        model->resolve(m_xlang_model.symbols, m_error_manager);
+        model->has_circular_struct_declarations(m_xlang_model.symbols, m_error_manager);
     }
 
     void xmeta_idl_reader::listen_delegate_model(std::shared_ptr<delegate_model> const& model) 
     {
-        model->resolve(symbols, m_error_manager);
+        model->resolve(m_xlang_model.symbols, m_error_manager);
     }
 }
 

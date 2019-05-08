@@ -19,7 +19,7 @@ enum class listener_error : bool
 struct ast_to_st_listener : XlangParserBaseListener
 {
     ast_to_st_listener() = delete;
-    ast_to_st_listener(xlang::xmeta::xmeta_idl_reader& reader);
+    ast_to_st_listener(xlang::xmeta::compilation_unit & xlang_model, xlang::xmeta::xlang_error_manager & error_manager);
 
     void exitDelegate_declaration(XlangParser::Delegate_declarationContext* ctx) override;
     void exitEnum_declaration(XlangParser::Enum_declarationContext *ctx) override;
@@ -34,7 +34,8 @@ struct ast_to_st_listener : XlangParserBaseListener
     }
 
 private:
-    xlang::xmeta::xmeta_idl_reader& m_reader;
+    xlang::xmeta::compilation_unit & xlang_model;
+    xlang::xmeta::xlang_error_manager & error_manager;
 
     std::string_view m_cur_assembly;
 
