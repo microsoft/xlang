@@ -74,9 +74,11 @@ jobs:
       pythonVersionSpec: '3.7.x'
       projectionType: $(ProjectionType)
 
+# "Dart" is the name of the MSFT internal AzDO organization used by the xlang team
+# When building in the Dart AzDO organization, add a job to sign the compiled binary
 - ${{ if eq(variables['System.TeamProject'], 'Dart') }}:
   - job: sign_projection
-    dependsOn: ${{ parameters.dependsOn }}
+    dependsOn: build_projection
     pool:
       name: Package ES Lab E
 
@@ -106,7 +108,8 @@ jobs:
   - template: AzurePipelinesTemplates/job-package-projection.yml
     parameters:
       dependsOn: sign_projection
-        
+
+# When building outside the Dart AzDO organization, skip the siging step
 - ${{ if ne(variables['System.TeamProject'], 'Dart') }}:
   - template: AzurePipelinesTemplates/job-package-projection.yml
     parameters:
