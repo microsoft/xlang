@@ -1,14 +1,14 @@
 # Python/WinRT
 
 The Windows Runtime Python Projection (Python/WinRT) enables Python developers to access
-[Windows Runtime APIs](https://docs.microsoft.com/en-us/uwp/api/) directly from Python in a natural
+[Windows Runtime APIs](https://docs.microsoft.com/uwp/api/) directly from Python in a natural
 and familiar way.
 
 ## Getting Started
 
 ### Prerequisites
 
-* [Windows 10](https://www.microsoft.com/en-us/windows), October 2018 Update or later.
+* [Windows 10](https://www.microsoft.com/windows), October 2018 Update or later.
 * [Python for Windows](https://docs.python.org/3.7/using/windows.html), version 3.7 or later
 * [pip](https://pypi.org/project/pip/), version 19 or later
 
@@ -22,13 +22,13 @@ pip is on the path, Python/WinRT can be installed from the command line with the
 ```
 
 You can test that Python/WinRT is installed correctly by launching Python and running the following
-snippet of Python code. It should print "https://github.com/Microsoft/xlang/tree/master/samples/python/winml_tutorial"
+snippet of Python code. It should print "https://github.com/Microsoft/xlang/tree/master/src/tool/python"
 to the console.
 
 ``` python
 import winrt.windows.foundation as wf
 u = wf.Uri("https://github.com/")
-u2 = u.combine_uri("Microsoft/xlang/tree/master/samples/python/winml_tutorial")
+u2 = u.combine_uri("Microsoft/xlang/tree/master/src/tool/python")
 print(str(u2))
 ```
 
@@ -38,7 +38,7 @@ print(str(u2))
 > [WinML Tutorial](https://github.com/Microsoft/xlang/tree/master/samples/python/winml_tutorial)
 > in the samples folder of the xlang GitHub repo.
 
-The WinRT APIs are documented on [docs.microsoft.com](https://docs.microsoft.com/en-us/uwp/api/).
+The WinRT APIs are documented on [docs.microsoft.com](https://docs.microsoft.com/uwp/api/).
 At this time, there is no official documentation for using WinRT from Python. However, this section
 will describe how WinRT APIs are projected in Python.
 
@@ -47,7 +47,7 @@ will describe how WinRT APIs are projected in Python.
 WinRT namespaces are projected in Python as modules. WinRT namespaces are projected in Python as
 lower case to conform with standard Python naming conventions. WinRT namespaces are also prefixed
 with the `winrt` package name. For example, the
-[Windows.Devices.Geolocation](https://docs.microsoft.com/en-us/uwp/api/Windows.Devices.Geolocation)
+[Windows.Devices.Geolocation](https://docs.microsoft.com/uwp/api/Windows.Devices.Geolocation)
 WinRT namespace is projected as `winrt.windows.devices.geolocation` in Python.
 
 Importing a WinRT namespace module will automatically import namespace modules containing dependent
@@ -58,7 +58,7 @@ will not automatically import ``winrt.windows.devices.geolocation.geofencing`.
 ### Class Members
 
 WinRT type members are projected in Python using snake_case, following standard Python naming conventions.
-For example, the [Geolocator.GetGeopositionAsync](https://docs.microsoft.com/en-us/uwp/api/windows.devices.geolocation.geolocator.getgeopositionasync)
+For example, the [Geolocator.GetGeopositionAsync](https://docs.microsoft.com/uwp/api/windows.devices.geolocation.geolocator.getgeopositionasync)
 method is projected as `get_geoposition_async` in Python
 
 ### Enum Members
@@ -66,7 +66,7 @@ method is projected as `get_geoposition_async` in Python
 WinRT enums are projected as [`IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)
 in Python. Enum members are projected in UPPER_SNAKE_CASE as per standard Python naming conventions.
 For example. the 
-[PositionStatus](https://docs.microsoft.com/en-us/uwp/api/Windows.Devices.Geolocation.PositionStatus)
+[PositionStatus](https://docs.microsoft.com/uwp/api/Windows.Devices.Geolocation.PositionStatus)
 WinRT enum is projected in Python like this:
 
 ``` python
@@ -114,17 +114,17 @@ async def get_current_latitude():
 WinRT and Python both have standard definitions of iterators, sequences and maps. Python/WinRT automatically
 projects WinRT collection types as using the appropriate Python protocol.
 
-* WinRT iterators ([IIterable<T>](https://docs.microsoft.com/en-us/uwp/api/Windows.Foundation.Collections.IIterable_T_)/
-  [IIterator<T>](https://docs.microsoft.com/en-us/uwp/api/windows.foundation.collections.iiterator_t_))
+* WinRT iterators ([IIterable<T>](https://docs.microsoft.com/uwp/api/Windows.Foundation.Collections.IIterable_T_)/
+  [IIterator<T>](https://docs.microsoft.com/uwp/api/windows.foundation.collections.iiterator_t_))
   are projected implementing the Python [iterator protocol](https://docs.python.org/3/c-api/iter.html).
-* WinRT vectors ([IVector<T>](https://docs.microsoft.com/en-us/uwp/api/windows.foundation.collections.ivector_t_)/
-  [IVectorView<T>](https://docs.microsoft.com/en-us/uwp/api/windows.foundation.collections.ivectorview_t_))
+* WinRT vectors ([IVector<T>](https://docs.microsoft.com/uwp/api/windows.foundation.collections.ivector_t_)/
+  [IVectorView<T>](https://docs.microsoft.com/uwp/api/windows.foundation.collections.ivectorview_t_))
   are projected implementing the Python [sequence protocol](https://docs.python.org/3/c-api/sequence.html).
   IVectorView supports [sq_length](https://docs.python.org/3/c-api/typeobj.html?highlight=sq_length#c.PySequenceMethods.sq_length)
   and [sq_item](https://docs.python.org/3/c-api/typeobj.html?highlight=sq_length#c.PySequenceMethods.sq_item).
   IVector also support [sq_ass_item](https://docs.python.org/3/c-api/typeobj.html?highlight=sq_length#c.PySequenceMethods.sq_ass_item).
-* WinRT maps ([IMap<K,V>](https://docs.microsoft.com/en-us/uwp/api/windows.foundation.collections.imap_k_v_)/
-  [IMapView<K,V>](https://docs.microsoft.com/en-us/uwp/api/windows.foundation.collections.imapview_k_v_))
+* WinRT maps ([IMap<K,V>](https://docs.microsoft.com/uwp/api/windows.foundation.collections.imap_k_v_)/
+  [IMapView<K,V>](https://docs.microsoft.com/uwp/api/windows.foundation.collections.imapview_k_v_))
   are projected implementing the Python [mapping protocol](https://docs.python.org/3/c-api/mapping.html).
   IMapView supports [mp_length](https://docs.python.org/3/c-api/typeobj.html?highlight=sq_length#c.PyMappingMethods.mp_length)
   and [mp_subscript](https://docs.python.org/3/c-api/typeobj.html?highlight=sq_length#c.PyMappingMethods.mp_subscript).
@@ -132,7 +132,7 @@ projects WinRT collection types as using the appropriate Python protocol.
 
 Additionally, Python/WinRT will convert Python collections to WinRT collections as appropriate. For
 example, one of the overloads of
-[TensorFlow.Create](https://docs.microsoft.com/en-us/uwp/api/windows.ai.machinelearning.tensorfloat.create#Windows_AI_MachineLearning_TensorFloat_Create_Windows_Foundation_Collections_IIterable_System_Int64__)
+[TensorFlow.Create](https://docs.microsoft.com/uwp/api/windows.ai.machinelearning.tensorfloat.create#Windows_AI_MachineLearning_TensorFloat_Create_Windows_Foundation_Collections_IIterable_System_Int64__)
 takes a WinRT iterator of 64 bit integers. Python/WinRT will accept any Python [iterator type](https://docs.python.org/3/library/stdtypes.html#typeiter)
 as a parameter.
 
@@ -145,15 +145,15 @@ shape = winml.TensorFloat.create([1, 1000, 1, 1])
 WinRT methods typically return objects with full type information that can be projected into Python.
 However, there are some WinRT APIs that don't have static type information. In these cases, the
 object must be converted into the correct type by the developer. For example,
-[LearningModelEvaluationResult.Outputs](https://docs.microsoft.com/en-us/uwp/api/windows.ai.machinelearning.learningmodelevaluationresult.outputs)
+[LearningModelEvaluationResult.Outputs](https://docs.microsoft.com/uwp/api/windows.ai.machinelearning.learningmodelevaluationresult.outputs)
 property is a map of strings to objects without type information. The expected type of the output in
 this example depends on the types of the input. In the
 [WinML Python/WinRT Tutorial](https://github.com/Microsoft/xlang/tree/master/samples/python/winml_tutorial),
-softmaxout_1 is bound to a [TensorFloat](https://docs.microsoft.com/en-us/uwp/api/windows.ai.machinelearning.tensorfloat).
+softmaxout_1 is bound to a [TensorFloat](https://docs.microsoft.com/uwp/api/windows.ai.machinelearning.tensorfloat).
 So we need to convert the softmaxout_1 output back to a TensorFloat in order to work with it.
 
 In WinRT terms, this conversion is achieved by calling
-[QueryInterface](https://docs.microsoft.com/en-us/windows/desktop/api/unknwn/nf-unknwn-iunknown-queryinterface%28refiid_void%29)
+[QueryInterface](https://docs.microsoft.com/windows/desktop/api/unknwn/nf-unknwn-iunknown-queryinterface%28refiid_void%29)
 to get a correctly typed object. WinRT classes and concrete interfaces project a `_from` static
 method in Python\WinRT to support calling Query Interface on arbitrary objects in order to convert
 them to the correct type so they can be used in Python.
@@ -164,7 +164,7 @@ them to the correct type so they can be used in Python.
 the classes in the Windows.UI.Composition and Windows.UI.Xaml namespaces. These namespaces are excluded
 from Python/WinRT.
   * Note, a few methods in other namespaces reference types in these namespaces. For example,
-  [MediaPlayerSurface](https://docs.microsoft.com/en-us/uwp/api/windows.media.playback.mediaplayersurface)
+  [MediaPlayerSurface](https://docs.microsoft.com/uwp/api/windows.media.playback.mediaplayersurface)
   is in the Windows.Media.Playback namespace but has properties that return types in the
   Windows.UI.Composition namespace. While these properties are available to Python, accessing them
   is not supported at this time.
