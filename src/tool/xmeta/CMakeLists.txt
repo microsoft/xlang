@@ -16,7 +16,7 @@ if (WIN32)
         cpp/xlang_model_walker.cpp)
 endif ()
 
-target_include_directories(xmeta_model PUBLIC cpp/models cpp)
+target_include_directories(xmeta_model PUBLIC cpp/models cpp ${XLANG_LIBRARY_PATH})
 
 if (WIN32)
     add_library(xmeta_windows xmeta_emit.cpp)
