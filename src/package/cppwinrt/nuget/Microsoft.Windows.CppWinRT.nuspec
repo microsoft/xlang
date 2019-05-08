@@ -22,7 +22,7 @@
     <file src="Microsoft.Windows.CppWinRT.targets" target="build\native"/>
     <file src="Microsoft.Windows.CppWinRT.FastAbi.targets" target="build\native"/>
     <file src="src\thunks.inc" target="src"/>
-    <file src="src\x86\thunks.asm" target="src\x86"/>
+    <file src="src\win32\thunks.asm" target="src\win32"/>
     <file src="src\x64\thunks.asm" target="src\x64"/>
     <file src="src\arm\thunks.asm" target="src\arm"/>
     <file src="src\arm64\thunks.asm" target="src\arm64"/>
