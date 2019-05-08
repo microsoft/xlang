@@ -810,7 +810,6 @@ namespace winrt::impl
 
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
-        static void final_release(std::unique_ptr<D>) noexcept {}
 
         int32_t query_interface_tearoff(guid const&, void**) const noexcept
         {
@@ -905,7 +904,14 @@ namespace winrt::impl
                 // This ensures destruction has a stable value during destruction.
                 m_references = 1;
 
-                D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
+                if constexpr (has_final_release::value)
+                {
+                    D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
+                }
+                else
+                {
+                    delete this;
+                }
             }
 
             return target;
@@ -1035,6 +1041,16 @@ namespace winrt::impl
         using is_factory = std::disjunction<std::is_same<Windows::Foundation::IActivationFactory, I>...>;
 
     private:
+
+        class has_final_release
+        {
+            template <typename U, typename = decltype(std::declval<U>().final_release(0))> static constexpr bool get_value(int) { return true; }
+            template <typename> static constexpr bool get_value(...) { return false; }
+
+        public:
+
+            static constexpr bool value = get_value<D>(0);
+        };
 
         using is_agile = std::negation<std::disjunction<std::is_same<non_agile, I>...>>;
         using is_inspectable = std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, I>...>;
@@ -1174,17 +1190,22 @@ namespace winrt::impl
         friend struct impl::produce;
     };
 
+#if defined(WINRT_NO_MAKE_DETECTION)
+    template <typename T>
+    using heap_implements = T;
+#else
     template <typename T>
     struct heap_implements final : T
     {
         using T::T;
 
-#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
+#if defined(_DEBUG)
         void use_make_function_to_create_this_object() final
         {
         }
 #endif
     };
+#endif
 
     template <typename D>
     auto make_factory() -> typename impl::implements_default_interface<D>::type
@@ -1234,6 +1255,12 @@ namespace winrt
     template <typename D, typename... Args>
     auto make(Args&&... args)
     {
+#if !defined(WINRT_NO_MAKE_DETECTION)
+        // Note: https://aka.ms/cppwinrt/detect_direct_allocations
+        static_assert(std::is_destructible_v<D>, "C++/WinRT implementation types must have a public destructor");
+        static_assert(!std::is_final_v<D>, "C++/WinRT implementation types must not be final");
+#endif
+
         using I = typename impl::implements_default_interface<D>::type;
 
         if constexpr (std::is_same_v<I, Windows::Foundation::IActivationFactory>)
@@ -1260,6 +1287,12 @@ namespace winrt
     template <typename D, typename... Args>
     com_ptr<D> make_self(Args&&... args)
     {
+#if !defined(WINRT_NO_MAKE_DETECTION)
+        // Note: https://aka.ms/cppwinrt/detect_direct_allocations
+        static_assert(std::is_destructible_v<D>, "C++/WinRT implementation types must have a public destructor");
+        static_assert(!std::is_final_v<D>, "C++/WinRT implementation types must not be final");
+#endif
+
         return { new impl::heap_implements<D>(std::forward<Args>(args)...), take_ownership_from_abi };
     }
 
