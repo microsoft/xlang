@@ -618,9 +618,9 @@ namespace xlang::xmeta
         TypeRef const& token_delegate_type_ref = iter->second;
 
         // Constructor
-        static constexpr DWORD delegate_constructor_flag = fdRTSpecialName | fdSpecialName | mdHideBySig;
+        static constexpr DWORD delegate_constructor_flag = mdPrivate | mdSpecialName | mdRTSpecialName | mdHideBySig;
         signature_blob delegate_constructor_sig;
-        std::vector<ParamSig> param_types = { ParamSig{ TypeSig{ElementType::Object} }, ParamSig{  TypeSig{ElementType::I} } };
+        std::vector<ParamSig> param_types = { ParamSig{ TypeSig{ElementType::Object} }, ParamSig{ TypeSig{ElementType::I} } };
         delegate_constructor_sig.add_signature(MethodDefSig{ RetTypeSig{ std::nullopt }, param_types }); // nullopt means returntype is void
         mdMethodDef token_delegate_constructor_def;
         check_hresult(m_metadata_emitter->DefineMethod(
@@ -666,8 +666,8 @@ namespace xlang::xmeta
             param_sigs.emplace_back(param_sig);
         }
         delegate_invoke_sig.add_signature(MethodDefSig{ return_sig, param_sigs });
-        
-        static constexpr DWORD delegate_invoke_flag = mdVirtual | fdSpecialName | mdHideBySig;
+         
+        static constexpr DWORD delegate_invoke_flag = mdPublic | mdVirtual | mdSpecialName | mdHideBySig;
         mdMethodDef token_delegate_invoke_def;
         check_hresult(m_metadata_emitter->DefineMethod(
             token_delegate_type_def,
@@ -728,7 +728,7 @@ namespace xlang::xmeta
         mdParamDef token_param_def; //To be used for attributes later
         check_hresult(m_metadata_emitter->DefineParam(
             token_method_def,
-            0, 
+            parameter_index,
             param_name.c_str(),
             param_flags,
             (DWORD) - 1,

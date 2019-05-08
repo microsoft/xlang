@@ -93,41 +93,81 @@ namespace xlang::meta::reader
         {
             return get_bit(Static_bit);
         }
+        void Static(bool arg) noexcept
+        {
+            set_bit(arg, Static_bit);
+        }
         constexpr bool InitOnly() const noexcept
         {
             return get_bit(InitOnly_bit);
+        }
+        void InitOnly(bool arg) noexcept
+        {
+            set_bit(arg, InitOnly_bit);
         }
         constexpr bool Literal() const noexcept
         {
             return get_bit(Literal_bit);
         }
+        void Literal(bool arg) noexcept
+        {
+            set_bit(arg, Literal_bit);
+        }
         constexpr bool NotSerialized() const noexcept
         {
             return get_bit(NotSerialized_bit);
+        }
+        void NotSerialized(bool arg) noexcept
+        {
+            set_bit(arg, NotSerialized_bit);
         }
         constexpr bool SpecialName() const noexcept
         {
             return get_bit(SpecialName_bit);
         }
+        void SpecialName(bool arg) noexcept
+        {
+            set_bit(arg, SpecialName_bit);
+        }
         constexpr bool PInvokeImpl() const noexcept
         {
             return get_bit(PInvokeImpl_bit);
+        }
+        void PInvokeImpl(bool arg) noexcept
+        {
+            set_bit(arg, PInvokeImpl_bit);
         }
         constexpr bool RTSpecialName() const noexcept
         {
             return get_bit(RTSpecialName_bit);
         }
+        void RTSpecialName(bool arg) noexcept
+        {
+            set_bit(arg, RTSpecialName_bit);
+        }
         constexpr bool HasFieldMarshal() const noexcept
         {
             return get_bit(HasFieldMarshal_bit);
+        }
+        void HasFieldMarshal(bool arg) noexcept
+        {
+            set_bit(arg, HasFieldMarshal_bit);
         }
         constexpr bool HasDefault() const noexcept
         {
             return get_bit(HasDefault_bit);
         }
+        void HasDefault(bool arg) noexcept
+        {
+            set_bit(arg, HasDefault_bit);
+        }
         constexpr bool HasFieldRVA() const noexcept
         {
             return get_bit(HasFieldRVA_bit);
+        }
+        void HasFieldRVA(bool arg) noexcept
+        {
+            set_bit(arg, HasFieldRVA_bit);
         }
 
     private:

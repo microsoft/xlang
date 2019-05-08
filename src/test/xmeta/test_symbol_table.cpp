@@ -21,7 +21,8 @@ TEST_CASE("Duplicate Namespaces")
     )");
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -49,7 +50,8 @@ TEST_CASE("Multiple definition error test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 3);
 }
 
@@ -70,7 +72,8 @@ TEST_CASE("Enum test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -115,7 +118,8 @@ TEST_CASE("Enum circular implicit dependency")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(implicit_dependency_error_idl) == 0);
+    reader.read(implicit_dependency_error_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
 }
 
@@ -133,7 +137,8 @@ TEST_CASE("Enum circular explicit dependency")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(explicit_dependency_error_idl) == 0);
+    reader.read(explicit_dependency_error_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
 }
 
@@ -151,7 +156,8 @@ TEST_CASE("Interface methods test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto const& namespaces = reader.get_namespaces();
     auto const& it = namespaces.find("N");
@@ -211,7 +217,8 @@ TEST_CASE("Resolving interface method type ref test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto const& namespaces = reader.get_namespaces();
     auto const& it = namespaces.find("N");
@@ -262,7 +269,8 @@ TEST_CASE("Interface property test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto const& namespaces = reader.get_namespaces();
     auto const& it = namespaces.find("N");
@@ -318,7 +326,8 @@ TEST_CASE("Interface property implicit accessors test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto const& namespaces = reader.get_namespaces();
     auto const& it = namespaces.find("N");
@@ -375,7 +384,8 @@ TEST_CASE("Resolving Interface property type ref test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto const& namespaces = reader.get_namespaces();
     auto const& it = namespaces.find("N");
@@ -417,7 +427,8 @@ TEST_CASE("Interface event test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto const& namespaces = reader.get_namespaces();
     auto const& it = namespaces.find("N");
@@ -439,49 +450,39 @@ TEST_CASE("Interface event test")
     REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
 }
 
-TEST_CASE("Interface event test")
-{
-    std::istringstream test_idl{ R"(
-        namespace N
-        {
-            interface IControl
-            {
-                void Paint();
-            }
-            interface ITextBox: IControl
-            {
-                void SetText(String text);
-            }
-            interface IListBox: IControl
-            {
-               void SetItems(String[] items);
-            }
-            interface IComboBox: ITextBox, IListBox {}
-        }
-    )" };
-
-    xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
-
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 3);
-
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
-
-    auto const& events = model->get_events();
-    REQUIRE(events[0]->get_id() == "Changed");
-
-    auto const& property_type = events[0]->get_type().get_semantic();
-    REQUIRE(property_type.is_resolved());
-    REQUIRE(std::holds_alternative<std::shared_ptr<delegate_model>>(property_type.get_resolved_target()));
-    REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
-}
+//TEST_CASE("Interface test")
+//{
+//    std::istringstream test_idl{ R"(
+//        namespace N
+//        {
+//            interface IControl
+//            {
+//                void Paint();
+//            }
+//            interface ITextBox: IControl
+//            {
+//                void SetText(String text);
+//            }
+//            interface IListBox: IControl
+//            {
+//               void SetItems(String[] items);
+//            }
+//            interface IComboBox: ITextBox, IListBox {}
+//        }
+//    )" };
+//
+//    xmeta_idl_reader reader{ "" };
+//    reader.read(test_idl);
+//    REQUIRE(reader.get_num_syntax_errors() == 0);
+//
+//    auto const& namespaces = reader.get_namespaces();
+//    auto const& it = namespaces.find("N");
+//    REQUIRE(it != namespaces.end());
+//    auto const& ns_bodies = it->second->get_namespace_bodies();
+//    REQUIRE(ns_bodies.size() == 1);
+//    auto const& interfaces = ns_bodies[0]->get_interfaces();
+//    REQUIRE(interfaces.size() == 3);
+//}
 
 TEST_CASE("Delegate test")
 {
@@ -496,7 +497,8 @@ TEST_CASE("Delegate test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -550,7 +552,8 @@ TEST_CASE("Struct test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(struct_test_idl) == 0);
+    reader.read(struct_test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -605,6 +608,10 @@ TEST_CASE("Struct circular test")
     std::istringstream struct_test_idl{ R"(
         namespace N
         {
+            struct S0
+            {
+                S1 field_1;
+            }
             struct S1
             {
                 S2 field_1;
@@ -621,8 +628,29 @@ TEST_CASE("Struct circular test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(struct_test_idl) == 0);
-    REQUIRE(reader.get_num_semantic_errors() == 3);
+    reader.read(struct_test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 4);
+    auto namespaces = reader.get_namespaces();
+}
+
+TEST_CASE("Struct duplicate member test")
+{
+    std::istringstream struct_test_idl{ R"(
+        namespace N
+        {
+            struct S0
+            {
+                Int32 field_1;
+                Int32 field_1;
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(struct_test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 1);
     auto namespaces = reader.get_namespaces();
 }
 
@@ -644,7 +672,8 @@ TEST_CASE("Resolving delegates type ref test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -707,7 +736,8 @@ TEST_CASE("Resolving struct type ref test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(struct_test_idl) == 0);
+    reader.read(struct_test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
@@ -765,7 +795,8 @@ TEST_CASE("Resolving type ref across namespaces test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
