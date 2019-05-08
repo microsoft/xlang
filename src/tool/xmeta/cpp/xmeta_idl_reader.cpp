@@ -30,24 +30,25 @@ namespace xlang::xmeta
 
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
-        resolve();
+        pass1();
         m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());
     }
 
-    void xmeta_idl_reader::resolve()
+    void xmeta_idl_reader::pass1()
     {
-        xlang_model_walker walker(m_xlang_model.namespaces, *this);
+        xlang_model_pass_1 pass1_listener(m_xlang_model.symbols, m_error_manager);
+        xlang_model_walker walker(m_xlang_model.namespaces, pass1_listener);
         walker.walk();
     }
 
-    void xmeta_idl_reader::listen_struct_model(std::shared_ptr<struct_model> const& model) 
+    void xlang_model_pass_1::listen_struct_model(std::shared_ptr<struct_model> const& model)
     {
-        model->resolve(m_xlang_model.symbols, m_error_manager);
-        model->has_circular_struct_declarations(m_xlang_model.symbols, m_error_manager);
+        model->resolve(m_symbols, m_error_manager);
+        model->has_circular_struct_declarations(m_symbols, m_error_manager);
     }
 
-    void xmeta_idl_reader::listen_delegate_model(std::shared_ptr<delegate_model> const& model) 
+    void xlang_model_pass_1::listen_delegate_model(std::shared_ptr<delegate_model> const& model)
     {
-        model->resolve(m_xlang_model.symbols, m_error_manager);
+        model->resolve(m_symbols, m_error_manager);
     }
 }

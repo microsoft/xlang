@@ -53,7 +53,8 @@ namespace xlang::xmeta
         size_t m_num_semantic_errors = 0;
         size_t m_num_syntax_errors = 0;
 
-        /* Prototyping how I would do the errors, I would store each type of error in these vectors.
+        /* 
+            Prototyping how I would do the errors, I would store each type of error in these vectors.
             And then they will be used to print out the actual error statements later. These vectors would
             contain a struct with an error code, the symbol associated with it, and the decl line
             
@@ -62,9 +63,8 @@ namespace xlang::xmeta
                 size_t error_code;
                 size_t decl_line;
                 std::string symbol;
-
             }
-          
-            std::vector<error_model> errors; */
+            std::vector<error_model> errors; 
+        */
     };
 }
