@@ -624,6 +624,30 @@ catch (...) { return winrt::to_hresult(); }
         }
     }
 
+    static void write_component_base_call(writer& w, TypeDef const& type)
+    {
+        if (!has_fastabi(type))
+        {
+            return;
+        }
+
+        auto base_type = get_base_class(type);
+
+        if (!base_type)
+        {
+            return;
+        }
+
+        auto format = R"(
+        auto base_%() const noexcept
+        {
+            return static_cast<D const&>(*this).get_abi<%>();
+        }
+)";
+
+        w.write(format, base_type.TypeName(), base_type);
+    }
+
     static void write_component_g_h(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -647,7 +671,7 @@ catch (...) { return winrt::to_hresult(); }
         {
             return L"%.%";
         }
-%%    };
+%%%    };
 }
 )";
 
@@ -718,7 +742,8 @@ catch (...) { return winrt::to_hresult(); }
                 type_namespace,
                 type_name,
                 bind<write_component_class_override_constructors>(type),
-                bind<write_component_override_dispatch_base>(type));
+                bind<write_component_override_dispatch_base>(type),
+                bind<write_component_base_call>(type));
         }
 
         if (has_factory_members(w, type))
