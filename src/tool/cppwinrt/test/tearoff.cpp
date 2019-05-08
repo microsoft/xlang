@@ -154,7 +154,7 @@ namespace
             Closed = true;
         }
 
-        HRESULT query_interface_tearoff(GUID const& id, void** result) const noexcept
+        int32_t query_interface_tearoff(winrt::guid const& id, void** result) const noexcept final
         {
             if (winrt::is_guid_of<IPersist>(id))
             {
@@ -186,7 +186,7 @@ namespace
             return L"RuntimeClassName";
         }
 
-        HRESULT query_interface_tearoff(GUID const& id, void** result) const noexcept
+        int32_t query_interface_tearoff(winrt::guid const& id, void** result) const noexcept final
         {
             if (winrt::is_guid_of<winrt::IStringable>(id))
             {
