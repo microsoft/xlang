@@ -269,15 +269,15 @@ fixed_parameter
     ;
 
 parameter_modifier // More restrictive?
-    : CONST REF
-    | REF CONST
+    : CONST_LXR REF
+    | REF CONST_LXR
     | REF
-    | OUT
+    | OUT_LXR
     ;
 
 return_type
     : type
-    | VOID
+    | VOID_LXR
     ;
 
 property_modifier

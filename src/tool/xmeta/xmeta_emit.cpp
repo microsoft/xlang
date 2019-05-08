@@ -737,7 +737,7 @@ namespace xlang::xmeta
             &token_param_def));
     }
 
-    std::optional<TypeSig> xmeta_emit::create_paramater_signature(std::optional<type_ref> ref)
+    std::optional<TypeSig> xmeta_emit::create_paramater_signature(std::optional<type_ref> const& ref)
     {
         if (ref) // Return type is not void
         {
