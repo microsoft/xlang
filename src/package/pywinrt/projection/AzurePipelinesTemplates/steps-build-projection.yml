@@ -30,7 +30,7 @@ steps:
   displayName: 'NuGet install Microsoft.Windows.CppWinRT'
   inputs:
     command: custom
-    arguments: 'install Microsoft.Windows.CppWinRT -Version 2.0.190417.3 -ExcludeVersion -OutputDirectory _tools'
+    arguments: 'install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory _tools'
 
 - script: _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/cppwinrt -verbose
   displayName: 'Generate C++/WinRT Projection'
