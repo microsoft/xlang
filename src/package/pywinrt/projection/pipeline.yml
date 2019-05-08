@@ -10,7 +10,7 @@ jobs:
       @echo Build.BuildNumber $(Build.BuildNumber)
       @echo buildFullProjection $(buildFullProjection)
 
-  - template: task-vsdevcmd.yml
+  - template: AzurePipelinesTemplates/task-vsdevcmd.yml
     parameters:
       buildArchitecture: 'x86'  
       hostArchitecture: 'x86'
@@ -68,7 +68,7 @@ jobs:
         buildArchitecture: 'amd64'
         buildConfiguration: 'Release'
   steps:
-  - template: steps-build-projection.yml
+  - template: AzurePipelinesTemplates/steps-build-projection.yml
     parameters:
       architecture: $(buildArchitecture)  
       pythonVersionSpec: '3.7.x'
@@ -89,11 +89,11 @@ jobs:
         artifactName: projection
         downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-    - template: steps-sign-projection.yml
+    - template: AzurePipelinesTemplates/steps-sign-projection.yml
       parameters:
         architecture: amd64
 
-    - template: steps-sign-projection.yml
+    - template: AzurePipelinesTemplates/steps-sign-projection.yml
       parameters:
         architecture: x86
 
