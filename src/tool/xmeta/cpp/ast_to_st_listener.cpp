@@ -116,8 +116,7 @@ listener_error ast_to_st_listener::extract_type(XlangParser::TypeContext* tc, ty
     return listener_error::passed;
 }
 
-void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, 
-    std::variant<std::shared_ptr<delegate_model>, std::shared_ptr<method_model>> const& model)
+void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, std::variant<std::shared_ptr<xlang::xmeta::delegate_model>, std::shared_ptr<xlang::xmeta::method_model>> const& model)
 {
     for (auto fixed_param : ast_formal_params)
     {
@@ -375,15 +374,15 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
                 model->add_member(set_method);
             }
         }
-    } 
+    }
     else // Implicity declaration
     {
         get_method = std::make_shared<method_model>("get_" + property_id, decl_line, m_cur_assembly, std::move(tr));
         model->add_member(get_method);
         set_method = std::make_shared<method_model>("set_" + property_id, decl_line, m_cur_assembly, std::move(tr));
-        model->add_member(set_method);    
+        model->add_member(set_method);
     }
-    
+
 
     auto prop_model = std::make_shared<property_model>(property_id, decl_line, m_cur_assembly, std::move(tr));
     prop_model->set_get_method(get_method);
