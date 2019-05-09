@@ -1,0 +1,12 @@
+x86-windows/
+x86-windows/debug/
+x86-windows/debug/lib/
+x86-windows/debug/lib/libffi.lib
+x86-windows/include/
+x86-windows/include/ffi.h
+x86-windows/include/ffitarget.h
+x86-windows/lib/
+x86-windows/lib/libffi.lib
+x86-windows/share/
+x86-windows/share/libffi/
+x86-windows/share/libffi/copyright

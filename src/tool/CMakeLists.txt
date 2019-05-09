@@ -3,5 +3,6 @@ add_subdirectory(python)
 add_subdirectory(cppxlang)
 
 if (WIN32)
+add_subdirectory(dynamic)
 add_subdirectory(cppwinrt)
 endif()
