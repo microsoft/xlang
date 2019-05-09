@@ -51,7 +51,7 @@ namespace xlang::xmeta
             }
             for (formal_parameter_model & param : m_formal_parameters)
             {
-                param.resolve(symbols, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
+                param.resolve(symbols, error_manager, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
             }
         }
 

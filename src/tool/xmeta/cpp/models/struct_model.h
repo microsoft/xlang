@@ -84,9 +84,7 @@ namespace xlang::xmeta
                 auto field_type = field.first.get_semantic().get_resolved_target();
                 if (std::holds_alternative<std::shared_ptr<struct_model>>(field_type))
                 {
-                    auto struct_field = std::get<std::shared_ptr<struct_model>>(field_type);
-                    struct_field->resolve(symbols, error_manager);
-                    symbol_set.insert(struct_field->get_fully_qualified_id());
+                    auto const& struct_field = std::get<std::shared_ptr<struct_model>>(field_type);
                     if (!symbol_set.insert(struct_field->get_fully_qualified_id()).second
                         || struct_field->has_circular_struct_declarations(symbols, symbol_set, error_manager))
                     {

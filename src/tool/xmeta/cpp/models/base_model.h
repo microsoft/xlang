@@ -8,6 +8,8 @@
 #include <vector>
 #include <variant>
 
+#include "xlang_error.h"
+
 namespace xlang::xmeta
 {
     struct namespace_body_model;

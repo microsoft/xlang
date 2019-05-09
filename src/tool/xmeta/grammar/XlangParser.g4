@@ -13,7 +13,7 @@ compilation_unit
 
 /* Basic Concepts */ //This could be namespace or type name
 type_name
-    : (IDENTIFIER .)* IDENTIFIER type_argument_list?
+    : IDENTIFIER type_argument_list?
     | qualified_alias_member
     ;
 
@@ -209,16 +209,13 @@ type_parameter_list // attributes on generic types? Something<[Attribute] K>
     : LESS_THAN attributes? IDENTIFIER (COMMA attributes? IDENTIFIER)* GREATER_THAN
     ;
 
-class_base // Semantically check for one class and multiple interfaces restriction
-    : COLON type_list
-    ;
-
-type_list
-    : type_base (COMMA type_base)*
+// Semantically check for one class and multiple interfaces restriction
+class_base
+    : COLON type_base (COMMA type_base)*
     ;
 
 type_base
-    : attributes? type //class_type
+    : attributes? class_type
     ;
 
 class_body
@@ -331,7 +328,7 @@ interface_declaration
     ;
 
 interface_base
-    : REQUIRES type_list
+    : REQUIRES type_base (COMMA type_base)*
     ;
 
 interface_body

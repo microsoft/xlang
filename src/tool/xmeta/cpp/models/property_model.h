@@ -69,7 +69,7 @@ namespace xlang::xmeta
             m_set_method = m;
         }
 
-        void resolve(std::map<std::string, class_type_semantics> symbols, std::string fully_qualified_id)
+        void resolve(std::map<std::string, class_type_semantics> symbols, xlang_error_manager & error_manager, std::string fully_qualified_id)
         {
             if (!m_type.get_semantic().is_resolved())
             {
@@ -81,7 +81,7 @@ namespace xlang::xmeta
                 auto iter = symbols.find(symbol);
                 if (iter == symbols.end())
                 {
-                    // TODO: Record the unresolved type and continue once we have a good error story for reporting errors in models
+                    error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                 }
                 else
                 {

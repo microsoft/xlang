@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <string_view>
-
+#include <set>
 #include "namespace_member_model.h"
 #include "property_model.h"
 
@@ -62,36 +62,31 @@ namespace xlang::xmeta
                 contains_id(m_events, id);
         }
 
-        void resolve(std::map<std::string, class_type_semantics> symbols)
+        void resolve(std::map<std::string, class_type_semantics> symbols, xlang_error_manager & error_manager)
         {
             for (auto & m_method : m_methods)
             {
-                m_method->resolve(symbols, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
+                m_method->resolve(symbols, error_manager, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
             }
             for (auto & m_property : m_properties)
             {
-                m_property->resolve(symbols, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
+                m_property->resolve(symbols, error_manager, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
             }
             for (auto & m_event : m_events)
             {
-                m_event->resolve(symbols, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
+                m_event->resolve(symbols, error_manager, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
             }
 
             for (auto & interface_base : m_interface_base_refs)
             {
-                if (interface_base.get_semantic().is_resolved())
-                {
-                    /* Events should not have been resolved. If it was, it means it was not a
-                    class type and not a delegate type */
-                    return;
-                }
+                assert(!interface_base.get_semantic().is_resolved());
                 std::string ref_name = interface_base.get_semantic().get_ref_name();
                 std::string symbol = ref_name.find(".") != std::string::npos
                     ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
                 auto iter = symbols.find(symbol);
                 if (iter == symbols.end())
                 {
-                    // TODO: Record the unresolved type and continue once we have a good error story for reporting errors in models
+                    error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                 }
                 else
                 {
@@ -101,11 +96,10 @@ namespace xlang::xmeta
                     }
                     else
                     {
-                        // TODO: Error report the non-interface type
+                        error_manager.write_not_an_interface_error(get_decl_line(), symbol);
                     }
                 }
             }
-
         }
 
     private:

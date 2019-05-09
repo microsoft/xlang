@@ -25,6 +25,7 @@ namespace xlang::xmeta
 
         void read(std::istream& idl_contents, bool disable_error_reporting = false);
         void read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting = false);
+        void pass2();
         void pass1();
 
         auto const& get_namespaces() const
@@ -59,6 +60,21 @@ namespace xlang::xmeta
         void listen_interface_model(std::shared_ptr<interface_model> const& model) final;
         void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
         void listen_delegate_model(std::shared_ptr<delegate_model> const& model) final;
+
+    private:
+        xlang_error_manager & m_error_manager;
+        std::map<std::string, class_type_semantics> & m_symbols;
+    };
+
+    struct xlang_model_pass_2 : public xlang_model_listener
+    {
+        explicit xlang_model_pass_2(std::map<std::string, class_type_semantics> & symbols, xlang::xmeta::xlang_error_manager & error_manager)
+            : m_symbols{ symbols }, m_error_manager{ error_manager }
+        {}
+        xlang_model_pass_2() = delete;
+
+        void listen_interface_model(std::shared_ptr<interface_model> const& model) final;
+        void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
 
     private:
         xlang_error_manager & m_error_manager;

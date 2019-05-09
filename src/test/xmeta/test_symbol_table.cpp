@@ -450,39 +450,73 @@ TEST_CASE("Interface event test")
     REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
 }
 
-//TEST_CASE("Interface test")
-//{
-//    std::istringstream test_idl{ R"(
-//        namespace N
-//        {
-//            interface IControl
-//            {
-//                void Paint();
-//            }
-//            interface ITextBox: IControl
-//            {
-//                void SetText(String text);
-//            }
-//            interface IListBox: IControl
-//            {
-//               void SetItems(String[] items);
-//            }
-//            interface IComboBox: ITextBox, IListBox {}
-//        }
-//    )" };
-//
-//    xmeta_idl_reader reader{ "" };
-//    reader.read(test_idl);
-//    REQUIRE(reader.get_num_syntax_errors() == 0);
-//
-//    auto const& namespaces = reader.get_namespaces();
-//    auto const& it = namespaces.find("N");
-//    REQUIRE(it != namespaces.end());
-//    auto const& ns_bodies = it->second->get_namespace_bodies();
-//    REQUIRE(ns_bodies.size() == 1);
-//    auto const& interfaces = ns_bodies[0]->get_interfaces();
-//    REQUIRE(interfaces.size() == 3);
-//}
+TEST_CASE("Interface test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl
+            {
+                void Paint();
+            }
+            interface ITextBox requires IControl
+            {
+                void SetText(String text);
+            }
+            interface IListBox requires IControl
+            {
+               void SetItem(String items);
+            }
+            interface IComboBox requires ITextBox, IListBox {}
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 4);
+
+    auto const& combo = interfaces.at("IComboBox");
+    auto const& combo_bases = combo->get_all_interface_bases();
+    REQUIRE(combo_bases.size() == 3);
+    REQUIRE(combo_bases.find(interfaces.at("ITextBox")) != combo_bases.end());
+    REQUIRE(combo_bases.find(interfaces.at("IListBox")) != combo_bases.end());
+    REQUIRE(combo_bases.find(interfaces.at("IControl")) != combo_bases.end());
+    REQUIRE(combo->get_all_interface_bases().size() == 3);
+}
+
+TEST_CASE("Interface circular inheritance test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl requires IListBox
+            {
+                void Paint();
+            }
+            interface ITextBox requires IControl
+            {
+                void SetText(String text);
+            }
+            interface IListBox requires ITextBox
+            {
+               void SetItem(String items);
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 3);
+}
 
 TEST_CASE("Delegate test")
 {
@@ -631,7 +665,6 @@ TEST_CASE("Struct circular test")
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 4);
-    auto namespaces = reader.get_namespaces();
 }
 
 TEST_CASE("Struct duplicate member test")

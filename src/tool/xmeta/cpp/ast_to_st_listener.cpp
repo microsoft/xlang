@@ -287,7 +287,6 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
         error_manager.write_namespace_member_name_error(decl_line, interface_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
     }
-
     auto const& interface_body = ctx->interface_body();
     for (auto const& interface_member : interface_body->interface_member_declaration())
     {
@@ -317,10 +316,10 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
     }
     if (ctx->interface_base())
     {
-        auto const& interface_bases = ctx->interface_base()->type_list()->type_base();
+        auto const& interface_bases = ctx->interface_base()->type_base();
         for (auto const& interface_base : interface_bases)
         {
-            model->add_interface_base_ref(interface_base->type()->getText());
+            model->add_interface_base_ref(interface_base->class_type()->getText());
         }
     }
     m_cur_namespace_body->add_interface(model);

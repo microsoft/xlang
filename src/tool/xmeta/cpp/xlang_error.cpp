@@ -71,4 +71,18 @@ namespace xlang::xmeta
         oss << "Member name '" << invalid_name << "' already defined in namespace '" << namespace_id << "'";
         write_error(decl_line, oss.str());
     }
+
+    void xlang_error_manager::write_not_an_interface_error(size_t decl_line, std::string symbol)
+    {
+        std::ostringstream oss;
+        oss << "Member name '" << symbol << "' is not an interface.";
+        write_error(decl_line, oss.str());
+    }
+
+    void xlang_error_manager::write_not_a_delegate_error(size_t decl_line, std::string symbol)
+    {
+        std::ostringstream oss;
+        oss << "Member name '" << symbol << "' is not an delegate.";
+        write_error(decl_line, oss.str());
+    }
 }

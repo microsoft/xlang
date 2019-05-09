@@ -83,7 +83,7 @@ namespace xlang::xmeta
             m_formal_parameters.emplace_back(std::move(formal_param));
         }
 
-        void resolve(std::map<std::string, class_type_semantics> const& symbols, std::string fully_qualified_id)
+        void resolve(std::map<std::string, class_type_semantics> const& symbols, xlang_error_manager & error_manager, std::string fully_qualified_id)
         {
             if (m_return_type)
             {
@@ -96,6 +96,7 @@ namespace xlang::xmeta
                     if (iter == symbols.end())
                     {
                         // TODO: Reccord the unresolved type and continue
+                        error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                     }
                     else
                     {
@@ -105,7 +106,7 @@ namespace xlang::xmeta
             }
             for (formal_parameter_model & param : m_formal_parameters)
             {
-                param.resolve(symbols, fully_qualified_id);
+                param.resolve(symbols, error_manager, fully_qualified_id);
             }
         }
 
