@@ -69,7 +69,7 @@ namespace xlang
         write_preamble(w);
         write_open_file_guard(w, "FAST_FORWARD");
 
-        w.write(strings::base_fast_fwd);
+        w.write(strings::base_fast_forward);
 
         write_close_file_guard(w);
         w.flush_to_file(settings.output_folder + "winrt/fast_forward.h");

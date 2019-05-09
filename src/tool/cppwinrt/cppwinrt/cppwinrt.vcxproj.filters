@@ -148,7 +148,7 @@
     <ClInclude Include="..\strings\base_xaml_typename.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="..\strings\base_fast_fwd.h">
+    <ClInclude Include="..\strings\base_fast_forward.h">
       <Filter>strings</Filter>
     </ClInclude>
   </ItemGroup>

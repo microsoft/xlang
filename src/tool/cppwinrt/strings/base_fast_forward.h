@@ -1087,7 +1087,7 @@ namespace winrt::impl
             return 0;
         }
 
-        // Note:  COM interfaces use stdcall, not thiscall, ('this' gets no special treatment), permitting static implementations
+        // Note: COM interfaces use stdcall, not thiscall, ('this' gets no special treatment), permitting static implementations
         static uint32_t WINRT_FF_CALL AddRef(fast_abi_forwarder* self) noexcept
         {
             return 1 + self->m_references.fetch_add(1, std::memory_order_relaxed);
