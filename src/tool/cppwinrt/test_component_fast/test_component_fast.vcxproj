@@ -26,9 +26,9 @@
     <ProjectName>test_component_fast</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-    <!-- Hard-coded reference to cppwinrt props file, as if NuGet package was added -->
-    <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.props"/>
-    <Import Project="$(SolutionDir)\cppwinrt.props" />
+  <!-- Hard-coded reference to cppwinrt props file, as if NuGet package was added -->
+  <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.props" />
+  <Import Project="$(SolutionDir)\cppwinrt.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -110,6 +110,7 @@
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
@@ -166,6 +167,7 @@
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
@@ -226,6 +228,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
@@ -286,6 +289,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
@@ -356,6 +360,6 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <!-- Hard-coded reference to cppwinrt targets file, as if NuGet package was added -->
-    <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.FastAbi.targets"/>
+    <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.FastAbi.targets" />
   </ImportGroup>
 </Project>
