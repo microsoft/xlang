@@ -64,7 +64,7 @@ namespace xlang::xmeta
                 return true;
             }
             std::string symbol = this->get_fully_qualified_id();
-            std::set<std::string_view> symbol_set{ symbol }; 
+            std::set<std::string> symbol_set{ symbol }; 
             if (has_circular_struct_declarations(symbols, symbol_set, error_manager))
             {
                 contains_itself = true;
@@ -73,7 +73,7 @@ namespace xlang::xmeta
             return contains_itself;
         }
 
-        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, std::set<std::string_view> & symbol_set, xlang_error_manager & error_manager)
+        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, std::set<std::string> & symbol_set, xlang_error_manager & error_manager)
         {
             if (contains_itself)
             {
@@ -90,6 +90,7 @@ namespace xlang::xmeta
                     {
                         return true;
                     }
+                    symbol_set.erase(struct_field->get_fully_qualified_id());
                 }
             }
             return false;
