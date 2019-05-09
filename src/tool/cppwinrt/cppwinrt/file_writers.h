@@ -30,7 +30,6 @@ namespace xlang
         w.write(strings::base_events);
         w.write(strings::base_marshaler);
         w.write(strings::base_activation);
-        w.write(strings::base_fast_fwd);
         w.write(strings::base_implements);
         w.write(strings::base_composable);
         w.write(strings::base_foundation);
@@ -62,6 +61,18 @@ namespace xlang
 
         write_close_file_guard(w);
         w.flush_to_file(settings.output_folder + "winrt/coroutine.h");
+    }
+
+    static void write_fast_forward_h()
+    {
+        writer w;
+        write_preamble(w);
+        write_open_file_guard(w, "FAST_FORWARD");
+
+        w.write(strings::base_fast_fwd);
+
+        write_close_file_guard(w);
+        w.flush_to_file(settings.output_folder + "winrt/fast_forward.h");
     }
 
     static void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)
