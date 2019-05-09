@@ -43,7 +43,7 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <!-- Hard-coded reference to cppwinrt props file, as if NuGet package was added -->
-  <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.props"/>
+  <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.props" />
   <Import Project="$(SolutionDir)\cppwinrt.props" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -85,7 +85,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
@@ -116,7 +115,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
@@ -143,7 +141,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
@@ -170,7 +167,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
@@ -197,7 +193,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
@@ -224,7 +219,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
@@ -255,7 +249,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
@@ -286,7 +279,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(CppWinRTDir)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
@@ -379,6 +371,6 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <!-- Hard-coded reference to cppwinrt targets file, as if NuGet package was added -->
-    <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.FastAbi.targets"/>
+    <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.FastAbi.targets" />
   </ImportGroup>
 </Project>
