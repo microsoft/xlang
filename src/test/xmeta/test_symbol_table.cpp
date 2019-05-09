@@ -263,33 +263,62 @@ TEST_CASE("Struct test")
 
 TEST_CASE("Struct circular test")
 {
-    std::istringstream struct_test_idl{ R"(
-        namespace N
-        {
-            struct S0
+    {
+        std::istringstream struct_test_idl{ R"(
+            namespace N
             {
-                S1 field_1;
+                struct S0
+                {
+                    S1 field_1;
+                }
+                struct S1
+                {
+                    S2 field_1;
+                }
+                struct S2
+                {
+                    S3 field_1;
+                }
+                struct S3
+                {
+                    S1 field_1;       
+                }
             }
-            struct S1
-            {
-                S2 field_1;
-            }
-            struct S2
-            {
-                S3 field_1;
-            }
-            struct S3
-            {
-                S1 field_1;       
-            }
-        }
-    )" };
+        )" };
 
-    xmeta_idl_reader reader{ "" };
-    reader.read(struct_test_idl);
-    REQUIRE(reader.get_num_syntax_errors() == 0);
-    REQUIRE(reader.get_num_semantic_errors() == 4);
-    auto namespaces = reader.get_namespaces();
+        xmeta_idl_reader reader{ "" };
+        reader.read(struct_test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 4);
+    }
+    {
+        std::istringstream struct_test_idl{ R"(
+            namespace N
+            {
+                struct S0
+                {
+                    S1 field_1;
+                    S2 field_2;
+                }
+                struct S1
+                {
+                    S3 field_1;
+                }
+                struct S2
+                {
+                    S3 field_1;
+                }
+                struct S3
+                {
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(struct_test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 0);
+    }
 }
 
 TEST_CASE("Struct duplicate member test")
