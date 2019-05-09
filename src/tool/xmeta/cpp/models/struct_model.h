@@ -81,7 +81,7 @@ namespace xlang::xmeta
             }
             for (auto const& field : m_fields)
             {
-                auto field_type = field.first.get_semantic().get_resolved_target();
+                auto const& field_type = field.first.get_semantic().get_resolved_target();
                 if (std::holds_alternative<std::shared_ptr<struct_model>>(field_type))
                 {
                     auto const& struct_field = std::get<std::shared_ptr<struct_model>>(field_type);
