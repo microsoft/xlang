@@ -110,7 +110,6 @@
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
@@ -167,7 +166,6 @@
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
@@ -228,7 +226,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
@@ -289,7 +286,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Midl>
       <EnableWindowsRuntime>true</EnableWindowsRuntime>
