@@ -310,6 +310,7 @@ Where <spec> is one or more of:
             {
                 write_base_h();
                 write_coroutine_h();
+                write_fast_forward_h();
             }
 
             if (settings.component)
