@@ -1,4 +1,7 @@
 #include "pch.h"
+#include "settings.h"
+#include "type_writers.h"
+#include "code_writers.h"
 
 namespace coolrt
 {
@@ -18,23 +21,6 @@ namespace coolrt
         return std::chrono::duration_cast<std::chrono::duration<int64_t, std::milli>>(std::chrono::high_resolution_clock::now() - start).count();
     }
 
-    struct writer : xlang::text::writer_base<writer>
-    {
-    };
-
-    struct settings_type
-    {
-        std::set<std::string> input;
-
-        std::experimental::filesystem::path output_folder;
-        std::string module{ "pyrt" };
-        bool verbose{};
-
-        std::set<std::string> include;
-        std::set<std::string> exclude;
-        xlang::meta::reader::filter filter;
-    };
-
     settings_type settings;
 
     struct usage_exception {};
@@ -46,7 +32,6 @@ namespace coolrt
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in projection" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from projection" },
         { "verbose", 0, 0, {}, "Show detailed progress information" },
-        { "module", 0, 1, "<name>", "Name of generated projection. Defaults to winrt."},
         { "help", 0, cmd::option::no_max, {}, "Show detailed help" },
     };
 
@@ -96,7 +81,6 @@ Where <spec> is one or more of:
         }
 
         settings.verbose = args.exists("verbose");
-        settings.module = args.value("module", "winrt");
         settings.input = args.files("input", database::is_database);
 
         for (auto && include : args.values("include"))
@@ -118,16 +102,6 @@ Where <spec> is one or more of:
         std::vector<std::string> files;
         files.insert(files.end(), settings.input.begin(), settings.input.end());
         return files;
-    }
-
-    bool has_projected_types(cache::namespace_members const& members)
-    {
-        return
-            !members.interfaces.empty() ||
-            !members.classes.empty() ||
-            !members.enums.empty() ||
-            !members.structs.empty() ||
-            !members.delegates.empty();
     }
 
     int run(int const argc, char** argv)
@@ -158,12 +132,13 @@ Where <spec> is one or more of:
 
             for (auto&&[ns, members] : c.namespaces())
             {
-                if (!has_projected_types(members) || !settings.filter.includes(members))
+                for (auto&&[name, type] : members.types)
                 {
-                    continue;
+                    if (settings.filter.includes(type))
+                    {
+                        write_type(type);
+                    }
                 }
-
-                w.write("%\n", ns);
             }
 
             group.get();
