@@ -36,7 +36,7 @@ namespace xlang::xmeta
         winrt::com_ptr<IMetaDataEmit2> m_metadata_emitter;
         winrt::com_ptr<IMetaDataImport> m_metadata_import;
 
-        std::map<std::string, meta::reader::TypeRef> type_references;
+        std::map<std::string, mdTypeRef> type_references;
         meta::reader::Module m_module;
         mdAssembly token_assembly;
         mdAssemblyRef token_mscorlib;
@@ -48,15 +48,18 @@ namespace xlang::xmeta
         void define_common_reference_assembly();
         mdTypeDef define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[]);
         
-        void define_method(std::shared_ptr<method_model> const& model, mdTypeDef const& token_def);
-        void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
-        void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
+        void define_method(std::shared_ptr<method_model> const& model, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_references, mdTypeDef const& token_def);
+        void define_property(std::shared_ptr<property_model> const& model, std::map<std::string_view, mdMethodDef> & method_references, mdTypeDef const& token_def);
+        void define_event(std::shared_ptr<event_model> const& model, std::map<std::string_view, mdMethodDef> & method_references, mdTypeDef const& token_def);
 
         mdParamDef define_return(mdTypeDef const& type_def);
         void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, uint16_t parameter_index);
 
-        std::optional<xlang::meta::reader::TypeSig> create_paramater_signature(std::optional<type_ref> const& ref);
+        std::optional<xlang::meta::reader::TypeSig> create_type_sig(std::optional<type_ref> const& ref);
+        xlang::meta::writer::signature_blob create_method_sig(std::optional<type_ref> const& return_type_ref, std::vector<formal_parameter_model> const& formal_parameters);
 
+        mdTypeRef get_or_define_type_ref(std::string ref_name);
+        
         //static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
         //static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
         //static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract

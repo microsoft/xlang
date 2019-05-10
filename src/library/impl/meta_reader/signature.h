@@ -471,6 +471,14 @@ namespace xlang::meta::reader
             }
         }
 
+        explicit PropertySig(TypeSig const& type)
+            : m_type(type)
+        {}
+
+        explicit PropertySig(TypeSig&& type)
+            : m_type(std::move(type))
+        {}
+
         TypeSig const& Type() const noexcept
         {
             return m_type;
@@ -506,7 +514,7 @@ namespace xlang::meta::reader
             }
             return conv;
         }
-        CallingConvention m_calling_convention;
+        CallingConvention m_calling_convention{ CallingConvention::Property };
         uint32_t m_param_count;
         std::vector<CustomModSig> m_cmod;
         TypeSig m_type;

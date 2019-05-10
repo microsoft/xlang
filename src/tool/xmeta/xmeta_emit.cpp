@@ -289,7 +289,7 @@ namespace xlang::xmeta
         mdTypeRef token_typeref;
 
         check_hresult(m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &token_typeref));
-        type_references.emplace(name, to_TypeRef(token_typeref));
+        type_references.emplace(name, token_typeref);
         return token_typedef;
     }
 
@@ -342,154 +342,144 @@ namespace xlang::xmeta
         //}
     }
 
-
-    void xmeta_emit::define_method(std::shared_ptr<method_model> const& /*model*/, mdTypeDef const& /*token_def*/)
+    void xmeta_emit::define_method(std::shared_ptr<method_model> const& model, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
     {
-        //std::wstring method_name = s2ws(model->get_id());
+        std::wstring method_name = s2ws(model->get_id());
 
-        //DWORD method_flag;
-        //mdMethodDef token_method_def;
-        ////m_metadata_emitter->DefineMethod(
-        ////    token_def,
-        ////    method_name.c_str(),
-        ////    ,
-        ////    ,
-        ////    miRuntime,
-        ////    &token_method_def);
+        signature_blob method_sig = create_method_sig(model->get_return_type(), model->get_formal_parameters());
 
-        ///* Define return value */
-        //mdParamDef token_return = define_return(model->get_return_type(), token_method_def);
+        mdMethodDef token_method_def;
+        m_metadata_emitter->DefineMethod(
+            token_def,
+            method_name.c_str(),
+            method_flag,
+            method_sig.data(),
+            method_sig.size(),
+            0,
+            0,
+            &token_method_def);
+        method_defs.emplace(model->get_id(), token_method_def);
+        define_return(token_method_def);
 
-        ///* Define formal parameters */
-        //int index = 1;
-        //for (auto const& val : model->get_formal_parameters())
-        //{
-        //    define_parameters(val, token_method_def, index);
-        //    index++;
-        //}
+        /* Define formal parameters */
+        uint16_t index = 1;
+        for (auto const& val : model->get_formal_parameters())
+        {
+            define_parameters(val, token_method_def, index);
+            index++;
+        }
     }
 
-    void xmeta_emit::define_property(std::shared_ptr<property_model> const& /*model*/, mdTypeDef const& /*token_def*/)
+    void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
     {
-        //std::wstring property_name = s2ws(model->get_id());
-        //
-        //mdMethodDef token_get_method = mdTokenNil;
-        //mdMethodDef token_set_method = mdTokenNil;
-        //DWORD property_flag = 0;
-        //DWORD c_plus_type_flag;
-        //std::shared_ptr<method_model> get_method_model = model->get_get_method();
-        //if (get_method_model != nullptr) //TODO: This case is not suppose to happen
-        //{
-        //    std::wstring get_method_name = s2ws(get_method_model->get_id());
-        //    PCCOR_SIGNATURE pv_sig_blob = NULL;
-        //    ULONG cb_sig_blob = 0;
-        //    DWORD impl_flag = 0;
-        //    check_hresult(m_metadata_emitter->DefineMethod(
-        //        token_def,
-        //        get_method_name.c_str(),
-        //        property_flag,
-        //        pv_sig_blob,
-        //        cb_sig_blob,
-        //        miRuntime,
-        //        impl_flag,
-        //        &token_get_method));
-        //}
+        std::wstring property_name = s2ws(model->get_id());
+        mdMethodDef token_get_method = mdTokenNil;
+        mdMethodDef token_set_method = mdTokenNil;
+        mdTypeDef implements[] = { mdTokenNil };
 
-        //std::shared_ptr<method_model> set_method_model = model->get_set_method();
-        //if (set_method_model != nullptr)
-        //{
-        //    std::wstring set_method_name = s2ws(set_method_model->get_id());
-        //    PCCOR_SIGNATURE pv_sig_blob = NULL;
-        //    ULONG cb_sig_blob = 0;
-        //    DWORD impl_flag = 0;
-        //    check_hresult(m_metadata_emitter->DefineMethod(
-        //        token_def,
-        //        set_method_name.c_str(),
-        //        property_flag,
-        //        pv_sig_blob,
-        //        cb_sig_blob,
-        //        miRuntime,
-        //        impl_flag,
-        //        &token_set_method));
-        //}
+        std::shared_ptr<method_model> get_method_model = model->get_get_method();
+        assert(get_method_model != nullptr); //There must always be a get
+        auto const& iter = method_defs.find(get_method_model->get_id());
+        assert(iter != method_defs.end());
+        token_get_method = iter->second;
 
-        //mdProperty token_property;
-        ////m_metadata_emitter->DefineProperty(
-        ////    token_class,
-        ////    property_name.c_str(),
-        ////    property_flag,
-        ////    , // pvSig
-        ////    , // cbsig
-        ////    , // c_plus_type_flag
-        ////    nullptr,
-        ////    0,
-        ////    token_set_method,
-        ////    token_get_method,
-        ////    mdTokenNil,
-        ////    &token_property);
+        std::shared_ptr<method_model> set_method_model = model->get_set_method();
+        if (set_method_model != nullptr)
+        {
+            auto const& iter = method_defs.find(set_method_model->get_id());
+            assert(iter != method_defs.end());
+            token_set_method = iter->second;
+        }
+        
+        signature_blob property_sig;
+        property_sig.add_signature(PropertySig{ create_type_sig(model->get_type()).value() });
+
+        mdProperty token_property;
+        m_metadata_emitter->DefineProperty(
+            token_def,
+            property_name.c_str(),
+            0,
+            property_sig.data(),
+            property_sig.size(),
+            (DWORD)-1, // c_plus_type_flag
+            nullptr,
+            0,
+            token_set_method,
+            token_get_method,
+            implements,
+            &token_property);
     }
 
 
-    void xmeta_emit::define_event(std::shared_ptr<event_model> const& /*model*/, mdTypeDef const& /*token_def*/)
+    void xmeta_emit::define_event(std::shared_ptr<event_model> const& model, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
     {
-        //std::wstring event_name = s2ws(model->get_id());
+        std::wstring event_name = s2ws(model->get_id());
+        mdMethodDef token_add_method = mdTokenNil;
+        mdMethodDef token_remove_method = mdTokenNil;
+        mdTypeDef implements[] = { mdTokenNil };
 
-        //mdMethodDef token_add_method = mdTokenNil;
-        //mdMethodDef token_remove_method = mdTokenNil;
-        //DWORD event_flag = 0;
-        //DWORD c_plus_type_flag;
-        //std::shared_ptr<method_model> add_method_model = model->get_add_method();
-        //if (add_method_model != nullptr) 
-        //{
-        //    std::wstring get_method_name = s2ws(add_method_model->get_id());
-        //    PCCOR_SIGNATURE pv_sig_blob = NULL;
-        //    ULONG cb_sig_blob = 0;
-        //    DWORD impl_flag = 0;
-        //    check_hresult(m_metadata_emitter->DefineMethod(
-        //        token_def,
-        //        get_method_name.c_str(),
-        //        event_flag,
-        //        pv_sig_blob,
-        //        cb_sig_blob,
-        //        miRuntime,
-        //        impl_flag,
-        //        &token_add_method));
+        std::shared_ptr<method_model> add_method_model = model->get_add_method();
+        assert(add_method_model != nullptr); //There must always be a add
+        {
+            auto const& iter = method_defs.find(add_method_model->get_id());
+            assert(iter != method_defs.end());
+            token_add_method = iter->second;
+        }
 
-        //}
-        //std::shared_ptr<method_model> remove_method_model = model->get_remove_method();
-        //if (remove_method_model != nullptr)
-        //{
-        //    std::wstring set_method_name = s2ws(remove_method_model->get_id());
-        //    PCCOR_SIGNATURE pv_sig_blob = NULL;
-        //    ULONG cb_sig_blob = 0;
-        //    DWORD impl_flag = 0;
-        //    check_hresult(m_metadata_emitter->DefineMethod(
-        //        token_def,
-        //        set_method_name.c_str(),
-        //        event_flag,
-        //        pv_sig_blob,
-        //        cb_sig_blob,
-        //        miRuntime,
-        //        impl_flag,
-        //        &token_remove_method));
-        //}
+        std::shared_ptr<method_model> remove_method_model = model->get_remove_method();
+        assert(remove_method_model != nullptr); //There must always be a remove
+        {
+            auto const& iter = method_defs.find(remove_method_model->get_id());
+            assert(iter != method_defs.end());
+            token_remove_method = iter->second;
+        }
+        auto const& target = model->get_type().get_semantic().get_resolved_target();
+        assert(std::holds_alternative<std::shared_ptr<delegate_model>>(target));
+        auto const& dm = std::get<std::shared_ptr<delegate_model>>(target);
 
-        //mdProperty token_event;
-        ////m_metadata_emitter->DefineEvent(
-        ////    token_class_def,
-        ////    event_name.c_str(),
-        ////    property_flag,
-        ////    , // pvSig
-        ////    , // cbsig
-        ////    , // c_plus_type_flag
-        ////    nullptr,
-        ////    0,
-        ////    token_add_method,
-        ////    token_remove_method,
-        ////    mdTokenNil,
-        ////    &token_event);
+        mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_fully_qualified_id());
+        mdEvent token_event;
+        m_metadata_emitter->DefineEvent (
+            token_def,
+            event_name.c_str(),
+            0,
+            event_type_ref,
+            token_add_method,
+            token_remove_method,
+            mdTokenNil,
+            implements,
+            &token_event);
     }
     
+    void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model)
+    {
+        auto const& interface_name = model->get_fully_qualified_id();
+        
+        std::vector<mdTypeRef> implements;
+        for (auto const& val : model->get_all_interface_bases())
+        {
+            implements.emplace_back(get_or_define_type_ref(val->get_fully_qualified_id()));
+        }
+        
+        //TODO: When we have attributes, if it has a single ExclusiveToAttribute. Then it must not be tdPublic. 
+        static constexpr DWORD interface_type_flag = tdInterface | tdPublic | tdAbstract | tdWindowsRuntime;
+        auto token_interface_type_def = define_type_def(interface_name, interface_type_flag, mdTokenNil, implements.data());
+        std::map<std::string_view, mdMethodDef> method_defs;
+        static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot /*| mdInstance*/;
+        for (auto const& val : model->get_methods())
+        {
+            define_method(val, method_flag, method_defs, token_interface_type_def);
+        }
+        for (auto const& val : model->get_properties())
+        {
+            define_property(val, method_defs, token_interface_type_def);
+        }
+        for (auto const& val : model->get_events())
+        {
+            define_event(val, method_defs, token_interface_type_def);
+        }
+    }
+
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
         auto const& struct_name = model->get_fully_qualified_id();
@@ -504,7 +494,7 @@ namespace xlang::xmeta
             auto const& field_name = s2ws(struct_member.second);
 
             signature_blob field_signature;
-            field_signature.add_signature(FieldSig{ create_paramater_signature(struct_member.first).value() });
+            field_signature.add_signature(FieldSig{ create_type_sig(struct_member.first).value() });
             mdFieldDef field_token;
             check_hresult(m_metadata_emitter->DefineField(token_struct_type_def,
                 field_name.c_str(),
@@ -516,38 +506,6 @@ namespace xlang::xmeta
                 0,
                 &field_token));
         }
-    }
-    
-    void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& /*model*/) 
-    {
-        //DWORD type_flag = interface_type_flag;
-        ////if (pInterface->HasExclusiveToAttribute())
-        ////{
-        ////    // Mark this type as NotPublic.
-        ////    type_flag &= ~tdVisibilityMask;
-        ////    type_flag |= tdNotPublic;
-        ////}
-
-        //mdTypeDef implements[] = { mdTokenNil };
-        //auto token_interface_type_def = define_type_def(
-        //    model->get_id(),
-        //    type_flag,
-        //    mdTypeRefNil, // Extends (Going to be null until we find out if it is base class)
-        //    implements // Implements (Going to be null until we find out if it is base class)
-        //);
-
-        //for (auto const& val : model->get_methods())
-        //{
-        //    define_method(val, token_interface_type_def);
-        //}
-        //for (auto const& val : model->get_properties())
-        //{
-        //    define_property(val, token_interface_type_def);
-        //}
-        //for (auto const& val : model->get_events())
-        //{
-        //    define_event(val, token_interface_type_def);
-        //}
     }
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
@@ -577,7 +535,7 @@ namespace xlang::xmeta
         {
             throw_invalid("Failed to find TypeRef for: " + type_name);
         }
-        TypeRef const& enum_type_ref = iter->second;
+        TypeRef const& enum_type_ref = to_TypeRef(iter->second);
 
         static constexpr DWORD enumerator_flag = fdHasDefault | fdLiteral | fdStatic | fdPublic;
         signature_blob enumerator_signature;
@@ -655,16 +613,7 @@ namespace xlang::xmeta
             &constructor_param_2));
         
         // Invoke
-        signature_blob delegate_invoke_sig;
-        std::optional<type_ref> return_type_ref = model->get_return_type();
-        std::vector<ParamSig> param_sigs;
-        RetTypeSig return_sig = RetTypeSig{ create_paramater_signature(return_type_ref) };
-        for (formal_parameter_model const& val : model->get_formal_parameters())
-        {
-            ParamSig param_sig = ParamSig{ create_paramater_signature(val.get_type()).value() };
-            param_sigs.emplace_back(param_sig);
-        }
-        delegate_invoke_sig.add_signature(MethodDefSig{ return_sig, param_sigs });
+        signature_blob delegate_invoke_sig = create_method_sig(model->get_return_type(), model->get_formal_parameters());
          
         static constexpr DWORD delegate_invoke_flag = mdPublic | mdVirtual | mdSpecialName | mdHideBySig;
         mdMethodDef token_delegate_invoke_def;
@@ -736,7 +685,20 @@ namespace xlang::xmeta
             &token_param_def));
     }
 
-    std::optional<TypeSig> xmeta_emit::create_paramater_signature(std::optional<type_ref> const& ref)
+    mdTypeRef xmeta_emit::get_or_define_type_ref(std::string ref_name)
+    {
+        auto iter = type_references.find(ref_name);
+        if (iter == type_references.end())
+        {
+            mdTypeRef md_ref;
+            m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(ref_name).c_str(), &md_ref);
+            type_references.emplace(ref_name, md_ref);
+            return md_ref;
+        }
+        return iter->second;
+    }
+
+    std::optional<TypeSig> xmeta_emit::create_type_sig(std::optional<type_ref> const& ref)
     {
         if (ref) // Return type is not void
         {
@@ -744,19 +706,7 @@ namespace xlang::xmeta
             if (std::holds_alternative<std::string>(semantic))
             {
                 std::string return_name = std::get<std::string>(semantic);
-                auto iter = type_references.find(return_name);
-                TypeRef type_ref;
-                if (iter == type_references.end())
-                {
-                    mdTypeRef md_ref;
-                    m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
-                    type_references.emplace(return_name, to_TypeRef(md_ref));
-                    type_ref = to_TypeRef(md_ref);
-                }
-                else
-                {
-                    type_ref = iter->second;
-                }
+                TypeRef type_ref = to_TypeRef(get_or_define_type_ref(return_name));
                 return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
             }
             else if (std::holds_alternative<object_type>(semantic))
@@ -770,6 +720,20 @@ namespace xlang::xmeta
         }
         return std::nullopt;
     };
+
+    signature_blob xmeta_emit::create_method_sig(std::optional<type_ref> const& return_type_ref, std::vector<formal_parameter_model> const& formal_parameters)
+    {
+        signature_blob method_sig;
+        std::vector<ParamSig> param_sigs;
+        RetTypeSig return_sig = RetTypeSig{ create_type_sig(return_type_ref) };
+        for (formal_parameter_model const& val : formal_parameters)
+        {
+            ParamSig param_sig = ParamSig{ create_type_sig(val.get_type()).value() };
+            param_sigs.emplace_back(param_sig);
+        }
+        method_sig.add_signature(MethodDefSig{ return_sig, param_sigs });
+        return method_sig;
+    }
 }
 
 
