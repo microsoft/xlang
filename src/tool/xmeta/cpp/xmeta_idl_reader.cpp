@@ -5,10 +5,10 @@
 #include "ast_to_st_listener.h"
 #include "XlangLexer.h"
 #include "XlangParser.h"
+#include "xlang_model_walker.h"
 
 namespace xlang::xmeta
 {
-
     size_t xmeta_idl_reader::read(std::istream& idl_contents, bool disable_error_reporting)
     {
         ast_to_st_listener listener{ *this };
@@ -30,7 +30,14 @@ namespace xlang::xmeta
 
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+        resolve();
         return parser.getNumberOfSyntaxErrors();
+    }
+
+    void xmeta_idl_reader::resolve()
+    {
+        xlang_model_walker walker(m_namespaces, *this);
+        walker.walk();
     }
 
     struct invalid_ns_id
@@ -54,6 +61,7 @@ namespace xlang::xmeta
             m_cur_namespace_body = std::make_shared<namespace_body_model>(child_ns);
             child_ns->add_namespace_body(m_cur_namespace_body);
         };
+
         if (m_cur_namespace_body != nullptr)
         {
             auto const& cur_ns = m_cur_namespace_body->get_containing_namespace();
@@ -114,6 +122,10 @@ namespace xlang::xmeta
             }
         }
     }
+    bool xmeta_idl_reader::type_declaration_exists(std::string symbol)
+    {
+        return symbols.find(symbol) != symbols.end();
+    }
 
     void xmeta_idl_reader::reset(std::string_view const& assembly_name)
     {
@@ -132,6 +144,27 @@ namespace xlang::xmeta
     {
         std::cerr << "Semantic error (line " << decl_line << "): " << msg << std::endl;
         m_num_semantic_errors++;
+    }
+
+    void xmeta_idl_reader::write_redeclaration_error(std::string symbol, size_t decl_line)
+    {
+        std::ostringstream oss;
+        oss << "Redeclaration; type already declared: " << symbol;
+        write_error(decl_line, oss.str());
+    }
+
+    void xmeta_idl_reader::write_unresolved_type_error(std::string symbol, size_t decl_line)
+    {
+        std::ostringstream oss;
+        oss << "Unable to resolve type: " << symbol;
+        write_error(decl_line, oss.str());
+    }
+
+    void xmeta_idl_reader::write_struct_field_error(std::string symbol, size_t decl_line)
+    {
+        std::ostringstream oss;
+        oss << "Struct has circular fields: " << symbol;
+        write_error(decl_line, oss.str());
     }
 
     void xmeta_idl_reader::write_enum_member_name_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& enum_name)
@@ -177,5 +210,19 @@ namespace xlang::xmeta
         write_error(decl_line, oss.str());
     }
 
+    void xmeta_idl_reader::listen_struct_model(std::shared_ptr<struct_model> const& model) 
+    {
+        model->resolve(symbols);
+        // TODO: Temporary for the test to work. Will wework when there is a good error reporting story
+        if (model->has_circular_struct_declarations(symbols))
+        {
+            m_num_semantic_errors++;
+        }
+    }
+
+    void xmeta_idl_reader::listen_delegate_model(std::shared_ptr<delegate_model> const& model) 
+    {
+        model->resolve(symbols);
+    }
 }
 

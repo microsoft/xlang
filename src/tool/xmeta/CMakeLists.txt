@@ -16,7 +16,7 @@ if (WIN32)
         cpp/xlang_model_walker.cpp)
 endif ()
 
-target_include_directories(xmeta_model PUBLIC cpp/models cpp)
+target_include_directories(xmeta_model PUBLIC cpp/models cpp ${XLANG_LIBRARY_PATH})
 
 if (WIN32)
     add_library(xmeta_windows xmeta_emit.cpp)
@@ -39,7 +39,12 @@ include(ExternalAntlr4Cpp)
 
 set(antlr_inputs ${CMAKE_CURRENT_SOURCE_DIR}/grammar/XlangLexer.g4 ${CMAKE_CURRENT_SOURCE_DIR}/grammar/XlangParser.g4)
 set(antlr_generated_dir ${CMAKE_CURRENT_BINARY_DIR}/antlr_generated)
-set(antlr_generated_src ${antlr_generated_dir}/XlangLexer.cpp ${antlr_generated_dir}/XlangParser.cpp)
+set(antlr_generated_src 
+    ${antlr_generated_dir}/XlangLexer.cpp 
+    ${antlr_generated_dir}/XlangParser.cpp
+    ${antlr_generated_dir}/XlangParserBaseListener.cpp
+    ${antlr_generated_dir}/XlangParserListener.cpp
+)
 
 if (WIN32)
     add_library(xmeta_antlr)

@@ -17,6 +17,7 @@ namespace xlang::xmeta
 
         model_ref() = delete;
         model_ref& operator=(model_ref const& other) = default;
+
         explicit model_ref(std::string_view const& name) :
             m_ref{ std::string(name) }
         { }
@@ -29,7 +30,7 @@ namespace xlang::xmeta
         template<typename H>
         bool holds_type() const noexcept
         {
-            return std::holds_alternative<H>(m_ref);
+            return std::holds_alternative<H>(std::get<resolved_type>(m_ref));
         }
 
         auto const& get_resolved_target() const noexcept

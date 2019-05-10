@@ -148,12 +148,12 @@ namespace xlang::meta::writer
             for (auto const& cmod : sig.CustomMod())
             {
                 add_signature(cmod);
-                if (sig.ByRef())
-                {
-                    add_compressed_enum(reader::ElementType::ByRef);
-                }
-                add_signature(sig.Type());
             }
+            if (sig.ByRef())
+            {
+                add_compressed_enum(reader::ElementType::ByRef);
+            }
+            add_signature(sig.Type());
         }
 
         void add_signature(reader::RetTypeSig const& sig)

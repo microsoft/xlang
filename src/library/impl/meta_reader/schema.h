@@ -77,6 +77,7 @@ namespace xlang::meta::reader
         auto MethodImplList() const;
 
         bool is_enum() const;
+        bool is_delegate() const;
         auto get_enum_definition() const;
     };
 

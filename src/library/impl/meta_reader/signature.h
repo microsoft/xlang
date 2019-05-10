@@ -262,6 +262,10 @@ namespace xlang::meta::reader
         {
         }
 
+        explicit ParamSig(TypeSig const& type)
+            : m_type{ type }
+        {}
+
         auto CustomMod() const noexcept
         {
             return std::pair{ m_cmod.cbegin(), m_cmod.cend() };
@@ -279,7 +283,7 @@ namespace xlang::meta::reader
 
     private:
         std::vector<CustomModSig> m_cmod;
-        bool m_byref;
+        bool m_byref{};
         TypeSig m_type;
     };
 
@@ -301,6 +305,14 @@ namespace xlang::meta::reader
             }
         }
 
+        explicit RetTypeSig(std::optional<TypeSig> const& type)
+            : m_type{ type }
+        {}
+
+        explicit RetTypeSig(TypeSig const& type)
+            : m_type{ type }
+        {}
+
         auto CustomMod() const noexcept
         {
             return std::pair{ m_cmod.cbegin(), m_cmod.cend() };
@@ -313,7 +325,7 @@ namespace xlang::meta::reader
 
         TypeSig const& Type() const noexcept
         {
-            return *m_type;
+            return m_type.value();
         }
 
         explicit operator bool() const noexcept
@@ -346,6 +358,14 @@ namespace xlang::meta::reader
             }
         }
 
+        explicit MethodDefSig(RetTypeSig const& ret_type, std::vector<ParamSig> const& param_type)
+            : m_ret_type(ret_type), m_params(param_type)
+        {}
+
+        explicit MethodDefSig(RetTypeSig&& type, std::vector<ParamSig> && param_type)
+            : m_ret_type(std::move(type)), m_params(std::move(param_type))
+        {}
+
         CallingConvention CallConvention() const noexcept
         {
             return m_calling_convention;
@@ -367,9 +387,9 @@ namespace xlang::meta::reader
         }
 
     private:
-        CallingConvention m_calling_convention;
-        uint32_t m_generic_param_count;
-        uint32_t m_param_count;
+        CallingConvention m_calling_convention{ CallingConvention::HasThis };
+        uint32_t m_generic_param_count{};
+        uint32_t m_param_count{};
         RetTypeSig m_ret_type;
         std::vector<ParamSig> m_params;
     };

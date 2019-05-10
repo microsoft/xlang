@@ -1,13 +1,38 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <map>
 #include <vector>
+#include <variant>
 
 namespace xlang::xmeta
 {
+    struct namespace_body_model;
+    struct namespace_model;
+
+    struct using_alias_directive_model;
+    struct using_namespace_directive_model;
+
+    struct class_model;
+    struct enum_model;
+    struct interface_model;
+    struct struct_model;
+    struct delegate_model;
+
+    struct property_model;
+    struct method_model;
+    struct event_model;
+
+    using class_type_semantics = std::variant<
+        std::shared_ptr<class_model>,
+        std::shared_ptr<enum_model>,
+        std::shared_ptr<interface_model>,
+        std::shared_ptr<struct_model>,
+        std::shared_ptr<delegate_model>>;
+
     struct base_model
     {
         base_model() = delete;

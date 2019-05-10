@@ -1,54 +1,137 @@
-#include <algorithm>
-#include <stdexcept>
-
 #include "ast_to_st_listener.h"
 #include "xmeta_idl_reader.h"
 #include "models/xmeta_models.h"
+#include "XlangParser.h"
+#include "impl/base.h"
 
 using namespace xlang::xmeta;
 
-enum_semantics str_to_enum_semantics(std::string const& val)
+namespace
 {
-    if (val == "Int8")
+    static const std::map<std::string, enum_semantics> str_to_enum_type_map = {
+        { "Int8", enum_semantics::Int8 },
+        { "Int16", enum_semantics::Int16 },
+        { "Int32", enum_semantics::Int32 },
+        { "Int64", enum_semantics::Int64 },
+        { "UInt8", enum_semantics::UInt8 },
+        { "UInt16", enum_semantics::UInt16 },
+        { "UInt32", enum_semantics::UInt32 },
+        { "UInt64", enum_semantics::UInt64 },
+    };
+
+    enum_semantics str_to_enum_semantics(std::string const& val)
     {
-        return enum_semantics::Int8;
+        auto const iter = str_to_enum_type_map.find(val);
+        if (iter == str_to_enum_type_map.end())
+        {
+            xlang::throw_invalid("Can't convert ", val, " to enum simple type");
+        }
+        return iter->second;
     }
-    else if (val == "UInt8")
+
+    static const std::map<std::string, simple_type> str_to_simple_type_map = {
+        { "Boolean", simple_type::Boolean },
+        { "String", simple_type::String },
+        { "Int8", simple_type::Int8 },
+        { "Int16", simple_type::Int16 },
+        { "Int32", simple_type::Int32 },
+        { "Int64", simple_type::Int64 },
+        { "UInt8", simple_type::UInt8 },
+        { "UInt16", simple_type::UInt16 },
+        { "UInt32", simple_type::UInt32 },
+        { "UInt64", simple_type::UInt64 },
+        { "Char16", simple_type::Char16 },
+        { "Single", simple_type::Single },
+        { "Double", simple_type::Double },
+    };
+
+    simple_type str_to_simple_type(std::string const& val)
     {
-        return enum_semantics::UInt8;
+        auto const iter = str_to_simple_type_map.find(val);
+        if (str_to_simple_type_map.find(val) == str_to_simple_type_map.end())
+        {
+            xlang::throw_invalid("Can't convert ", val, " to simple type");
+        }
+        return iter->second;
     }
-    else if (val == "Int16")
-    {
-        return enum_semantics::Int16;
-    }
-    else if (val == "UInt16")
-    {
-        return enum_semantics::UInt16;
-    }
-    else if (val == "Int32")
-    {
-        return enum_semantics::Int32;
-    }
-    else if (val == "UInt32")
-    {
-        return enum_semantics::UInt32;
-    }
-    else if (val == "Int64")
-    {
-        return enum_semantics::Int64;
-    }
-    else if (val == "UInt64")
-    {
-        return enum_semantics::UInt64;
-    }
-    assert(false);
-    return enum_semantics::Int32;
 }
 
 ast_to_st_listener::ast_to_st_listener(xmeta_idl_reader& reader) :
     m_reader{ reader }
 { }
 
+listener_error ast_to_st_listener::extract_type(XlangParser::Return_typeContext* rtc, std::optional<type_ref>& tr)
+{
+    assert(rtc);
+    if (rtc->VOID_LXR())
+    {
+        tr = std::nullopt;
+        return listener_error::passed;
+    }
+    assert(rtc->type());
+    return extract_type(rtc->type(), *tr);
+}
+
+// Class types are to be resolved later in thse second pass
+listener_error ast_to_st_listener::extract_type(XlangParser::TypeContext* tc, type_ref& tr)
+{
+    if (tc->value_type())
+    {
+        tr.set_semantic(str_to_simple_type(tc->getText()));
+    }
+    else if (tc->class_type())
+    {
+        if (tc->class_type()->OBJECT())
+        {
+            tr.set_semantic(object_type{});
+        }
+    }
+    else if (tc->array_type())
+    {
+        assert(tc->array_type()->non_array_type());
+        if (tc->array_type()->non_array_type()->value_type())
+        {
+            tr.set_semantic(str_to_simple_type(tc->getText()));
+        }
+        else if (tc->array_type()->non_array_type()->class_type())
+        {
+            if (tc->array_type()->non_array_type()->class_type()->OBJECT())
+            {
+                tr.set_semantic(object_type{});
+            }
+        }
+    }
+    return listener_error::passed;
+}
+
+void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, std::shared_ptr<delegate_model> const& dm)
+{
+    for (auto fixed_param : ast_formal_params)
+    {
+        auto id = fixed_param->IDENTIFIER();
+        std::string formal_param_name{ id->getText() };
+        auto decl_line = id->getSymbol()->getLine();
+        type_ref tr{ fixed_param->type()->getText() };
+        extract_type(fixed_param->type(), tr);
+        parameter_semantics sem = parameter_semantics::in;
+        if (fixed_param->parameter_modifier() != nullptr)
+        {
+            if (fixed_param->parameter_modifier()->CONST_LXR())
+            {
+                sem = parameter_semantics::const_ref;
+            }
+            else if (fixed_param->parameter_modifier()->REF())
+            {
+                sem = parameter_semantics::ref;
+            }
+            else if (fixed_param->parameter_modifier()->OUT_LXR())
+            {
+                sem = parameter_semantics::out;
+            }
+        }
+        dm->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_reader.m_current_assembly, sem, std::move(tr) });
+    }
+}
 
 listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_declarationContext *ast_enum_member, std::shared_ptr<enum_model> const& new_enum)
 {
@@ -169,12 +252,45 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     return listener_error::passed;
 }
 
+void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarationContext* ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    std::string delegate_name{ id->getText() };
+    auto decl_line = id->getSymbol()->getLine();
+
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + delegate_name;
+    if (m_reader.type_declaration_exists(symbol))
+    {
+        m_reader.write_redeclaration_error(symbol, decl_line);
+        return;
+    }
+
+    std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };
+    extract_type(ctx->return_type(), tr);
+    auto dm = std::make_shared<delegate_model>(delegate_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), std::move(tr));
+
+    auto formal_params = ctx->formal_parameter_list();
+    if (formal_params)
+    {
+        extract_formal_params(formal_params->fixed_parameter(), dm);
+    }
+
+    m_reader.m_cur_namespace_body->add_delegate(dm);
+    m_reader.symbols[symbol] = dm;
+}
+
 void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationContext *ctx)
 {
     auto id = ctx->IDENTIFIER();
     std::string enum_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
     enum_semantics type = enum_semantics::Int32;
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + enum_name;
+    if (m_reader.type_declaration_exists(symbol))
+    {
+        m_reader.write_redeclaration_error(symbol, decl_line);
+        return;
+    }
 
     if (ctx->enum_base())
     {
@@ -182,7 +298,7 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
         type = str_to_enum_semantics(ctx->enum_base()->enum_integral_type()->getText());
     }
 
-    std::shared_ptr<enum_model> new_enum = std::make_shared<enum_model>(id->getText(), decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), type);
+    auto new_enum = std::make_shared<enum_model>(enum_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body(), type);
 
     for (auto field : ctx->enum_body()->enum_member_declaration())
     {
@@ -206,6 +322,34 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
     }
 
     m_reader.m_cur_namespace_body->add_enum(new_enum);
+    m_reader.symbols[symbol] = new_enum;
+}
+
+void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationContext *ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    auto decl_line = id->getSymbol()->getLine();
+    std::string struct_name{ id->getText() };
+    std::string symbol = m_reader.get_cur_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + struct_name;
+
+    if (m_reader.type_declaration_exists(symbol))
+    {
+        // TODO: Reccord the semantic error and continue
+        m_reader.write_redeclaration_error(symbol, decl_line);
+        return;
+    }
+
+    auto new_struct = std::make_shared<struct_model>(struct_name, decl_line, m_reader.get_cur_assembly(), m_reader.get_cur_namespace_body());
+
+    for (auto field : ctx->struct_body()->field_declaration())
+    {
+        type_ref tr{ field->type()->getText() };
+        extract_type(field->type(), tr);
+        new_struct->add_field(std::pair(tr, field->IDENTIFIER()->getText()));
+    }
+
+    m_reader.m_cur_namespace_body->add_struct(new_struct);
+    m_reader.symbols[symbol] = new_struct;
 }
 
 void ast_to_st_listener::enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx)

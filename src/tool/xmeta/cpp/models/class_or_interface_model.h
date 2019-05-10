@@ -7,10 +7,6 @@
 
 namespace xlang::xmeta
 {
-    struct property_model;
-    struct method_model;
-    struct event_model;
-
     struct class_or_interface_model : namespace_member_model
     {
         class_or_interface_model() = delete;

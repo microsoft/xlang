@@ -28,6 +28,7 @@ type
 value_type
     : BOOLEAN
     | STRING
+    | INT8
     | INT16
     | INT32
     | INT64
@@ -43,7 +44,6 @@ value_type
 class_type
     : type_name
     | OBJECT
-    | NILL
     ;
 
 array_type
@@ -285,15 +285,15 @@ fixed_parameter
     ;
 
 parameter_modifier // More restrictive?
-    : CONST REF
-    | REF CONST
+    : CONST_LXR REF
+    | REF CONST_LXR
     | REF
-    | OUT
+    | OUT_LXR
     ;
 
 return_type
     : type
-    | VOID
+    | VOID_LXR
     ;
 
 property_identifier // more restrictive
@@ -439,15 +439,7 @@ enum_identifier
 
 /* Delegates */
 delegate_declaration
-    : attributes? delegate_modifier* DELEGATE return_type
+    : attributes? DELEGATE return_type
         IDENTIFIER type_parameter_list?
         OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
-
-delegate_modifier
-    : NEW
-    | PUBLIC
-    | PROTECTED
-    | PRIVATE
-    ;
-

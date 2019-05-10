@@ -55,11 +55,13 @@ namespace xlang::xmeta
         mdParamDef define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def);
         void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, uint16_t parameter_index);
 
-        static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
-        static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
-        static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract
-        static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;
-                // A generic assembly metadata struct.
+        std::optional<xlang::meta::reader::TypeSig> create_paramater_signature(std::optional<type_ref> const& ref);
+
+        //static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
+        //static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
+        //static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract
+
+        // A generic assembly metadata struct.
         static constexpr ASSEMBLYMETADATA s_genericMetadata =
         {
             // usMajorVersion - Unspecified major version

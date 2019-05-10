@@ -12,18 +12,6 @@
 
 namespace xlang::xmeta
 {
-    struct namespace_body_model;
-    struct namespace_model;
-
-    struct using_alias_directive_model;
-    struct using_namespace_directive_model;
-
-    struct class_model;
-    struct struct_model;
-    struct interface_model;
-    struct delegate_model;
-    struct enum_model;
-
     // The scope of a using directive extends over the namespace member declarations of
     // its immediately containing namespace body. The namespace_body_model struct
     // will be used to differentiate the separate bodies.

@@ -22,7 +22,7 @@ namespace xlang::xmeta
 
         bool is_namespace_ref() const noexcept
         {
-            return m_type_or_namespace_ref.is_resolved() && 
+            return m_type_or_namespace_ref.is_resolved() &&
                 std::holds_alternative<std::shared_ptr<namespace_model>>(m_type_or_namespace_ref.get_resolved_target());
         }
 
