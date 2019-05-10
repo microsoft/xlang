@@ -105,6 +105,90 @@ namespace coolrt
     {
         using indented_writer_base<writer>::write;
 
+#pragma region generic param handling
+        std::vector<std::vector<std::string>> generic_param_stack;
+
+        struct generic_param_guard
+        {
+            explicit generic_param_guard(writer* arg = nullptr)
+                : owner(arg)
+            {}
+
+            ~generic_param_guard()
+            {
+                if (owner)
+                {
+                    owner->generic_param_stack.pop_back();
+                }
+            }
+
+            generic_param_guard(generic_param_guard&& other)
+                : owner(other.owner)
+            {
+                owner = nullptr;
+            }
+
+            generic_param_guard& operator=(generic_param_guard&& other)
+            {
+                owner = std::exchange(other.owner, nullptr);
+                return *this;
+            }
+
+            generic_param_guard& operator=(generic_param_guard const&) = delete;
+            writer* owner;
+        };
+
+        [[nodiscard]] auto push_generic_params(std::pair<GenericParam, GenericParam>&& params)
+        {
+            if (empty(params))
+            {
+                return generic_param_guard{ nullptr };
+            }
+
+            std::vector<std::string> names;
+
+            for (auto&& param : params)
+            {
+                names.push_back(std::string{ param.Name() });
+            }
+
+            generic_param_stack.push_back(std::move(names));
+            return generic_param_guard{ this };
+        }
+
+        [[nodiscard]] auto push_generic_params(GenericTypeInstSig const& signature)
+        {
+            std::vector<std::string> names;
+
+            for (auto&& arg : signature.GenericArgs())
+            {
+                names.push_back(write_temp("%", get_type_semantics(arg)));
+            }
+
+            generic_param_stack.push_back(std::move(names));
+            return generic_param_guard{ this };
+        }
+
+        [[nodiscard]] auto push_generic_params(std::vector<type_semantics> const& type_arguments)
+        {
+            if (type_arguments.size() == 0)
+            {
+                return generic_param_guard{ nullptr };
+            }
+
+            std::vector<std::string> names;
+
+            for (auto&& arg : type_arguments)
+            {
+                names.push_back(write_temp("%", arg));
+            }
+
+            generic_param_stack.push_back(std::move(names));
+            return generic_param_guard{ this };
+        }
+
+#pragma endregion
+
         void write_code(std::string_view const& value)
         {
             for (auto&& c : value)
@@ -191,14 +275,14 @@ namespace coolrt
             }
         }
 
-        void write(object_type const& type)
+        void write(object_type)
         {
             write("object");
         }
 
-        void write(guid_type const& type)
+        void write(guid_type)
         {
-            throw_invalid("guid_type not supported");
+            write("System.Guid");
         }
 
         void write(type_definition const& type)
@@ -226,9 +310,9 @@ namespace coolrt
             write(">");
         }
 
-        void write(generic_type_index const& type)
+        void write(generic_type_index const& var)
         {
-            throw_invalid("generic_type_index not supported");
+            write(generic_param_stack.back()[var.index]);
         }
 
         void write(type_semantics const& semantics)
@@ -240,22 +324,31 @@ namespace coolrt
                 });
         }
 
-
-        void write(ParamSig const* signature)
+        void write(TypeSig const& signature)
         {
-            write(get_type_semantics(signature->Type()));
+            write(get_type_semantics(signature));
+        }
+
+        void write(coded_index<TypeDefOrRef> const& index)
+        {
+            write(get_type_semantics(index));
         }
 
         void write(RetTypeSig const& signature)
         {
             if (signature)
             {
-                write(get_type_semantics(signature.Type()));
+                write(signature.Type());
             }
             else
             {
                 write("void");
             }
+        }
+
+        void write(PropertySig const& signature)
+        {
+            write(signature.Type());
         }
     };
 

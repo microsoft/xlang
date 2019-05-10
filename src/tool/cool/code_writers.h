@@ -4,30 +4,72 @@ namespace coolrt
 {
     using namespace xlang::meta::reader;
 
+    void write_ptype_name(writer& w, TypeDef const& type)
+    {
+        w.write("@", type.TypeName());
+        if (distance(type.GenericParam()) > 0)
+        {
+            w.write("<");
+            separator s{ w };
+            for (auto&& gp : type.GenericParam())
+            {
+                s();
+                w.write(gp.Name());
+            }
+            w.write(">");
+        }
+    }
+
     void write_throw_not_impl(writer& w)
     {
         writer::indent_guard g{ w };
         w.write("throw new System.NotImplementedException();\n");
     }
 
+    void write_parameter_type(writer& w, method_signature::param_t const& param)
+    {
+        switch (get_param_category(param))
+        {
+        case param_category::in:
+            w.write(param.second->Type());
+            break;
+        case param_category::out:
+            w.write("out %", param.second->Type());
+            break;
+        case param_category::pass_array:
+            w.write("/*pass_array*/ %[]", param.second->Type());
+            break;
+        case param_category::fill_array:
+            w.write("/*fill_array*/ %[]", param.second->Type());
+            break;
+        case param_category::receive_array:
+            w.write("/*receive_array*/ %[]", param.second->Type());
+            break;
+        }
+    }
+
     void write_method_parameters(writer& w, method_signature const& signature)
     {
         separator s{ w };
-        for (auto&& [param, param_sig] : signature.params())
+        for (auto&& param : signature.params())
         {
             s();
-            w.write("% %", param_sig, param.Name());
+            w.write("% %", bind<write_parameter_type>(param), param.first.Name());
         }
     }
 
     void write_method_signature(writer& w, MethodDef const& method, method_signature const& signature)
     {
-        if (!is_constructor(method))
+        if (is_constructor(method))
         {
-            w.write("% ", signature.return_signature());
+            w.write(method.Parent().TypeName());
+        }
+        else
+        {
+            w.write("% %", signature.return_signature(), method.Name());
         }
 
-        w.write("%(%)", method.Name(), bind<write_method_parameters>(signature));
+        w.write("(%)", bind<write_method_parameters>(signature));
     }
 
     void write_class(writer& w, TypeDef const& type)
@@ -56,22 +98,29 @@ namespace coolrt
                 }
 
                 method_signature signature{ method };
-                w.write("public % %(%)\n{\n", 
-                    signature.return_signature(),
-                    method.Name(), 
-                    bind<write_method_parameters>(signature));
+                w.write("public %\n{\n", bind<write_method_signature>(method, signature));
                 write_throw_not_impl(w);
                 w.write("}\n");
             }
 
             for (auto&& prop : type.PropertyList())
             {
-                w.write("// prop %\n", prop.Name());
+                auto [getter, setter] = get_property_methods(prop);
+                w.write("public % %\n{\n", prop.Type(), prop.Name());
+                {
+                    writer::indent_guard g{ w };
+                    w.write("get { throw new System.NotImplementedException(); }\n");
+                    if (setter)
+                    {
+                        w.write("set { throw new System.NotImplementedException(); }\n");
+                    }
+                }
+                w.write("}\n");
             }
 
             for (auto&& evt : type.EventList())
             {
-                w.write("// prop %\n", evt.Name());
+                w.write("public event % %;\n", evt.EventType(), evt.Name());
             }
         }
         w.write("}\n");
@@ -81,7 +130,7 @@ namespace coolrt
     {
         method_signature signature{ get_delegate_invoke(type) };
 
-        w.write("public delegate void @();\n", type.TypeName());
+        w.write("public delegate void %();\n", bind<write_ptype_name>(type));
     }
 
     void write_enum(writer& w, TypeDef const& type)
@@ -108,7 +157,8 @@ namespace coolrt
 
     void write_interface(writer& w, TypeDef const& type)
     {
-        w.write("public interface @\n{\n", type.TypeName());
+        w.write("public interface %", bind<write_ptype_name>(type));
+        w.write("\n{\n");
         {
             writer::indent_guard g{ w };
             for (auto&& method : type.MethodList())
@@ -124,12 +174,12 @@ namespace coolrt
 
             for (auto&& prop : type.PropertyList())
             {
-                w.write("// prop %\n", prop.Name());
+                w.write("% % { get; set; }\n", prop.Type(), prop.Name());
             }
 
             for (auto&& evt : type.EventList())
             {
-                w.write("// evt %\n", evt.Name());
+                w.write("event % %;\n", evt.EventType(), evt.Name());
             }
         }
         w.write("}\n");
@@ -142,6 +192,8 @@ namespace coolrt
 
     void write_type(writer& w, TypeDef const& type)
     {
+        auto guard{ w.push_generic_params(type.GenericParam()) };
+
         switch (get_category(type))
         {
         case category::class_type:

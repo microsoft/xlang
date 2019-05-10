@@ -115,6 +115,11 @@ namespace xlang::meta::reader
                 return guid_type{};
             }
 
+            if (type_ref.TypeName() == "Type" && type_ref.TypeNamespace() == "System")
+            {
+                throw_invalid("System.Type typeref not implemented");
+            }
+
             return find_required(type_ref);
         }
         case TypeDefOrRef::TypeSpec:
@@ -242,4 +247,79 @@ namespace xlang::meta::reader
         std::vector<param_t> m_params;
         Param m_return;
     };
+
+    enum class param_category
+    {
+        in,
+        out,
+        pass_array,
+        fill_array,
+        receive_array,
+    };
+
+    auto get_param_category(method_signature::param_t const& param)
+    {
+        if (param.second->Type().is_szarray())
+        {
+            if (param.first.Flags().In())
+            {
+                return param_category::pass_array;
+            }
+            else if (param.second->ByRef())
+            {
+                XLANG_ASSERT(param.first.Flags().Out());
+                return param_category::receive_array;
+            }
+            else
+            {
+                XLANG_ASSERT(param.first.Flags().Out());
+                return param_category::fill_array;
+            }
+        }
+        else
+        {
+            if (param.first.Flags().In())
+            {
+                XLANG_ASSERT(!param.first.Flags().Out());
+                return param_category::in;
+            }
+            else
+            {
+                XLANG_ASSERT(param.first.Flags().Out());
+                return param_category::out;
+            }
+        }
+    }
+
+    auto get_property_methods(Property const& prop)
+    {
+        MethodDef get_method{}, set_method{};
+
+        for (auto&& method_semantic : prop.MethodSemantic())
+        {
+            auto semantic = method_semantic.Semantic();
+
+            if (semantic.Getter())
+            {
+                get_method = method_semantic.Method();
+            }
+            else if (semantic.Setter())
+            {
+                set_method = method_semantic.Method();
+            }
+            else
+            {
+                throw_invalid("Properties can only have get and set methods");
+            }
+        }
+
+        XLANG_ASSERT(get_method);
+
+        if (set_method)
+        {
+            XLANG_ASSERT(get_method.Flags().Static() == set_method.Flags().Static());
+        }
+
+        return std::make_tuple(get_method, set_method);
+    }
 }
