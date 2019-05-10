@@ -2,7 +2,7 @@
 namespace winrt::impl
 {
     template <typename T>
-    struct reference final : implements<reference<T>, Windows::Foundation::IReference<T>, Windows::Foundation::IPropertyValue>
+    struct reference : implements<reference<T>, Windows::Foundation::IReference<T>, Windows::Foundation::IPropertyValue>
     {
         reference(T const& value) : m_value(value)
         {

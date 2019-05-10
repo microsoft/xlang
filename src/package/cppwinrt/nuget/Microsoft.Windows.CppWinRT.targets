@@ -14,7 +14,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTTargetPlatformReferences Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(TargetPlatformVersion)</CppWinRTTargetPlatformReferences>
         <CppWinRTWriteOnlyWhenDifferent Condition="('$(CppWinRTWriteOnlyWhenDifferent)' == '') And (('$(MSBuildToolsVersion)' == 'Current') Or ('$(MSBuildToolsVersion)' &gt;= '15'))">true</CppWinRTWriteOnlyWhenDifferent>
         <CppWinRTWriteOnlyWhenDifferent Condition="'$(CppWinRTWriteOnlyWhenDifferent)' != 'true'">false</CppWinRTWriteOnlyWhenDifferent>
-        <CppWinRTPath Condition="'$(CppWinRTPath)'==''">"$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\bin\"</CppWinRTPath>
+        <CppWinRTPackageDir Condition="'$(CppWinRTPackage)' == 'true' and '$(CppWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\</CppWinRTPackageDir>
+        <CppWinRTPackageDir Condition="'$(CppWinRTPackage)' != 'true' and '$(CppWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))</CppWinRTPackageDir>
+        <CppWinRTPath Condition="'$(CppWinRTPackage)' == 'true' and '$(CppWinRTPath)'==''">"$(CppWinRTPackageDir)bin\"</CppWinRTPath>
+        <CppWinRTPath Condition="'$(CppWinRTPackage)' != 'true' and '$(CppWinRTPath)'==''">"$(CppWinRTPackageDir)"</CppWinRTPath>
         
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
         <!--Override SDK's uap.props setting to ensure version-matched headers-->
@@ -25,6 +28,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <PrepareForBuildDependsOn>
             $(PrepareForBuildDependsOn);CppWinRTVerifyKitVersion
         </PrepareForBuildDependsOn>
+        <ComputeCompileInputsTargets>
+          $(ComputeCompileInputsTargets);
+          CppWinRTHeapEnforcementOptOut;
+        </ComputeCompileInputsTargets>
         <BeforeClCompileTargets>
             $(BeforeClCompileTargets);CppWinRTMakePlatformProjection;CppWinRTMakeReferenceProjection
         </BeforeClCompileTargets>
@@ -67,6 +74,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Delete Files="@(_FilesToDelete)"/>
     </Target>
 
+    <Target Name="CppWinRTHeapEnforcementOptOut" Condition="'@(ClCompile)' != ''">
+      <ItemGroup Condition="'$(CppWinRTHeapEnforcement)'=='' and ('@(Page)' != '' Or '@(ApplicationDefinition)' != '')">
+        <ClCompile>
+          <AdditionalOptions>%(ClCompile.AdditionalOptions) /DWINRT_NO_MAKE_DETECTION</AdditionalOptions>
+        </ClCompile>
+      </ItemGroup>
+    </Target>
+
     <!--Define platform projection WinMD inputs-->
     <Target Name="GetCppWinRTPlatformWinMDInputs"
             DependsOnTargets="ResolveAssemblyReferences"
@@ -88,9 +103,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <ItemGroup>
             <_CppWinRTPlatformWinMDReferences Remove="@(_CppWinRTPlatformWinMDReferences)" />
             <_CppWinRTPlatformWinMDReferences Include="@(ReferencePath)" Condition="'%(ReferencePath.IsSystemReference)' == 'true' and '%(ReferencePath.WinMDFile)' == 'true' and '%(ReferencePath.ReferenceSourceTarget)' == 'ResolveAssemblyReference'" />
-            <_CppWinRTPlatformWinMDReferences Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Foundation.FoundationContract.winmd" />
-            <_CppWinRTPlatformWinMDReferences Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Foundation.UniversalApiContract.winmd" />
-            <_CppWinRTPlatformWinMDReferences Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Networking.Connectivity.WwanContract.winmd" />
+            <_CppWinRTPlatformWinMDReferences Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'" Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Foundation.FoundationContract.winmd" />
+            <_CppWinRTPlatformWinMDReferences Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'" Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Foundation.UniversalApiContract.winmd" />
+            <_CppWinRTPlatformWinMDReferences Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'" Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Networking.Connectivity.WwanContract.winmd" />
             <_CppWinRTPlatformWinMDReferences Include="$(CppWinRTSDKReferences)" />
             <CppWinRTPlatformWinMDReferences Remove="@(CppWinRTPlatformWinMDReferences)"/>
             <CppWinRTPlatformWinMDReferences Include="@(_CppWinRTPlatformWinMDReferences->'%(FullPath)'->Distinct())">
@@ -339,6 +354,7 @@ $(XamlMetaDataProviderPch)
     </Target>
 
     <Target Name="CppWinRTMakePlatformProjection"
+            Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'"
             DependsOnTargets="GetCppWinRTPlatformWinMDInputs;$(CppWinRTMakePlatformProjectionDependsOn)"
             Inputs="@(CppWinRTPlatformWinMDInputs)"
             Outputs="$(GeneratedFilesDir)winrt\base.h">
@@ -464,5 +480,9 @@ $(XamlMetaDataProviderPch)
             <XamlLocalAssembly>$(CppWinRTProjectWinMD)</XamlLocalAssembly>
         </PropertyGroup>
     </Target>
+
+    <!-- Fast ABI component support -->
+    <Import Condition="'$(CppWinRTFastAbi)'=='true'"
+        Project="$(MSBuildThisFileDirectory)Microsoft.Windows.CppWinRT.FastAbi.targets" />
 
 </Project>

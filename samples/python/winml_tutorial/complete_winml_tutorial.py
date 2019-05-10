@@ -1,11 +1,16 @@
-import sys
-sys.path.append("./pywinrt_output")
-
-import pyrt
 import asyncio
+import csv
+import os
+import time
+import winrt
+import winrt.windows.ai.machinelearning as winml 
+
+from pathlib import Path
+from winrt.windows.graphics.imaging import BitmapDecoder
+from winrt.windows.media import VideoFrame
+from winrt.windows.storage import StorageFile, FileAccessMode
 
 def timed_op(fun):
-    import time
 
     def sync_wrapper(*args, **kwds):
         print("Starting", fun.__name__)
@@ -14,7 +19,7 @@ def timed_op(fun):
         ret = fun(*args, **kwds)
 
         end = time.perf_counter()
-        print(fun.__name__, "took", end - start, "seconds")
+        print(f"{fun.__name__} took {end - start:.3f} seconds")
         return ret
 
     async def async_wrapper(*args, **kwds):
@@ -24,92 +29,66 @@ def timed_op(fun):
         ret = await fun(*args, **kwds)
 
         end = time.perf_counter()
-        print(fun.__name__, "took", end - start, "seconds")
+        print(f"{fun.__name__} took {end - start:.3f} seconds")
         return ret
 
     return async_wrapper if asyncio.iscoroutinefunction(fun) else sync_wrapper
 
-import pyrt.windows.ai.machinelearning as winml 
-
 @timed_op
 def load_model(model_path):
-    return winml.LearningModel.LoadFromFilePath(model_path)
+    return winml.LearningModel.load_from_file_path(os.fspath(model_path))
 
 @timed_op
 async def load_image_file(file_path):
-    from pyrt.windows.storage import StorageFile, FileAccessMode
-    from pyrt.windows.graphics.imaging import BitmapDecoder
-    from pyrt.windows.media import VideoFrame
-
-    file = await StorageFile.GetFileFromPathAsync(file_path)
-    stream = await file.OpenAsync(FileAccessMode.Read) 
-    decoder = await BitmapDecoder.CreateAsync(stream)
-    software_bitmap = await decoder.GetSoftwareBitmapAsync()
-    return VideoFrame.CreateWithSoftwareBitmap(software_bitmap)
+    file = await StorageFile.get_file_from_path_async(os.fspath(file_path))
+    stream = await file.open_async(FileAccessMode.READ)
+    decoder = await BitmapDecoder.create_async(stream)
+    software_bitmap = await decoder.get_software_bitmap_async()
+    return VideoFrame.create_with_software_bitmap(software_bitmap)
 
 @timed_op
 def bind_model(model, image_frame):
-    device = winml.LearningModelDevice(winml.LearningModelDeviceKind.Default)
+    device = winml.LearningModelDevice(winml.LearningModelDeviceKind.DEFAULT)
     session = winml.LearningModelSession(model, device)
     binding = winml.LearningModelBinding(session)
-    image_feature_value = winml.ImageFeatureValue.CreateFromVideoFrame(image_frame)
-    binding.Bind("data_0", image_feature_value)
-    shape = winml.TensorFloat.Create([1, 1000, 1, 1])
-    binding.Bind("softmaxout_1", shape)
+    image_feature_value = winml.ImageFeatureValue.create_from_video_frame(image_frame)
+    binding.bind("data_0", image_feature_value)
+    shape = winml.TensorFloat.create([1, 1000, 1, 1])
+    binding.bind("softmaxout_1", shape)
     return (session, binding)
 
 @timed_op
 def evaluate_model(session, binding):
-    results = session.Evaluate(binding, "RunId")
-    o = results.Outputs["softmaxout_1"]
+    results = session.evaluate(binding, "RunId")
+    o = results.outputs["softmaxout_1"]
     result_tensor = winml.TensorFloat._from(o)
-    return result_tensor.GetAsVectorView()
+    return result_tensor.get_as_vector_view()
 
 def load_labels(labels_path):
-    import csv
-    labels = dict()
     with open(labels_path) as labels_file:
-        labels_reader = csv.reader(labels_file)
-        for label in labels_reader:
-            label_text = ', '.join(label[1:])
-            labels[int(label[0])] = ', '.join(label[1:])
-    return labels
+        return {int(index): ', '.join(labels)
+                for index, *labels
+                in csv.reader(labels_file)}
 
 def print_results(results, labels):
-    topProbabilities = [0.0 for x in range(3)]
-    topProbabilityLabelIndexes = [0 for x in range(3)]
-
-    for i in range(results.Size):
-        for j in range(3):
-            result = results.GetAt(i)
-            if result > topProbabilities[j]:
-                topProbabilityLabelIndexes[j] = i
-                topProbabilities[j] = result
-                break
-
-    print()
-    for i in range(3):
-        print(labels[topProbabilityLabelIndexes[i]], "with confidence of", topProbabilities[i])
+    for confidence, label in sorted(zip(results, labels), reverse=True)[:3]:
+        print(f"{labels[label]} ({confidence * 100:.1f}%)")
 
 async def async_main():
+    winml_content_path = Path.cwd() / "winml_content"
 
-    import os.path
-
-    model_path = os.path.abspath("./winml_content/SqueezeNet.onnx")
+    model_path = winml_content_path / "SqueezeNet.onnx"
     model = load_model(model_path)
 
-    image_file = os.path.abspath("./winml_content/kitten_224.png")
+    image_file =  winml_content_path / "kitten_224.png"
     image_frame = await load_image_file(image_file)
 
     session, binding = bind_model(model, image_frame)
     results = evaluate_model(session, binding)
 
-    labels_path = os.path.abspath("./winml_content/Labels.txt")
+    labels_path = winml_content_path / "Labels.txt"
     labels = load_labels(labels_path)
 
     print_results(results, labels)
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(async_main())
-loop.close()
-
+asyncio.run(async_main())

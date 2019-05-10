@@ -49,5 +49,8 @@
 #define WINRT_INTERLOCKED_READ_MEMORY_BARRIER (__dmb(_ARM64_BARRIER_ISH));
 #endif
 
+#define WINRT_IMPL_STRING_1(expression) #expression
+#define WINRT_IMPL_STRING(expression) WINRT_IMPL_STRING_1(expression)
+
 // Note: this is a workaround for a false-positive warning produced by the Visual C++ 15.9 compiler.
 #pragma warning(disable : 5046)

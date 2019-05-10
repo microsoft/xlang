@@ -9,7 +9,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>C++/WinRT is a standard C++ language projection for the Windows Runtime implemented solely in header files. It allows you to both author and consume Windows Runtime APIs using any standards-compliant C++ compiler. C++/WinRT is designed to provide C++ developers with first-class access to the modern Windows API.</description>
     <releaseNotes></releaseNotes>
-    <tags>native, C++, WinRT, nativepackage</tags>
+    <tags>native C++ WinRT nativepackage</tags>
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <license type="file">LICENSE</license>
     <projectUrl>https://github.com/Microsoft/xlang/tree/master/src/package/cppwinrt/nuget</projectUrl>
@@ -18,8 +18,14 @@
   <files>
     <file src="..\LICENSE"/>
     <file src="$cppwinrt_exe$" target="bin"/>
-    <file src="Microsoft.Windows.CppWinRT.targets" target="build\native"/>
     <file src="Microsoft.Windows.CppWinRT.props" target="build\native"/>
-    <file src="readme.txt" target="" />
+    <file src="Microsoft.Windows.CppWinRT.targets" target="build\native"/>
+    <file src="Microsoft.Windows.CppWinRT.FastAbi.targets" target="build\native"/>
+    <file src="src\thunks.inc" target="src"/>
+    <file src="src\x86\thunks.asm" target="src\x86"/>
+    <file src="src\x64\thunks.asm" target="src\x64"/>
+    <file src="src\arm\thunks.asm" target="src\arm"/>
+    <file src="src\arm64\thunks.asm" target="src\arm64"/>
+    <file src="readme.txt"/>
   </files>
 </package>

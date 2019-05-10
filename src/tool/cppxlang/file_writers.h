@@ -29,7 +29,6 @@ namespace xlang
         w.write(strings::base_activation);
         w.write(strings::base_implements);
         w.write(strings::base_composable);
-        w.write(strings::base_foundation);
         w.write(strings::base_chrono);
         w.write(strings::base_std_hash);
         w.write(strings::base_reflect);
@@ -48,17 +47,13 @@ namespace xlang
 
         w.write(R"(
 #include <experimental/coroutine>
-#include "xlang/Windows.Foundation.h"
-#include "xlang/Windows.System.h"
-#include "xlang/Windows.UI.Core.h"
+#include "xlang/Foundation.h"
 )");
 
         w.write(strings::base_coroutine);
         w.write(strings::base_coroutine_resume);
         w.write(strings::base_coroutine_action);
-        w.write(strings::base_coroutine_action_with_progress);
         w.write(strings::base_coroutine_operation);
-        w.write(strings::base_coroutine_operation_with_progress);
         w.write(strings::base_coroutine_fire_and_forget);
 
         write_close_file_guard(w);

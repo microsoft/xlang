@@ -108,11 +108,11 @@ xlang_fail           | 3      | Generic error when no equivalent or better error
 xlang_handle         | 4      | Invalid handle
 xlang_invalid_arg    | 5      | Invalid argument in a call
 xlang_invalid_state  | 6      | Call isn't allowed in the current state
-xlang_no_interface   | 7      | Class or interface not found
+xlang_no_interface   | 7      | Interface not found
 xlang_not_impl       | 8      | Function / feature is not implemented
 xlang_out_of_memory  | 9      | Allocation issue resulting from not enough memory
 xlang_pointer        | 10     | Null pointer related errors
-xlang_type_load      | 11     | Syntax / type error during runtime
+xlang_type_load      | 11     | Class not found or syntax / type error during runtime
 
 These errors defined in xlang should get a natural mapping from projections if an equivalent error
 exists in the language it projects.
@@ -398,9 +398,9 @@ struct IXLangErrorInfo
     void GetError(xlang_result* error);
     void GetMessage(xlang_string* message);
     void GetLanguageError(xlang_string* error);
-    void GetExecutionTrace(IUnknown* executionTrace);
-    void GetLanguageIdentifier(xlang_string* identifier);
-    void GetLanguageInformation(IUnknown* languageInformation);
+    void GetExecutionTrace(IUnknown** executionTrace);
+    void GetProjectionIdentifier(xlang_string* identifier);
+    void GetLanguageInformation(IUnknown** languageInformation);
     void GetPropagatedError(IXlangErrorInfo** propagatedError);
     void PropagateError(
         xlang_string projectionIdentifier,

@@ -134,7 +134,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -190,7 +190,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -250,7 +250,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -310,7 +310,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />

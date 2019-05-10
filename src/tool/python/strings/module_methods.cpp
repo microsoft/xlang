@@ -1,4 +1,4 @@
-#include "pybase.h"
+#include "pch.h"
 #include <winrt/base.h>
 
 PyObject* create_python_type(PyType_Spec* type_spec, PyObject* base_type) noexcept

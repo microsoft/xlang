@@ -25,9 +25,6 @@
     <ClInclude Include="..\strings\base_array.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="..\strings\base_async.h">
-      <Filter>strings</Filter>
-    </ClInclude>
     <ClInclude Include="..\strings\base_chrono.h">
       <Filter>strings</Filter>
     </ClInclude>
@@ -64,25 +61,16 @@
     <ClInclude Include="..\strings\base_composable.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="..\strings\base_coroutine.h">
+    <ClInclude Include="..\strings\base_coroutine_foundation.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="..\strings\base_coroutine_action.h">
+    <ClInclude Include="..\strings\base_coroutine_system.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="..\strings\base_coroutine_action_with_progress.h">
+    <ClInclude Include="..\strings\base_coroutine_threadpool.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="..\strings\base_coroutine_fire_and_forget.h">
-      <Filter>strings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\strings\base_coroutine_operation.h">
-      <Filter>strings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\strings\base_coroutine_operation_with_progress.h">
-      <Filter>strings</Filter>
-    </ClInclude>
-    <ClInclude Include="..\strings\base_coroutine_resume.h">
+    <ClInclude Include="..\strings\base_coroutine_ui_core.h">
       <Filter>strings</Filter>
     </ClInclude>
     <ClInclude Include="..\strings\base_delegate.h">
@@ -130,9 +118,6 @@
     <ClInclude Include="..\strings\base_reference_produce.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="..\strings\base_reflect.h">
-      <Filter>strings</Filter>
-    </ClInclude>
     <ClInclude Include="..\strings\base_security.h">
       <Filter>strings</Filter>
     </ClInclude>
@@ -161,6 +146,9 @@
       <Filter>strings</Filter>
     </ClInclude>
     <ClInclude Include="..\strings\base_xaml_typename.h">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\strings\base_fast_fwd.h">
       <Filter>strings</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,11 +1,16 @@
-import sys
-sys.path.append("./generated")
-
-import winrt
 import asyncio
+import csv
+import os
+import time
+import winrt
+import winrt.windows.ai.machinelearning as winml 
+
+from pathlib import Path
+from winrt.windows.graphics.imaging import BitmapDecoder
+from winrt.windows.media import VideoFrame
+from winrt.windows.storage import StorageFile, FileAccessMode
 
 def timed_op(fun):
-    import time
 
     def sync_wrapper(*args, **kwds):
         print("Starting", fun.__name__)
@@ -14,7 +19,7 @@ def timed_op(fun):
         ret = fun(*args, **kwds)
 
         end = time.perf_counter()
-        print(fun.__name__, "took", end - start, "seconds")
+        print(f"{fun.__name__} took {end - start:.3f} seconds")
         return ret
 
     async def async_wrapper(*args, **kwds):
@@ -24,13 +29,10 @@ def timed_op(fun):
         ret = await fun(*args, **kwds)
 
         end = time.perf_counter()
-        print(fun.__name__, "took", end - start, "seconds")
+        print(f"{fun.__name__} took {end - start:.3f} seconds")
         return ret
 
     return async_wrapper if asyncio.iscoroutinefunction(fun) else sync_wrapper
-
-import winrt.windows.ai.machinelearning as winml 
-import os
 
 @timed_op
 def load_model(model_path):
@@ -38,12 +40,8 @@ def load_model(model_path):
 
 @timed_op
 async def load_image_file(file_path):
-    from winrt.windows.storage import StorageFile, FileAccessMode
-    from winrt.windows.graphics.imaging import BitmapDecoder
-    from winrt.windows.media import VideoFrame
-
     file = await StorageFile.get_file_from_path_async(os.fspath(file_path))
-    stream = await file.open_async(FileAccessMode.READ) 
+    stream = await file.open_async(FileAccessMode.READ)
     decoder = await BitmapDecoder.create_async(stream)
     software_bitmap = await decoder.get_software_bitmap_async()
     return VideoFrame.create_with_software_bitmap(software_bitmap)
@@ -62,44 +60,28 @@ def bind_model(model, image_frame):
 @timed_op
 def evaluate_model(session, binding):
     results = session.evaluate(binding, "RunId")
-    o = results.outputs.lookup("softmaxout_1")
+    o = results.outputs["softmaxout_1"]
     result_tensor = winml.TensorFloat._from(o)
     return result_tensor.get_as_vector_view()
 
 def load_labels(labels_path):
-    import csv
-    labels = dict()
-    with open(os.fspath(labels_path)) as labels_file:
-        labels_reader = csv.reader(labels_file)
-        for label in labels_reader:
-            label_text = ', '.join(label[1:])
-            labels[int(label[0])] = ', '.join(label[1:])
-    return labels
+    with open(labels_path) as labels_file:
+        return {int(index): ', '.join(labels)
+                for index, *labels
+                in csv.reader(labels_file)}
 
 def print_results(results, labels):
-    topProbabilities = [0.0 for x in range(3)]
-    topProbabilityLabelIndexes = [0 for x in range(3)]
-
-    for i, result in enumerate(results):
-        for j in range(3):
-            if result > topProbabilities[j]:
-                topProbabilityLabelIndexes[j] = i
-                topProbabilities[j] = result
-                break
-
-    print()
-    for i in range(3):
-        print(labels[topProbabilityLabelIndexes[i]], "with confidence of", topProbabilities[i])
+    for confidence, label in sorted(zip(results, labels), reverse=True)[:3]:
+        print(f"{labels[label]} ({confidence * 100:.1f}%)")
 
 async def async_main():
-
-    from pathlib import Path
     cur_path = Path.cwd()
 
-    while (cur_path / "samples").is_dir() == False:
-        cur_path = cur_path.parent
-
-    winml_content_path = cur_path / "samples/python/winml_tutorial/winml_content"
+    winml_content_path = next((
+        path for path in
+        (p / "samples/python/winml_tutorial/winml_content" for p in (cur_path, *cur_path.parents))
+        if path.is_dir()
+    ), cur_path)
 
     model_path = winml_content_path / "SqueezeNet.onnx"
     model = load_model(model_path)
@@ -115,6 +97,4 @@ async def async_main():
 
     print_results(results, labels)
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(async_main())
-loop.close()
+asyncio.run(async_main())
