@@ -157,8 +157,7 @@ namespace coolrt
 
     void write_interface(writer& w, TypeDef const& type)
     {
-        w.write("public interface %", bind<write_ptype_name>(type));
-        w.write("\n{\n");
+        w.write("public interface %\n{\n", bind<write_ptype_name>(type));
         {
             writer::indent_guard g{ w };
             for (auto&& method : type.MethodList())
@@ -187,7 +186,16 @@ namespace coolrt
 
     void write_struct(writer& w, TypeDef const& type)
     {
-        w.write("public struct @\n{\n}\n", type.TypeName());
+        w.write("public struct @\n{\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+
+            for (auto&& field : type.FieldList())
+            {
+                w.write("public % %;\n", field.Signature().Type(), field.Name());
+            }
+        }
+        w.write("}\n");
     }
 
     void write_type(writer& w, TypeDef const& type)
@@ -216,10 +224,9 @@ namespace coolrt
 
     void write_type(TypeDef const& type)
     {
-        if (is_exclusive_to(type))
-        {
-            return;
-        }
+        if (is_exclusive_to(type)) { return; }
+        if (is_api_contract_type(type)) { return; }
+        if (is_attribute_type(type)) { return; }
 
         writer w;
         w.write("namespace %\n{\n", type.TypeNamespace());

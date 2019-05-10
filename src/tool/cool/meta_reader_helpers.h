@@ -4,12 +4,22 @@ namespace xlang::meta::reader
 {
     bool is_exclusive_to(TypeDef const& type)
     {
-        return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
+        return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata"sv, "ExclusiveToAttribute"sv);
     }
 
     bool is_flags_enum(TypeDef const& type)
     {
-        return get_category(type) == category::enum_type && get_attribute(type, "System", "FlagsAttribute");
+        return get_category(type) == category::enum_type && get_attribute(type, "System"sv, "FlagsAttribute"sv);
+    }
+
+    bool is_api_contract_type(TypeDef const& type)
+    {
+        return get_category(type) == category::struct_type && get_attribute(type, "Windows.Foundation.Metadata"sv, "ApiContractAttribute"sv);
+    }
+
+    bool is_attribute_type(TypeDef const& type)
+    {
+        return get_category(type) == category::class_type && extends_type(type, "System"sv, "Attribute"sv);
     }
 
     bool is_constructor(MethodDef const& method)
