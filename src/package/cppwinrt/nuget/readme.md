@@ -62,6 +62,8 @@ C++/WinRT behavior can be customized with these project properties:
 | CppWinRTNamespaceMergeDepth | *1 | Sets the depth of namespace merging (Xaml apps require 1) |
 | CppWinRTUsePrefixes | *false \| true | Uses a dotted prefix namespace convention (versus a nested folder convention) |
 | CppWinRTPath | ...\cppwinrt.exe | NuGet package-relative path to cppwinrt.exe, for custom build rule invocation |
+| CppWinRTParameters | "" | Custom cppwinrt.exe command-line parameters (be sure to append to existing) |
+| CppWinRTFastAbi | true \| *false | Enables Fast ABI feature for both consuming and producing projections |
 \*Default value
 
 To customize the above properties, a property sheet can be added to the project:
