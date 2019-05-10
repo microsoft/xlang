@@ -51,9 +51,11 @@ namespace xlang::xmeta
 
     struct xlang_model_pass_1 : public xlang_model_listener
     {
-        explicit xlang_model_pass_1(std::map<std::string, class_type_semantics> & symbols, xlang::xmeta::xlang_error_manager & error_manager)
+        explicit xlang_model_pass_1(std::map<std::string, class_type_semantics> & symbols, 
+                xlang::xmeta::xlang_error_manager & error_manager)
             : m_symbols{ symbols }, m_error_manager{ error_manager }
         {}
+
         xlang_model_pass_1() = delete;
 
         void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
