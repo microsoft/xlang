@@ -28,7 +28,6 @@ namespace coolrt
             int32_t _offset;
         };
 
-
         void write_indent()
         {
             for (int32_t i = 0; i < indent; i++)
@@ -110,11 +109,7 @@ namespace coolrt
         {
             for (auto&& c : value)
             {
-                if (c == '.')
-                {
-                    write("::");
-                }
-                else if (c == '`')
+                if (c == '`')
                 {
                     return;
                 }
@@ -147,6 +142,139 @@ namespace coolrt
                 break;
             }
         }
+   
+        void write(fundamental_type const& type)
+        {
+            switch (type)
+            {
+            case fundamental_type::Boolean:
+                write("bool");
+                break;
+            case fundamental_type::Char:
+                write("char");
+                break;
+            case fundamental_type::Int8:
+                write("sbyte");
+                break;
+            case fundamental_type::UInt8:
+                write("byte");
+                break;
+            case fundamental_type::Int16:
+                write("short");
+                break;
+            case fundamental_type::UInt16:
+                write("ushort");
+                break;
+            case fundamental_type::Int32:
+                write("int");
+                break;
+            case fundamental_type::UInt32:
+                write("uint");
+                break;
+            case fundamental_type::Int64:
+                write("long");
+                break;
+            case fundamental_type::UInt64:
+                write("ulong");
+                break;
+            case fundamental_type::Float:
+                write("float");
+                break;
+            case fundamental_type::Double:
+                write("double");
+                break;
+            case fundamental_type::String:
+                write("string");
+                break;
+            default:
+                throw_invalid("invalid fundamental type");
+            }
+        }
 
+        void write(object_type const& type)
+        {
+            write("object");
+        }
+
+        void write(guid_type const& type)
+        {
+            throw_invalid("guid_type not supported");
+        }
+
+        void write(type_definition const& type)
+        {
+            write("%.@", type.TypeNamespace(), type.TypeName());
+        }
+
+        void write(generic_type_instance const& type)
+        {
+            write(type.generic_type);
+            write("<");
+            bool first{ true };
+            for (auto&& type_arg : type.generic_args)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    write(", ");
+                }
+                write(type_arg);
+            }
+            write(">");
+        }
+
+        void write(generic_type_index const& type)
+        {
+            throw_invalid("generic_type_index not supported");
+        }
+
+        void write(type_semantics const& semantics)
+        {
+            call(semantics,
+                [&](auto && type)
+                {
+                    write(type);
+                });
+        }
+
+
+        void write(ParamSig const* signature)
+        {
+            write(get_type_semantics(signature->Type()));
+        }
+
+        void write(RetTypeSig const& signature)
+        {
+            if (signature)
+            {
+                write(get_type_semantics(signature.Type()));
+            }
+            else
+            {
+                write("void");
+            }
+        }
+    };
+
+    struct separator
+    {
+        writer& w;
+        std::string_view _separator{ ", " };
+        bool first{ true };
+
+        void operator()()
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                w.write(_separator);
+            }
+        }
     };
 }

@@ -4,37 +4,30 @@ namespace coolrt
 {
     using namespace xlang::meta::reader;
 
-    void write_members(writer& w, TypeDef const& type)
+    void write_throw_not_impl(writer& w)
     {
-        for (auto&& method : type.MethodList())
-        {
-            if (!is_constructor(method))
-            {
-                continue;
-            }
+        writer::indent_guard g{ w };
+        w.write("throw new System.NotImplementedException();\n");
+    }
 
-            w.write("// ctor @\n", type.TypeName());
+    void write_method_parameters(writer& w, method_signature const& signature)
+    {
+        separator s{ w };
+        for (auto&& [param, param_sig] : signature.params())
+        {
+            s();
+            w.write("% %", param_sig, param.Name());
+        }
+    }
+
+    void write_method_signature(writer& w, MethodDef const& method, method_signature const& signature)
+    {
+        if (!is_constructor(method))
+        {
+            w.write("% ", signature.return_signature());
         }
 
-        for (auto&& method : type.MethodList())
-        {
-            if (is_special(method))
-            {
-                continue;
-            }
-
-            w.write("// %\n", method.Name());
-        }
-
-        for (auto&& prop : type.PropertyList())
-        {
-            w.write("// prop %\n", prop.Name());
-        }
-
-        for (auto&& evt : type.EventList())
-        {
-            w.write("// prop %\n", evt.Name());
-        }
+        w.write("%(%)", method.Name(), bind<write_method_parameters>(signature));
     }
 
     void write_class(writer& w, TypeDef const& type)
@@ -42,7 +35,44 @@ namespace coolrt
         w.write("public class @\n{\n", type.TypeName());
         {
             writer::indent_guard g{ w };
-            write_members(w, type);
+            for (auto&& method : type.MethodList())
+            {
+                if (!is_constructor(method))
+                {
+                    continue;
+                }
+
+                method_signature signature{ method };
+                w.write("public %\n{\n", bind<write_method_signature>(method, signature));
+                write_throw_not_impl(w);
+                w.write("}\n");
+            }
+
+            for (auto&& method : type.MethodList())
+            {
+                if (is_special(method))
+                {
+                    continue;
+                }
+
+                method_signature signature{ method };
+                w.write("public % %(%)\n{\n", 
+                    signature.return_signature(),
+                    method.Name(), 
+                    bind<write_method_parameters>(signature));
+                write_throw_not_impl(w);
+                w.write("}\n");
+            }
+
+            for (auto&& prop : type.PropertyList())
+            {
+                w.write("// prop %\n", prop.Name());
+            }
+
+            for (auto&& evt : type.EventList())
+            {
+                w.write("// prop %\n", evt.Name());
+            }
         }
         w.write("}\n");
     }
@@ -81,7 +111,26 @@ namespace coolrt
         w.write("public interface @\n{\n", type.TypeName());
         {
             writer::indent_guard g{ w };
-            write_members(w, type);
+            for (auto&& method : type.MethodList())
+            {
+                if (is_special(method))
+                {
+                    continue;
+                }
+
+                method_signature signature{ method };
+                w.write("%;\n", bind<write_method_signature>(method, signature));
+            }
+
+            for (auto&& prop : type.PropertyList())
+            {
+                w.write("// prop %\n", prop.Name());
+            }
+
+            for (auto&& evt : type.EventList())
+            {
+                w.write("// evt %\n", evt.Name());
+            }
         }
         w.write("}\n");
     }
