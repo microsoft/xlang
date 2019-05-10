@@ -418,7 +418,7 @@ TEST_CASE("Interface event test")
     std::istringstream test_idl{ R"(
         namespace N
         {
-            delegate void StringListEvent(IStringList sender);
+            delegate void StringListEvent(Int32 sender);
             interface IControl
             {
                 event StringListEvent Changed;

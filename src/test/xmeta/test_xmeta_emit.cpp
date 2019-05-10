@@ -569,3 +569,33 @@ TEST_CASE("Struct class type metadata")
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[5]);
     }
 }
+
+TEST_CASE("Interface type metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(Int32 sender);
+
+            interface IControl
+            {
+                void Paint();
+            }
+    
+            interface IComboBox requires IControl {
+                void Draw();
+                event StringListEvent Changed;
+                S1 property1;
+            }
+
+            struct S1
+            {
+            }
+        }
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 4);
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 4);
+}

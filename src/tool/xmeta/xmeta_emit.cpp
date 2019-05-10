@@ -139,10 +139,7 @@ namespace
 
     std::variant<std::string, simple_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
     {
-        if (!semantic_type.is_resolved())
-        {
-            assert(false);
-        }
+        assert(semantic_type.is_resolved());
         type_semantics const& ts = semantic_type.get_resolved_target();
         if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
         {
@@ -293,8 +290,6 @@ namespace xlang::xmeta
         return token_typedef;
     }
 
-
-
     void xmeta_emit::listen_namespace_model(std::shared_ptr<namespace_model> const& /*model*/) {};
     
     void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& /*model*/) 
@@ -439,7 +434,7 @@ namespace xlang::xmeta
 
         mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_fully_qualified_id());
         mdEvent token_event;
-        m_metadata_emitter->DefineEvent (
+        m_metadata_emitter->DefineEvent(
             token_def,
             event_name.c_str(),
             0,
@@ -460,6 +455,7 @@ namespace xlang::xmeta
         {
             implements.emplace_back(get_or_define_type_ref(val->get_fully_qualified_id()));
         }
+        implements.emplace_back(mdTokenNil);
         
         //TODO: When we have attributes, if it has a single ExclusiveToAttribute. Then it must not be tdPublic. 
         static constexpr DWORD interface_type_flag = tdInterface | tdPublic | tdAbstract | tdWindowsRuntime;
