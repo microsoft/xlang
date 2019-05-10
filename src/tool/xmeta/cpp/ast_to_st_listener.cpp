@@ -261,7 +261,8 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     auto const& ref_name = val.get_ref_name();
     if (!new_enum->member_exists(ref_name))
     {
-        error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_id(), m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_id(), 
+            m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return listener_error::failed;
     }
     auto ref_member = new_enum->get_member(ref_name);
@@ -469,7 +470,8 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
     }
     if (!xlang_model.set_symbol(symbol, new_enum))
     {
-        error_manager.write_namespace_member_name_error(decl_line, enum_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_namespace_member_name_error(decl_line, enum_name, 
+            m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
     }
     m_cur_namespace_body->add_enum(new_enum);
@@ -553,7 +555,8 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
             }
             else
             {
-                error_manager.write_namespace_member_name_error(decl_line, name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+                error_manager.write_namespace_member_name_error(decl_line, name, 
+                    m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
                 return;
             }
         }

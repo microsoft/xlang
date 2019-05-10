@@ -615,7 +615,6 @@ namespace xlang::xmeta
         {
             throw_invalid("Failed to find TypeRef for: " + type_name);
         }
-        TypeRef const& token_delegate_type_ref = iter->second;
 
         // Constructor
         static constexpr DWORD delegate_constructor_flag = mdPrivate | mdSpecialName | mdRTSpecialName | mdHideBySig;
@@ -682,10 +681,10 @@ namespace xlang::xmeta
         /** Defining parameters and return **/
         /* Define return value */
         // To be used for attributes later
-        mdParamDef token_return = define_return(model->get_return_type(), token_delegate_invoke_def);
+        /* mdParamDef token_return = */define_return(token_delegate_invoke_def);
 
         /* Define formal parameters */
-        int index = 1;
+        uint16_t index = 1;
         for (auto const& val : model->get_formal_parameters())
         {
             define_parameters(val, token_delegate_invoke_def, index);
@@ -693,7 +692,7 @@ namespace xlang::xmeta
         }
     }
 
-    mdParamDef xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def)
+    mdParamDef xmeta_emit::define_return(mdTypeDef const& type_def)
     {
         /* Define return value */
         mdParamDef token_param_return;
@@ -746,19 +745,19 @@ namespace xlang::xmeta
             {
                 std::string return_name = std::get<std::string>(semantic);
                 auto iter = type_references.find(return_name);
-                TypeRef ref;
+                TypeRef type_ref;
                 if (iter == type_references.end())
                 {
                     mdTypeRef md_ref;
                     m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
                     type_references.emplace(return_name, to_TypeRef(md_ref));
-                    ref = to_TypeRef(md_ref);
+                    type_ref = to_TypeRef(md_ref);
                 }
                 else
                 {
-                    ref = iter->second;
+                    type_ref = iter->second;
                 }
-                return TypeSig{ ElementType::ValueType, ref.coded_index<TypeDefOrRef>() };
+                return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
             }
             else if (std::holds_alternative<object_type>(semantic))
             {

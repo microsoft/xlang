@@ -52,7 +52,7 @@ namespace xlang::xmeta
         void define_property(std::shared_ptr<property_model> const& model, mdTypeDef const& token_def);
         void define_event(std::shared_ptr<event_model> const& model, mdTypeDef const& token_def);
 
-        mdParamDef define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def);
+        mdParamDef define_return(mdTypeDef const& type_def);
         void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, uint16_t parameter_index);
 
         std::optional<xlang::meta::reader::TypeSig> create_paramater_signature(std::optional<type_ref> const& ref);

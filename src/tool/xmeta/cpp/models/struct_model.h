@@ -57,7 +57,8 @@ namespace xlang::xmeta
             }
         }
 
-        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, xlang_error_manager & error_manager)
+        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, 
+            xlang_error_manager & error_manager)
         {
             if (contains_itself)
             {
@@ -73,7 +74,8 @@ namespace xlang::xmeta
             return contains_itself;
         }
 
-        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, std::set<std::string> & symbol_set, xlang_error_manager & error_manager)
+        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, 
+            std::set<std::string> & symbol_set, xlang_error_manager & error_manager)
         {
             if (contains_itself)
             {
