@@ -495,7 +495,7 @@ namespace xlang::xmeta
         auto const& struct_name = model->get_fully_qualified_id();
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
-        auto token_enum_type_def = define_type_def(struct_name, struct_type_flag, token_value_type, implements);
+        auto token_struct_type_def = define_type_def(struct_name, struct_type_flag, token_value_type, implements);
 
         static constexpr DWORD struct_field_flag = fdPublic;
         for (std::pair<type_ref, std::string> const& struct_member : model->get_fields())
@@ -506,7 +506,7 @@ namespace xlang::xmeta
             signature_blob field_signature;
             field_signature.add_signature(FieldSig{ create_paramater_signature(struct_member.first).value() });
             mdFieldDef field_token;
-            check_hresult(m_metadata_emitter->DefineField(token_enum_type_def,
+            check_hresult(m_metadata_emitter->DefineField(token_struct_type_def,
                 field_name.c_str(),
                 struct_field_flag,
                 field_signature.data(),
