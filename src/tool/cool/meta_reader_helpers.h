@@ -125,6 +125,11 @@ namespace xlang::meta::reader
                 return guid_type{};
             }
 
+            if (type_ref.TypeName() == "Object" && type_ref.TypeNamespace() == "System")
+            {
+                return object_type{};
+            }
+
             if (type_ref.TypeName() == "Type" && type_ref.TypeNamespace() == "System")
             {
                 throw_invalid("System.Type typeref not implemented");

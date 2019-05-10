@@ -72,9 +72,55 @@ namespace coolrt
         w.write("(%)", bind<write_method_parameters>(signature));
     }
 
+    void write_type_inheritance(writer& w, TypeDef const& type)
+    {
+        bool colon_written = false;
+        auto write_colon = [&]()
+        {
+            if (!colon_written)
+            {
+                w.write(" : ");
+                colon_written = true;
+            }
+        };
+
+        separator s{ w };
+
+        if (get_category(type) == category::class_type)
+        {
+            write_colon();
+            s();
+            w.write(type.Extends());
+        }
+
+        for (auto&& iface : type.InterfaceImpl())
+        {
+            call(get_type_semantics(iface.Interface()),
+                [&](type_definition const& type) 
+                { 
+                    if (!is_exclusive_to(type))
+                    {
+                        write_colon();
+                        s();
+                        w.write(type);
+                    }
+                },
+                [&](generic_type_instance const& type) 
+                { 
+                    if (!is_exclusive_to(type.generic_type))
+                    {
+                        write_colon();
+                        s();
+                        w.write(type);
+                    }
+                },
+                [](auto) { throw_invalid("invalid interface impl type"); });
+        }
+    }
+
     void write_class(writer& w, TypeDef const& type)
     {
-        w.write("public class @\n{\n", type.TypeName());
+        w.write("public class @%\n{\n", type.TypeName(), bind<write_type_inheritance>(type));
         {
             writer::indent_guard g{ w };
             for (auto&& method : type.MethodList())
@@ -157,7 +203,7 @@ namespace coolrt
 
     void write_interface(writer& w, TypeDef const& type)
     {
-        w.write("public interface %\n{\n", bind<write_ptype_name>(type));
+        w.write("public interface %%\n{\n", bind<write_ptype_name>(type), bind<write_type_inheritance>(type));
         {
             writer::indent_guard g{ w };
             for (auto&& method : type.MethodList())
@@ -238,6 +284,5 @@ namespace coolrt
 
         auto filename = w.write_temp("%.@.cs", type.TypeNamespace(), type.TypeName());
         w.flush_to_file(settings.output_folder / filename);
-
     }
 }
