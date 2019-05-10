@@ -4,23 +4,53 @@ namespace coolrt
 {
     using namespace xlang::meta::reader;
 
-    bool is_exclusive_to(TypeDef const& type)
+    void write_members(writer& w, TypeDef const& type)
     {
-        return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
-    }
+        for (auto&& method : type.MethodList())
+        {
+            if (!is_constructor(method))
+            {
+                continue;
+            }
 
-    bool is_flags_enum(TypeDef const& type)
-    {
-        return get_category(type) == category::enum_type && get_attribute(type, "System", "FlagsAttribute");
+            w.write("// ctor @\n", type.TypeName());
+        }
+
+        for (auto&& method : type.MethodList())
+        {
+            if (is_special(method))
+            {
+                continue;
+            }
+
+            w.write("// %\n", method.Name());
+        }
+
+        for (auto&& prop : type.PropertyList())
+        {
+            w.write("// prop %\n", prop.Name());
+        }
+
+        for (auto&& evt : type.EventList())
+        {
+            w.write("// prop %\n", evt.Name());
+        }
     }
 
     void write_class(writer& w, TypeDef const& type)
     {
-        w.write("public class @\n{\n}\n", type.TypeName());
+        w.write("public class @\n{\n", type.TypeName());
+        {
+            writer::indent_guard g{ w };
+            write_members(w, type);
+        }
+        w.write("}\n");
     }
 
     void write_delegate(writer& w, TypeDef const& type)
     {
+        method_signature signature{ get_delegate_invoke(type) };
+
         w.write("public delegate void @();\n", type.TypeName());
     }
 
@@ -48,17 +78,12 @@ namespace coolrt
 
     void write_interface(writer& w, TypeDef const& type)
     {
-        if (!is_exclusive_to(type))
+        w.write("public interface @\n{\n", type.TypeName());
         {
-            w.write("public interface @\n{\n}\n", type.TypeName());
+            writer::indent_guard g{ w };
+            write_members(w, type);
         }
-
-        //w.write("\nnamespace _Interop\n{\n");
-        //{
-        //    writer::indent_guard g{ w };
-        //    w.write("private interface @\n{\n}\n", type.TypeName());
-        //}
-
+        w.write("}\n");
     }
 
     void write_struct(writer& w, TypeDef const& type)
@@ -90,6 +115,11 @@ namespace coolrt
 
     void write_type(TypeDef const& type)
     {
+        if (is_exclusive_to(type))
+        {
+            return;
+        }
+
         writer w;
         w.write("namespace %\n{\n", type.TypeNamespace());
         {
