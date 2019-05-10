@@ -273,58 +273,6 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     return listener_error::passed;
 }
 
-void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_declarationContext *ctx)
-{
-    auto id = ctx->IDENTIFIER();
-    std::string interface_name{ id->getText() };
-    auto decl_line = id->getSymbol()->getLine();
-
-    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + interface_name;
-    auto model = std::make_shared<interface_model>(interface_name, decl_line, m_cur_assembly, m_cur_namespace_body);
-
-    if (!xlang_model.set_symbol(symbol, model))
-    {
-        error_manager.write_namespace_member_name_error(decl_line, interface_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
-        return;
-    }
-    auto const& interface_body = ctx->interface_body();
-    for (auto const& interface_member : interface_body->interface_member_declaration())
-    {
-        if (interface_member->interface_method_declaration())
-        {
-            auto interface_method = interface_member->interface_method_declaration();
-            std::string method_id = interface_method->IDENTIFIER()->getText();
-
-            std::optional<type_ref> tr = type_ref{ interface_method->return_type()->getText() };
-            extract_type(interface_method->return_type(), tr);
-
-            auto met_model = std::make_shared<method_model>(method_id, interface_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr));
-            if (interface_method->formal_parameter_list())
-            {
-                extract_formal_params(interface_method->formal_parameter_list()->fixed_parameter(), met_model);
-            }
-            model->add_member(met_model);
-        }
-        if (interface_member->interface_property_declaration())
-        {
-            extract_property_accessors(interface_member->interface_property_declaration(), model);
-        }
-        if (interface_member->interface_event_declaration())
-        {
-            extract_event_accessors(interface_member->interface_event_declaration(), model);
-        }
-    }
-    if (ctx->interface_base())
-    {
-        auto const& interface_bases = ctx->interface_base()->type_base();
-        for (auto const& interface_base : interface_bases)
-        {
-            model->add_interface_base_ref(interface_base->class_type()->getText());
-        }
-    }
-    m_cur_namespace_body->add_interface(model);
-}
-
 listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Interface_property_declarationContext* interface_property, std::shared_ptr<class_or_interface_model> model)
 {
     std::string property_id = interface_property->IDENTIFIER()->getText();
@@ -405,6 +353,59 @@ listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interfac
     model->add_member(event);
     return listener_error::passed;
 }
+
+void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_declarationContext *ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    std::string interface_name{ id->getText() };
+    auto decl_line = id->getSymbol()->getLine();
+
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + interface_name;
+    auto model = std::make_shared<interface_model>(interface_name, decl_line, m_cur_assembly, m_cur_namespace_body);
+
+    if (!xlang_model.set_symbol(symbol, model))
+    {
+        error_manager.write_namespace_member_name_error(decl_line, interface_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        return;
+    }
+    auto const& interface_body = ctx->interface_body();
+    for (auto const& interface_member : interface_body->interface_member_declaration())
+    {
+        if (interface_member->interface_method_declaration())
+        {
+            auto interface_method = interface_member->interface_method_declaration();
+            std::string method_id = interface_method->IDENTIFIER()->getText();
+
+            std::optional<type_ref> tr = type_ref{ interface_method->return_type()->getText() };
+            extract_type(interface_method->return_type(), tr);
+
+            auto met_model = std::make_shared<method_model>(method_id, interface_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr));
+            if (interface_method->formal_parameter_list())
+            {
+                extract_formal_params(interface_method->formal_parameter_list()->fixed_parameter(), met_model);
+            }
+            model->add_member(met_model);
+        }
+        if (interface_member->interface_property_declaration())
+        {
+            extract_property_accessors(interface_member->interface_property_declaration(), model);
+        }
+        if (interface_member->interface_event_declaration())
+        {
+            extract_event_accessors(interface_member->interface_event_declaration(), model);
+        }
+    }
+    if (ctx->interface_base())
+    {
+        auto const& interface_bases = ctx->interface_base()->type_base();
+        for (auto const& interface_base : interface_bases)
+        {
+            model->add_interface_base_ref(interface_base->class_type()->getText());
+        }
+    }
+    m_cur_namespace_body->add_interface(model);
+}
+
 
 void ast_to_st_listener::enterDelegate_declaration(XlangParser::Delegate_declarationContext* ctx)
 {

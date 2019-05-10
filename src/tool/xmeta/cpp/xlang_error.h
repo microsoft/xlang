@@ -14,6 +14,7 @@ namespace xlang::xmeta
     {
     public:
         void write_error(size_t decl_line, std::string_view const& msg);
+        void write_type_member_exists_error(size_t decl_line, std::string member);
         void write_unresolved_type_error(size_t decl_line, std::string symbol);
         void write_struct_field_error(size_t decl_line, std::string symbol);
         void write_struct_field_error(size_t decl_line, std::string_view const& invalid_name, std::string_view const& struct_name);
@@ -62,6 +63,7 @@ namespace xlang::xmeta
             
             struct error_model
             {
+                size error_level;
                 size_t error_code;
                 size_t decl_line;
                 std::string symbol;

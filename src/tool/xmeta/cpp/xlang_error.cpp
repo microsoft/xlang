@@ -8,6 +8,13 @@ namespace xlang::xmeta
         m_num_semantic_errors++;
     }
 
+    void xlang_error_manager::write_type_member_exists_error(size_t decl_line, std::string member)
+    {
+        std::ostringstream oss;
+        oss << "Member already exists: " << member;
+        write_error(decl_line, oss.str());
+    }
+
     void xlang_error_manager::write_unresolved_type_error(size_t decl_line, std::string symbol)
     {
         std::ostringstream oss;

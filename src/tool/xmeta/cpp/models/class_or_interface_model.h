@@ -40,19 +40,31 @@ namespace xlang::xmeta
             m_interface_base_refs.emplace_back(interface_base_ref);
         }
 
-        void add_member(std::shared_ptr<property_model> const& member)
+        bool add_member(std::shared_ptr<property_model> const& member)
         {
+            if (member_id_exists(member->get_id()))
+            {
+                return false;
+            }
             m_properties.emplace_back(member);
+            return true;
         }
 
-        void add_member(std::shared_ptr<method_model> const& member)
+        bool add_member(std::shared_ptr<method_model> const& member)
         {
+            // TODO: the case with overloading
+            if (contains_id(m_events, member->get_id()) || contains_id(m_properties, member->get_id()))
+            {
+                return false;
+            }
             m_methods.emplace_back(member);
+            return true;
         }
 
-        void add_member(std::shared_ptr<event_model> const& member)
+        bool add_member(std::shared_ptr<event_model> const& member)
         {
             m_events.emplace_back(member);
+            return true;
         }
 
         bool member_id_exists(std::string_view const& id)
