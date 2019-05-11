@@ -461,10 +461,27 @@ namespace xlang::xmeta
         static constexpr DWORD interface_type_flag = tdInterface | tdPublic | tdAbstract | tdWindowsRuntime;
         auto token_interface_type_def = define_type_def(interface_name, interface_type_flag, mdTokenNil, implements.data());
         std::map<std::string_view, mdMethodDef> method_defs;
-        static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot /*| mdInstance*/;
         for (auto const& val : model->get_methods())
         {
-            define_method(val, method_flag, method_defs, token_interface_type_def);
+            if (val->get_method_association() == method_association::None)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot /*| mdInstance*/;
+                define_method(val, method_flag, method_defs, token_interface_type_def);
+            }
+            else if (val->get_method_association() == method_association::Property)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot | mdAbstract | mdSpecialName;
+                define_method(val, method_flag, method_defs, token_interface_type_def);
+            }
+            else if (val->get_method_association() == method_association::Event)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
+                define_method(val, method_flag, method_defs, token_interface_type_def);
+            }
+            else
+            {
+                assert(false);
+            }
         }
         for (auto const& val : model->get_properties())
         {

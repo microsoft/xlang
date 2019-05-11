@@ -313,21 +313,21 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
         {
             if (property_accessor->GET())
             {
-                get_method = std::make_shared<method_model>("get_" + property_id, property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(tr));
+                get_method = std::make_shared<method_model>("get_" + property_id, property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::Property);
                 model->add_member(get_method);
             }
             else if (property_accessor->SET())
             {
-                set_method = std::make_shared<method_model>("set_" + property_id, property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(tr));
+                set_method = std::make_shared<method_model>("set_" + property_id, property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::Property);
                 model->add_member(set_method);
             }
         }
     }
     else // Implicity declaration
     {
-        get_method = std::make_shared<method_model>("get_" + property_id, decl_line, m_cur_assembly, std::move(tr));
+        get_method = std::make_shared<method_model>("get_" + property_id, decl_line, m_cur_assembly, std::move(tr), method_association::Property);
         model->add_member(get_method);
-        set_method = std::make_shared<method_model>("set_" + property_id, decl_line, m_cur_assembly, std::move(tr));
+        set_method = std::make_shared<method_model>("set_" + property_id, decl_line, m_cur_assembly, std::move(tr), method_association::Property);
         model->add_member(set_method);
     }
 
@@ -345,8 +345,8 @@ listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interfac
     type_ref tr{ interface_event->type()->getText() };
     extract_type(interface_event->type(), tr);
     auto decl_line = interface_event->IDENTIFIER()->getSymbol()->getLine();
-    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event_id, decl_line, m_cur_assembly, std::move(tr));
-    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event_id, decl_line, m_cur_assembly, std::move(tr));
+    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event_id, decl_line, m_cur_assembly, std::move(tr), method_association::Event);
+    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event_id, decl_line, m_cur_assembly, std::move(tr), method_association::Event);
 
     model->add_member(add_method);
     model->add_member(remove_method);
@@ -380,7 +380,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             std::optional<type_ref> tr = type_ref{ interface_method->return_type()->getText() };
             extract_type(interface_method->return_type(), tr);
 
-            auto met_model = std::make_shared<method_model>(method_id, interface_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr));
+            auto met_model = std::make_shared<method_model>(method_id, interface_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::None);
             if (interface_method->formal_parameter_list())
             {
                 extract_formal_params(interface_method->formal_parameter_list()->fixed_parameter(), met_model);
