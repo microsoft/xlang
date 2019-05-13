@@ -42,8 +42,6 @@
     <ProjectName>test_fast_fwd</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <!-- Hard-coded reference to cppwinrt props file, as if NuGet package was added -->
-  <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.props" />
   <Import Project="$(SolutionDir)\cppwinrt.props" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -351,6 +349,11 @@
       </MinimumTargetSystem>
     </Midl>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\fast_fwd\fast_fwd.vcxproj">
+      <Project>{a63b3ad1-ab7b-461e-9fff-2447f5bcd459}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <ItemDefinitionGroup>
     <CustomBuildStep>
       <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)FastForwarderTest.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
@@ -370,7 +373,5 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <!-- Hard-coded reference to cppwinrt targets file, as if NuGet package was added -->
-    <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.FastAbi.targets" />
   </ImportGroup>
 </Project>
