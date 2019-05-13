@@ -304,8 +304,7 @@ TEST_CASE("Interface property test")
 
     auto const& method1 = methods[1];
     REQUIRE(method1->get_id() == "set_property1");
-    auto const& method1_return_type = method1->get_return_type()->get_semantic();
-    REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
+    REQUIRE(!method1->get_return_type());
     
     auto const& method2 = methods[2];
     REQUIRE(method2->get_id() == "get_property2");
@@ -356,8 +355,7 @@ TEST_CASE("Interface property implicit accessors test")
 
     auto const& method1 = methods[1];
     REQUIRE(method1->get_id() == "set_property1");
-    auto const& method1_return_type = method1->get_return_type()->get_semantic();
-    REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
+    REQUIRE(!method1->get_return_type());
 }
 
 TEST_CASE("Resolving Interface property type ref test")

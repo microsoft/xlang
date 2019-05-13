@@ -708,20 +708,20 @@ TEST_CASE("Interface property metadata")
     }
     auto const& get_method = db.MethodSemantics[0].Method();
     REQUIRE(get_method.Name() == "get_property1");
-    //{
-    //    auto const& sig = get_method.Signature();
-    //    REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
-    //    REQUIRE(size(sig.Params()) == 0);
-    //}
+    {
+        auto const& sig = get_method.Signature();
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
+        REQUIRE(size(sig.Params()) == 0);
+    }
     auto const& set_method = db.MethodSemantics[1].Method();
     REQUIRE(set_method.Name() == "set_property1");
-    //{
-    //    auto const& sig = get_method.Signature();
-    //    REQUIRE(!sig.ReturnType());
-    //    REQUIRE(size(sig.Params()) == 1);
-    //    auto const& param_sig = sig.Params().first[0];
-    //    REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == S1_ref);
-    //}
+    {
+        auto const& sig = set_method.Signature();
+        REQUIRE(!sig.ReturnType());
+        REQUIRE(size(sig.Params()) == 1);
+        auto const& param_sig = sig.Params().first[0];
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == S1_ref);
+    }
 }
 
 TEST_CASE("Interface type metadata")

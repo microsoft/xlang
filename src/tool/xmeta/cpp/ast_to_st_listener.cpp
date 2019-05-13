@@ -318,7 +318,9 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
             }
             else if (property_accessor->SET())
             {
-                set_method = std::make_shared<method_model>("set_" + property_id, property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::Property);
+                set_method = std::make_shared<method_model>("set_" + property_id, property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_association::Property);
+                parameter_semantics sem = parameter_semantics::in;
+                set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
                 model->add_member(set_method);
             }
         }
@@ -327,7 +329,9 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
     {
         get_method = std::make_shared<method_model>("get_" + property_id, decl_line, m_cur_assembly, std::move(tr), method_association::Property);
         model->add_member(get_method);
-        set_method = std::make_shared<method_model>("set_" + property_id, decl_line, m_cur_assembly, std::move(tr), method_association::Property);
+        set_method = std::make_shared<method_model>("set_" + property_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Property);
+        parameter_semantics sem = parameter_semantics::in;
+        set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
         model->add_member(set_method);
     }
 
