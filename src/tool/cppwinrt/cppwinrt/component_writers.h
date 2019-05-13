@@ -212,11 +212,16 @@ catch (...) { return winrt::to_hresult(); }
 
     static void write_component_interfaces(writer& w, TypeDef const& type)
     {
+        bool const fastabi = has_fastabi(type);
+
         for (auto&&[interface_name, info] : get_interfaces(w, type))
         {
             if (!info.base && !info.is_default && !is_always_disabled(info.type))
             {
-                w.write(", @", interface_name);
+                if (!fastabi || !info.fastabi)
+                {
+                    w.write(", @", interface_name);
+                }
             }
         }
 
@@ -624,6 +629,106 @@ catch (...) { return winrt::to_hresult(); }
         }
     }
 
+    static void write_component_tearoff_interfaces(writer& w, TypeDef const& type)
+    {
+        auto format = R"(
+            if (is_guid_of<%>(id))
+            {
+                *result = make_fast_abi_forwarder(static_cast<D const&>(*this).get_abi<class_type>(), guid_of<%>(), %);
+                return 0;
+            }
+)";
+
+        size_t offset = get_bases(type).size();
+        auto interfaces = get_interfaces(w, type);
+
+        for (auto&& [name, info] : interfaces)
+        {
+            if (!info.base && info.is_default)
+            {
+                auto methods = info.type.MethodList();
+                offset += methods.second - methods.first;
+                break;
+            }
+        }
+
+        for (auto&& [name, info] : interfaces)
+        {
+            if (info.is_default)
+            {
+                continue;
+            }
+
+            if (!info.fastabi)
+            {
+                break;
+            }
+
+            w.write(format,
+                name,
+                name,
+                offset);
+
+            auto methods = info.type.MethodList();
+            offset += methods.second - methods.first;
+        }
+    }
+
+    static void write_component_tearoff(writer& w, TypeDef const& type, bool has_base)
+    {
+        if (!has_fastabi(type))
+        {
+            return;
+        }
+
+        if (has_base)
+        {
+            auto format = R"(
+        int32_t query_interface_tearoff(guid const& id, void** result) const noexcept override
+        {%
+            return B::query_interface_tearoff(id, result);
+        }
+)";
+
+            w.write(format, bind<write_component_tearoff_interfaces>(type));
+        }
+        else
+        {
+            auto format = R"(
+        int32_t query_interface_tearoff(guid const& id, void** result) const noexcept override
+        {%
+            return impl::error_no_interface;
+        }
+)";
+
+            w.write(format, bind<write_component_tearoff_interfaces>(type));
+        }
+    }
+
+    static void write_component_base_call(writer& w, TypeDef const& type)
+    {
+        if (!has_fastabi(type))
+        {
+            return;
+        }
+
+        auto base_type = get_base_class(type);
+
+        if (!base_type)
+        {
+            return;
+        }
+
+        auto format = R"(
+        auto base_%() const noexcept
+        {
+            return static_cast<D const&>(*this).get_abi<%>();
+        }
+)";
+
+        w.write(format, base_type.TypeName(), base_type);
+    }
+
     static void write_component_g_h(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -647,7 +752,7 @@ catch (...) { return winrt::to_hresult(); }
         {
             return L"%.%";
         }
-%%    };
+%%%%    };
 }
 )";
 
@@ -718,7 +823,9 @@ catch (...) { return winrt::to_hresult(); }
                 type_namespace,
                 type_name,
                 bind<write_component_class_override_constructors>(type),
-                bind<write_component_override_dispatch_base>(type));
+                bind<write_component_override_dispatch_base>(type),
+                bind<write_component_base_call>(type),
+                bind<write_component_tearoff>(type, !base_type_parameter.empty()));
         }
 
         if (has_factory_members(w, type))

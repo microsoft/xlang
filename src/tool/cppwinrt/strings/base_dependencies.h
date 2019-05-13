@@ -20,6 +20,7 @@
 #include <utility>
 #include <unordered_map>
 #include <vector>
+#include <experimental/coroutine>
 
 #if __has_include(<WindowsNumerics.impl.h>)
 #define WINRT_NUMERICS

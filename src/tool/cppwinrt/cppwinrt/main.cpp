@@ -230,6 +230,25 @@ Where <spec> is one or more of:
         }
     }
 
+    static void remove_foundation_types(cache& c)
+    {
+        c.remove_type("Windows.Foundation", "DateTime");
+        c.remove_type("Windows.Foundation", "EventRegistrationToken");
+        c.remove_type("Windows.Foundation", "HResult");
+        c.remove_type("Windows.Foundation", "Point");
+        c.remove_type("Windows.Foundation", "Rect");
+        c.remove_type("Windows.Foundation", "Size");
+        c.remove_type("Windows.Foundation", "TimeSpan");
+
+        c.remove_type("Windows.Foundation.Numerics", "Matrix3x2");
+        c.remove_type("Windows.Foundation.Numerics", "Matrix4x4");
+        c.remove_type("Windows.Foundation.Numerics", "Plane");
+        c.remove_type("Windows.Foundation.Numerics", "Quaternion");
+        c.remove_type("Windows.Foundation.Numerics", "Vector2");
+        c.remove_type("Windows.Foundation.Numerics", "Vector3");
+        c.remove_type("Windows.Foundation.Numerics", "Vector4");
+    }
+
     static int run(int const argc, char** argv)
     {
         int result{};
@@ -240,7 +259,7 @@ Where <spec> is one or more of:
             auto start = get_start_time();
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
-            c.remove_cppwinrt_foundation_types();
+            remove_foundation_types(c);
             build_filters(c);
             settings.base = settings.base || (!settings.component && settings.projection_filter.empty());
             build_fastabi_cache(c);
@@ -291,6 +310,7 @@ Where <spec> is one or more of:
             {
                 write_base_h();
                 write_coroutine_h();
+                write_fast_forward_h();
             }
 
             if (settings.component)

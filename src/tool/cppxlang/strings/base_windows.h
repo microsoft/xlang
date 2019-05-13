@@ -24,7 +24,7 @@ namespace xlang::impl
             return nullptr;
         }
 
-        void* result;
+        void* result{};
         check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
         return wrap_as_result<To>(result);
     }
@@ -37,7 +37,7 @@ namespace xlang::impl
             return nullptr;
         }
 
-        void* result;
+        void* result{};
         ptr->QueryInterface(guid_of<To>(), &result);
         return wrap_as_result<To>(result);
     }
@@ -320,9 +320,9 @@ namespace xlang::Windows::Foundation
         return !(left < right);
     }
 
-    struct IInspectable : IUnknown
+    struct IXlangObject : IUnknown
     {
-        IInspectable(std::nullptr_t = nullptr) noexcept {}
-        IInspectable(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
+        IXlangObject(std::nullptr_t = nullptr) noexcept {}
+        IXlangObject(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
     };
 }

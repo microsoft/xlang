@@ -109,12 +109,23 @@ namespace winrt::impl
         }
     };
 
+    template <typename T>
+    struct producer_vtable
+    {
+        void* value;
+    };
+
     template <typename D, typename I, typename Enable>
     struct producer_convert : producer<D, typename default_interface<I>::type>
     {
         operator producer_ref<I> const() const noexcept
         {
             return { (produce<D, typename default_interface<I>::type>*)this };
+        }
+
+        operator producer_vtable<I> const() const noexcept
+        {
+            return { (void*)this };
         }
     };
 
@@ -802,6 +813,11 @@ namespace winrt::impl
 
     protected:
 
+        virtual int32_t query_interface_tearoff(guid const&, void**) const noexcept
+        {
+            return error_no_interface;
+        }
+
         root_implements() noexcept
         {
             if constexpr (use_module_lock::value)
@@ -1095,7 +1111,7 @@ namespace winrt::impl
                 }
             }
 
-            return error_no_interface;
+            return query_interface_tearoff(id, object);
         }
 
         impl::IWeakReferenceSource* make_weak_ref() noexcept
@@ -1174,6 +1190,23 @@ namespace winrt::impl
         friend struct impl::produce;
     };
 
+#if defined(WINRT_NO_MAKE_DETECTION)
+    template <typename T>
+    using heap_implements = T;
+#else
+    template <typename T>
+    struct heap_implements final : T
+    {
+        using T::T;
+
+#if defined(_DEBUG)
+        void use_make_function_to_create_this_object() final
+        {
+        }
+#endif
+    };
+#endif
+
     template <typename D>
     auto make_factory() -> typename impl::implements_default_interface<D>::type
     {
@@ -1181,7 +1214,7 @@ namespace winrt::impl
 
         if constexpr (!has_static_lifetime_v<D>)
         {
-            return { to_abi<result_type>(new D), take_ownership_from_abi };
+            return { to_abi<result_type>(new heap_implements<D>), take_ownership_from_abi };
         }
         else
         {
@@ -1190,7 +1223,7 @@ namespace winrt::impl
             check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
             auto const map = collection.as<IStaticLifetimeCollection>();
             param::hstring const name{ name_of<typename D::instance_type>() };
-            result_type object{ to_abi<result_type>(new D), take_ownership_from_abi };
+            result_type object{ to_abi<result_type>(new heap_implements<D>), take_ownership_from_abi };
 
             static slim_mutex lock;
             slim_lock_guard const guard{ lock };
@@ -1222,6 +1255,12 @@ namespace winrt
     template <typename D, typename... Args>
     auto make(Args&&... args)
     {
+#if !defined(WINRT_NO_MAKE_DETECTION)
+        // Note: https://aka.ms/cppwinrt/detect_direct_allocations
+        static_assert(std::is_destructible_v<D>, "C++/WinRT implementation types must have a public destructor");
+        static_assert(!std::is_final_v<D>, "C++/WinRT implementation types must not be final");
+#endif
+
         using I = typename impl::implements_default_interface<D>::type;
 
         if constexpr (std::is_same_v<I, Windows::Foundation::IActivationFactory>)
@@ -1231,24 +1270,30 @@ namespace winrt
         }
         else if constexpr (impl::has_composable<D>::value)
         {
-            impl::com_ref<I> result{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
+            impl::com_ref<I> result{ to_abi<I>(new impl::heap_implements<D>(std::forward<Args>(args)...)), take_ownership_from_abi };
             return result.template as<typename D::composable>();
         }
         else if constexpr (impl::has_class_type<D>::value)
         {
             static_assert(std::is_same_v<I, default_interface<typename D::class_type>>);
-            return typename D::class_type{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
+            return typename D::class_type{ to_abi<I>(new impl::heap_implements<D>(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
         else
         {
-            return impl::com_ref<I>{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
+            return impl::com_ref<I>{ to_abi<I>(new impl::heap_implements<D>(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
     }
 
     template <typename D, typename... Args>
     com_ptr<D> make_self(Args&&... args)
     {
-        return { new D(std::forward<Args>(args)...), take_ownership_from_abi };
+#if !defined(WINRT_NO_MAKE_DETECTION)
+        // Note: https://aka.ms/cppwinrt/detect_direct_allocations
+        static_assert(std::is_destructible_v<D>, "C++/WinRT implementation types must have a public destructor");
+        static_assert(!std::is_final_v<D>, "C++/WinRT implementation types must not be final");
+#endif
+
+        return { new impl::heap_implements<D>(std::forward<Args>(args)...), take_ownership_from_abi };
     }
 
     template <typename D, typename... I>
@@ -1267,11 +1312,9 @@ namespace winrt
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
 
-#ifdef _DEBUG
-        implements() noexcept
-        {
-            WINRT_ASSERT(!is_stack_object());
-        }
+#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
+        // Please use winrt::make<T>(args...) to avoid allocating a C++/WinRT implementation type on the stack.
+        virtual void use_make_function_to_create_this_object() = 0;
 #endif
 
         weak_ref<D> get_weak()
@@ -1284,6 +1327,18 @@ namespace winrt
             com_ptr<D> result;
             result.copy_from(static_cast<D*>(this));
             return result;
+        }
+
+        template <typename T>
+        auto get_abi(T const& value) const noexcept
+        {
+            return winrt::get_abi(value);
+        }
+
+        template <typename T>
+        void* get_abi() const noexcept
+        {
+            return static_cast<impl::producer_vtable<T>>(*this).value;
         }
 
         operator IInspectable() const noexcept
@@ -1335,17 +1390,6 @@ namespace winrt
         }
 
     private:
-
-#ifdef _DEBUG
-        bool is_stack_object() const noexcept
-        {
-            uintptr_t low_limit{};
-            uintptr_t high_limit{};
-            WINRT_GetCurrentThreadStackLimits(&low_limit, &high_limit);
-            uintptr_t const address = reinterpret_cast<uintptr_t>(this);
-            return (low_limit <= address) && (address < high_limit);
-        }
-#endif
 
         impl::unknown_abi* get_unknown() const noexcept override
         {

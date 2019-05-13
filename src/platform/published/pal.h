@@ -90,7 +90,6 @@ extern "C"
 {
 #endif
     // Type/handle definitions
-    typedef int32_t xlang_result;
 
     struct xlang_guid
     {
@@ -140,6 +139,14 @@ extern "C"
         }
     };
 
+    enum class XlangObjectInfoCategory
+    {
+        TypeName,
+        HashCode,
+        StringRepresentation,
+        ObjectSize
+    };
+
     struct XLANG_NOVTABLE xlang_unknown
     {
         virtual int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) XLANG_NOEXCEPT = 0;
@@ -148,13 +155,13 @@ extern "C"
     };
     inline constexpr xlang_guid xlang_unknown_guid{ 0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
 
-    // TODO(manodasanW): Update this with actual new error handling type(s)
-    struct XLANG_NOVTABLE xlang_error_info : xlang_unknown
+    struct XLANG_NOVTABLE IXlangObject : xlang_unknown
     {
-        virtual xlang_result error_code() XLANG_NOEXCEPT = 0;
+        virtual bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info) = 0;
+        virtual bool Equals(IXlangObject* object) = 0;
     };
-    inline constexpr xlang_guid xlang_error_info_guid{ 0x9e89b87e, 0xb6fc, 0x491b, { 0xba, 0x2b, 0x71, 0xa, 0x1b, 0x46, 0x7a, 0xe3 } };
-
+    inline constexpr xlang_guid IXlangObject_guid{ 0x9f1770a3,0xd152,0x4041,{ 0x95,0x70,0x09,0x57,0xb6,0xeb,0x9e,0xf7 } };
+  
     typedef XLANG_PAL_CHAR8_T xlang_char8;
 
     struct xlang_string__
@@ -191,6 +198,58 @@ extern "C"
         XlangStringEncodingUtf16 = 0x2
     };
 #endif
+
+#ifdef __cplusplus
+    enum class xlang_result : uint32_t
+    {
+        success = 0,
+        access_denied = 1,
+        bounds = 2,
+        fail = 3,
+        handle = 4,
+        invalid_arg = 5,
+        invalid_state = 6,
+        no_interface = 7,
+        not_impl = 8,
+        out_of_memory = 9,
+        pointer = 10,
+        type_load = 11
+    };
+#else
+    enum xlang_result
+    {
+        xlang_success = 0,
+        xlang_access_denied = 1,
+        xlang_bounds = 2,
+        xlang_fail = 3,
+        xlang_handle = 4,
+        xlang_invalid_arg = 5,
+        xlang_invalid_state = 6,
+        xlang_no_interface = 7,
+        xlang_not_impl = 8,
+        xlang_out_of_memory = 9,
+        xlang_pointer = 10,
+        xlang_type_load = 11
+    };
+#endif
+
+    struct XLANG_NOVTABLE xlang_error_info : xlang_unknown
+    {
+        virtual void GetError(xlang_result* error) XLANG_NOEXCEPT = 0;
+        virtual void GetMessage(xlang_string* message) XLANG_NOEXCEPT = 0;
+        virtual void GetLanguageError(xlang_string* language_error) XLANG_NOEXCEPT = 0;
+        virtual void GetExecutionTrace(xlang_unknown** execution_trace) XLANG_NOEXCEPT = 0;
+        virtual void GetProjectionIdentifier(xlang_string* projection_identifier) XLANG_NOEXCEPT = 0;
+        virtual void GetLanguageInformation(xlang_unknown** language_information) XLANG_NOEXCEPT = 0;
+        virtual void GetPropagatedError(xlang_error_info** propagated_error) XLANG_NOEXCEPT = 0;
+        virtual void PropagateError(
+            xlang_string projection_identifier,
+            xlang_string language_error,
+            xlang_unknown* execution_trace,
+            xlang_unknown* language_information
+        ) XLANG_NOEXCEPT = 0;
+    };
+    inline constexpr xlang_guid xlang_error_info_guid{ 0xadf906fb, 0x11ac, 0x49ec, { 0x8d, 0xfd, 0x64, 0xc2, 0x6d, 0x8, 0x87, 0xb0 } };
 
     // Function declarations
     XLANG_PAL_EXPORT void* XLANG_CALL xlang_mem_alloc(size_t count) XLANG_NOEXCEPT;
@@ -270,6 +329,23 @@ extern "C"
 
     typedef xlang_result(XLANG_CALL * xlang_pfn_lib_get_activation_factory)(xlang_string, xlang_guid const&, void **);
 
+#ifdef __cplusplus
+    [[nodiscard]] XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_originate_error(
+        xlang_result error,
+        xlang_string message = nullptr,
+        xlang_string projection_identifier = nullptr,
+        xlang_string language_error = nullptr,
+        xlang_unknown* execution_trace = nullptr,
+        xlang_unknown* language_information = nullptr) XLANG_NOEXCEPT;
+#else
+    XLANG_PAL_EXPORT xlang_error_info* XLANG_CALL xlang_originate_error(
+        xlang_result error,
+        xlang_string message,
+        xlang_string projection_identifier,
+        xlang_string language_error,
+        xlang_unknown* execution_trace,
+        xlang_unknown* language_information) XLANG_NOEXCEPT;
+#endif
 
 #ifdef __cplusplus
 }
@@ -301,16 +377,7 @@ constexpr xlang_string_encoding& operator&=(xlang_string_encoding& lhs, xlang_st
     return lhs;
 }
 
-inline constexpr xlang_result xlang_error_ok{ 0 };
-inline constexpr xlang_result xlang_error_mem_invalid_size{ static_cast<int32_t>(0x80080011) };
-inline constexpr xlang_result xlang_error_string_not_null_terminated{ static_cast <int32_t>(0x80000017) };
-inline constexpr xlang_result xlang_error_no_interface{ static_cast<int32_t>(0x80004002) };
-inline constexpr xlang_result xlang_error_pointer{ static_cast<int32_t>(0x80004003) };
-inline constexpr xlang_result xlang_error_sadness{ static_cast<int32_t>(0x80004005) };
-inline constexpr xlang_result xlang_error_out_of_memory{ static_cast<int32_t>(0x8007000e) };
-inline constexpr xlang_result xlang_error_invalid_arg{ static_cast<int32_t>(0x80070057) };
-inline constexpr xlang_result xlang_error_untranslatable_string{ static_cast<int32_t>(0x80070459) };
-inline constexpr xlang_result xlang_error_class_not_available{ static_cast<int32_t>(0x80040111) };
+inline constexpr int32_t xlang_hresult_no_interface{ static_cast<int32_t>(0x80004002) };
 #endif
 
 #endif

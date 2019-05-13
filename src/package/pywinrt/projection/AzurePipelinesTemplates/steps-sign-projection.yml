@@ -1,0 +1,12 @@
+parameters:
+  architecture: 'amd64'
+
+steps:
+- task: PkgESCodeSign@10
+  displayName: CodeSign
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+  inputs:
+    signConfigXml: '$(Build.SourcesDirectory)/src/package/pywinrt/projection/SignConfig.xml'
+    inPathRoot: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}'
+    outPathRoot: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}'

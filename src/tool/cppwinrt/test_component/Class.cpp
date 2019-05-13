@@ -65,6 +65,90 @@ namespace winrt::test_component::implementation
         throw hresult_invalid_argument();
     }
 
+    Class::Class(Windows::Foundation::Collections::IIterable<hstring> const& arg, int32_t)
+    {
+        if (arg.First().Current() != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, hstring>> const& arg, int32_t, int32_t)
+    {
+        if (arg.First().Current().Key() != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IMap<hstring, hstring> const& arg, int32_t, int32_t, int32_t)
+    {
+        if (arg.Lookup(L"test") != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IMapView<hstring, hstring> const& arg, int32_t, int32_t, int32_t, int32_t)
+    {
+        if (arg.Lookup(L"test") != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IVector<hstring> const& arg, int32_t, int32_t, int32_t, int32_t, int32_t)
+    {
+        if (arg.GetAt(0) != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+    Class::Class(Windows::Foundation::Collections::IVectorView<hstring> const& arg, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t)
+    {
+        if (arg.GetAt(0) != L"test")
+        {
+            throw hresult_error();
+        }
+    }
+
+    hstring Class::InIterable(Windows::Foundation::Collections::IIterable<hstring> const& value)
+    {
+        return value.First().Current();
+    }
+    hstring Class::InIterablePair(Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, hstring>> const& value)
+    {
+        return value.First().Current().Key();
+    }
+    Windows::Foundation::IAsyncOperation<hstring> Class::InAsyncIterable(Windows::Foundation::Collections::IIterable<hstring> value)
+    {
+        co_return value.First().Current();
+    }
+    Windows::Foundation::IAsyncOperation<hstring> Class::InAsyncIterablePair(Windows::Foundation::Collections::IIterable<Windows::Foundation::Collections::IKeyValuePair<hstring, hstring>> value)
+    {
+        co_return value.First().Current().Key();
+    }
+    hstring Class::InMap(Windows::Foundation::Collections::IMap<hstring, hstring> const& value)
+    {
+        return value.Lookup(L"test");
+    }
+    hstring Class::InMapView(Windows::Foundation::Collections::IMapView<hstring, hstring> const& value)
+    {
+        return value.Lookup(L"test");
+    }
+    Windows::Foundation::IAsyncOperation<hstring> Class::InAsyncMapView(Windows::Foundation::Collections::IMapView<hstring, hstring> value)
+    {
+        co_return value.Lookup(L"test");
+    }
+    hstring Class::InVector(Windows::Foundation::Collections::IVector<hstring> const& value)
+    {
+        return value.GetAt(0);
+    }
+    hstring Class::InVectorView(Windows::Foundation::Collections::IVectorView<hstring> const& value)
+    {
+        return value.GetAt(0);
+    }
+    Windows::Foundation::IAsyncOperation<hstring> Class::InAsyncVectorView(Windows::Foundation::Collections::IVectorView<hstring> value)
+    {
+        co_return value.GetAt(0);
+    }
+
     void Class::OutInt32(int32_t& value)
     {
         value = 123;

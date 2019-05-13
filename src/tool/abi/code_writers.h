@@ -55,7 +55,10 @@ inline void write_cpp_fully_qualified_type(writer& w, std::string_view typeNames
     w.write(cpp_typename_format(w), [&](writer& w) { w.write("@::%", typeNamespace, typeName); });
 }
 
-inline auto bind_cpp_fully_qualified_type(std::string_view typeNamespace, std::string_view typeName)
+// NOTE: xlang::bind captures arguments by reference in the lambda that it returns, however since all of these bind_*
+//       helpers are intermediate functions, we can't have it capturing references to our stack arguments, hence the
+//       reason all of these arguments are captured by reference
+inline auto bind_cpp_fully_qualified_type(std::string_view const& typeNamespace, std::string_view const& typeName)
 {
     return xlang::text::bind<write_cpp_fully_qualified_type>(typeNamespace, typeName);
 }
@@ -120,12 +123,6 @@ inline void write_c_type_name(writer& w, generic_inst const& type, Suffix&& suff
     w.write("%%", type.mangled_name(), suffix);
 }
 
-template <typename Suffix>
-inline void write_c_type_name(writer& w, fastabi_type const& type, Suffix&& suffix)
-{
-    w.write("%%", type.mangled_name(), suffix);
-}
-
 template <typename T>
 auto bind_c_type_name(T const& type)
 {
@@ -159,6 +156,7 @@ inline void write_deprecation_message(
     std::string_view deprecationMacro = "DEPRECATED")
 {
     using namespace xlang::text;
+    XLANG_ASSERT(w.config().enable_header_deprecation);
 
     auto [ns, name] = decompose_type(info.contract_type);
     w.write(R"^-^(#if % >= %
@@ -206,11 +204,6 @@ inline void write_generated_uuid(writer& w, metadata_type const& type)
 }
 
 inline void write_uuid(writer& w, generic_inst const& type)
-{
-    write_generated_uuid(w, type);
-}
-
-inline void write_uuid(writer& w, fastabi_type const& type)
 {
     write_generated_uuid(w, type);
 }

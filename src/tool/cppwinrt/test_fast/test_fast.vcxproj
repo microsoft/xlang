@@ -99,9 +99,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -125,9 +126,10 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -151,9 +153,10 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -181,9 +184,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PreBuildEvent>
-      <Command>$(OutputPath)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
+      <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

@@ -22,6 +22,7 @@
       <ProjectItem ReplaceParameters="false" TargetFileName="pch.cpp">pch.cpp</ProjectItem>
       <ProjectItem ReplaceParameters="false" TargetFileName="winmain.cpp">winmain.cpp</ProjectItem>
       <ProjectItem ReplaceParameters="false" TargetFileName="resource.h">resource.h</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="PropertySheet.props">PropertySheet.props</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="readme.txt">readme.txt</ProjectItem>
     </Project>
   </TemplateContent>

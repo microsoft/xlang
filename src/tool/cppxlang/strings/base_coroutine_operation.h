@@ -2,11 +2,11 @@
 namespace std::experimental
 {
     template <typename TResult, typename... Args>
-    struct coroutine_traits<xlang::Windows::Foundation::IAsyncOperation<TResult>, Args...>
+    struct coroutine_traits<xlang::Foundation::IAsyncOperation<TResult>, Args...>
     {
         struct promise_type final : xlang::impl::promise_base<promise_type,
-            xlang::Windows::Foundation::IAsyncOperation<TResult>,
-            xlang::Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+            xlang::Foundation::IAsyncOperation<TResult>,
+            xlang::Foundation::AsyncOperationCompletedHandler<TResult>>
         {
             TResult get_return_value() noexcept
             {

@@ -209,39 +209,19 @@ namespace xlang
 
             // TODO: get rid of all these renames once parity with cppxlang.exe has been reached...
 
-            if (name == "EventRegistrationToken" && ns == "Windows.Foundation")
+            if (name == "EventRegistrationToken" && ns == "Foundation")
             {
                 write("xlang::event_token");
-            }
-            else if (name == "HResult" && ns == "Windows.Foundation")
-            {
-                write("xlang::hresult");
             }
             else if (abi_types)
             {
                 auto category = get_category(type);
 
-                if (ns == "Windows.Foundation.Numerics")
+                if (category == category::struct_type)
                 {
-                    if (name == "Matrix3x2") { name = "float3x2"; }
-                    else if (name == "Matrix4x4") { name = "float4x4"; }
-                    else if (name == "Plane") { name = "plane"; }
-                    else if (name == "Quaternion") { name = "quaternion"; }
-                    else if (name == "Vector2") { name = "float2"; }
-                    else if (name == "Vector3") { name = "float3"; }
-                    else if (name == "Vector4") { name = "float4"; }
-
-                    write("@::%", ns, name);
-                }
-                else if (category == category::struct_type)
-                {
-                    if ((name == "DateTime" || name == "TimeSpan") && ns == "Windows.Foundation")
+                    if ((name == "DateTime" || name == "TimeSpan") && ns == "Foundation")
                     {
                         write("int64_t");
-                    }
-                    else if ((name == "Point" || name == "Size" || name == "Rect") && ns == "Windows.Foundation")
-                    {
-                        write("@::%", ns, name);
                     }
                     else
                     {
@@ -259,22 +239,7 @@ namespace xlang
             }
             else
             {
-                if (ns == "Windows.Foundation.Numerics")
-                {
-                    if (name == "Matrix3x2") { name = "float3x2"; }
-                    else if (name == "Matrix4x4") { name = "float4x4"; }
-                    else if (name == "Plane") { name = "plane"; }
-                    else if (name == "Quaternion") { name = "quaternion"; }
-                    else if (name == "Vector2") { name = "float2"; }
-                    else if (name == "Vector3") { name = "float3"; }
-                    else if (name == "Vector4") { name = "float4"; }
-
-                    write("@::%", ns, name);
-                }
-                else
-                {
-                    write("@::%", ns, name);
-                }
+                write("@::%", ns, name);
             }
         }
 
@@ -319,19 +284,18 @@ namespace xlang
             }
             else
             {
-                auto generic_type = type.GenericType().TypeRef();
-                auto ns = generic_type.TypeNamespace();
-                auto name = generic_type.TypeName();
+                auto generic_type = type.GenericType();
+                auto[ns, name] = get_type_namespace_and_name(generic_type);
                 name.remove_suffix(name.size() - name.rfind('`'));
                 add_depends(find_required(generic_type));
 
                 if (consume_types)
                 {
-                    static constexpr std::string_view iterable("Windows::Foundation::Collections::IIterable<"sv);
-                    static constexpr std::string_view vector_view("Windows::Foundation::Collections::IVectorView<"sv);
-                    static constexpr std::string_view map_view("Windows::Foundation::Collections::IMapView<"sv);
-                    static constexpr std::string_view vector("Windows::Foundation::Collections::IVector<"sv);
-                    static constexpr std::string_view map("Windows::Foundation::Collections::IMap<"sv);
+                    static constexpr std::string_view iterable("Foundation::Collections::IIterable<"sv);
+                    static constexpr std::string_view vector_view("Foundation::Collections::IVectorView<"sv);
+                    static constexpr std::string_view map_view("Foundation::Collections::IMapView<"sv);
+                    static constexpr std::string_view vector("Foundation::Collections::IVector<"sv);
+                    static constexpr std::string_view map("Foundation::Collections::IMap<"sv);
 
                     consume_types = false;
                     auto full_name = write_temp("@::%<%>", ns, name, bind_list(", ", type.GenericArgs()));
@@ -431,7 +395,7 @@ namespace xlang
                         }
                         else
                         {
-                            write("Windows::Foundation::IInspectable");
+                            write("Windows::Foundation::IXlangObject");
                         }
                     }
                     else
