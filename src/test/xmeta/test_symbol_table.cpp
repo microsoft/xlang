@@ -890,3 +890,34 @@ TEST_CASE("Resolving type ref across namespaces test")
         REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
     }
 }
+
+TEST_CASE("Imports test")
+{
+    std::istringstream test_idl{ R"(
+        namespace A
+        {
+            struct S1
+            {
+            };
+        }
+
+        namespace N
+        {
+            delegate Boolean D1(A.S1 param1, B.C.E1 param2);
+        }
+
+        namespace B.C
+        {
+            enum E1
+            {
+            }
+        }
+
+    )" };
+    std::vector<std::string> paths = { "E:\\xlang\\src\\_build\\Windows\\x86\\Debug\\foundation\\Foundation.xmeta" };
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl, paths);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+
+   
+}

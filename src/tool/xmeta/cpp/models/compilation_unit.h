@@ -24,9 +24,20 @@ namespace xlang::xmeta
             return symbols.insert(std::pair<std::string, class_type_semantics>(symbol, class_type)).second;
         }
 
+        bool set_imported_type_ref(std::string_view symbol)
+        {   
+            if (symbols.find(std::string(symbol)) != symbols.end())
+            {
+                return false;
+            }
+            return imported_type_refs.emplace(symbol, type_ref{ symbol }).second;
+        }
+
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> namespaces;
         std::string m_assembly;
-        std::vector<std::string> m_imnported_assembly_names;
+        std::vector<std::string> m_imported_assembly_names;
+
         std::map<std::string, class_type_semantics> symbols;
+        std::map<std::string_view, type_ref> imported_type_refs;
     };
 }

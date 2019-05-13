@@ -24,7 +24,9 @@ namespace xlang::xmeta
         {}
 
         void read(std::istream& idl_contents, bool disable_error_reporting = false);
+        void read(std::istream& idl_contents, std::vector<std::string> imports, bool disable_error_reporting = false);
         void read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting = false);
+        void read(std::istream& idl_contents, std::vector<std::string> imports, XlangParserBaseListener& listener, bool disable_error_reporting = false);
         void pass2();
         void pass1();
 
@@ -46,6 +48,10 @@ namespace xlang::xmeta
     private:
         xlang_error_manager m_error_manager;
         compilation_unit m_xlang_model;
+        void import_metadata(std::vector<std::string> imports);
+
+
+        const std::string event_registration_token = "Xlang.Foundation.EventRegistrationToken";
     };
 
     std::string copy_to_lower(std::string_view sv);

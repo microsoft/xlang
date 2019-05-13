@@ -19,7 +19,7 @@ using namespace xlang::xmeta;
 using namespace xlang::meta::reader;
 
 constexpr int TYPE_DEF_OFFSET = 1; // Module
-constexpr int TYPE_REF_OFFSET = 4; // System: Enum, Delegate, ValueType
+constexpr int TYPE_REF_OFFSET = 3; // System: Enum, Delegate, ValueType
 
 // All the flags use in the metadata representation
 const TypeAttributes interface_type_attributes()

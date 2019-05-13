@@ -270,8 +270,6 @@ namespace xlang::xmeta
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.Enum", &token_enum));
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.ValueType", &token_value_type));
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.MulticastDelegate", &token_delegate));
-
-        check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"indows.Foundation.EventRegistrationToken", &token_event_registration));
     }
 
     mdTypeDef xmeta_emit::define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[])
