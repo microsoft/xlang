@@ -19,7 +19,7 @@ using namespace xlang::xmeta;
 using namespace xlang::meta::reader;
 
 constexpr int TYPE_DEF_OFFSET = 1; // Module
-constexpr int TYPE_REF_OFFSET = 3; // System: Enum, Delegate, ValueType
+constexpr int TYPE_REF_OFFSET = 4; // System: Enum, Delegate, ValueType
 
 // All the flags use in the metadata representation
 const TypeAttributes interface_type_attributes()
@@ -473,7 +473,7 @@ TEST_CASE("Parameter signature class reference type metadata across namespace")
         auto const& delegate_invoke = d1.MethodList().first[1];
         REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
         auto const& delegate_sig = delegate_invoke.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[4]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[TYPE_REF_OFFSET + 1]);
     }
 }
 
@@ -507,7 +507,7 @@ TEST_CASE("Parameter signature class reference type metadata")
         auto const& delegate_invoke = d1.MethodList().first[1];
         REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
         auto const& delegate_sig = delegate_invoke.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[3]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[TYPE_REF_OFFSET]);
     }
 }
 
@@ -606,14 +606,14 @@ TEST_CASE("Struct class type metadata")
         REQUIRE(struct_field.Parent().TypeName() == db.TypeDef[1].TypeName());
         auto const& struct_field_sig = struct_field.Signature();
         REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[4]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[TYPE_REF_OFFSET + 1]);
     }
     {
         auto const& struct_field = struct0.FieldList().first[1];
         REQUIRE(struct_field.Parent().TypeName() == db.TypeDef[1].TypeName());
         auto const& struct_field_sig = struct_field.Signature();
         REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[5]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[TYPE_REF_OFFSET + 2]);
     }
 }
 

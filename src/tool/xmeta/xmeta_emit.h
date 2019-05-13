@@ -38,11 +38,13 @@ namespace xlang::xmeta
 
         std::map<std::string, mdTypeRef> type_references;
         meta::reader::Module m_module;
+
         mdAssembly token_assembly;
         mdAssemblyRef token_mscorlib;
         mdTypeRef token_enum;
         mdTypeRef token_value_type;
         mdTypeRef token_delegate;
+        mdTypeRef token_event_registration;
 
         void define_assembly();
         void define_common_reference_assembly();
