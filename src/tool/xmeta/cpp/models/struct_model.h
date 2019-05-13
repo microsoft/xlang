@@ -32,7 +32,7 @@ namespace xlang::xmeta
             m_fields.emplace_back(std::move(field));
         }
 
-        void resolve(std::map<std::string, class_type_semantics> const& symbols, xlang_error_manager & error_manager)
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager)
         {
             for (auto & field : m_fields)
             {
@@ -43,22 +43,20 @@ namespace xlang::xmeta
                     std::string ref_name = field_type.get_semantic().get_ref_name();
                     std::string symbol = ref_name.find(".") != std::string::npos 
                         ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
-
-                    auto iter = symbols.find(symbol);
-                    if (iter == symbols.end())
+                    auto iter = symbols.get_symbol(symbol);
+                    if (std::holds_alternative<std::monostate>(iter))
                     {
                         error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                     }
                     else
                     {
-                        field_type.set_semantic(iter->second);
+                        field_type.set_semantic(iter);
                     }
                 }
             }
         }
 
-        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, 
-            xlang_error_manager & error_manager)
+        bool has_circular_struct_declarations(xlang_error_manager & error_manager)
         {
             if (contains_itself)
             {
@@ -66,7 +64,7 @@ namespace xlang::xmeta
             }
             std::string symbol = this->get_fully_qualified_id();
             std::set<std::string> symbol_set{ symbol }; 
-            if (has_circular_struct_declarations(symbols, symbol_set, error_manager))
+            if (has_circular_struct_declarations(symbol_set, error_manager))
             {
                 contains_itself = true;
                 error_manager.write_struct_field_error(get_decl_line(), std::string(symbol));
@@ -74,8 +72,7 @@ namespace xlang::xmeta
             return contains_itself;
         }
 
-        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, 
-            std::set<std::string> & symbol_set, xlang_error_manager & error_manager)
+        bool has_circular_struct_declarations(std::set<std::string> & symbol_set, xlang_error_manager & error_manager)
         {
             if (contains_itself)
             {
@@ -88,7 +85,7 @@ namespace xlang::xmeta
                 {
                     auto const& struct_field = std::get<std::shared_ptr<struct_model>>(field_type);
                     if (!symbol_set.insert(struct_field->get_fully_qualified_id()).second
-                        || struct_field->has_circular_struct_declarations(symbols, symbol_set, error_manager))
+                        || struct_field->has_circular_struct_declarations(symbol_set, error_manager))
                     {
                         return true;
                     }

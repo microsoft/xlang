@@ -8,6 +8,7 @@
 #include "formal_parameter_model.h"
 #include "model_ref.h"
 #include "model_types.h"
+#include "compilation_unit.h"
 
 namespace xlang::xmeta
 {
@@ -101,7 +102,7 @@ namespace xlang::xmeta
             m_formal_parameters.emplace_back(std::move(formal_param));
         }
 
-        void resolve(std::map<std::string, class_type_semantics> const& symbols, xlang_error_manager & error_manager, std::string fully_qualified_id)
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string fully_qualified_id)
         {
             if (m_return_type)
             {
@@ -110,15 +111,14 @@ namespace xlang::xmeta
                     // TODO: Once we have using directives, we will need to go through many fully_qualified_ids here
                     std::string ref_name = m_return_type->get_semantic().get_ref_name();
                     std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : fully_qualified_id + "." + ref_name;
-                    auto iter = symbols.find(symbol);
-                    if (iter == symbols.end())
+                    auto iter = symbols.get_symbol(symbol);
+                    if (std::holds_alternative<std::monostate>(iter))
                     {
-                        // TODO: Reccord the unresolved type and continue
                         error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                     }
                     else
                     {
-                        m_return_type->set_semantic(iter->second);
+                        m_return_type->set_semantic(iter);
                     }
                 }
             }

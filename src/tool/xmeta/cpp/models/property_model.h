@@ -3,8 +3,7 @@
 #include <string_view>
 
 #include "base_model.h"
-#include "method_model.h"
-#include "model_types.h"
+#include "compilation_unit.h"
 
 namespace xlang::xmeta
 {
@@ -69,7 +68,7 @@ namespace xlang::xmeta
             m_set_method = m;
         }
 
-        void resolve(std::map<std::string, class_type_semantics> symbols, xlang_error_manager & error_manager, std::string fully_qualified_id)
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string fully_qualified_id)
         {
             if (!m_type.get_semantic().is_resolved())
             {
@@ -78,14 +77,14 @@ namespace xlang::xmeta
                 std::string ref_name = m_type.get_semantic().get_ref_name();
                 std::string symbol = ref_name.find(".") != std::string::npos
                     ? ref_name : fully_qualified_id + "." + ref_name;
-                auto iter = symbols.find(symbol);
-                if (iter == symbols.end())
+                auto iter = symbols.get_symbol(symbol);
+                if (std::holds_alternative<std::monostate>(iter))
                 {
                     error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                 }
                 else
                 {
-                    m_type.set_semantic(iter->second);
+                    m_type.set_semantic(iter);
                 }
             }
         }

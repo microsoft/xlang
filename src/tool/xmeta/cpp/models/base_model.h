@@ -15,6 +15,8 @@ namespace xlang::xmeta
     struct namespace_body_model;
     struct namespace_model;
 
+    struct namespace_member_model;
+
     struct using_alias_directive_model;
     struct using_namespace_directive_model;
 
@@ -31,7 +33,9 @@ namespace xlang::xmeta
     struct symbol_table;
     struct compilation_unit;
 
-    using class_type_semantics = std::variant<
+    struct type_ref;
+
+    using class_type_semantics = std::variant<std::monostate,
         std::shared_ptr<class_model>,
         std::shared_ptr<enum_model>,
         std::shared_ptr<interface_model>,

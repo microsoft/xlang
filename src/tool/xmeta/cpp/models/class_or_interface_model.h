@@ -74,7 +74,7 @@ namespace xlang::xmeta
                 contains_id(m_events, id);
         }
 
-        void resolve(std::map<std::string, class_type_semantics> symbols, xlang_error_manager & error_manager)
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager)
         {
             for (auto & m_method : m_methods)
             {
@@ -95,16 +95,17 @@ namespace xlang::xmeta
                 std::string ref_name = interface_base.get_semantic().get_ref_name();
                 std::string symbol = ref_name.find(".") != std::string::npos
                     ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
-                auto iter = symbols.find(symbol);
-                if (iter == symbols.end())
+
+                auto iter = symbols.get_symbol(symbol);
+                if (std::holds_alternative<std::monostate>(iter))
                 {
                     error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                 }
                 else
                 {
-                    if (std::holds_alternative<std::shared_ptr<interface_model>>(iter->second))
+                    if (std::holds_alternative<std::shared_ptr<interface_model>>(iter))
                     {
-                        interface_base.set_semantic(iter->second);
+                        interface_base.set_semantic(iter);
                     }
                     else
                     {

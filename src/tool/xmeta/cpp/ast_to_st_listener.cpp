@@ -368,7 +368,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
     std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + interface_name;
     auto model = std::make_shared<interface_model>(interface_name, decl_line, m_cur_assembly, m_cur_namespace_body);
 
-    if (!xlang_model.set_symbol(symbol, model))
+    if (!xlang_model.symbols.set_symbol(symbol, model))
     {
         error_manager.write_namespace_member_name_error(decl_line, interface_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
@@ -429,7 +429,7 @@ void ast_to_st_listener::enterDelegate_declaration(XlangParser::Delegate_declara
     {
         extract_formal_params(formal_params->fixed_parameter(), dm);
     }
-    if (!xlang_model.set_symbol(symbol, dm))
+    if (!xlang_model.symbols.set_symbol(symbol, dm))
     {
         error_manager.write_namespace_member_name_error(decl_line, delegate_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
@@ -472,7 +472,7 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
             return;
         }
     }
-    if (!xlang_model.set_symbol(symbol, new_enum))
+    if (!xlang_model.symbols.set_symbol(symbol, new_enum))
     {
         error_manager.write_namespace_member_name_error(decl_line, enum_name, 
             m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
@@ -504,7 +504,7 @@ void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declaration
             new_struct->add_field(std::pair(tr, field_name));
         }
     }
-    if (!xlang_model.set_symbol(symbol, new_struct))
+    if (!xlang_model.symbols.set_symbol(symbol, new_struct))
     {
         error_manager.write_namespace_member_name_error(decl_line, struct_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;

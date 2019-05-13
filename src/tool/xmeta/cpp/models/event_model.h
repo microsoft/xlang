@@ -5,6 +5,8 @@
 #include "base_model.h"
 #include "method_model.h"
 #include "model_types.h"
+#include "compilation_unit.h"
+
 
 namespace xlang::xmeta
 {
@@ -65,28 +67,27 @@ namespace xlang::xmeta
             return m_type;
         }
 
-        void resolve(std::map<std::string, class_type_semantics> symbols, xlang_error_manager & error_manager, std::string fully_qualified_id)
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string fully_qualified_id)
         {
             assert(!m_type.get_semantic().is_resolved());
             std::string ref_name = m_type.get_semantic().get_ref_name();
             std::string symbol = ref_name.find(".") != std::string::npos
                 ? ref_name : fully_qualified_id + "." + ref_name;
-            auto iter = symbols.find(symbol);
-            if (iter == symbols.end())
+            auto iter = symbols.get_symbol(symbol);
+            if (std::holds_alternative<std::monostate>(iter))
             {
-                // TODO: Record the unresolved type and continue once we have a good error story for reporting errors in models
                 error_manager.write_unresolved_type_error(get_decl_line(), symbol);
             }
             else
             {
-                if (std::holds_alternative<std::shared_ptr<delegate_model>>(iter->second))
-                {
-                    m_type.set_semantic(iter->second);
-                }
-                else
-                {
-                    error_manager.write_not_a_delegate_error(get_decl_line(), symbol);
-                }
+                if (std::holds_alternative<std::shared_ptr<delegate_model>>(iter))
+                 {
+                     m_type.set_semantic(iter);
+                 }
+                 else
+                 {
+                     error_manager.write_not_a_delegate_error(get_decl_line(), symbol);
+                 }
             }
         }
 

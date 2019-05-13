@@ -6,7 +6,6 @@
 #include <vector>
 #include <variant>
 
-#include "event_model.h"
 #include "interface_model.h"
 #include "method_model.h"
 #include "model_ref.h"

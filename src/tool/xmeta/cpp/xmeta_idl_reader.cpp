@@ -124,11 +124,11 @@ namespace xlang::xmeta
 
     void xlang_model_pass_2::listen_interface_model(std::shared_ptr<interface_model> const& model)
     {
-        model->has_circular_inheritance(m_symbols, m_error_manager);
+        model->has_circular_inheritance(m_error_manager);
     }
 
     void xlang_model_pass_2::listen_struct_model(std::shared_ptr<struct_model> const& model)
     {
-        model->has_circular_struct_declarations(m_symbols, m_error_manager);
+        model->has_circular_struct_declarations(m_error_manager);
     }
 }

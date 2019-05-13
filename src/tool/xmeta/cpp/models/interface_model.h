@@ -40,12 +40,12 @@ namespace xlang::xmeta
             return bases;
         }
 
-        void resolve(std::map<std::string, class_type_semantics> symbols, xlang_error_manager & error_manager)
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager)
         {
             class_or_interface_model::resolve(symbols, error_manager);
         }
 
-        bool has_circular_inheritance(std::map<std::string, class_type_semantics> const& symbols, xlang_error_manager & error_manager)
+        bool has_circular_inheritance(xlang_error_manager & error_manager)
         {
             if (contains_itself)
             {
@@ -53,7 +53,7 @@ namespace xlang::xmeta
             }
             std::string symbol = this->get_fully_qualified_id();
             std::set<std::string> symbol_set{ symbol };
-            if (has_circular_inheritance(symbols, symbol_set, error_manager))
+            if (has_circular_inheritance( symbol_set, error_manager))
             {
                 contains_itself = true;
                 error_manager.write_struct_field_error(get_decl_line(), std::string(symbol));
@@ -61,7 +61,7 @@ namespace xlang::xmeta
             return contains_itself;
         }
 
-        bool has_circular_inheritance(std::map<std::string, class_type_semantics> const& symbols, std::set<std::string> & symbol_set, xlang_error_manager & error_manager)
+        bool has_circular_inheritance(std::set<std::string> & symbol_set, xlang_error_manager & error_manager)
         {
             if (contains_itself)
             {
@@ -75,7 +75,7 @@ namespace xlang::xmeta
                 {
                     std::shared_ptr<interface_model> interface_base = std::get<std::shared_ptr<interface_model>>(type);
                     if (!symbol_set.insert(interface_base->get_fully_qualified_id()).second
-                        || interface_base->has_circular_inheritance(symbols, symbol_set, error_manager))
+                        || interface_base->has_circular_inheritance(symbol_set, error_manager))
                     {
                         return true;
                     }
