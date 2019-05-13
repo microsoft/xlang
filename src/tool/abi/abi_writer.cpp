@@ -112,7 +112,25 @@ void writer::pop_inline_namespace()
     }
 }
 
-void writer::push_contract_guard(contract_attributes& vers)
+bool writer::push_contract_guard(version ver)
+{
+    if (std::holds_alternative<contract_version>(ver))
+    {
+        push_contract_guard(std::get<contract_version>(ver));
+        return true;
+    }
+
+    return false;
+}
+
+void writer::push_contract_guard(contract_version ver)
+{
+    contract_history history;
+    history.current_contract = ver;
+    push_contract_guard(std::move(history));
+}
+
+void writer::push_contract_guard(contract_history vers)
 {
     auto [ns, name] = decompose_type(vers.current_contract.type_name);
     write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.current_contract.version });
@@ -322,14 +340,6 @@ static void write_cpp_type_definitions(writer& w, type_cache const& types)
 
     for (auto const& classType : types.classes)
     {
-        for (auto const& fastAbiType : classType.get().fastabi_interfaces)
-        {
-            fastAbiType.write_cpp_definition(w);
-        }
-    }
-
-    for (auto const& classType : types.classes)
-    {
         classType.get().write_cpp_definition(w);
     }
 }
@@ -406,14 +416,6 @@ static void write_c_type_definitions(writer& w, type_cache const& types)
 
     for (auto const& classType : types.classes)
     {
-        for (auto const& fastAbiType : classType.get().fastabi_interfaces)
-        {
-            fastAbiType.write_c_definition(w);
-        }
-    }
-
-    for (auto const& classType : types.classes)
-    {
         classType.get().write_c_definition(w);
     }
 }
@@ -429,7 +431,10 @@ void write_abi_header(std::string_view fileName, abi_configuration const& config
         bind<write_include_guard>(fileName),
         bind<write_include_guard>(fileName),
         bind<write_include_guard>(fileName));
-    w.write(strings::deprecated_header_start);
+    if (config.enable_header_deprecation)
+    {
+        w.write(strings::deprecated_header_start);
+    }
     w.write(strings::ns_prefix_definitions,
         (config.ns_prefix_state == ns_prefix::always) ? strings::ns_prefix_always :
         (config.ns_prefix_state == ns_prefix::optional) ? strings::ns_prefix_optional : strings::ns_prefix_never);
@@ -470,7 +475,10 @@ void write_abi_header(std::string_view fileName, abi_configuration const& config
     {
         w.write(strings::optional_ns_prefix_end_definitions);
     }
-    w.write(strings::deprecated_header_end);
+    if (config.enable_header_deprecation)
+    {
+        w.write(strings::deprecated_header_end);
+    }
     w.write(strings::include_guard_end, bind<write_include_guard>(fileName), bind<write_include_guard>(fileName));
 
     auto filename{ config.output_directory };

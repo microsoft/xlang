@@ -47,6 +47,6 @@ namespace xlang::Windows::Foundation
     };
 
     struct IUnknown;
-    struct IInspectable;
+    struct IXlangObject;
     struct IActivationFactory;
 }

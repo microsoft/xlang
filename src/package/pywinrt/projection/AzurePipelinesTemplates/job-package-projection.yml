@@ -1,0 +1,40 @@
+parameters:
+  dependsOn: build_projection
+
+jobs:
+- job: package_projection
+  dependsOn: ${{ parameters.dependsOn }}
+  pool:
+    vmImage: 'windows-2019'
+
+  steps:
+  
+  - task: DownloadBuildArtifacts@0 
+    inputs: 
+      buildType: 'current'
+      downloadType: single
+      artifactName: projection
+      downloadPath: '$(Build.ArtifactStagingDirectory)'
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.7.x'
+      addToPath: true 
+
+  - script: pip install wheel
+    displayName: pip install wheel
+
+  - template: steps-package-projection.yml
+    parameters:
+      architecture: x86  
+
+  - template: steps-package-projection.yml
+    parameters:
+      architecture: amd64  
+      
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: wheel'
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/wheel
+      artifactName: wheel
+

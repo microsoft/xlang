@@ -817,7 +817,7 @@ namespace py
     };
 
     template <typename T>
-    struct python_iterable final :
+    struct python_iterable :
         winrt::implements<python_iterable<T>, winrt::Windows::Foundation::Collections::IIterable<T>>
     {
         pyobj_handle _iterable;
@@ -833,7 +833,7 @@ namespace py
         }
 
     private:
-        struct iterator final : winrt::implements<iterator, winrt::Windows::Foundation::Collections::IIterator<T>>
+        struct iterator : winrt::implements<iterator, winrt::Windows::Foundation::Collections::IIterator<T>>
         {
             pyobj_handle _iterator;
             std::optional<T> _current_value;

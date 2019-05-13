@@ -454,24 +454,31 @@ namespace xlang
         return impl::com_array_proxy<T>(__valueSize, value);
     }
 
-    inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
+    inline hstring get_TypeName(Windows::Foundation::IXlangObject const& object)
     {
-        xlang_string value;
-        check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(&value));
-        return { value, take_ownership_from_abi };
+        void* value{};
+        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::TypeName, &value));
+        return { static_cast<xlang_string>(value), take_ownership_from_abi };
     }
 
-    inline com_array<guid> get_interfaces(Windows::Foundation::IInspectable const& object)
+    inline uint32_t get_HashCode(Windows::Foundation::IXlangObject const& object)
     {
-        com_array<guid> value;
-        check_hresult((*(impl::inspectable_abi**)&object)->GetIids(impl::put_size_abi(value), put_abi(value)));
-        return value;
+        void* value{};
+        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::HashCode, &value));
+        return static_cast<uint32_t>(reinterpret_cast<std::size_t>(value));
     }
 
-    inline Windows::Foundation::TrustLevel get_trust_level(Windows::Foundation::IInspectable const& object)
+    inline hstring get_StringRepresentation(Windows::Foundation::IXlangObject const& object)
     {
-        Windows::Foundation::TrustLevel value{};
-        check_hresult((*(impl::inspectable_abi**)&object)->GetTrustLevel(&value));
-        return value;
+        void* value{};
+        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::StringRepresentation, &value));
+        return { static_cast<xlang_string>(value), take_ownership_from_abi };
+    }
+
+    inline uint32_t get_ObjectSize(Windows::Foundation::IXlangObject const& object)
+    {
+        void* value{};
+        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::ObjectSize, &value));
+        return static_cast<uint32_t>(reinterpret_cast<std::size_t>(value));
     }
 }

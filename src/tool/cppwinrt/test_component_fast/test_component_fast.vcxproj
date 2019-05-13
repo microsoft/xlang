@@ -19,12 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
+    <CppWinRTPackageDir>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\..\package\cppwinrt\nuget\</CppWinRTPackageDir>
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{0E0ACA62-A92F-44CF-BD41-AEB541946DF8}</ProjectGuid>
     <RootNamespace>Component</RootNamespace>
     <ProjectName>test_component_fast</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
+  <!-- Hard-coded reference to cppwinrt props file, as if NuGet package was added -->
+  <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.props" />
   <Import Project="$(SolutionDir)\cppwinrt.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -134,7 +137,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -190,7 +193,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -250,7 +253,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -310,7 +313,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_fast.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -352,5 +355,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <!-- Hard-coded reference to cppwinrt targets file, as if NuGet package was added -->
+    <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.FastAbi.targets" />
   </ImportGroup>
 </Project>
