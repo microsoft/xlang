@@ -36,7 +36,7 @@ namespace xlang
         w.write(strings::base_chrono);
         w.write(strings::base_security);
         w.write(strings::base_std_hash);
-        w.write(strings::base_reflect);
+        w.write(strings::base_coroutine_threadpool);
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
@@ -51,22 +51,28 @@ namespace xlang
         write_open_file_guard(w, "COROUTINE");
 
         w.write(R"(
-#include <experimental/coroutine>
 #include "winrt/Windows.Foundation.h"
 #include "winrt/Windows.System.h"
 #include "winrt/Windows.UI.Core.h"
-)");
 
-        w.write(strings::base_coroutine);
-        w.write(strings::base_coroutine_resume);
-        w.write(strings::base_coroutine_action);
-        w.write(strings::base_coroutine_action_with_progress);
-        w.write(strings::base_coroutine_operation);
-        w.write(strings::base_coroutine_operation_with_progress);
-        w.write(strings::base_coroutine_fire_and_forget);
+#pragma message (__FILE__ "(" WINRT_IMPL_STRING(__LINE__) "): This header is deprecated and will be removed in a future update. Please directly include the namespace headers you need.")
+
+)");
 
         write_close_file_guard(w);
         w.flush_to_file(settings.output_folder + "winrt/coroutine.h");
+    }
+
+    static void write_fast_forward_h()
+    {
+        writer w;
+        write_preamble(w);
+        write_open_file_guard(w, "FAST_FORWARD");
+
+        w.write(strings::base_fast_forward);
+
+        write_close_file_guard(w);
+        w.flush_to_file(settings.output_folder + "winrt/fast_forward.h");
     }
 
     static void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)

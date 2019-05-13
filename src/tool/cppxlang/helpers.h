@@ -176,13 +176,11 @@ namespace xlang
         {
             auto const&[type_namespace, type_name] = get_type_namespace_and_name(type.GenericType());
 
-            if (type_namespace == "Windows.Foundation")
+            if (type_namespace == "Foundation")
             {
                 async =
                     type_name == "IAsyncAction" ||
-                    type_name == "IAsyncOperation`1" ||
-                    type_name == "IAsyncActionWithProgress`1" ||
-                    type_name == "IAsyncOperationWithProgress`2";
+                    type_name == "IAsyncOperation`1";
             }
         },
             [](auto&&) {});

@@ -327,9 +327,8 @@ namespace xlang
             }
             else
             {
-                auto generic_type = type.GenericType().TypeRef();
-                auto ns = generic_type.TypeNamespace();
-                auto name = generic_type.TypeName();
+                auto generic_type = type.GenericType();
+                auto[ns, name] = get_type_namespace_and_name(generic_type);
                 name.remove_suffix(name.size() - name.rfind('`'));
                 add_depends(find_required(generic_type));
 

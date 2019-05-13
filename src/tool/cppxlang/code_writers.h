@@ -195,26 +195,11 @@ namespace xlang
             return;
         }
 
-        if (type_name == "Windows.Foundation.DateTime" ||
-            type_name == "Windows.Foundation.TimeSpan")
+        if (type_name == "Foundation.DateTime" ||
+            type_name == "Foundation.TimeSpan")
         {
             // Don't forward declare these since they're not structs.
             return;
-        }
-
-        if (type_name.name_space == "Windows.Foundation.Numerics")
-        {
-            if (type_name.name == "Matrix3x2" ||
-                type_name.name == "Matrix4x4" ||
-                type_name.name == "Plane" ||
-                type_name.name == "Quaternion" ||
-                type_name.name == "Vector2" ||
-                type_name.name == "Vector3" ||
-                type_name.name == "Vector4")
-            {
-                // Don't forward declare these since they're already defined with different names.
-                return;
-            }
         }
 
         auto generics = type.GenericParam();
@@ -292,11 +277,11 @@ namespace xlang
     };
 )";
 
-            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+            auto attribute = get_attribute(type, "Foundation.Metadata", "GuidAttribute");
 
             if (!attribute)
             {
-                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+                throw_invalid("'Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
             }
 
             w.write(format,
@@ -369,11 +354,11 @@ namespace xlang
     };
 )";
 
-            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+            auto attribute = get_attribute(type, "Foundation.Metadata", "GuidAttribute");
 
             if (!attribute)
             {
-                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+                throw_invalid("'Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
             }
 
             w.write(format,
@@ -658,7 +643,7 @@ namespace xlang
         {
             auto format = R"(    template <> struct abi<%>
     {
-        struct XLANG_NOVTABLE type : inspectable_abi
+        struct XLANG_NOVTABLE type : xlang_object_abi
         {
 )";
 
@@ -668,7 +653,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct abi<%>
     {
-        struct XLANG_NOVTABLE type : inspectable_abi
+        struct XLANG_NOVTABLE type : xlang_object_abi
         {
 )";
 
@@ -1048,37 +1033,7 @@ namespace xlang
     {
         type_name type_name(type);
 
-        if (type_name == "Windows.UI.Xaml.Interop.IBindableIterator")
-        {
-            w.write(R"(
-        auto& operator++()
-        {
-            if (!MoveNext())
-            {
-                static_cast<D&>(*this) = nullptr;
-            }
-
-            return *this;
-        }
-
-        auto operator*() const
-        {
-            return Current();
-        }
-)");
-        }
-        else if (type_name == "Windows.Storage.Streams.IBuffer")
-        {
-            w.write(R"(
-        auto data() const
-        {
-            uint8_t* data{};
-            static_cast<D const&>(*this).template as<IBufferByteAccess>()->Buffer(&data);
-            return data;
-        }
-)");
-        }
-        else if (type_name == "Windows.Foundation.Collections.IIterator`1")
+        if (type_name == "Foundation.Collections.IIterator`1")
         {
             w.write(R"(
         auto& operator++()
@@ -1097,29 +1052,29 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "Windows.Foundation.Collections.IKeyValuePair`2")
+        else if (type_name == "Foundation.Collections.IKeyValuePair`2")
         {
             w.write(R"(
-        bool operator==(Windows::Foundation::Collections::IKeyValuePair<K, V> const& other) const
+        bool operator==(Foundation::Collections::IKeyValuePair<K, V> const& other) const
         {
             return Key() == other.Key() && Value() == other.Value();
         }
 
-        bool operator!=(Windows::Foundation::Collections::IKeyValuePair<K, V> const& other) const
+        bool operator!=(Foundation::Collections::IKeyValuePair<K, V> const& other) const
         {
             return !(*this == other);
         }
 )");
         }
-        else if (type_name == "Windows.Foundation.Collections.IMapView`2")
+        else if (type_name == "Foundation.Collections.IMapView`2")
         {
             w.write(R"(
         auto TryLookup(param_type<K> const& key) const noexcept
         {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
+            if constexpr (std::is_base_of_v<Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                XLANG_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -1127,7 +1082,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == XLANG_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1137,15 +1092,15 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "Windows.Foundation.Collections.IMap`2")
+        else if (type_name == "Foundation.Collections.IMap`2")
         {
             w.write(R"(
         auto TryLookup(param_type<K> const& key) const noexcept
         {
-            if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
+            if constexpr (std::is_base_of_v<Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                XLANG_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
+                XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -1153,7 +1108,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == XLANG_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1163,35 +1118,35 @@ namespace xlang
         }
 )");
         }
-        else if (type_name == "Windows.Foundation.IAsyncAction")
+        else if (type_name == "Foundation.IAsyncAction")
         {
             w.write(R"(        void get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
+            blocking_suspend(static_cast<Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
             GetResults();
         })");
         }
-        else if (type_name == "Windows.Foundation.IAsyncOperation`1")
+        else if (type_name == "Foundation.IAsyncOperation`1")
         {
             w.write(R"(        TResult get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
+            blocking_suspend(static_cast<Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
             return GetResults();
         })");
         }
-        else if (type_name == "Windows.Foundation.IAsyncActionWithProgress`1")
+        else if (type_name == "Foundation.IAsyncActionWithProgress`1")
         {
             w.write(R"(        void get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
+            blocking_suspend(static_cast<Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
             GetResults();
         })");
         }
-        else if (type_name == "Windows.Foundation.IAsyncOperationWithProgress`2")
+        else if (type_name == "Foundation.IAsyncOperationWithProgress`2")
         {
             w.write(R"(        TResult get() const
         {
-            blocking_suspend(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
+            blocking_suspend(static_cast<Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
             return GetResults();
         })");
         }
@@ -1201,7 +1156,7 @@ namespace xlang
     {
         type_name type_name(type);
 
-        if (type_name == "Windows.Foundation.Collections.IIterator`1")
+        if (type_name == "Foundation.Collections.IIterator`1")
         {
             w.write(R"(
         using iterator_category = std::input_iterator_tag;
@@ -1209,19 +1164,6 @@ namespace xlang
         using difference_type = ptrdiff_t;
         using pointer = T*;
         using reference = T&;
-)");
-        }
-        else if (type_name == "Windows.Foundation.IReference`1")
-        {
-            w.write(R"(        IReference(T const& value) : IReference<T>(impl::reference_traits<T>::make(value))
-        {
-        }
-
-    private:
-
-        IReference<T>(IInspectable const& value) : IReference<T>(value.as<IReference<T>>())
-        {
-        }
 )");
         }
     }
@@ -1398,7 +1340,7 @@ namespace xlang
         else if (optional)
         {
             auto format = R"(            if (%) *% = nullptr;
-            Windows::Foundation::IInspectable xlang_impl_%;
+            Windows::Foundation::IXlangObject xlang_impl_%;
 )";
 
             w.write(format, param_name, param_name, param_name);
@@ -1721,7 +1663,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
 
         if (!found)
         {
-            w.write(", Windows::Foundation::IInspectable");
+            w.write(", Windows::Foundation::IXlangObject");
         }
     }
 
@@ -2015,11 +1957,11 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
         if (empty(generics))
         {
             auto format = R"(    struct XLANG_EBO % :
-        Windows::Foundation::IInspectable,
+        Windows::Foundation::IXlangObject,
         impl::consume_t<%>%
     {
         %(std::nullptr_t = nullptr) noexcept {}
-        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IXlangObject(ptr, take_ownership_from_abi) {}
 %%    };
 )";
 
@@ -2038,11 +1980,11 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
 
             auto format = R"(    template <%>
     struct XLANG_EBO % :
-        Windows::Foundation::IInspectable,
+        Windows::Foundation::IXlangObject,
         impl::consume_t<%>%
     {
         %(std::nullptr_t = nullptr) noexcept {}
-        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IInspectable(ptr, take_ownership_from_abi) {}
+        %(void* ptr, take_ownership_from_abi_t) noexcept : Windows::Foundation::IXlangObject(ptr, take_ownership_from_abi) {}
 %%    };
 )";
 
@@ -2529,7 +2471,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
 
         auto format = R"(    inline %::%(%)
     {
-        Windows::Foundation::IInspectable %, %;
+        Windows::Foundation::IXlangObject %, %;
         *this = impl::call_factory<%, %>([&](auto&& f) { return f.%(%%%, %); });
     }
 )";
@@ -2741,18 +2683,9 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
             type);
     }
 
-    static void write_namespace_special(writer& w, std::string_view const& namespace_name, cache const& c)
+    static void write_namespace_special(writer& w, std::string_view const& namespace_name, cache const& /*c*/)
     {
-        if (namespace_name == "Windows.Foundation")
-        {
-            if (c.find("Windows.Foundation.PropertyValue"))
-            {
-                w.write(strings::base_reference_produce);
-            }
-
-            w.write(strings::base_async);
-        }
-        else if (namespace_name == "Windows.Foundation.Collections")
+        if (namespace_name == "Foundation.Collections")
         {
             w.write(strings::base_collections);
             w.write(strings::base_collections_base);
@@ -2763,10 +2696,6 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
             w.write(strings::base_collections_input_map);
             w.write(strings::base_collections_vector);
             w.write(strings::base_collections_map);
-        }
-        else if (namespace_name == "Windows.UI.Xaml.Interop")
-        {
-            w.write(strings::base_xaml_typename);
         }
     }
 }

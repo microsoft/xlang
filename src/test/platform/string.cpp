@@ -391,6 +391,7 @@ void convert_string()
     for (auto const& test_string : invalid_strings<char_type>::value)
     {
         xlang_error_info* result{};
+        xlang_result error_code{};
         xlang_string str{};
         {
             INFO("Create string");
@@ -404,7 +405,8 @@ void convert_string()
             INFO("Fail to convert string");
             result = xlang_get_string_raw_buffer<other_type>(str, &buffer, &length);
             REQUIRE(result != nullptr);
-            REQUIRE(result->error_code() == xlang_error_untranslatable_string);
+            result->GetError(&error_code);
+            REQUIRE(error_code == xlang_result::invalid_arg);
             REQUIRE(buffer == nullptr);
             REQUIRE(length == 0);
         }
@@ -472,6 +474,7 @@ void convert_string_reference()
     for (auto const& test_string : invalid_strings<char_type>::value)
     {
         xlang_error_info* result{};
+        xlang_result error_code{};
         xlang_string str_ref{};
         xlang_string_header header{};
         {
@@ -486,7 +489,8 @@ void convert_string_reference()
         {
             result = xlang_get_string_raw_buffer<other_type>(str_ref, &buffer_ref, &length_ref);
             REQUIRE(result != nullptr);
-            REQUIRE(result->error_code() == xlang_error_untranslatable_string);
+            result->GetError(&error_code);
+            REQUIRE(error_code == xlang_result::invalid_arg);
             REQUIRE(buffer_ref == nullptr);
             REQUIRE(length_ref == 0);
         }
