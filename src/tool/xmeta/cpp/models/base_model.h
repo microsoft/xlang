@@ -28,12 +28,15 @@ namespace xlang::xmeta
     struct method_model;
     struct event_model;
 
+    struct symbol_table;
+    struct compilation_unit;
+
     using class_type_semantics = std::variant<
         std::shared_ptr<class_model>,
         std::shared_ptr<enum_model>,
         std::shared_ptr<interface_model>,
         std::shared_ptr<struct_model>,
-        std::shared_ptr<delegate_model>>;
+        std::shared_ptr<delegate_model>, std::less<>>;
 
     struct base_model
     {

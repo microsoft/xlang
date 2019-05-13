@@ -59,12 +59,7 @@ namespace xlang::xmeta
             m_semantic.resolve(sem);
         }
 
-        void set_semantic(std::variant<
-            std::shared_ptr<class_model>,
-            std::shared_ptr<enum_model>,
-            std::shared_ptr<interface_model>,
-            std::shared_ptr<struct_model>,
-            std::shared_ptr<delegate_model>> const& sem) noexcept
+        void set_semantic(class_type_semantics const& sem) noexcept
         {
             if (std::holds_alternative<std::shared_ptr<delegate_model>>(sem))
             {
