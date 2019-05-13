@@ -7,7 +7,8 @@ namespace xlang::meta::reader
         cache(cache const&) = delete;
         cache& operator=(cache const&) = delete;
 
-        explicit cache(std::vector<std::string> const& files)
+        template<typename C, typename T = typename C::value_type>
+        explicit cache(C const& files)
         {
             for (auto&& file : files)
             {
@@ -87,10 +88,12 @@ namespace xlang::meta::reader
         TypeDef find(std::string_view const& type_string) const
         {
             auto pos = type_string.rfind('.');
+
             if (pos == std::string_view::npos)
             {
-                throw_invalid("Type name is missing namespace separator");
+                throw_invalid("Type '", type_string, "' is missing a namespace qualifier");
             }
+
             return find(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
         }
 
@@ -112,7 +115,7 @@ namespace xlang::meta::reader
 
             if (pos == std::string_view::npos)
             {
-                throw_invalid("Type name is missing namespace separator");
+                throw_invalid("Type '", type_string, "' is missing a namespace qualifier");
             }
 
             return find_required(type_string.substr(0, pos), type_string.substr(pos + 1, type_string.size()));
@@ -128,48 +131,33 @@ namespace xlang::meta::reader
             return m_namespaces;
         }
 
-        void remove_cppwinrt_foundation_types()
+        void remove_type(std::string_view const& ns, std::string_view const& name)
         {
-            auto remove = [&](auto&& ns, auto&& name)
+            auto m = m_namespaces.find(ns);
+            if (m == m_namespaces.end())
             {
-                auto& members = m_namespaces[ns];
+                return;
+            }
+            auto& members = m->second;
 
-                auto remove = [&](auto&& collection, auto&& name)
-                {
-                    auto pos = std::find_if(collection.begin(), collection.end(), [&](auto&& type)
+            auto remove = [&](auto&& collection, auto&& name)
+            {
+                auto pos = std::find_if(collection.begin(), collection.end(), [&](auto&& type)
                     {
                         return type.TypeName() == name;
                     });
 
-                    if (pos != collection.end())
-                    {
-                        collection.erase(pos);
-                    }
-                };
-
-                remove(members.interfaces, name);
-                remove(members.classes, name);
-                remove(members.enums, name);
-                remove(members.structs, name);
-                remove(members.delegates, name);
-                remove(members.classes, name);
+                if (pos != collection.end())
+                {
+                    collection.erase(pos);
+                }
             };
 
-            remove("Windows.Foundation", "DateTime");
-            remove("Windows.Foundation", "EventRegistrationToken");
-            remove("Windows.Foundation", "HResult");
-            remove("Windows.Foundation", "Point");
-            remove("Windows.Foundation", "Rect");
-            remove("Windows.Foundation", "Size");
-            remove("Windows.Foundation", "TimeSpan");
-
-            remove("Windows.Foundation.Numerics", "Matrix3x2");
-            remove("Windows.Foundation.Numerics", "Matrix4x4");
-            remove("Windows.Foundation.Numerics", "Plane");
-            remove("Windows.Foundation.Numerics", "Quaternion");
-            remove("Windows.Foundation.Numerics", "Vector2");
-            remove("Windows.Foundation.Numerics", "Vector3");
-            remove("Windows.Foundation.Numerics", "Vector4");
+            remove(members.interfaces, name);
+            remove(members.classes, name);
+            remove(members.enums, name);
+            remove(members.structs, name);
+            remove(members.delegates, name);
         }
 
         struct namespace_members

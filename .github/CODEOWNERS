@@ -4,16 +4,29 @@
 
 * @BenJKuhn @DefaultRyan @devhawk @kennykerr @Scottj1s 
 
-/src/library/ @kennykerr  
+/design_notes/ @devhawk 
+/docs/ @devhawk 
+
+/src/library/ @kennykerr @DefaultRyan
+
+/src/package/ @Scottj1s
+
+/src/platform/ @DefaultRyan @devhawk
+/src/test/platform/ @DefaultRyan @devhawk
+
+/src/scripts/ @devhawk @Scottj1s 
+
+/src/tool/abi @dunhor
+
 /src/test/cpp/ @kennykerr
 /src/tool/cpp/ @kennykerr
-/src/tool/idl/ @kennykerr
-
-/src/platform/ @DefaultRyan 
-/src/test/platform/ @DefaultRyan 
-
-/src/scripts/ @devhawk  
-/src/test/python/ @devhawk  
-/src/tool/python/ @devhawk  
 
 /src/tool/natvis/ @Scottj1s
+
+/src/test/python/ @devhawk  
+/src/tool/python/ @devhawk 
+
+/samples @devhawk
+/samples/python/ @devhawk 
+
+

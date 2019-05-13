@@ -154,12 +154,18 @@ namespace xlang::meta::reader
         uint32_t index;
     };
 
+    struct GenericMethodTypeIndex
+    {
+        uint32_t index;
+    };
+
     struct TypeSig
     {
-        using value_type = std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig>;
+        using value_type = std::variant<ElementType, coded_index<TypeDefOrRef>, GenericTypeIndex, GenericTypeInstSig, GenericMethodTypeIndex>;
         TypeSig(table_base const* table, byte_view& data)
             : m_is_szarray(parse_szarray(table, data))
             , m_cmod(parse_cmods(table, data))
+            , m_element_type(parse_element_type(data))
             , m_type(ParseType(table, data))
         {}
 
@@ -168,15 +174,27 @@ namespace xlang::meta::reader
             return m_type;
         }
 
+        ElementType element_type() const noexcept
+        {
+            return m_element_type;
+        }
+
         bool is_szarray() const noexcept
         {
             return m_is_szarray;
         }
 
     private:
+        static ElementType parse_element_type(byte_view& data)
+        {
+            auto cursor = data;
+            return uncompress_enum<ElementType>(cursor);
+        }
+
         static value_type ParseType(table_base const* table, byte_view& data);
         bool m_is_szarray;
         std::vector<CustomModSig> m_cmod;
+        ElementType m_element_type;
         value_type m_type;
     };
 
@@ -278,6 +296,10 @@ namespace xlang::meta::reader
             , m_param_count(uncompress_unsigned(data))
             , m_ret_type(table, data)
         {
+            if (m_param_count > data.size())
+            {
+                throw_invalid("Invalid blob array size");
+            }
             m_params.reserve(m_param_count);
             for (uint32_t count = 0; count < m_param_count; ++count)
             {
@@ -300,9 +322,9 @@ namespace xlang::meta::reader
             return m_ret_type;
         }
 
-        auto const& Params() const noexcept
+        auto Params() const noexcept
         {
-            return m_params;
+            return std::pair{ m_params.cbegin(), m_params.cend() };
         }
 
     private:
@@ -354,6 +376,10 @@ namespace xlang::meta::reader
             , m_cmod(parse_cmods(table, data))
             , m_type(table, data)
         {
+            if (m_param_count > data.size())
+            {
+                throw_invalid("Invalid blob array size");
+            }
             m_params.reserve(m_param_count);
             for (uint32_t count = 0; count < m_param_count; ++count)
             {
@@ -364,6 +390,11 @@ namespace xlang::meta::reader
         TypeSig const& Type() const noexcept
         {
             return m_type;
+        }
+
+        CallingConvention CallConvention() const noexcept
+        {
+            return m_calling_convention;
         }
 
     private:
@@ -415,6 +446,10 @@ namespace xlang::meta::reader
             throw_invalid("Generic type instantiation signatures must begin with either ELEMENT_TYPE_CLASS or ELEMENT_TYPE_VALUE");
         }
 
+        if (m_generic_arg_count > data.size())
+        {
+            throw_invalid("Invalid blob array size");
+        }
         m_generic_args.reserve(m_generic_arg_count);
         for (uint32_t arg = 0; arg < m_generic_arg_count; ++arg)
         {
@@ -457,6 +492,10 @@ namespace xlang::meta::reader
 
         case ElementType::Var:
             return GenericTypeIndex{ uncompress_unsigned(data) };
+            break;
+
+        case ElementType::MVar:
+            return GenericMethodTypeIndex{ uncompress_unsigned(data) };
             break;
 
         default:

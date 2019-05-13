@@ -97,6 +97,11 @@ namespace xlang::text
             write(std::to_string(value));
         }
 
+        void write(uint32_t const value)
+        {
+            write(std::to_string(value));
+        }
+
         void write(int64_t const value)
         {
             write(std::to_string(value));
@@ -143,15 +148,12 @@ namespace xlang::text
 
         void flush_to_file(std::string const& filename)
         {
-            if (static_cast<T*>(this)->skip_flush_to_file(filename))
+            if (!file_equal(filename))
             {
-                return;
+                std::ofstream file{ filename, std::ios::out | std::ios::binary };
+                file.write(m_first.data(), m_first.size());
+                file.write(m_second.data(), m_second.size());
             }
-
-            std::ofstream file{ filename, std::ios::out | std::ios::binary };
-            file.write(reinterpret_cast<char const*>(m_bom.data()), m_bom.size());
-            file.write(m_first.data(), m_first.size());
-            file.write(m_second.data(), m_second.size());
             m_first.clear();
             m_second.clear();
         }
@@ -159,6 +161,17 @@ namespace xlang::text
         void flush_to_file(std::experimental::filesystem::path const& filename)
         {
             flush_to_file(filename.string());
+        }
+
+        std::string flush_to_string()
+        {
+            std::string result;
+            result.reserve(m_first.size() + m_second.size());
+            result.assign(m_first.begin(), m_first.end());
+            result.append(m_second.begin(), m_second.end());
+            m_first.clear();
+            m_second.clear();
+            return result;
         }
 
         char back()
@@ -175,22 +188,17 @@ namespace xlang::text
 
             meta::reader::file_view file{ filename };
 
-            if (file.size() != m_bom.size() + m_first.size() + m_second.size())
+            if (file.size() != m_first.size() + m_second.size())
             {
                 return false;
             }
 
-            if (!std::equal(m_bom.begin(), m_bom.end(), file.begin(), file.begin() + m_bom.size()))
+            if (!std::equal(m_first.begin(), m_first.end(), file.begin(), file.begin() + m_first.size()))
             {
                 return false;
             }
 
-            if (!std::equal(m_first.begin(), m_first.end(), file.begin() + m_bom.size(), file.begin() + m_bom.size() + m_first.size()))
-            {
-                return false;
-            }
-
-            return std::equal(m_second.begin(), m_second.end(), file.begin() + m_bom.size() + m_first.size(), file.end());
+            return std::equal(m_second.begin(), m_second.end(), file.begin() + m_first.size(), file.end());
         }
 
 #if defined(XLANG_DEBUG)
@@ -199,13 +207,6 @@ namespace xlang::text
 
     private:
 
-        static constexpr std::array<uint8_t, 3> m_bom{ 0xEF, 0xBB, 0xBF };
-
-        constexpr bool skip_flush_to_file(std::string const&) const noexcept
-        {
-            return false;
-        }
-
         static constexpr uint32_t count_placeholders(std::string_view const& format) noexcept
         {
             uint32_t count{};
@@ -213,17 +214,19 @@ namespace xlang::text
 
             for (auto c : format)
             {
-                if (c == '^')
+                if (!escape)
                 {
-                    escape = true;
-                    continue;
-                }
+                    if (c == '^')
+                    {
+                        escape = true;
+                        continue;
+                    }
 
-                if ((c == '%' || c == '@') && !escape)
-                {
-                    ++count;
+                    if (c == '%' || c == '@')
+                    {
+                        ++count;
+                    }
                 }
-
                 escape = false;
             }
 
@@ -232,7 +235,19 @@ namespace xlang::text
 
         void write_segment(std::string_view const& value)
         {
-            write(value);
+            auto offset = value.find_first_of("^");
+            if (offset == std::string_view::npos)
+            {
+                write(value);
+                return;
+            }
+
+            write(value.substr(0, offset));
+
+            XLANG_ASSERT(offset != value.size() - 1);
+
+            write(value[offset + 1]);
+            write_segment(value.substr(offset + 2));
         }
 
         template <typename First, typename... Rest>
@@ -244,19 +259,10 @@ namespace xlang::text
 
             if (value[offset] == '^')
             {
-                auto next = value[offset + 1];
+                XLANG_ASSERT(offset != value.size() - 1);
 
-                if (next == '%' || next == '@')
-                {
-                    write(next);
-                    offset++;
-                }
-                else
-                {
-                    write('^');
-                }
-
-                write_segment(value.substr(offset + 1), first, rest...);
+                write(value[offset + 1]);
+                write_segment(value.substr(offset + 2), first, rest...);
             }
             else
             {
@@ -293,6 +299,15 @@ namespace xlang::text
         };
     }
 
+    template <typename F, typename... Args>
+    auto bind(F fwrite, Args const&... args)
+    {
+        return [&, fwrite](auto& writer)
+        {
+            fwrite(writer, args...);
+        };
+    }
+
     template <auto F, typename List, typename... Args>
     auto bind_each(List const& list, Args const&... args)
     {
@@ -305,8 +320,32 @@ namespace xlang::text
         };
     }
 
-    template <auto F, typename T>
-    auto bind_list(std::string_view const& delimiter, T const& list)
+    template <typename List, typename... Args>
+    auto bind_each(List const& list, Args const&... args)
+    {
+        return [&](auto& writer)
+        {
+            for (auto&& item : list)
+            {
+                writer.write(item, args...);
+            }
+        };
+    }
+
+    template <typename F, typename List, typename... Args>
+    auto bind_each(F fwrite, List const& list, Args const&... args)
+    {
+        return [&, fwrite](auto& writer)
+        {
+            for (auto&& item : list)
+            {
+                fwrite(writer, item, args...);
+            }
+        };
+    }
+
+    template <auto F, typename T, typename... Args>
+    auto bind_list(std::string_view const& delimiter, T const& list, Args const&... args)
     {
         return [&](auto& writer)
         {
@@ -323,7 +362,7 @@ namespace xlang::text
                     writer.write(delimiter);
                 }
 
-                F(writer, item);
+                F(writer, item, args...);
             }
         };
     }

@@ -12,7 +12,7 @@ using namespace xlang::text;
 template <typename T>
 static std::size_t push_type_contract_guards(writer& w, T const& type)
 {
-    if (auto vers = get_contracts(type))
+    if (auto vers = get_contract_history(type))
     {
         w.push_contract_guard(*vers);
         return 1;
@@ -21,10 +21,54 @@ static std::size_t push_type_contract_guards(writer& w, T const& type)
     return 0;
 }
 
+template <typename T>
+static std::size_t begin_type_definition(writer& w, T const& type)
+{
+    write_type_banner(w, type);
+    if (type.is_experimental())
+    {
+        w.write("#if defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+    }
+
+    return type.push_contract_guards(w);
+}
+
+template <typename T>
+static void end_type_definition(writer& w, T const& type, std::size_t contractGuardDepth)
+{
+    w.pop_contract_guards(contractGuardDepth);
+    if (type.is_experimental())
+    {
+        w.write("#endif // defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+    }
+
+    w.write('\n');
+}
+
+typedef_base::typedef_base(TypeDef const& type) :
+    m_type(type),
+    m_clrFullName(::clr_full_name(type)),
+    m_mangledName(::mangled_name<false>(type)),
+    m_genericParamMangledName(::mangled_name<true>(type)),
+    m_contractHistory(get_contract_history(type))
+{
+    for_each_attribute(type, metadata_namespace, "VersionAttribute"sv, [&](bool, CustomAttribute const& attr)
+    {
+        m_platformVersions.push_back(decode_platform_version(attr));
+    });
+}
+
 std::size_t typedef_base::push_contract_guards(writer& w) const
 {
     XLANG_ASSERT(!is_generic());
-    return push_type_contract_guards(w, m_type);
+
+    if (m_contractHistory)
+    {
+        w.push_contract_guard(*m_contractHistory);
+        return 1;
+    }
+
+    return 0;
 }
 
 void typedef_base::write_cpp_abi_name(writer& w) const
@@ -81,14 +125,11 @@ void enum_type::write_c_abi_param(writer& w) const
 void enum_type::write_cpp_definition(writer& w) const
 {
     auto name = cpp_abi_name();
-
-    write_type_banner(w, *this);
-
-    auto contractDepth = push_contract_guards(w);
+    auto contractDepth = begin_type_definition(w, *this);
     w.push_namespace(clr_abi_namespace());
 
     w.write("%%", indent{}, enum_string(w));
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write("\n");
         write_deprecation_message(w, *info);
@@ -108,6 +149,12 @@ void enum_type::write_cpp_definition(writer& w) const
     {
         if (auto value = field.Constant())
         {
+            auto isExperimental = ::is_experimental(field);
+            if (isExperimental)
+            {
+                w.write("#if defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+            }
+
             auto fieldContractDepth = push_type_contract_guards(w, field);
 
             w.write("%", indent{ 1 });
@@ -117,7 +164,7 @@ void enum_type::write_cpp_definition(writer& w) const
             }
             w.write(field.Name());
 
-            if (auto info = ::is_deprecated(field))
+            if (auto info = ::is_deprecated(field); info && w.config().enable_header_deprecation)
             {
                 w.write("\n");
                 write_deprecation_message(w, *info, 1, "DEPRECATEDENUMERATOR");
@@ -130,6 +177,10 @@ void enum_type::write_cpp_definition(writer& w) const
 
             w.write("= %,\n", value);
             w.pop_contract_guards(fieldContractDepth);
+            if (isExperimental)
+            {
+                w.write("#endif // defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+            }
         }
     }
 
@@ -153,17 +204,15 @@ void enum_type::write_cpp_definition(writer& w) const
     }
 
     w.pop_namespace();
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
+    end_type_definition(w, *this, contractDepth);
 }
 
 void enum_type::write_c_definition(writer& w) const
 {
-    write_type_banner(w, *this);
-    auto contractDepth = push_contract_guards(w);
+    auto contractDepth = begin_type_definition(w, *this);
 
     w.write("enum");
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write("\n");
         write_deprecation_message(w, *info);
@@ -181,10 +230,16 @@ void enum_type::write_c_definition(writer& w) const
     {
         if (auto value = field.Constant())
         {
+            auto isExperimental = ::is_experimental(field);
+            if (isExperimental)
+            {
+                w.write("#if defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+            }
+
             auto fieldContractDepth = push_type_contract_guards(w, field);
 
             w.write("    %_%", cpp_abi_name(), field.Name());
-            if (auto info = ::is_deprecated(field))
+            if (auto info = ::is_deprecated(field); info && w.config().enable_header_deprecation)
             {
                 w.write("\n");
                 write_deprecation_message(w, *info, 1, "DEPRECATEDENUMERATOR");
@@ -193,13 +248,15 @@ void enum_type::write_c_definition(writer& w) const
 
             w.write(" = %,\n", value);
             w.pop_contract_guards(fieldContractDepth);
+            if (isExperimental)
+            {
+                w.write("#endif // defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+            }
         }
     }
 
     w.write("};\n");
-
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
+    end_type_definition(w, *this, contractDepth);
 }
 
 void struct_type::write_cpp_forward_declaration(writer& w) const
@@ -244,13 +301,11 @@ void struct_type::write_c_abi_param(writer& w) const
 
 void struct_type::write_cpp_definition(writer& w) const
 {
-    write_type_banner(w, *this);
-
-    auto contractDepth = push_contract_guards(w);
+    auto contractDepth = begin_type_definition(w, *this);
     w.push_namespace(clr_abi_namespace());
 
     w.write("%struct", indent{});
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write('\n');
         write_deprecation_message(w, *info);
@@ -267,7 +322,7 @@ void struct_type::write_cpp_definition(writer& w) const
 
     for (auto const& member : members)
     {
-        if (auto info = ::is_deprecated(member.field))
+        if (auto info = ::is_deprecated(member.field); info && w.config().enable_header_deprecation)
         {
             write_deprecation_message(w, *info, 1);
         }
@@ -278,17 +333,15 @@ void struct_type::write_cpp_definition(writer& w) const
     w.write("%};\n", indent{});
 
     w.pop_namespace();
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
+    end_type_definition(w, *this, contractDepth);
 }
 
 void struct_type::write_c_definition(writer& w) const
 {
-    write_type_banner(w, *this);
-    auto contractDepth = push_contract_guards(w);
+    auto contractDepth = begin_type_definition(w, *this);
 
     w.write("struct");
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write('\n');
         write_deprecation_message(w, *info);
@@ -304,7 +357,7 @@ void struct_type::write_c_definition(writer& w) const
 
     for (auto const& member : members)
     {
-        if (auto info = ::is_deprecated(member.field))
+        if (auto info = ::is_deprecated(member.field); info && w.config().enable_header_deprecation)
         {
             write_deprecation_message(w, *info, 1);
         }
@@ -314,8 +367,7 @@ void struct_type::write_c_definition(writer& w) const
 
     w.write("};\n");
 
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
+    end_type_definition(w, *this, contractDepth);
 }
 
 void delegate_type::write_cpp_forward_declaration(writer& w) const
@@ -371,7 +423,7 @@ static std::string_view function_name(MethodDef const& def)
 
 static void write_cpp_function_declaration(writer& w, function_def const& func)
 {
-    if (auto info = is_deprecated(func.def))
+    if (auto info = is_deprecated(func.def); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info, 1);
     }
@@ -433,15 +485,14 @@ static void write_cpp_interface_definition(writer& w, T const& type)
 {
     constexpr bool is_delegate = std::is_same_v<T, delegate_type>;
     constexpr bool is_interface = std::is_same_v<T, interface_type>;
-    constexpr bool is_fastabi = std::is_same_v<T, fastabi_type>;
-    static_assert(is_delegate || is_interface || is_fastabi);
+    static_assert(is_delegate || is_interface);
 
     w.push_namespace(type.clr_abi_namespace());
 
     w.write(R"^-^(%MIDL_INTERFACE("%")
 )^-^", indent{}, bind_uuid(type));
 
-    if (auto info = is_deprecated(type.type()))
+    if (auto info = is_deprecated(type.type()); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info);
     }
@@ -456,28 +507,52 @@ static void write_cpp_interface_definition(writer& w, T const& type)
     {
         w.write("IInspectable");
     }
-    else
-    {
-        type.base().write_cpp_abi_name(w);
-    }
 
     w.write(R"^-^(
 %{
 %public:
 )^-^", indent{}, indent{});
 
-    if constexpr (is_fastabi)
+    for (auto const& func : type.functions)
     {
-        for (auto const& func : type.current_interface().functions)
-        {
-            write_cpp_function_declaration(w, func);
-        }
+        write_cpp_function_declaration(w, func);
     }
-    else
+
+    if constexpr (is_interface)
     {
-        for (auto const& func : type.functions)
+        if (type.fast_class)
         {
-            write_cpp_function_declaration(w, func);
+            w.write("\n%// Supplemental functions added by use of the fast ABI attribute\n", indent{});
+
+            auto fastAttr = get_attribute(type.fast_class->type(), metadata_namespace, "FastAbiAttribute"sv);
+            std::size_t fastContractDepth = w.push_contract_guard(version_from_attribute(fastAttr)) ? 1 : 0;
+
+            // If the class "derives" from any other class, the fast pointer-to-base functions come first
+            std::vector<class_type const*> baseClasses;
+            auto base = type.fast_class->base_class;
+            while (base)
+            {
+                baseClasses.push_back(base);
+                base = base->base_class;
+            }
+
+            std::for_each(baseClasses.rbegin(), baseClasses.rend(), [&](class_type const* baseClass)
+            {
+                w.write("%virtual % base_%() = 0;\n", indent{}, [&](writer& w) { baseClass->write_cpp_abi_param(w); }, baseClass->cpp_logical_name());
+            });
+
+            for (auto [iface, ver] : type.fast_class->supplemental_fast_interfaces)
+            {
+                w.write("\n%// Supplemental functions added for the % interface\n", indent{}, iface->clr_full_name());
+                fastContractDepth += w.push_contract_guard(ver) ? 1 : 0;
+
+                for (auto const& func : iface->functions)
+                {
+                    write_cpp_function_declaration(w, func);
+                }
+            }
+
+            w.pop_contract_guards(fastContractDepth);
         }
     }
 
@@ -548,7 +623,7 @@ static void write_c_iinspectable_interface_macros(writer& w, T const& type)
 template <typename TypeName>
 static void write_c_function_declaration(writer& w, TypeName&& typeName, function_def const& func)
 {
-    if (auto info = is_deprecated(func.def))
+    if (auto info = is_deprecated(func.def); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info, 1);
     }
@@ -593,7 +668,7 @@ static void write_c_function_declaration(writer& w, TypeName&& typeName, functio
 template <typename T>
 static void write_c_function_declaration_macro(writer& w, T const& type, function_def const& func)
 {
-    if (auto info = is_deprecated(func.def))
+    if (auto info = is_deprecated(func.def); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info, 1);
     }
@@ -650,8 +725,13 @@ static void write_c_function_declaration_macro(writer& w, T const& type, functio
 template <typename T>
 static void write_c_interface_definition(writer& w, T const& type)
 {
+    constexpr bool is_interface = std::is_same_v<T, interface_type>;
+    constexpr bool is_delegate = std::is_same_v<T, delegate_type>;
+    constexpr bool is_generic = std::is_same_v<T, generic_inst>;
+    static_assert(is_interface || is_delegate | is_generic);
+
     w.write("typedef struct");
-    if (auto info = type.is_deprecated())
+    if (auto info = type.is_deprecated(); info && w.config().enable_header_deprecation)
     {
         w.write('\n');
         write_deprecation_message(w, *info);
@@ -682,6 +762,47 @@ static void write_c_interface_definition(writer& w, T const& type)
         write_c_function_declaration(w, bind_c_type_name(type), func);
     }
 
+    if constexpr (is_interface)
+    {
+        if (type.fast_class)
+        {
+            w.write("\n// Supplemental functions added by use of the fast ABI attribute\n");
+
+            auto fastAttr = get_attribute(type.fast_class->type(), metadata_namespace, "FastAbiAttribute"sv);
+            std::size_t fastContractDepth = w.push_contract_guard(version_from_attribute(fastAttr)) ? 1 : 0;
+
+            // If the class "derives" from any other class, the fast pointer-to-base functions come first
+            std::vector<class_type const*> baseClasses;
+            auto base = type.fast_class->base_class;
+            while (base)
+            {
+                baseClasses.push_back(base);
+                base = base->base_class;
+            }
+
+            std::for_each(baseClasses.rbegin(), baseClasses.rend(), [&](class_type const* baseClass)
+            {
+                w.write("    % (STDMETHODCALLTYPE* base_%)(%* This);\n",
+                    [&](writer& w) { baseClass->write_c_abi_param(w); },
+                    baseClass->cpp_logical_name(),
+                    bind_c_type_name(type));
+            });
+
+            for (auto [iface, ver] : type.fast_class->supplemental_fast_interfaces)
+            {
+                w.write("\n    // Supplemental functions added for the % interface\n", iface->clr_full_name());
+                fastContractDepth += w.push_contract_guard(ver) ? 1 : 0;
+
+                for (auto const& func : iface->functions)
+                {
+                    write_c_function_declaration(w, bind_c_type_name(type), func);
+                }
+            }
+
+            w.pop_contract_guards(fastContractDepth);
+        }
+    }
+
     w.write(R"^-^(
     END_INTERFACE
 } %;
@@ -707,6 +828,53 @@ interface %
     for (auto const& func : type.functions)
     {
         write_c_function_declaration_macro(w, type, func);
+    }
+
+    if constexpr (is_interface)
+    {
+        if (type.fast_class)
+        {
+            w.write("// Supplemental functions added by use of the fast ABI attribute\n");
+
+            auto fastAttr = get_attribute(type.fast_class->type(), metadata_namespace, "FastAbiAttribute"sv);
+            std::size_t fastContractDepth = w.push_contract_guard(version_from_attribute(fastAttr)) ? 1 : 0;
+            w.write("\n");
+
+            // If the class "derives" from any other class, the fast pointer-to-base functions come first
+            std::vector<class_type const*> baseClasses;
+            auto base = type.fast_class->base_class;
+            while (base)
+            {
+                baseClasses.push_back(base);
+                base = base->base_class;
+            }
+
+            std::for_each(baseClasses.rbegin(), baseClasses.rend(), [&](class_type const* baseClass)
+            {
+                w.write(R"^-^(#define %_base_%(This) \
+    ((This)->lpVtbl->base_%(This))
+
+)^-^", bind_mangled_name_macro(type), baseClass->cpp_logical_name(), baseClass->cpp_logical_name());
+            });
+
+            for (auto [iface, ver] : type.fast_class->supplemental_fast_interfaces)
+            {
+                w.write("// Supplemental functions added for the % interface\n", iface->clr_full_name());
+                fastContractDepth += w.push_contract_guard(ver) ? 1 : 0;
+                w.write("\n");
+
+                for (auto const& func : iface->functions)
+                {
+                    write_c_function_declaration_macro(w, type, func);
+                }
+            }
+
+            w.pop_contract_guards(fastContractDepth);
+            if (fastContractDepth > 0)
+            {
+                w.write("\n");
+            }
+        }
     }
 
     w.write(R"^-^(#endif /* COBJMACROS */
@@ -747,8 +915,7 @@ static void write_delegate_definition(writer& w, delegate_type const& type, void
         return;
     }
 
-    write_type_banner(w, type);
-    auto contractDepth = type.push_contract_guards(w);
+    auto contractDepth = begin_type_definition(w, type);
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
@@ -761,8 +928,7 @@ EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
 )^-^", bind_iid_name(type), bind_mangled_name_macro(type));
 
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
+    end_type_definition(w, type, contractDepth);
 }
 
 void delegate_type::write_cpp_definition(writer& w) const
@@ -845,8 +1011,7 @@ static void write_interface_definition(writer& w, interface_type const& type, vo
         return;
     }
 
-    write_type_banner(w, type);
-    auto contractDepth = type.push_contract_guards(w);
+    auto contractDepth = begin_type_definition(w, type);
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
 #define __%_INTERFACE_DEFINED__
@@ -865,8 +1030,7 @@ EXTERN_C const IID %;
 #endif /* !defined(__%_INTERFACE_DEFINED__) */
 )^-^", bind_iid_name(type), bind_mangled_name_macro(type));
 
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
+    end_type_definition(w, type, contractDepth);
 }
 
 void interface_type::write_cpp_definition(writer& w) const
@@ -960,9 +1124,7 @@ void class_type::write_c_abi_param(writer& w) const
 
 void class_type::write_cpp_definition(writer& w) const
 {
-    write_type_banner(w, *this);
-
-    auto contractDepth = push_contract_guards(w);
+    auto contractDepth = begin_type_definition(w, *this);
 
     w.write(R"^-^(#ifndef RUNTIMECLASS_%_%_DEFINED
 #define RUNTIMECLASS_%_%_DEFINED
@@ -972,7 +1134,7 @@ void class_type::write_cpp_definition(writer& w) const
         bind_list("_", namespace_range{ clr_logical_namespace() }),
         cpp_logical_name());
 
-    if (auto info = is_deprecated())
+    if (auto info = is_deprecated(); info && w.config().enable_header_deprecation)
     {
         write_deprecation_message(w, *info);
     }
@@ -984,158 +1146,12 @@ void class_type::write_cpp_definition(writer& w) const
         cpp_logical_name(),
         clr_full_name());
 
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
+    end_type_definition(w, *this, contractDepth);
 }
 
 void class_type::write_c_definition(writer& w) const
 {
     write_cpp_definition(w);
-}
-
-static void write_fastabi_definition(writer& w, fastabi_type const& type, void (*func)(writer&, fastabi_type const&))
-{
-    write_type_banner(w, type);
-    auto contractDepth = type.push_contract_guards(w);
-
-    w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
-#define __%_INTERFACE_DEFINED__
-)^-^", bind_mangled_name_macro(type), bind_mangled_name_macro(type));
-
-    func(w, type);
-
-    w.write(R"^-^(
-#endif /* !defined(__%_INTERFACE_DEFINED__) */
-)^-^", bind_mangled_name_macro(type));
-
-    w.pop_contract_guards(contractDepth);
-    w.write('\n');
-}
-
-void fastabi_type::write_cpp_abi_name(writer& w) const
-{
-    write_cpp_fully_qualified_type(w, clr_abi_namespace(), m_typeName);
-}
-
-void fastabi_type::write_cpp_definition(writer& w) const
-{
-    write_fastabi_definition(w, *this, &write_cpp_interface_definition<fastabi_type>);
-}
-
-static void write_c_interface_function_declarations(writer& w, fastabi_type const& type, interface_type const& iface)
-{
-    for (auto const& func : iface.functions)
-    {
-        write_c_function_declaration(w, bind_c_type_name(type), func);
-    }
-}
-
-static void write_c_interface_function_declarations(writer& w, fastabi_type const& type, generic_inst const& genericInst)
-{
-    for (auto const& func : genericInst.functions)
-    {
-        write_c_function_declaration(w, bind_c_type_name(type), func);
-    }
-}
-
-static void write_c_interface_function_declarations(writer& w, fastabi_type const& type, metadata_type const& targetType)
-{
-    if (auto iface = dynamic_cast<interface_type const*>(&targetType))
-    {
-        write_c_interface_function_declarations(w, type, *iface);
-    }
-    else if (auto genericInst = dynamic_cast<generic_inst const*>(&targetType))
-    {
-        // NOTE: Default interfaces can be generic instantiations, hence the check here
-        write_c_interface_function_declarations(w, type, *genericInst);
-    }
-    else
-    {
-        auto const& fastAbi = dynamic_cast<fastabi_type const&>(targetType);
-        write_c_interface_function_declarations(w, type, fastAbi.base());
-        write_c_interface_function_declarations(w, type, fastAbi.current_interface());
-    }
-}
-
-static void write_c_interface_function_declaration_macros(writer& w, interface_type const& type)
-{
-    for (auto const& func : type.functions)
-    {
-        write_c_function_declaration_macro(w, type, func);
-    }
-}
-
-static void write_c_interface_function_declaration_macros(writer& w, generic_inst const& type)
-{
-    for (auto const& func : type.functions)
-    {
-        write_c_function_declaration_macro(w, type, func);
-    }
-}
-
-static void write_c_interface_function_declaration_macros(writer& w, metadata_type const& type)
-{
-    if (auto iface = dynamic_cast<interface_type const*>(&type))
-    {
-        write_c_interface_function_declaration_macros(w, *iface);
-    }
-    else if (auto genericInst = dynamic_cast<generic_inst const*>(&type))
-    {
-        // NOTE: Default interfaces can be generic instantiations, hence the check here
-        write_c_interface_function_declaration_macros(w, *genericInst);
-    }
-    else
-    {
-        auto const& fastAbi = dynamic_cast<fastabi_type const&>(type);
-        write_c_interface_function_declaration_macros(w, fastAbi.base());
-        write_c_interface_function_declaration_macros(w, fastAbi.current_interface());
-    }
-}
-
-static void write_fastabi_c_interface_definition(writer& w, fastabi_type const& type)
-{
-    // We don't forward declare fast ABI interfaces with the remainder of the interfaces, so go ahead and do so now
-    // since the vtable type needs to refer to it
-    w.write(R"^-^(typedef struct % %;
-
-)^-^", bind_c_type_name(type), bind_c_type_name(type));
-
-    w.write(R"^-^(typedef struct %
-{
-    BEGIN_INTERFACE
-
-)^-^", bind_c_type_name(type, "Vtbl"));
-
-    write_c_iinspectable_interface(w, type);
-
-    write_c_interface_function_declarations(w, type, type.base());
-    write_c_interface_function_declarations(w, type, type.current_interface());
-
-    w.write(R"^-^(
-    END_INTERFACE
-} %;
-
-interface %
-{
-    CONST_VTBL struct %* lpVtbl;
-};
-
-#ifdef COBJMACROS
-
-)^-^", bind_c_type_name(type, "Vtbl"), bind_c_type_name(type), bind_c_type_name(type, "Vtbl"));
-
-    write_c_iinspectable_interface_macros(w, type);
-
-    write_c_interface_function_declaration_macros(w, type.base());
-    write_c_interface_function_declaration_macros(w, type.current_interface());
-
-    w.write(R"^-^(#endif /* COBJMACROS */
-)^-^");
-}
-
-void fastabi_type::write_c_definition(writer& w) const
-{
-    write_fastabi_definition(w, *this, &write_fastabi_c_interface_definition);
 }
 
 std::size_t generic_inst::push_contract_guards(writer& w) const
@@ -1167,6 +1183,12 @@ void generic_inst::write_cpp_forward_declaration(writer& w) const
     for (auto param : m_genericParams)
     {
         param->write_cpp_forward_declaration(w);
+    }
+
+    auto isExperimental = is_experimental();
+    if (isExperimental)
+    {
+        w.write("#if defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
     }
 
     auto contractDepth = push_contract_guards(w);
@@ -1246,6 +1268,11 @@ typedef % %_t;
 )^-^", m_mangledName);
 
     w.pop_contract_guards(contractDepth);
+    if (isExperimental)
+    {
+        w.write("#endif // defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+    }
+
     w.write('\n');
     w.end_declaration(m_mangledName);
 }
@@ -1295,6 +1322,12 @@ void generic_inst::write_c_forward_declaration(writer& w) const
         dep->write_c_forward_declaration(w);
     }
 
+    auto isExperimental = is_experimental();
+    if (isExperimental)
+    {
+        w.write("#if defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+    }
+
     auto contractDepth = push_contract_guards(w);
 
     w.write(R"^-^(#if !defined(__%_INTERFACE_DEFINED__)
@@ -1314,6 +1347,11 @@ EXTERN_C const IID IID_%;
 )^-^", m_mangledName);
 
     w.pop_contract_guards(contractDepth);
+    if (isExperimental)
+    {
+        w.write("#endif // defined(ENABLE_WINRT_EXPERIMENTAL_TYPES)\n");
+    }
+
     w.write('\n');
     w.end_declaration(m_mangledName);
 }

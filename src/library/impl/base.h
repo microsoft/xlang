@@ -6,7 +6,7 @@
 #define XLANG_PLATFORM_WINDOWS 0
 #endif
 
-#if XLANG_PLATFORM_WINDOWS 
+#if XLANG_PLATFORM_WINDOWS
 #include <windows.h>
 #include <shlwapi.h>
 #include <xmllite.h>
@@ -76,8 +76,8 @@ namespace xlang
     template <typename...T> struct visit_overload : T... { using T::operator()...; };
 
     template <typename V, typename...C>
-    void call(V&& variant, C&&...call)
+    auto call(V&& variant, C&&...call)
     {
-        std::visit(visit_overload<C...>{ std::forward<C>(call)... }, std::forward<V>(variant));
+        return std::visit(visit_overload<C...>{ std::forward<C>(call)... }, std::forward<V>(variant));
     }
 }

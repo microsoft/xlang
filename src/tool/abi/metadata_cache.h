@@ -3,6 +3,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "meta_reader.h"
@@ -19,7 +20,7 @@ struct api_contract
 
 struct category_compare
 {
-    bool operator()(typedef_base const& lhs, typedef_base const& rhs)
+    bool operator()(typedef_base const& lhs, typedef_base const& rhs) const
     {
         using namespace xlang::meta::reader;
         auto leftCat = get_category(lhs.type());
@@ -138,6 +139,10 @@ private:
     void process_delegate_dependencies(init_state& state, delegate_type& type);
     void process_interface_dependencies(init_state& state, interface_type& type);
     void process_class_dependencies(init_state& state, class_type& type);
+
+    using relative_version = std::pair<std::size_t, std::uint32_t>;
+    using relative_version_map = std::unordered_map<interface_type const*, relative_version>;
+    void process_fastabi_required_interfaces(init_state& state, interface_type const* currentInterface, relative_version rank, relative_version_map& interfaceMap);
 
     function_def process_function(init_state& state, xlang::meta::reader::MethodDef const& def);
 

@@ -113,9 +113,9 @@ namespace xlang::impl
     {
         HKEY key;
 
-        if (0 != RegOpenKeyEx(
+        if (0 != RegOpenKeyExW(
             HKEY_LOCAL_MACHINE,
-            "SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots",
+            L"SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots",
             0,
             KEY_READ,
             &key))
@@ -187,7 +187,12 @@ namespace xlang::impl
 
         if (std::regex_search(module_path.c_str(), match, rx))
         {
-            return match[1].str();
+            auto path = get_sdk_path() / "Platforms\\UAP" / match[1].str() / "Platform.xml";
+
+            if (std::experimental::filesystem::exists(path))
+            {
+                return match[1].str();
+            }
         }
 
         auto key = open_sdk();
