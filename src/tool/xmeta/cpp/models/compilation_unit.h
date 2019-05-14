@@ -8,14 +8,38 @@
 
 namespace xlang::xmeta
 {
-    //std::string_view remove_path(std::string_view const filename) {
-    //    size_t lastdot = filename.find_last_of("\\");
-    //    if (lastdot == std::string::npos) return filename;
-    //    return filename.substr(lastdot + 1, filename.length());
-    //}
-
     struct symbol_table
     {
+        symbol_table() = delete;
+        symbol_table(std::vector<std::string> const& path) : cache{ path }
+        { }
+
+        bool set_symbol(std::string_view symbol, class_type_semantics const& class_type)
+        {
+            return table.insert(std::pair<std::string, class_type_semantics>(symbol, class_type)).second;
+        }
+
+        class_type_semantics get_symbol(std::string symbol)
+        {
+            auto iter = table.find(symbol);
+            if (iter == table.end())
+            {
+                auto const& type_def = cache.find(symbol);
+                if (type_def)
+                {
+                    std::shared_ptr<xlang::meta::reader::TypeDef> type = std::make_shared<xlang::meta::reader::TypeDef>(std::move(type_def));
+                    table[symbol] = type;
+                    return type;
+                }
+                return std::monostate();
+            }
+            return iter->second;
+        }
+
+    private:
+        std::map<std::string, class_type_semantics> table;
+        xlang::meta::reader::cache cache;
+
         void print_metadata(xlang::meta::reader::cache const& cache)
         {
             for (auto const& db : cache.databases())
@@ -45,44 +69,6 @@ namespace xlang::xmeta
                     std::cout << type_ref.TypeNamespace() << "." << type_ref.TypeName() << std::endl;
                 }
             }
-        }
-
-        symbol_table() = delete;
-        symbol_table(std::vector<std::string> const& path) : cache{ path }
-        { 
-            // print_metadata(cache);
-        }
-
-        std::map<std::string, class_type_semantics> table;
-        std::map<std::string_view, type_ref> imported_type_refs;
-        std::map<std::string_view, xlang::meta::reader::cache> metadata;
-        xlang::meta::reader::cache cache;
-
-        bool set_symbol(std::string_view symbol, class_type_semantics const& class_type)
-        {
-            return table.insert(std::pair<std::string, class_type_semantics>(symbol, class_type)).second;
-        }
-
-        bool set_imported_type_ref(std::string_view symbol)
-        {
-            return imported_type_refs.emplace(symbol, type_ref{ symbol }).second;
-        }
-
-        class_type_semantics get_symbol(std::string symbol)
-        {
-            auto iter = table.find(symbol);
-            if (iter == table.end())
-            {
-                auto const& type_def = cache.find(symbol);
-                if (type_def)
-                {
-                    std::shared_ptr<xlang::meta::reader::TypeDef> type = std::make_shared<xlang::meta::reader::TypeDef>(std::move(type_def));
-                    table[symbol] = type;
-                    return type;
-                }
-                return std::monostate();
-            }
-            return iter->second;
         }
     };
 
