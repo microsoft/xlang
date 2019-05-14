@@ -33,7 +33,7 @@ string(REGEX REPLACE "x86" "arm" CmakeOutDir_arm ${CmakeOutDir})
 string(REGEX REPLACE "x86" "arm64" CmakeOutDir_arm64 ${CmakeOutDir})
 
 add_custom_command(OUTPUT ${cppwinrt_fast_fwd_x86}
-	COMMAND cd /d ${CmakeOutDir_x86} && ${ffbuild} /p:Platform=x86,CmakeOutDir=${CmakeOutDir_x86}
+    COMMAND cd /d ${CmakeOutDir_x86} && ${ffbuild} /p:Platform=x86,CmakeOutDir=${CmakeOutDir_x86}
     COMMAND cd /d ${CmakeOutDir_x64} && ${ffbuild} /p:Platform=x64,CmakeOutDir=${CmakeOutDir_x64}
     COMMAND cd /d ${CmakeOutDir_arm} && ${ffbuild} /p:Platform=arm,CmakeOutDir=${CmakeOutDir_arm}
     COMMAND cd /d ${CmakeOutDir_arm64} && ${ffbuild} /p:Platform=arm64,CmakeOutDir=${CmakeOutDir_arm64}
