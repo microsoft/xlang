@@ -801,52 +801,88 @@ TEST_CASE("Interface type metadata")
     std::istringstream test_idl{ R"(
         namespace N
         {
-            delegate void StringListEvent(Int32 sender);
-
-            interface IControl
+            interface IControl requires M.IControl3
             {
                 void Paint();
             }
     
-            interface IComboBox requires IControl {
-                S1 Draw(S1 param1);
-                event StringListEvent Changed;
-                S1 property1;
+            interface IComboBox requires IControl, IControl2
+            {
+                Int32 property1;
             }
 
-            struct S1
+            interface IControl2 requires M.IControl3
             {
+                void Paint2();
             }
         }
+        namespace M
+        {
+            interface IControl3
+            {
+                void Paint3();
+            }
+        }
+
     )" };
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 5);
-    auto const& s1_ref = find_type_by_name<TypeRef>(db.TypeRef, "S1");
-    auto const& icontrol_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl");
-    auto const& icombo_ref = find_type_by_name<TypeRef>(db.TypeRef, "IComboBox");
-    auto const& event_registration_ref = find_type_by_name<TypeRef>(db.TypeRef, "TimeSpan");
-    auto const& string_list_event_ref = find_type_by_name<TypeRef>(db.TypeRef, "StringListEvent");
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 4);
+    auto const& combo_ref = find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    auto const& control3_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl3", "M");
+    auto const& control2_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl2", "N");
+    auto const& control_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl", "N");
 
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 4);
-    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox");
-    auto const& control = find_type_by_name<TypeDef>(db.TypeDef, "IControl");
+    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
+    auto const& c1 = find_type_by_name<TypeDef>(db.TypeDef, "IControl", "N");
+    auto const& c2 = find_type_by_name<TypeDef>(db.TypeDef, "IControl2", "N");
+
     test_interface_type_properties(combo);
-    test_interface_type_properties(control);
 
-    REQUIRE(size(combo.MethodList()) == 5);
-    REQUIRE(size(combo.PropertyList()) == 1);
-    REQUIRE(size(combo.EventList()) == 1);
-    REQUIRE(size(combo.InterfaceImpl()) == 1);
-    auto const& method_list = combo.MethodList();
-
-    REQUIRE(method_list.first[0].Name() == "Draw");
-    REQUIRE(method_list.first[0].Flags().value == interface_method_attributes().value);
+    REQUIRE(db.InterfaceImpl.size() == 5);
+    auto const& impls =  combo.InterfaceImpl();
+    REQUIRE(size(impls) == 3);
     {
-        auto const& Draw_sig = method_list.first[0].Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_sig.ReturnType().Type().Type()).TypeRef() == s1_ref);
-        auto const& Draw_param_sig = Draw_sig.Params().first[0];
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_param_sig.Type().Type()).TypeRef() == s1_ref);
+        auto const& iter = std::find_if(impls.first, impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control2_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control2_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control2_ref);
+    }
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control_ref);
+    }
+
+    auto const& c1_impls = c1.InterfaceImpl();
+    {
+        REQUIRE(size(c1_impls) == 1);
+        auto const& iter = std::find_if(c1_impls.first, c1_impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+
+    auto const& c2_impls = c2.InterfaceImpl();
+    {
+        REQUIRE(size(c2_impls) == 1);
+        auto const& iter = std::find_if(c2_impls.first, c2_impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
     }
 }
