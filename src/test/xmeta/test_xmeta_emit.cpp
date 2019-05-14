@@ -280,18 +280,6 @@ std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::
 }
 
 template<typename T>
-auto find_type_by_name(table<T> const& type, std::string name)
-{
-    auto const& ref = std::find_if(type.begin(), type.end(), [name](auto&& type_ref)
-    {
-        return type_ref.TypeName() == name;
-    });
-    REQUIRE(ref.TypeName() == name);
-    return ref;
-}
-
-
-template<typename T>
 auto find_type_by_name(table<T> const& type, std::string name, std::string namespace_name)
 {
     auto const& ref = std::find_if(type.begin(), type.end(), [name, namespace_name](auto&& type_ref)
