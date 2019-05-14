@@ -141,6 +141,11 @@ namespace
     {
         assert(semantic_type.is_resolved());
         type_semantics const& ts = semantic_type.get_resolved_target();
+        if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(ts))
+        {
+            auto const& type = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(ts);
+            return std::string(type->TypeNamespace()) + "." + std::string(type->TypeName());
+        }
         if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
         {
             return std::get<std::shared_ptr<class_model>>(ts)->get_fully_qualified_id();

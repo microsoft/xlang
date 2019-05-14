@@ -117,6 +117,12 @@ const MethodAttributes method_attributes_no_flags()
     return result;
 }
 
+const EventAttributes event_attributes_no_flags()
+{
+    EventAttributes result{};
+    return result;
+}
+
 const MethodImplAttributes delegate_method_impl_attribtes()
 {
     MethodImplAttributes result{};
@@ -257,7 +263,8 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
 
 std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::string_view assembly_name)
 {
-    xmeta_idl_reader reader{ "" };
+    std::vector<std::string> paths = { "E:\\xlang\\src\\_build\\Windows\\x86\\Debug\\foundation\\Foundation.xmeta" };
+    xmeta_idl_reader reader{ "", paths };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     xlang::xmeta::xmeta_emit emitter(assembly_name);
@@ -704,7 +711,7 @@ TEST_CASE("Interface property metadata")
         REQUIRE(assoc == HasSemantics::Property);
         auto const& property_sig = db.MethodSemantics[i].Association().Property().Type();
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(property_sig.Type().Type()).TypeRef() == S1_ref);
-        REQUIRE(db.MethodSemantics[i].Association().Property().Name() == "property1");
+        REQUIRE(db.MethodSemantics[i].Association().Property().Name() == property1.Name());
     }
     auto const& get_method = db.MethodSemantics[0].Method();
     REQUIRE(get_method.Name() == "get_property1");
@@ -723,6 +730,77 @@ TEST_CASE("Interface property metadata")
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == S1_ref);
     }
 }
+
+TEST_CASE("Interface event metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(Int32 sender);
+            interface IComboBox 
+            {
+                event StringListEvent Changed;
+            }
+        }
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
+
+    auto const& icombo_ref = db.TypeRef[TYPE_REF_OFFSET + 0];
+    auto const& event_registration_token_ref = db.TypeRef[TYPE_REF_OFFSET + 1];
+    auto const& string_list_event_ref = db.TypeRef[TYPE_REF_OFFSET + 2];
+    REQUIRE(icombo_ref.TypeName() == "IComboBox");
+    REQUIRE(event_registration_token_ref.TypeName() == "TimeSpan");
+    REQUIRE(event_registration_token_ref.TypeNamespace() == "Foundation");
+    REQUIRE(string_list_event_ref.TypeName() == "StringListEvent");
+
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
+    REQUIRE(db.TypeDef[TYPE_DEF_OFFSET + 0].TypeName() == "IComboBox");
+    REQUIRE(db.TypeDef[TYPE_DEF_OFFSET + 1].TypeName() == "StringListEvent");
+
+    auto const& combo = db.TypeDef[TYPE_DEF_OFFSET + 0];
+    test_interface_type_properties(combo);
+
+    REQUIRE(size(combo.EventList()) == 1);
+    auto const& event_list = combo.EventList();
+
+
+    auto const& event1 = event_list.first[0];
+    REQUIRE(event1.Name() == "Changed");
+    REQUIRE(event1.EventFlags().value == event_attributes_no_flags().value);
+
+    REQUIRE(db.MethodSemantics.size() == 2);
+    for (size_t i = 0; i < db.MethodSemantics.size(); i++)
+    {
+        auto const& assoc = db.MethodSemantics[i].Association().type();
+        REQUIRE(assoc == HasSemantics::Event);
+        auto const& event_sig = db.MethodSemantics[i].Association().Event().EventType();
+        REQUIRE(event_sig.TypeRef().TypeName() == string_list_event_ref.TypeName());
+        REQUIRE(db.MethodSemantics[i].Association().Event().Name() == event1.Name());
+    }
+    auto const& add_method = db.MethodSemantics[0].Method();
+    REQUIRE(add_method.Name() == "add_Changed");
+    {
+        auto const& sig = add_method.Signature();
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == event_registration_token_ref);
+        REQUIRE(size(sig.Params()) == 1);
+        auto const& param_sig = sig.Params().first[0];
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == string_list_event_ref);
+    }
+    auto const& remove_method = db.MethodSemantics[1].Method();
+    REQUIRE(remove_method.Name() == "remove_Changed");
+    {
+        auto const& sig = remove_method.Signature();
+        REQUIRE(!sig.ReturnType());
+        REQUIRE(size(sig.Params()) == 1);
+        auto const& param_sig = sig.Params().first[0];
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == event_registration_token_ref);
+    }
+}
+
+
 
 TEST_CASE("Interface type metadata")
 {
@@ -750,15 +828,17 @@ TEST_CASE("Interface type metadata")
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 4);
-    auto const& S1_ref = db.TypeRef[TYPE_REF_OFFSET + 0];
-    auto const& IControl_ref = db.TypeRef[TYPE_REF_OFFSET + 1];
-    auto const& ICombo_ref = db.TypeRef[TYPE_REF_OFFSET + 2];
-    auto const& StringListEvent_ref = db.TypeRef[TYPE_REF_OFFSET + 3];
-    REQUIRE(S1_ref.TypeName() == "S1");
-    REQUIRE(IControl_ref.TypeName() == "IControl");
-    REQUIRE(ICombo_ref.TypeName() == "IComboBox");
-    REQUIRE(StringListEvent_ref.TypeName() == "StringListEvent");
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 5);
+    auto const& s1_ref = db.TypeRef[TYPE_REF_OFFSET + 0];
+    auto const& icontrol_ref = db.TypeRef[TYPE_REF_OFFSET + 1];
+    auto const& icombo_ref = db.TypeRef[TYPE_REF_OFFSET + 2];
+    auto const& event_registration_ref = db.TypeRef[TYPE_REF_OFFSET + 3];
+    auto const& string_list_event_ref = db.TypeRef[TYPE_REF_OFFSET + 4];
+    REQUIRE(s1_ref.TypeName() == "S1");
+    REQUIRE(icontrol_ref.TypeName() == "IControl");
+    REQUIRE(icombo_ref.TypeName() == "IComboBox");
+    REQUIRE(event_registration_ref.TypeName() == "TimeSpan");
+    REQUIRE(string_list_event_ref.TypeName() == "StringListEvent");
 
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 4);
     REQUIRE(db.TypeDef[TYPE_DEF_OFFSET + 1].TypeName() == "IComboBox");
@@ -778,8 +858,8 @@ TEST_CASE("Interface type metadata")
     REQUIRE(method_list.first[0].Flags().value == interface_method_attributes().value);
     {
         auto const& Draw_sig = method_list.first[0].Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_sig.ReturnType().Type().Type()).TypeRef() == s1_ref);
         auto const& Draw_param_sig = Draw_sig.Params().first[0];
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_param_sig.Type().Type()).TypeRef() == S1_ref);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_param_sig.Type().Type()).TypeRef() == s1_ref);
     }
 }

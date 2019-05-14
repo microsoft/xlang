@@ -23,6 +23,8 @@ namespace xlang::xmeta
                 std::cout << "TypeDefs ------------------ " << std::endl;
                 for (auto const& type_def : db.TypeDef)
                 {
+                    std::cout << "assembly: " << type_def.get_database().Assembly[0].Name() << std::endl;
+
                     std::cout << type_def.TypeNamespace() << "." << type_def.TypeName() << std::endl;
                     if (type_def.Extends())
                     {
@@ -47,7 +49,9 @@ namespace xlang::xmeta
 
         symbol_table() = delete;
         symbol_table(std::vector<std::string> const& path) : cache{ path }
-        { }
+        { 
+            // print_metadata(cache);
+        }
 
         std::map<std::string, class_type_semantics> table;
         std::map<std::string_view, type_ref> imported_type_refs;
@@ -69,27 +73,13 @@ namespace xlang::xmeta
             auto iter = table.find(symbol);
             if (iter == table.end())
             {
-                auto const& type = cache.find(symbol);
-                if (type.is_struct())
+                auto const& type_def = cache.find(symbol);
+                if (type_def)
                 {
-                    auto new_struct = std::make_shared<struct_model>(type.TypeName(), 0, "", type.TypeNamespace());
-                    type.FieldList();
-               /*     for (auto field : ctx->struct_body()->field_declaration())
-                    {
-                        std::string field_name{ field->IDENTIFIER()->getText() };
-                        if (new_struct->member_exists(field_name))
-                        {
-                            error_manager.write_struct_field_error(field->IDENTIFIER()->getSymbol()->getLine(), field_name, struct_name);
-                        }
-                        else
-                        {
-                            type_ref tr{ field->type()->getText() };
-                            extract_type(field->type(), tr);
-                            new_struct->add_field(std::pair(tr, field_name));
-                        }
-                    }*/
+                    std::shared_ptr<xlang::meta::reader::TypeDef> type = std::make_shared<xlang::meta::reader::TypeDef>(std::move(type_def));
+                    table[symbol] = type;
+                    return type;
                 }
-
                 return std::monostate();
             }
             return iter->second;

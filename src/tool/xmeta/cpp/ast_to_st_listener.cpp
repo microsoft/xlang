@@ -346,17 +346,17 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
 listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interface_event_declarationContext* interface_event, std::shared_ptr<class_or_interface_model> model)
 {
     std::string event_id = interface_event->IDENTIFIER()->getText();
-    // type_ref event_registration{ "Foundation.TimeSpan" };
+    type_ref event_registration{ "Foundation.TimeSpan" };
     type_ref tr{ interface_event->type()->getText() };
     extract_type(interface_event->type(), tr);
     auto decl_line = interface_event->IDENTIFIER()->getSymbol()->getLine();
     parameter_semantics sem = parameter_semantics::in;
 
-    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event_id, decl_line, m_cur_assembly, /*std::move(std::nullopt)*/ std::move(std::nullopt), method_association::Event);
+    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event_id, decl_line, m_cur_assembly, std::move(event_registration), method_association::Event);
     add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
 
     std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Event);
-    //remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(event_registration) });
+    remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(event_registration) });
 
     model->add_member(add_method);
     model->add_member(remove_method);

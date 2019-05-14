@@ -61,10 +61,6 @@ namespace xlang::xmeta
         xlang::meta::writer::signature_blob create_method_sig(std::optional<type_ref> const& return_type_ref, std::vector<formal_parameter_model> const& formal_parameters);
 
         mdTypeRef get_or_define_type_ref(std::string ref_name);
-        
-        //static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime; // Flags: Public | Sealed | Class |  Sequential
-        //static constexpr DWORD runtimeclass_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;                // Flags: class | public | sealed
-        //static constexpr DWORD interface_type_flag = tdPublic | tdInterface | tdAbstract | tdWindowsRuntime;    // Flags: : Interface | Public | Abstract
 
         // A generic assembly metadata struct.
         static constexpr ASSEMBLYMETADATA s_genericMetadata =
