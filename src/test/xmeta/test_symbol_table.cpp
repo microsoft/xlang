@@ -915,8 +915,8 @@ TEST_CASE("Imports test")
 
     )" };
     std::vector<std::string> paths = { "E:\\xlang\\src\\_build\\Windows\\x86\\Debug\\foundation\\Foundation.xmeta" };
-    xmeta_idl_reader reader{ "" };
-    reader.read(test_idl, paths);
+    xmeta_idl_reader reader{ "", paths };
+    reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
    

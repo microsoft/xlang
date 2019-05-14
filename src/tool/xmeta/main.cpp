@@ -35,7 +35,8 @@ int main(int argc, const char* argv[])
 {
     std::ifstream stream;
     stream.open(argv[1]);
-    xmeta_idl_reader reader{ "" };
+    std::vector<std::string> imports;
+    xmeta_idl_reader reader{ "", imports};
     reader.read(stream);
 
     std::string_view assembly_name = remove_path(argv[1]);

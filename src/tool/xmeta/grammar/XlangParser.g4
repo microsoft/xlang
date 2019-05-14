@@ -182,7 +182,7 @@ qualified_alias_member
     ;
 
 apicontract_declaration
-    : attributes? APICONTRACT IDENTIFIER OPEN_BRACE CLOSE_BRACE SEMICOLON?
+    : attributes? APICONTRACT_LXR IDENTIFIER OPEN_BRACE CLOSE_BRACE SEMICOLON?
     ;
 
 //* Class members *//

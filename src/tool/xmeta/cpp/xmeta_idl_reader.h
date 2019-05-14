@@ -20,13 +20,14 @@ namespace xlang::xmeta
 {
     struct xmeta_idl_reader : public xlang_model_listener
     {
-        xmeta_idl_reader(std::string_view const& idl_assembly_name) : m_xlang_model{ idl_assembly_name }
+        xmeta_idl_reader(std::string_view const& idl_assembly_name) : m_xlang_model{ idl_assembly_name, std::vector<std::string>{} }
+        {}
+
+        xmeta_idl_reader(std::string_view const& idl_assembly_name, std::vector<std::string> const& paths) : m_xlang_model{ idl_assembly_name, paths }
         {}
 
         void read(std::istream& idl_contents, bool disable_error_reporting = false);
-        void read(std::istream& idl_contents, std::vector<std::string> imports, bool disable_error_reporting = false);
         void read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting = false);
-        void read(std::istream& idl_contents, std::vector<std::string> imports, XlangParserBaseListener& listener, bool disable_error_reporting = false);
         void pass2();
         void pass1();
 
