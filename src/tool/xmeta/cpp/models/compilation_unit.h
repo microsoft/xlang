@@ -8,35 +8,6 @@
 
 namespace xlang::xmeta
 {
- /*   void print_metadata(xlang::meta::reader::cache const& cache)
-    {
-        for (auto const& db : cache.databases())
-        {
-            std::cout << "TypeDefs ------------------ " << std::endl;
-            for (auto const& type_def : db.TypeDef)
-            {
-                std::cout << type_def.TypeNamespace() << "." << type_def.TypeName() << std::endl;
-                if (type_def.Extends())
-                {
-                    std::cout << "  extends: " << type_def.Extends().TypeRef().TypeName() << std::endl;
-                    std::cout << "           " << type_def.is_struct() << std::endl;
-                }
-                if (size(type_def.MethodList()) > 0)
-                {
-                    for (auto const& method : type_def.MethodList())
-                    {
-                        std::cout << "       " << method.Name() << std::endl;
-                    }
-                }
-            }
-            std::cout << "TypeRefs ------------------ " << std::endl;
-            for (auto const& type_ref : db.TypeRef)
-            {
-                std::cout << type_ref.TypeNamespace() << "." << type_ref.TypeName() << std::endl;
-            }
-        }
-    }*/
-
     //std::string_view remove_path(std::string_view const filename) {
     //    size_t lastdot = filename.find_last_of("\\");
     //    if (lastdot == std::string::npos) return filename;
@@ -45,6 +16,35 @@ namespace xlang::xmeta
 
     struct symbol_table
     {
+        void print_metadata(xlang::meta::reader::cache const& cache)
+        {
+            for (auto const& db : cache.databases())
+            {
+                std::cout << "TypeDefs ------------------ " << std::endl;
+                for (auto const& type_def : db.TypeDef)
+                {
+                    std::cout << type_def.TypeNamespace() << "." << type_def.TypeName() << std::endl;
+                    if (type_def.Extends())
+                    {
+                        std::cout << "  extends: " << type_def.Extends().TypeRef().TypeName() << std::endl;
+                        std::cout << "           " << type_def.is_struct() << std::endl;
+                    }
+                    if (size(type_def.MethodList()) > 0)
+                    {
+                        for (auto const& method : type_def.MethodList())
+                        {
+                            std::cout << "       " << method.Name() << std::endl;
+                        }
+                    }
+                }
+                std::cout << "TypeRefs ------------------ " << std::endl;
+                for (auto const& type_ref : db.TypeRef)
+                {
+                    std::cout << type_ref.TypeNamespace() << "." << type_ref.TypeName() << std::endl;
+                }
+            }
+        }
+
         symbol_table() = delete;
         symbol_table(std::vector<std::string> const& path) : cache{ path }
         { }
@@ -69,6 +69,27 @@ namespace xlang::xmeta
             auto iter = table.find(symbol);
             if (iter == table.end())
             {
+                auto const& type = cache.find(symbol);
+                if (type.is_struct())
+                {
+                    auto new_struct = std::make_shared<struct_model>(type.TypeName(), 0, "", type.TypeNamespace());
+                    type.FieldList();
+               /*     for (auto field : ctx->struct_body()->field_declaration())
+                    {
+                        std::string field_name{ field->IDENTIFIER()->getText() };
+                        if (new_struct->member_exists(field_name))
+                        {
+                            error_manager.write_struct_field_error(field->IDENTIFIER()->getSymbol()->getLine(), field_name, struct_name);
+                        }
+                        else
+                        {
+                            type_ref tr{ field->type()->getText() };
+                            extract_type(field->type(), tr);
+                            new_struct->add_field(std::pair(tr, field_name));
+                        }
+                    }*/
+                }
+
                 return std::monostate();
             }
             return iter->second;

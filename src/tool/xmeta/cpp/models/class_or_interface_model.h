@@ -15,6 +15,10 @@ namespace xlang::xmeta
             namespace_member_model{ id, decl_line, assembly_name, containing_ns_body }
         { }
 
+        class_or_interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::string_view const& containing_namespace_name) :
+            namespace_member_model{ id, decl_line, assembly_name, containing_namespace_name }
+        { }
+
         auto const& get_interface_bases() const noexcept
         {
             return m_interface_base_refs;

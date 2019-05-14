@@ -20,6 +20,10 @@ namespace xlang::xmeta
         interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body }
         { }
+        interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::string_view const& containing_ns_name) :
+            class_or_interface_model{ id, decl_line, assembly_name, containing_ns_name }
+        { }
+
 
         std::unordered_set<std::shared_ptr<interface_model>> get_all_interface_bases()
         {
