@@ -54,6 +54,12 @@
   .field public uint8 Node6
 } // end of class Foundation.Guid
 
+.class public sequential ansi windowsruntime sealed Foundation.EventRegistrationToken
+       extends [mscorlib]System.ValueType
+{
+  .field public int64 Value
+} // end of class Foundation.EventRegistrationToken
+
 .class public auto ansi windowsruntime sealed Foundation.AsyncActionCompletedHandler
        extends [mscorlib]System.MulticastDelegate
 {
