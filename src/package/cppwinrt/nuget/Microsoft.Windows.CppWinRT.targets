@@ -18,7 +18,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTPackageDir Condition="'$(CppWinRTPackage)' != 'true' and '$(CppWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))</CppWinRTPackageDir>
         <CppWinRTPath Condition="'$(CppWinRTPackage)' == 'true' and '$(CppWinRTPath)'==''">"$(CppWinRTPackageDir)bin\"</CppWinRTPath>
         <CppWinRTPath Condition="'$(CppWinRTPackage)' != 'true' and '$(CppWinRTPath)'==''">"$(CppWinRTPackageDir)"</CppWinRTPath>
-        <CppWinRTParameters Condition="'$(CppWinRTFastAbi)'=='true'">$(CppWinRTParameters) -fastabi</CppWinRTParameters>
         
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
         <!--Override SDK's uap.props setting to ensure version-matched headers-->
@@ -480,7 +479,13 @@ $(XamlMetaDataProviderPch)
     </Target>
 
     <!-- Fast ABI component support -->
-    <!-- <Import Condition="'$(CppWinRTFastAbi)'=='true'">
-        Project="$(MSBuildThisFileDirectory)Microsoft.Windows.CppWinRT.FastAbi.targets" /> -->
+    <PropertyGroup Condition="'$(CppWinRTFastAbi)'=='true'">
+        <CppWinRTParameters>$(CppWinRTParameters) -fastabi</CppWinRTParameters>
+    </PropertyGroup>
+    <ItemDefinitionGroup Condition="'$(CppWinRTFastAbi)'=='true'">
+        <Link>
+            <AdditionalDependencies>%(AdditionalDependencies);$(CppWinRTPackageDir)build\native\lib\$(Platform)\cppwinrt_fast_forwarder.lib</AdditionalDependencies>
+        </Link>
+    </ItemDefinitionGroup>
 
 </Project>
