@@ -346,7 +346,7 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
 listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interface_event_declarationContext* interface_event, std::shared_ptr<class_or_interface_model> model)
 {
     std::string event_id = interface_event->IDENTIFIER()->getText();
-    type_ref event_registration{ "Foundation.TimeSpan" };
+    type_ref event_registration{ "Foundation.EventRegistrationToken" };
     type_ref tr{ interface_event->type()->getText() };
     extract_type(interface_event->type(), tr);
     auto decl_line = interface_event->IDENTIFIER()->getSymbol()->getLine();

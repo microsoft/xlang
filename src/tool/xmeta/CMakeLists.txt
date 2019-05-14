@@ -15,6 +15,7 @@ if (WIN32)
         cpp/ast_to_st_listener.cpp
         cpp/models/namespace_model.cpp
         cpp/xlang_model_walker.cpp)
+    add_dependencies(xmeta_model foundation_metadata)
 endif ()
 
 target_include_directories(xmeta_model PUBLIC cpp/models cpp ${XLANG_LIBRARY_PATH})

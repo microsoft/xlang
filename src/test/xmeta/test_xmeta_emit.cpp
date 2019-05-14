@@ -263,7 +263,7 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
 
 std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::string_view assembly_name)
 {
-    std::vector<std::string> paths = { "E:\\xlang\\src\\_build\\Windows\\x86\\Debug\\foundation\\Foundation.xmeta" };
+    std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "", paths };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
@@ -474,7 +474,7 @@ TEST_CASE("Parameter signature class reference type metadata across namespace")
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
     auto const& e1_ref = find_type_by_name<TypeRef>(db.TypeRef, "e1", "Windows.Test");
-    auto const& d1_ref = find_type_by_name<TypeRef>(db.TypeRef, "d1", "A");
+    find_type_by_name<TypeRef>(db.TypeRef, "d1", "A");
 
     auto const& e1 = find_type_by_name<TypeDef>(db.TypeDef, "e1", "Windows.Test");
     auto const& d1 = find_type_by_name<TypeDef>(db.TypeDef, "d1", "A");
@@ -508,7 +508,7 @@ TEST_CASE("Parameter signature class reference type metadata")
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
     REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "e1");
     auto const& e1_ref = find_type_by_name<TypeRef>(db.TypeRef, "e1", "Windows.Test");
-    auto const& d1_ref = find_type_by_name<TypeRef>(db.TypeRef, "d1", "Windows.Test");
+    find_type_by_name<TypeRef>(db.TypeRef, "d1", "Windows.Test");
 
     auto const e1 = find_type_by_name<TypeDef>(db.TypeDef, "e1", "Windows.Test");
     auto const d1 = find_type_by_name<TypeDef>(db.TypeDef, "d1", "Windows.Test");
@@ -600,7 +600,7 @@ TEST_CASE("Struct class type metadata")
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
     
-    auto const& s0 = find_type_by_name<TypeRef>(db.TypeRef, "S0", "N");
+    find_type_by_name<TypeRef>(db.TypeRef, "S0", "N");
     auto const& s1 = find_type_by_name<TypeRef>(db.TypeRef, "S1", "N");
     auto const& e0 = find_type_by_name<TypeRef>(db.TypeRef, "E0", "N");
 
@@ -681,8 +681,8 @@ TEST_CASE("Interface property metadata")
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
-    auto const& E1_ref = find_type_by_name<TypeRef>(db.TypeRef, "E1", "N");
-    auto const& ICombo_ref = find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    find_type_by_name<TypeRef>(db.TypeRef, "E1", "N");
     auto const& S1_ref = find_type_by_name<TypeRef>(db.TypeRef, "S1", "N");
 
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
@@ -739,8 +739,8 @@ TEST_CASE("Interface event metadata")
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
-    auto const& icombo_ref = find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
-    auto const& event_registration_token_ref = find_type_by_name<TypeRef>(db.TypeRef, "TimeSpan", "Foundation");
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    auto const& event_registration_token_ref = find_type_by_name<TypeRef>(db.TypeRef, "EventRegistrationToken", "Foundation");
     auto const& string_list_event_ref = find_type_by_name<TypeRef>(db.TypeRef, "StringListEvent", "N");
 
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
@@ -817,7 +817,7 @@ TEST_CASE("Interface type metadata")
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 4);
-    auto const& combo_ref = find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
     auto const& control3_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl3", "M");
     auto const& control2_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl2", "N");
     auto const& control_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl", "N");
