@@ -219,7 +219,11 @@ namespace coolrt
 
             for (auto&& prop : type.PropertyList())
             {
-                w.write("% % { get; set; }\n", prop.Type(), prop.Name());
+                auto [getter, setter] = get_property_methods(prop);
+                
+                w.write("% % { % % }\n", prop.Type(), prop.Name(),
+                    getter ? "get;" : "",
+                    setter ? "set;" : "");
             }
 
             for (auto&& evt : type.EventList())
