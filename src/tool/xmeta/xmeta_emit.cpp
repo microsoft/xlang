@@ -370,7 +370,7 @@ namespace xlang::xmeta
         }
     }
 
-    void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
+    void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, std::map<std::string_view, mdMethodDef> const& method_defs, mdTypeDef const& token_def)
     {
         std::wstring property_name = s2ws(model->get_id());
         mdMethodDef token_get_method = mdTokenNil;
@@ -411,7 +411,7 @@ namespace xlang::xmeta
     }
 
 
-    void xmeta_emit::define_event(std::shared_ptr<event_model> const& model, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
+    void xmeta_emit::define_event(std::shared_ptr<event_model> const& model, std::map<std::string_view, mdMethodDef> const& method_defs, mdTypeDef const& token_def)
     {
         std::wstring event_name = s2ws(model->get_id());
         mdMethodDef token_add_method = mdTokenNil;
@@ -703,9 +703,9 @@ namespace xlang::xmeta
             &token_param_def));
     }
 
-    mdTypeRef xmeta_emit::get_or_define_type_ref(std::string ref_name)
+    mdTypeRef xmeta_emit::get_or_define_type_ref(std::string const& ref_name)
     {
-        auto iter = type_references.find(ref_name);
+        auto const& iter = type_references.find(ref_name);
         if (iter == type_references.end())
         {
             mdTypeRef md_ref;

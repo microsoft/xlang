@@ -19,7 +19,7 @@ namespace xlang::xmeta
             return table.insert(std::pair<std::string, class_type_semantics>(symbol, class_type)).second;
         }
 
-        class_type_semantics get_symbol(std::string symbol)
+        class_type_semantics get_symbol(std::string const& symbol)
         {
             auto iter = table.find(symbol);
             if (iter == table.end())
