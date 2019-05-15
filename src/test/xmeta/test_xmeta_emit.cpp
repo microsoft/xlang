@@ -267,16 +267,8 @@ std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::
     xmeta_idl_reader reader{ "", paths };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-    xlang::xmeta::xmeta_emit emitter(assembly_name);
-    xlang::xmeta::xlang_model_walker walker(reader.get_namespaces(), emitter);
-
-    walker.register_listener(emitter);
-    walker.walk();
-
-    xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter.save_to_memory());
-
-    return writer.save_to_memory();
+    REQUIRE(reader.get_num_semantic_errors() == 0);
+    return reader.save_to_memory();
 }
 
 template<typename T>

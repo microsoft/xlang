@@ -13,6 +13,9 @@
 #include "xlang_model_listener.h"
 #include "models/xmeta_models.h"
 #include "xlang_error.h"
+#include "meta_reader.h"
+#include "meta_writer.h"
+#include "xmeta_emit.h"
 
 struct ast_to_st_listener;
 
@@ -21,10 +24,10 @@ namespace xlang::xmeta
     struct xmeta_idl_reader : public xlang_model_listener
     {
         xmeta_idl_reader(std::string_view const& idl_assembly_name) : m_xlang_model{ idl_assembly_name, std::vector<std::string>{} }
-        {}
+        { }
 
         xmeta_idl_reader(std::string_view const& idl_assembly_name, std::vector<std::string> const& paths) : m_xlang_model{ idl_assembly_name, paths }
-        {}
+        { }
 
         void read(std::istream& idl_contents, bool disable_error_reporting = false);
         void read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting = false);
@@ -46,11 +49,21 @@ namespace xlang::xmeta
             return m_error_manager.get_num_of_syntax_errors();
         }
 
+        std::vector<uint8_t> save_to_memory()
+        {
+            return writer.save_to_memory();
+        }
+
+        void save_to_current_path()
+        {
+            return writer.save_to_file(std::filesystem::current_path().append(std::string(m_xlang_model.m_assembly) + ".xmeta"));
+        }
+
     private:
         xlang_error_manager m_error_manager;
         compilation_unit m_xlang_model;
         void import_metadata(std::vector<std::string> imports);
-
+        xlang::meta::writer::pe_writer writer;
 
         const std::string event_registration_token = "Xlang.Foundation.EventRegistrationToken";
     };

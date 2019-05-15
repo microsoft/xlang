@@ -6,7 +6,6 @@
 #include "XlangLexer.h"
 #include "XlangParser.h"
 #include "xlang_model_walker.h"
-#include "meta_reader.h"
 
 namespace xlang::xmeta
 {
@@ -34,7 +33,18 @@ namespace xlang::xmeta
         m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());
         pass1_resolving_refs();
         pass2_resolving_circular_semantics();
+        if (get_num_syntax_errors() != 0 || get_num_semantic_errors())
+        {
+            return;
+        }
 
+        xlang::xmeta::xmeta_emit emitter(m_xlang_model.m_assembly);
+        xlang::xmeta::xlang_model_walker walker(m_xlang_model.namespaces, emitter);
+
+        walker.register_listener(emitter);
+        walker.walk();
+
+        writer.add_metadata(emitter.save_to_memory());
     }
 
     void xmeta_idl_reader::pass1_resolving_refs()

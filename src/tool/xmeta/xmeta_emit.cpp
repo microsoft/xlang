@@ -462,6 +462,7 @@ namespace xlang::xmeta
         implements.emplace_back(mdTokenNil);
         
         //TODO: When we have attributes, if it has a single ExclusiveToAttribute. Then it must not be tdPublic. 
+        //NOTE: tdWindowsRuntime flag maybe removed later to indicate that this is not WinRT
         static constexpr DWORD interface_type_flag = tdInterface | tdPublic | tdAbstract | tdWindowsRuntime;
         auto token_interface_type_def = define_type_def(interface_name, interface_type_flag, mdTokenNil, implements.data());
         std::map<std::string_view, mdMethodDef> method_defs;
@@ -500,6 +501,7 @@ namespace xlang::xmeta
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
         auto const& struct_name = model->get_fully_qualified_id();
+        //NOTE: tdWindowsRuntime flag maybe removed later to indicate that this is not WinRT
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         auto token_struct_type_def = define_type_def(struct_name, struct_type_flag, token_value_type, implements);
@@ -528,6 +530,7 @@ namespace xlang::xmeta
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
     {
         auto const& type_name = model->get_fully_qualified_id();
+        //NOTE: tdWindowsRuntime flag maybe removed later to indicate that this is not WinRT
         static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         auto token_enum_type_def = define_type_def(type_name, enum_type_flag, token_enum, implements);
@@ -581,6 +584,7 @@ namespace xlang::xmeta
     void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model)
     {
         auto const& type_name = model->get_fully_qualified_id();
+        //NOTE: tdWindowsRuntime flag maybe removed later to indicate that this is not WinRT
         static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
         mdTypeDef token_delegate_type_def = define_type_def(type_name, delegate_type_flag, token_delegate, implements);

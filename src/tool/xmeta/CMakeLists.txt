@@ -18,7 +18,7 @@ if (WIN32)
     add_dependencies(xmeta_model foundation_metadata)
 endif ()
 
-target_include_directories(xmeta_model PUBLIC cpp/models cpp ${XLANG_LIBRARY_PATH})
+target_include_directories(xmeta_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} cpp/models cpp ${XLANG_LIBRARY_PATH})
 
 if (WIN32)
     add_library(xmeta_windows xmeta_emit.cpp)

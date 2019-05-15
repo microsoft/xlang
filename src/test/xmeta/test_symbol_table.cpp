@@ -12,7 +12,6 @@
 using namespace antlr4;
 using namespace xlang::xmeta;
 
-
 TEST_CASE("Duplicate Namespaces")
 {
     std::istringstream test_idl(R"(
@@ -840,8 +839,8 @@ TEST_CASE("Interface event test")
             }
         }
     )" };
-
-    xmeta_idl_reader reader{ "" };
+    std::vector<std::string> paths = { "Foundation.xmeta" };
+    xmeta_idl_reader reader{ "" , paths};
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 

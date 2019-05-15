@@ -30,7 +30,7 @@ std::string_view remove_path(std::string_view const filename) {
     return filename.substr(lastdot + 1, filename.length());
 }
 
-// TODO: #350 https://github.com/Microsoft/xlang/issues/350
+// TODO: #350 https://github.com/Microsoft/xlang/issues/350. This is very WIP.
 int main(int argc, const char* argv[])
 {
     std::ifstream stream;
@@ -38,16 +38,5 @@ int main(int argc, const char* argv[])
     std::vector<std::string> imports;
     xmeta_idl_reader reader{ "", imports};
     reader.read(stream);
-
-    std::string_view assembly_name = remove_path(argv[1]);
-    xmeta_emit emitter(assembly_name);
-    xlang_model_walker walker(reader.get_namespaces(), emitter);
-    walker.walk();
-
-    assembly_name = remove_extension(assembly_name);
-    xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter.save_to_memory());
-
-    // Temporarily saving as a winmd to allow IL spy and dsm to work
-    writer.save_to_file(std::filesystem::current_path().append(std::string(assembly_name) + ".winmd"));
+    reader.save_to_current_path();
 }
