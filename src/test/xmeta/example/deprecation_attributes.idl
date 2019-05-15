@@ -1,0 +1,21 @@
+//Saving this now to use as a test later
+
+import "RtCopContract.idl";
+import "windows.foundation.idl";
+namespace Deprecation
+{
+    [contract(RtCop.RtCopContract, 1)]
+    runtimeclass Muffin
+    {
+        UInt32 WeightInGrams { get; };
+        [deprecated("Muffin is deprecated", deprecate, RtCop.RtCopContract, 2)]
+        String Flavor { get; };
+
+
+        [deprecated("Muffin is deprecated", deprecate, RtCop.RtCopContract, 2)]
+        {
+            void Consume();
+            Windows.Foundation.IAsyncAction CookAsync();
+        }
+    }
+}

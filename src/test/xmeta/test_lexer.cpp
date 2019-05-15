@@ -27,8 +27,8 @@ TEST_CASE("Namespace Identifier")
 
     xlang_test_listener listener;
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl, listener) == 0);
-
+    reader.read(test_idl, listener);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     auto& namespaces = listener.namespaces;
     REQUIRE(namespaces.find("test") != namespaces.end());
 }
@@ -46,7 +46,8 @@ TEST_CASE("Token identifier with unicode letter character")
 
     xlang_test_listener listener;
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl, listener) == 0);
+    reader.read(test_idl, listener);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     auto& namespaces = listener.namespaces;
 
     REQUIRE(namespaces.find("test1AÆĦǆＺ") != namespaces.end()); // LU
@@ -64,7 +65,8 @@ TEST_CASE("Identifer not starting with letter character")
     )" };
     xlang_test_listener listener;
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl, listener, true) != 0);
+    reader.read(test_idl, listener, true);
+    REQUIRE(reader.get_num_syntax_errors() != 0);
 }
 
 TEST_CASE("Remove comments")
@@ -76,7 +78,8 @@ TEST_CASE("Remove comments")
 
     xlang_test_listener listener;
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl, listener) == 0);
+    reader.read(test_idl, listener);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     auto& namespaces = listener.namespaces;
 
     REQUIRE(namespaces.find("test") != namespaces.end());
@@ -93,7 +96,8 @@ TEST_CASE("Spacing")
 
     xlang_test_listener listener;
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl, listener) == 0);
+    reader.read(test_idl, listener);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     auto& namespaces = listener.namespaces;
 
     REQUIRE(namespaces.find("test") != namespaces.end());
@@ -115,7 +119,8 @@ TEST_CASE("Lexer uuid")
 
     xlang_test_listener listener;
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl, listener) == 0);
+    reader.read(test_idl, listener);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     auto& expressions = listener.expressions;
 
     REQUIRE(expressions.find("b7de5527-4c8f-42dd-84da-5ec493abdb9a") != expressions.end());
@@ -148,7 +153,8 @@ TEST_CASE("Enum assignments")
 
     xlang_test_listener listener;
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl, listener) == 0);
+    reader.read(test_idl, listener);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     std::set<std::string> &enums = listener.enums;
 
     REQUIRE(enums.find("Color") != enums.end());
@@ -191,7 +197,9 @@ TEST_CASE("Enum illegal assignments")
 
     xmeta_idl_reader reader{ "" };
     xlang_test_listener listener;
-    REQUIRE(reader.read(test_idl_string_assignment, listener, true) == 1);
+    reader.read(test_idl_string_assignment, listener, true);
+    REQUIRE(reader.get_num_syntax_errors() == 1);
     listener.reset();
-    REQUIRE(reader.read(test_idl_float_assignment, listener, true) == 1);
+    reader.read(test_idl_float_assignment, listener, true);
+    REQUIRE(reader.get_num_syntax_errors() == 1);
 }

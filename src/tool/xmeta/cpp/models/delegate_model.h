@@ -7,6 +7,7 @@
 #include "namespace_member_model.h"
 #include "formal_parameter_model.h"
 #include "model_types.h"
+#include "xlang_error.h"
 
 namespace xlang::xmeta
 {
@@ -28,7 +29,7 @@ namespace xlang::xmeta
             return m_formal_parameters;
         }
 
-        void resolve(std::map<std::string, class_type_semantics> const& symbols)
+        void resolve(std::map<std::string, class_type_semantics> const& symbols, xlang_error_manager & error_manager)
         {
             if (m_return_type)
             {
@@ -40,7 +41,7 @@ namespace xlang::xmeta
                     auto iter = symbols.find(symbol);
                     if (iter == symbols.end())
                     {
-                        // TODO: Reccord the unresolved type and continue
+                        error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                     }
                     else
                     {

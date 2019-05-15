@@ -22,6 +22,23 @@ constexpr int TYPE_DEF_OFFSET = 1; // Module
 constexpr int TYPE_REF_OFFSET = 3; // System: Enum, Delegate, ValueType
 
 // All the flags use in the metadata representation
+const TypeAttributes struct_type_attributes()
+{
+    TypeAttributes result{};
+    result.Visibility(TypeVisibility::Public);
+    result.Sealed(true);
+    result.WindowsRuntime(true);
+    result.Layout(TypeLayout::SequentialLayout);
+    return result;
+}
+
+const FieldAttributes struct_field_attributes()
+{
+    FieldAttributes result{};
+    result.Access(MemberAccess::Public);
+    return result;
+}
+
 const TypeAttributes enum_type_attributes()
 {
     TypeAttributes result{};
@@ -107,6 +124,20 @@ const ParamAttributes param_attributes_out_flag()
     return result;
 }
 
+// In-depth checking of type properties of structs
+void test_struct_type_properties(TypeDef const& struct_type)
+{
+    auto const& struct_flags = struct_type.Flags();
+    REQUIRE(struct_flags.value == struct_type_attributes().value);
+    REQUIRE(struct_type.is_struct());
+    REQUIRE(empty(struct_type.MethodList()));
+    REQUIRE(empty(struct_type.EventList()));
+    REQUIRE(empty(struct_type.GenericParam()));
+    REQUIRE(empty(struct_type.InterfaceImpl()));
+    REQUIRE(empty(struct_type.MethodImplList()));
+    REQUIRE(empty(struct_type.PropertyList()));
+}
+
 // In-depth checking of type properties of enums
 void test_enum_type_properties(TypeDef const& enum_type)
 {
@@ -180,7 +211,8 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
 std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::string_view assembly_name)
 {
     xmeta_idl_reader reader{ "" };
-    REQUIRE(reader.read(test_idl) == 0);
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
     xlang::xmeta::xmeta_emit emitter(assembly_name);
     xlang::xmeta::xlang_model_walker walker(reader.get_namespaces(), emitter);
 
@@ -429,5 +461,111 @@ TEST_CASE("Parameter signature class reference type metadata")
         REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
         auto const& delegate_sig = delegate_invoke.Signature();
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[3]);
+    }
+}
+
+TEST_CASE("Struct simple type metadata")
+{
+    std::istringstream struct_test_idl{ R"(
+        namespace N
+        {
+            struct S
+            {
+                Boolean field_1;
+                String field_2;
+                Int16 field_3;
+                Int32 field_4;
+                Int64 field_5;
+                UInt8 field_6;
+                UInt16 field_7;
+                UInt32 field_8;
+                Char16 field_9;
+                Single field_10;
+                Double field_11;
+            };
+        }
+    )" };
+
+    const std::vector<ElementType> elements_to_check 
+        = { ElementType::Boolean, ElementType::String, ElementType::I2, 
+        ElementType::I4, ElementType::I8, ElementType::U1, ElementType::U2, 
+        ElementType::U4, ElementType::Char, ElementType::R4, ElementType::R8};
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(struct_test_idl, assembly_name) };
+    
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 1);
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
+    REQUIRE(db.Field.size() == 11);
+
+    auto const struct0 = db.TypeDef[TYPE_DEF_OFFSET];
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "S");
+    REQUIRE(struct0.TypeName() == "S");
+    REQUIRE(struct0.TypeNamespace() == "N");
+    test_struct_type_properties(struct0);
+
+    for (size_t i = 0; i < size(struct0.FieldList()) ; i++)
+    {
+        auto const& struct_field = struct0.FieldList().first[i];
+        REQUIRE(struct_field.Parent().TypeName() == "S");
+        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
+        auto const& struct_field_sig = struct_field.Signature();
+        REQUIRE(struct_field_sig.Type().element_type() == elements_to_check[i]);
+    }
+}
+
+TEST_CASE("Struct class type metadata")
+{
+    std::istringstream struct_test_idl{ R"(
+        namespace N
+        {
+            enum E0
+            {
+            }
+
+            struct S0
+            {
+                S1 field_1;
+                E0 field_2;
+            };
+
+            struct S1
+            {
+            }
+        }
+    )" };
+
+    const std::vector<ElementType> elements_to_check
+        = { ElementType::Boolean, ElementType::String, ElementType::I2,
+        ElementType::I4, ElementType::I8, ElementType::U1, ElementType::U2,
+        ElementType::U4, ElementType::Char, ElementType::R4, ElementType::R8 };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(struct_test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
+
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 0].TypeName() == "S0");
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 1].TypeName() == "S1");
+    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 2].TypeName() == "E0");
+
+    auto const& struct0 = db.TypeDef[TYPE_DEF_OFFSET];
+    REQUIRE(struct0.TypeName() == "S0");
+    REQUIRE(struct0.TypeNamespace() == "N");
+    test_struct_type_properties(struct0);
+
+    REQUIRE(db.Field.size() == 3);
+    {
+        auto const& struct_field = struct0.FieldList().first[0];
+        REQUIRE(struct_field.Parent().TypeName() == db.TypeDef[1].TypeName());
+        auto const& struct_field_sig = struct_field.Signature();
+        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[4]);
+    }
+    {
+        auto const& struct_field = struct0.FieldList().first[1];
+        REQUIRE(struct_field.Parent().TypeName() == db.TypeDef[1].TypeName());
+        auto const& struct_field_sig = struct_field.Signature();
+        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[5]);
     }
 }

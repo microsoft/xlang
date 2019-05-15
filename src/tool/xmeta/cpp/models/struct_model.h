@@ -3,11 +3,13 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <set>
 #include <vector>
 #include <variant>
 #include "model_types.h"
 #include "namespace_member_model.h"
 #include "property_model.h"
+#include "xlang_error.h"
 
 namespace xlang::xmeta
 {
@@ -30,7 +32,7 @@ namespace xlang::xmeta
             m_fields.emplace_back(std::move(field));
         }
 
-        void resolve(std::map<std::string, class_type_semantics> const& symbols)
+        void resolve(std::map<std::string, class_type_semantics> const& symbols, xlang_error_manager & error_manager)
         {
             for (auto & field : m_fields)
             {
@@ -45,7 +47,7 @@ namespace xlang::xmeta
                     auto iter = symbols.find(symbol);
                     if (iter == symbols.end())
                     {
-                        // TODO: Reccord the unresolved type and continue. Fix once we have a good error story
+                        error_manager.write_unresolved_type_error(get_decl_line(), symbol);
                     }
                     else
                     {
@@ -55,32 +57,59 @@ namespace xlang::xmeta
             }
         }
 
-        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> symbols)
+        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, 
+            xlang_error_manager & error_manager)
         {
+            if (contains_itself)
+            {
+                return true;
+            }
             std::string symbol = this->get_fully_qualified_id();
-            return has_circular_struct_declarations(symbols, symbol);
+            std::set<std::string> symbol_set{ symbol }; 
+            if (has_circular_struct_declarations(symbols, symbol_set, error_manager))
+            {
+                contains_itself = true;
+                error_manager.write_struct_field_error(get_decl_line(), std::string(symbol));
+            }
+            return contains_itself;
         }
 
-        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> symbols, std::string_view const& symbol_to_check)
+        bool has_circular_struct_declarations(std::map<std::string, class_type_semantics> const& symbols, 
+            std::set<std::string> & symbol_set, xlang_error_manager & error_manager)
         {
+            if (contains_itself)
+            {
+                return true;
+            }
             for (auto const& field : m_fields)
             {
-                auto field_type = field.first.get_semantic().get_resolved_target();
+                auto const& field_type = field.first.get_semantic().get_resolved_target();
                 if (std::holds_alternative<std::shared_ptr<struct_model>>(field_type))
                 {
-                    auto struct_field = std::get<std::shared_ptr<struct_model>>(field_type);
-                    struct_field->resolve(symbols); // TODO: This is hiding a resolve error. Fix once we have a good error story
-                    if (struct_field->get_fully_qualified_id() == symbol_to_check 
-                        || struct_field->has_circular_struct_declarations(symbols, symbol_to_check))
+                    auto const& struct_field = std::get<std::shared_ptr<struct_model>>(field_type);
+                    struct_field->resolve(symbols, error_manager);
+                    if (!symbol_set.insert(struct_field->get_fully_qualified_id()).second
+                        || struct_field->has_circular_struct_declarations(symbols, symbol_set, error_manager))
                     {
                         return true;
                     }
+                    symbol_set.erase(struct_field->get_fully_qualified_id());
                 }
             }
             return false;
         }
 
+        bool member_exists(std::string_view const& id) const
+        {
+            auto same_id = [&id](std::pair<type_ref, std::string> const& field)
+            {
+                return field.second == id;
+            };
+            return std::find_if(m_fields.begin(), m_fields.end(), same_id) != m_fields.end();
+        }
+
     private:
         std::vector<std::pair<type_ref, std::string>> m_fields;
+        bool contains_itself = false;
     };
 }

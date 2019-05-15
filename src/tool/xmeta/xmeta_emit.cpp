@@ -490,42 +490,32 @@ namespace xlang::xmeta
         ////    &token_event);
     }
     
-    void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& /*model*/) 
+    void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
-        //auto const& type_name = model->get_id();
-        //static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime;
-        //mdTypeDef implements[] = { mdTokenNil };
-        //auto token_struct_type_def = define_type_def(type_name, struct_type_flag, token_enum, implements);
+        auto const& struct_name = model->get_fully_qualified_id();
+        static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime;
+        mdTypeDef implements[] = { mdTokenNil };
+        auto token_struct_type_def = define_type_def(struct_name, struct_type_flag, token_value_type, implements);
 
-        //auto iter = type_references.find(type_name);
-        //if (iter == type_references.end())
-        //{
-        //    throw_invalid("Failed to find TypeRef for: " + type_name);
-        //}
-        //TypeRef const& struct_type_ref = iter->second;
+        static constexpr DWORD struct_field_flag = fdPublic;
+        for (std::pair<type_ref, std::string> const& struct_member : model->get_fields())
+        {
+            assert(struct_member.first.get_semantic().is_resolved());
+            auto const& field_name = s2ws(struct_member.second);
 
-        //static constexpr DWORD enumerator_flag = fdHasDefault | fdLiteral | fdStatic | fdPublic;
-        //signature_blob enumerator_signature;
-        //enumerator_signature.add_signature(FieldSig{ TypeSig{struct_type_ref.coded_index<TypeDefOrRef>()} });
-
-        //for (std::pair<type_ref, std::string> const& enum_member : model->get_fields())
-        //{
-        //    call(enum_member.get_resolved_value(), [&](auto const& val)
-        //    {
-        //        using val_type = std::decay_t<decltype(val)>;
-        //        static_assert(std::is_integral_v<val_type>);
-        //        auto const& name = s2ws(enum_member.get_id());
-        //        check_hresult(m_metadata_emitter->DefineField(token_enum_type_def,
-        //            name.c_str(),
-        //            enumerator_flag,
-        //            enumerator_signature.data(),
-        //            enumerator_signature.size(),
-        //            static_cast<DWORD>(underlying_type),
-        //            &val,
-        //            static_cast<ULONG>(sizeof(val_type)),
-        //            &field_token));
-        //    });
-        //}
+            signature_blob field_signature;
+            field_signature.add_signature(FieldSig{ create_paramater_signature(struct_member.first).value() });
+            mdFieldDef field_token;
+            check_hresult(m_metadata_emitter->DefineField(token_struct_type_def,
+                field_name.c_str(),
+                struct_field_flag,
+                field_signature.data(),
+                field_signature.size(),
+                ELEMENT_TYPE_END,
+                nullptr,
+                0,
+                &field_token));
+        }
     }
     
     void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& /*model*/) 
@@ -625,7 +615,6 @@ namespace xlang::xmeta
         {
             throw_invalid("Failed to find TypeRef for: " + type_name);
         }
-        TypeRef const& token_delegate_type_ref = iter->second;
 
         // Constructor
         static constexpr DWORD delegate_constructor_flag = mdPrivate | mdSpecialName | mdRTSpecialName | mdHideBySig;
@@ -692,10 +681,10 @@ namespace xlang::xmeta
         /** Defining parameters and return **/
         /* Define return value */
         // To be used for attributes later
-        mdParamDef token_return = define_return(model->get_return_type(), token_delegate_invoke_def);
+        /* mdParamDef token_return = */define_return(token_delegate_invoke_def);
 
         /* Define formal parameters */
-        int index = 1;
+        uint16_t index = 1;
         for (auto const& val : model->get_formal_parameters())
         {
             define_parameters(val, token_delegate_invoke_def, index);
@@ -703,7 +692,7 @@ namespace xlang::xmeta
         }
     }
 
-    mdParamDef xmeta_emit::define_return(std::optional<type_ref> const& retun_type, mdTypeDef const& type_def)
+    mdParamDef xmeta_emit::define_return(mdTypeDef const& type_def)
     {
         /* Define return value */
         mdParamDef token_param_return;
@@ -756,19 +745,19 @@ namespace xlang::xmeta
             {
                 std::string return_name = std::get<std::string>(semantic);
                 auto iter = type_references.find(return_name);
-                TypeRef ref;
+                TypeRef type_ref;
                 if (iter == type_references.end())
                 {
                     mdTypeRef md_ref;
                     m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(return_name).c_str(), &md_ref);
                     type_references.emplace(return_name, to_TypeRef(md_ref));
-                    ref = to_TypeRef(md_ref);
+                    type_ref = to_TypeRef(md_ref);
                 }
                 else
                 {
-                    ref = iter->second;
+                    type_ref = iter->second;
                 }
-                return TypeSig{ ElementType::ValueType, ref.coded_index<TypeDefOrRef>() };
+                return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
             }
             else if (std::holds_alternative<object_type>(semantic))
             {
