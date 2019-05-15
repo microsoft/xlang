@@ -268,19 +268,66 @@ namespace coolrt
         }
     }
 
+    void write_interop_type(writer& w, TypeDef const& type)
+    {
+        XLANG_ASSERT(get_category(type) == category::interface_type);
+
+        // w.write("namespace Methods.@\n{\n", type.TypeName());
+        // {
+        //     writer::indent_guard g{ w };
+
+        //     for (auto&& method : type.MethodList())
+        //     {
+        //         w.write("// internal delegate int %(); \n", method.Name());
+        //     }
+        // }
+        // w.write("}\n");
+
+        w.write("internal interface %\n{\n", bind<write_ptype_name>(type));
+        {
+            writer::indent_guard g{ w };
+
+            for (auto&& method : type.MethodList())
+            {
+                w.write("internal delegate int _%(); \n", method.Name());
+            }
+
+            w.write("\ninternal IInspectableVftbl IInspectableVftbl;\n");
+
+            for (auto&& method : type.MethodList())
+            {
+                w.write("internal _% %;\n", method.Name(), method.Name());
+            }
+        }
+        w.write("}\n");
+    }
+
     void write_type(TypeDef const& type)
     {
-        if (is_exclusive_to(type)) { return; }
         if (is_api_contract_type(type)) { return; }
         if (is_attribute_type(type)) { return; }
 
         writer w;
-        w.write("namespace %\n{\n", type.TypeNamespace());
+
+        if (!is_exclusive_to(type))
         {
-            writer::indent_guard g{ w };
-            write_type(w, type);
+            w.write("namespace %\n{\n", type.TypeNamespace());
+            {
+                writer::indent_guard g{ w };
+                write_type(w, type);
+            }
+            w.write("}\n");
         }
-        w.write("}\n");
+
+        if (get_category(type) == category::interface_type)
+        {
+            w.write("namespace __Interop__.%\n{\n", type.TypeNamespace());
+            {
+                writer::indent_guard g{ w };
+                write_interop_type(w, type);
+            }
+            w.write("}\n");
+        }
 
         auto filename = w.write_temp("%.@.cs", type.TypeNamespace(), type.TypeName());
         w.flush_to_file(settings.output_folder / filename);
