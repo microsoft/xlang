@@ -287,7 +287,8 @@ namespace coolrt
         // }
         // w.write("}\n");
 
-        w.write("internal struct %VFTBL\n{\n", bind<write_ptype_name>(type));
+        // TODO: do pinterface interop structs need to be generic?
+        w.write("internal struct @VFTBL\n{\n", type.TypeName());
         {
             writer::indent_guard g{ w };
 
