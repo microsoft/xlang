@@ -38,7 +38,7 @@ namespace xlang::xmeta
             return;
         }
 
-        xlang::xmeta::xmeta_emit emitter(m_xlang_model.m_assembly);
+        xlang::xmeta::xmeta_emit emitter(m_xlang_model);
         xlang::xmeta::xlang_model_walker walker(m_xlang_model.namespaces, emitter);
 
         walker.register_listener(emitter);

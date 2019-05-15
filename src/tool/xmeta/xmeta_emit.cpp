@@ -187,8 +187,8 @@ namespace
 
 namespace xlang::xmeta
 {
-    xmeta_emit::xmeta_emit(std::string_view const& assembly_name)
-        : m_assembly_name(std::string(assembly_name))
+    xmeta_emit::xmeta_emit(compilation_unit & model)
+        : xlang_model{ model }
     {
         // Getting the meta data dispenser
         check_hresult(CoInitialize(nullptr));
@@ -231,7 +231,7 @@ namespace xlang::xmeta
     // This doesn't really output in a PE format
     void xmeta_emit::save_to_file() const
     {
-        m_metadata_emitter->Save((s2ws(remove_extension(m_assembly_name)) + L".xmeta").c_str(), 0);
+        m_metadata_emitter->Save((s2ws(remove_extension(xlang_model.m_assembly)) + L".xmeta").c_str(), 0);
     }
 
     std::vector<uint8_t> xmeta_emit::save_to_memory() const
@@ -251,11 +251,11 @@ namespace xlang::xmeta
             nullptr,
             0,
             sha1_hash_algo,
-            s2ws(m_assembly_name).c_str(),
+            s2ws(xlang_model.m_assembly).c_str(),
             &s_genericMetadata,
             afContentType_WindowsRuntime,
             &token_assembly));
-        check_hresult(m_metadata_emitter->SetModuleProps(s2ws(m_assembly_name).c_str()));
+        check_hresult(m_metadata_emitter->SetModuleProps(s2ws(xlang_model.m_assembly).c_str()));
     }
 
     void xmeta_emit::define_common_reference_assembly()

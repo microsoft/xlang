@@ -16,7 +16,7 @@ namespace xlang::xmeta
     class xmeta_emit : public xlang_model_listener
     {
     public:
-        explicit xmeta_emit(std::string_view const& assembly_name);
+        explicit xmeta_emit(compilation_unit & assembly_name);
         ~xmeta_emit();
 
         void save_to_file() const;
@@ -30,7 +30,7 @@ namespace xlang::xmeta
         void listen_delegate_model(std::shared_ptr<delegate_model> const& model) final;
 
     private:
-        std::string m_assembly_name;
+        compilation_unit & xlang_model;
         winrt::com_ptr<IMetaDataDispenserEx> m_metadata_dispenser;
         winrt::com_ptr<IMetaDataAssemblyEmit> m_metadata_assembly_emitter;
         winrt::com_ptr<IMetaDataEmit2> m_metadata_emitter;

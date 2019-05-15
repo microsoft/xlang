@@ -62,13 +62,10 @@ namespace xlang::xmeta
     private:
         xlang_error_manager m_error_manager;
         compilation_unit m_xlang_model;
-        void import_metadata(std::vector<std::string> imports);
         xlang::meta::writer::pe_writer writer;
 
         const std::string event_registration_token = "Xlang.Foundation.EventRegistrationToken";
     };
-
-    std::string copy_to_lower(std::string_view sv);
 
     struct xlang_model_pass_1 : public xlang_model_listener
     {

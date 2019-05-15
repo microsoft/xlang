@@ -264,7 +264,7 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
 std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::string_view assembly_name)
 {
     std::vector<std::string> paths = { "Foundation.xmeta" };
-    xmeta_idl_reader reader{ "", paths };
+    xmeta_idl_reader reader{ assembly_name, paths };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
@@ -285,14 +285,12 @@ auto find_type_by_name(table<T> const& type, std::string name, std::string names
 
 TEST_CASE("Assemblies metadata")
 {
-    constexpr char assembly_name[] = "testidl";
+    constexpr char assembly_name[] = "test_idl";
     constexpr char common_assembly_ref[] = "mscorlib";
-    xlang::xmeta::xmeta_emit emitter(assembly_name);
 
-    xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter.save_to_memory());
-
-    xlang::meta::reader::database db{ writer.save_to_memory() };
+    std::istringstream test_idl{ R"(
+    )" };
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
     REQUIRE(db.Assembly.size() == 1);
     REQUIRE(db.Assembly[0].Name() == assembly_name);
