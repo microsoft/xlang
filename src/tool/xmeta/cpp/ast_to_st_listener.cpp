@@ -423,7 +423,6 @@ void ast_to_st_listener::enterDelegate_declaration(XlangParser::Delegate_declara
     auto id = ctx->IDENTIFIER();
     std::string delegate_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
-
     std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + delegate_name;
 
     std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };

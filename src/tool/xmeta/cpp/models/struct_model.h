@@ -69,7 +69,7 @@ namespace xlang::xmeta
                 return true;
             }
             std::string symbol = this->get_fully_qualified_id();
-            std::set<std::string> symbol_set{ symbol }; 
+            std::set<std::string> symbol_set{ symbol };
             if (has_circular_struct_declarations(symbol_set, error_manager))
             {
                 contains_itself = true;
