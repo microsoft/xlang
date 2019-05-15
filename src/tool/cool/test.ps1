@@ -22,9 +22,15 @@ function Test-Any() {
 
 if ($build) {
 
-    if (-not(Get-ChildItem $outputDir *.csproj | test-any)) {
-        dotnet new classlib -o $outputDir
-    }
+$testProjContent = @'
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+</Project>
+'@
 
+    Set-Content (join-path $outputDir "test.csproj") $testProjContent
     dotnet build $outputDir
 }
