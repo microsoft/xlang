@@ -32,11 +32,11 @@ namespace xlang::xmeta
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
         m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());
-        pass1();
-        pass2();
+        pass1_resolving_refs();
+        pass2_resolving_circular_semantics();
     }
 
-    void xmeta_idl_reader::pass1()
+    void xmeta_idl_reader::pass1_resolving_refs()
     {
         xlang_model_pass_1 pass1_listener(m_xlang_model.symbols, m_error_manager);
         xlang_model_walker walker(m_xlang_model.namespaces, pass1_listener);
@@ -44,7 +44,7 @@ namespace xlang::xmeta
     }
 
     // We can probably combine pass2 and the last pass in xmeta_emit together. 
-    void xmeta_idl_reader::pass2()
+    void xmeta_idl_reader::pass2_resolving_circular_semantics()
     {
         xlang_model_pass_2 pass2_listener(m_xlang_model.symbols, m_error_manager);
         xlang_model_walker walker(m_xlang_model.namespaces, pass2_listener);

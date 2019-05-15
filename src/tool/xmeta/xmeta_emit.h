@@ -37,6 +37,7 @@ namespace xlang::xmeta
         winrt::com_ptr<IMetaDataImport> m_metadata_import;
 
         std::map<std::string, mdTypeRef> type_references;
+        std::map<std::string, mdAssemblyRef> assembly_references;
         meta::reader::Module m_module;
 
         mdAssembly token_assembly;

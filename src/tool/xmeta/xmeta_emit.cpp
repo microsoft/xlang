@@ -271,7 +271,6 @@ namespace xlang::xmeta
             0,
             afContentType_Default,
             &token_mscorlib));
-
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.Enum", &token_enum));
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.ValueType", &token_value_type));
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.MulticastDelegate", &token_delegate));
@@ -705,6 +704,22 @@ namespace xlang::xmeta
 
     mdTypeRef xmeta_emit::get_or_define_type_ref(std::string const& ref_name)
     {
+  /*      if (assembly_references.find(assembly_ref) == assembly_references.end())
+        {
+            BYTE strong_name;
+            ULONG strong_name_size;
+            check_hresult(m_metadata_assembly_emitter->DefineAssemblyRef(
+                strong_name,
+                sizeof(strong_name_size),
+                L"mscorlib",
+                &s_genericMetadata,
+                nullptr,
+                0,
+                afContentType_Default,
+                &token_mscorlib));
+            assembly_references.emplace(L"mscorlib", token_mscorlib);
+        }*/
+
         auto const& iter = type_references.find(ref_name);
         if (iter == type_references.end())
         {

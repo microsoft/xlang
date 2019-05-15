@@ -28,8 +28,8 @@ namespace xlang::xmeta
 
         void read(std::istream& idl_contents, bool disable_error_reporting = false);
         void read(std::istream& idl_contents, XlangParserBaseListener& listener, bool disable_error_reporting = false);
-        void pass2();
-        void pass1();
+        void pass2_resolving_circular_semantics();
+        void pass1_resolving_refs();
 
         auto const& get_namespaces() const
         {

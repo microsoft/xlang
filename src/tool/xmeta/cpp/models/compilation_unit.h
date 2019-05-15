@@ -8,15 +8,25 @@
 
 namespace xlang::xmeta
 {
+    enum class compilation_error : bool
+    {
+        passed = true,
+        symbol_exists = false
+    };
+
     struct symbol_table
     {
         symbol_table() = delete;
         symbol_table(std::vector<std::string> const& path) : cache{ path }
         { }
 
-        bool set_symbol(std::string_view symbol, class_type_semantics const& class_type)
+        compilation_error set_symbol(std::string_view symbol, class_type_semantics const& class_type)
         {
-            return table.insert(std::pair<std::string, class_type_semantics>(symbol, class_type)).second;
+            if (!table.insert(std::pair<std::string, class_type_semantics>(symbol, class_type)).second)
+            {
+                return compilation_error::symbol_exists;
+            }
+            return compilation_error::passed;
         }
 
         class_type_semantics get_symbol(std::string const& symbol)
