@@ -48,13 +48,25 @@ namespace coolrt
         }
     }
 
+    void write_parameter_name(writer& w, std::string_view name)
+    {
+        static const std::set<std::string_view> keywords = { "event" };
+
+        if (std::find(keywords.begin(), keywords.end(), name) != keywords.end())
+        {
+            w.write("@");
+        }
+
+        w.write(name);
+    }
+
     void write_method_parameters(writer& w, method_signature const& signature)
     {
         separator s{ w };
         for (auto&& param : signature.params())
         {
             s();
-            w.write("% %", bind<write_parameter_type>(param), param.first.Name());
+            w.write("% %", bind<write_parameter_type>(param), bind<write_parameter_name>(param.first.Name()));
         }
     }
 
@@ -175,8 +187,7 @@ namespace coolrt
     void write_delegate(writer& w, TypeDef const& type)
     {
         method_signature signature{ get_delegate_invoke(type) };
-
-        w.write("public delegate void %();\n", bind<write_ptype_name>(type));
+        w.write("public delegate void %(%);\n", bind<write_ptype_name>(type), bind<write_method_parameters>(signature));
     }
 
     void write_enum(writer& w, TypeDef const& type)
@@ -313,6 +324,7 @@ namespace coolrt
         if (is_attribute_type(type)) { return; }
 
         writer w;
+        w.current_namespace = type.TypeNamespace();
 
         if (!is_exclusive_to(type))
         {

@@ -189,6 +189,8 @@ namespace coolrt
 
 #pragma endregion
 
+        std::string_view current_namespace{};
+
         void write_code(std::string_view const& value)
         {
             for (auto&& c : value)
@@ -287,7 +289,12 @@ namespace coolrt
 
         void write(type_definition const& type)
         {
-            write("%.@", type.TypeNamespace(), type.TypeName());
+            if (type.TypeNamespace() != current_namespace)
+            {
+                write("%.", type.TypeNamespace());
+            }
+
+            write("@", type.TypeName());
         }
 
         void write(generic_type_instance const& type)
