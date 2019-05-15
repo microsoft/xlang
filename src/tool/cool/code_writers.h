@@ -154,7 +154,7 @@ namespace coolrt
                 auto [getter, setter] = get_property_methods(prop);
                 w.write("public % %\n{\n", prop.Type(), prop.Name());
                 {
-                    writer::indent_guard g{ w };
+                    writer::indent_guard gg{ w };
                     w.write("get { throw new System.NotImplementedException(); }\n");
                     if (setter)
                     {
@@ -283,16 +283,16 @@ namespace coolrt
         // }
         // w.write("}\n");
 
-        w.write("internal interface %\n{\n", bind<write_ptype_name>(type));
+        w.write("internal struct %VFTBL\n{\n", bind<write_ptype_name>(type));
         {
             writer::indent_guard g{ w };
 
             for (auto&& method : type.MethodList())
             {
-                w.write("internal delegate int _%(); \n", method.Name());
+                w.write("internal delegate int _%([In] IntPtr pThis); \n", method.Name());
             }
 
-            w.write("\ninternal IInspectableVftbl IInspectableVftbl;\n");
+            w.write("\ninternal __Interop__.Windows.Foundation.IInspectableVftbl IInspectableVftbl;\n");
 
             for (auto&& method : type.MethodList())
             {
@@ -324,6 +324,8 @@ namespace coolrt
             w.write("namespace __Interop__.%\n{\n", type.TypeNamespace());
             {
                 writer::indent_guard g{ w };
+
+                w.write("using System;\nusing System.Runtime.InteropServices;\n\n");
                 write_interop_type(w, type);
             }
             w.write("}\n");

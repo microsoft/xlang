@@ -3,6 +3,17 @@ namespace __Interop__.Windows.Foundation
     using System;
     using System.Runtime.InteropServices;
 
+    internal struct IUnknownVftbl
+    {
+        internal delegate int _QueryInterface([In] IntPtr pThis, [In] Guid iid, [Out] IntPtr vftbl);
+        internal delegate uint _AddRef([In] IntPtr pThis);
+        internal delegate uint _Release([In] IntPtr pThis);
+
+        internal _QueryInterface QueryInterface;
+        internal _AddRef AddRef;
+        internal _Release Release;
+    }
+
     internal enum TrustLevel
     {
         BaseTrust = 0,
@@ -20,5 +31,13 @@ namespace __Interop__.Windows.Foundation
         internal _GetIids GetIids;
         internal _GetRuntimeClassName GetRuntimeClassName;
         internal _GetTrustLevel GetTrustLevel;
+    }
+
+    internal struct IActivationFactoryVftbl
+    {
+        internal delegate int _ActivateInstance([In] IntPtr pThis, [Out] IntPtr instance);
+
+        internal IInspectableVftbl IInspectableVftbl;
+        internal _ActivateInstance ActivateInstance;
     }
 }

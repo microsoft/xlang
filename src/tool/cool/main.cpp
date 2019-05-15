@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "settings.h"
+#include "strings.h"
 #include "meta_reader_helpers.h"
 #include "type_writers.h"
 #include "code_writers.h"
@@ -130,6 +131,13 @@ Where <spec> is one or more of:
             w.flush_to_console();
 
             task_group group;
+
+            group.add([]
+            {
+                writer w;
+                w.write(strings::base_interop);
+                w.flush_to_file(settings.output_folder / "base-interop.cs");
+            });
 
             for (auto&&[ns, members] : c.namespaces())
             {
