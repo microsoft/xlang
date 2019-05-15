@@ -137,7 +137,10 @@ Where <spec> is one or more of:
                 {
                     if (settings.filter.includes(type))
                     {
-                        write_type(type);
+                        group.add([&type]
+                        {
+                            write_type(type);
+                        });
                     }
                 }
             }
