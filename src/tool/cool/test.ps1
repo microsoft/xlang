@@ -6,7 +6,7 @@ $outputDir = join-path $env:TEMP "coolrt"
 
 if ($clean) { Remove-Item $outputDir -Recurse -force -ErrorAction SilentlyContinue }
 
-& $coolrtexe -input local -output $outputDir  -include Windows.Foundation -exclude Windows.Foundation.Metadata -exclude Windows.Foundation.Diagnostics #-include Windows.Data.Json
+& $coolrtexe -input local -output $outputDir  -include Windows.Foundation -exclude Windows.Foundation.Metadata -exclude Windows.Foundation.Diagnostics -include Windows.Data.Json
 
 function Test-Any() {
     begin {
