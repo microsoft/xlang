@@ -235,20 +235,16 @@ namespace xlang::meta::reader
             return m_method.ReturnType();
         }
 
-        auto return_param_name() const
+        auto return_param_name(std::string_view default_name = "__return_value__") const
         {
-            std::string_view name;
-
             if (m_return)
             {
-                name = m_return.Name();
+                return m_return.Name();
             }
             else
             {
-                name = "_return_value";
+                return default_name;
             }
-
-            return name;
         }
 
         bool has_params() const

@@ -1,43 +1,51 @@
+namespace __Interop__
+{
+    static class Helper
+    {
+        public unsafe static T GetDelegate<T>(void* @this, int offset)
+        {
+            void* __slot = (*(void***)@this)[offset];
+            return System.Runtime.InteropServices.Marshal.GetDelegateForFunctionPointer<T>(new System.IntPtr(__slot));
+        }
+    }
+}
+
 namespace __Interop__.Windows.Foundation
 {
+#pragma warning disable 0649
     using System;
     using System.Runtime.InteropServices;
 
-    internal struct IUnknownVftbl
+    internal unsafe static class IUnknown
     {
-        internal delegate int _QueryInterface([In] IntPtr pThis, [In] Guid iid, [Out] IntPtr vftbl);
-        internal delegate uint _AddRef([In] IntPtr pThis);
-        internal delegate uint _Release([In] IntPtr pThis);
+        delegate int delegateQueryInterface(void* @this, IntPtr iid, void** @object);
+        public static int invokeQueryInterface(void* @this, IntPtr iid, void** @object)
+        {
+            var __delegate = __Interop__.Helper.GetDelegate<delegateQueryInterface>(@this, 0);
+            return __delegate(@this, iid, @object);
+        }
 
-        internal _QueryInterface QueryInterface;
-        internal _AddRef AddRef;
-        internal _Release Release;
+        delegate uint delegateAddRefRelease(void* @this);
+        public static uint invokeAddRef(void* @this, IntPtr iid, void** vftbl)
+        {
+            var __delegate = __Interop__.Helper.GetDelegate<delegateAddRefRelease>(@this, 1);
+            return __delegate(@this);
+        }
+        public static uint invokeRelease(void* @this)
+        {
+            var __delegate = __Interop__.Helper.GetDelegate<delegateAddRefRelease>(@this, 2);
+            return __delegate(@this);
+        }
     }
 
-    internal enum TrustLevel
+    internal unsafe static class IActivationFactory
     {
-        BaseTrust = 0,
-        PartialTrust = (BaseTrust + 1),
-        FullTrust = (PartialTrust + 1)
-    };
-
-    internal struct IInspectableVftbl
-    {
-        internal delegate int _GetIids([In] IntPtr pThis, [Out] uint iidCount, [Out] Guid[] iids);
-        internal delegate int _GetRuntimeClassName([In] IntPtr pThis, [Out] IntPtr className);
-        internal delegate int _GetTrustLevel([In] IntPtr pThis, [Out] TrustLevel trustLevel);
-
-        internal IUnknownVftbl IUnknownVftbl;
-        internal _GetIids GetIids;
-        internal _GetRuntimeClassName GetRuntimeClassName;
-        internal _GetTrustLevel GetTrustLevel;
+        delegate int delegateActivateInstance(void* @this, void** instance);
+        public static int invokeActivateInstance(void* @this, void** instance)
+        {
+            var __delegate = __Interop__.Helper.GetDelegate<delegateActivateInstance>(@this, 6);
+            return __delegate(@this, instance);
+        }
     }
-
-    internal struct IActivationFactoryVftbl
-    {
-        internal delegate int _ActivateInstance([In] IntPtr pThis, [Out] IntPtr instance);
-
-        internal IInspectableVftbl IInspectableVftbl;
-        internal _ActivateInstance ActivateInstance;
-    }
+#pragma warning restore 0649
 }
