@@ -34,6 +34,7 @@ namespace xlang::xmeta
         m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());
         pass1_resolving_refs();
         pass2_resolving_circular_semantics();
+
     }
 
     void xmeta_idl_reader::pass1_resolving_refs()
