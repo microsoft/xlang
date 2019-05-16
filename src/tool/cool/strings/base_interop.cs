@@ -11,17 +11,6 @@ namespace __Interop__
             return System.Runtime.InteropServices.Marshal.GetDelegateForFunctionPointer<T>(new System.IntPtr(__slot));
         }
     }
-
-    [DllImport("api-ms-win-core-winrt-string-l1-1-0.dll", CallingConvention = CallingConvention.StdCall)]
-    internal static extern unsafe int WindowsCreateString(
-        [MarshalAs(UnmanagedType.LPWStr)] string sourceString, int length, [Out] IntPtr* hstring);
-
-    [DllImport("api-ms-win-core-winrt-string-l1-1-0.dll", CallingConvention = CallingConvention.StdCall)]
-    internal static extern int WindowsDeleteString(IntPtr hstring);
-
-    [DllImport("api-ms-win-core-winrt-l1-1-0.dll", PreserveSig = true)]
-    internal static extern unsafe int RoGetActivationFactory(IntPtr activatableClassId, [In] ref Guid iid,
-        [Out] out IntPtr* factory);
 }
 
 namespace __Interop__.Windows.Foundation
@@ -72,8 +61,34 @@ namespace __Interop__.Windows.Foundation
         }
     }
 
+    internal static class Platform
+    {
+        [DllImport("api-ms-win-core-winrt-l1-1-0.dll", PreserveSig = true)]
+        static extern unsafe int RoGetActivationFactory([In] IntPtr activatableClassId, [In] ref Guid iid, [Out] IntPtr* factory);
+
+        public static IntPtr GetActivationFactory(string className, Guid iid)
+        {
+            var classNameHstring = HString.Create(className);
+            try
+            {
+                IntPtr factory = IntPtr.Zero;
+                unsafe
+                {
+                    Marshal.ThrowExceptionForHR(RoGetActivationFactory(classNameHstring, ref iid, &factory));
+                }
+                return factory;
+            }
+            finally
+            {
+                HString.Delete(classNameHstring);
+            }
+        }
+    }
+
     internal static class IUnknown
     {
+        public static readonly Guid IID = new Guid("00000000-0000-0000-C000-000000000046");
+
         unsafe delegate int delegateQueryInterface(IntPtr @this, [In] ref Guid iid, IntPtr* @object);
         public static IntPtr QueryInterface(IntPtr @this, Guid iid)
         {
@@ -99,8 +114,8 @@ namespace __Interop__.Windows.Foundation
             return __delegate(@this);
         }
     }
-
-    internal unsafe static class IActivationFactory
+    
+    internal static class IActivationFactory
     {
         public static readonly Guid IID = new Guid("00000035-0000-0000-C000-000000000046");
 
