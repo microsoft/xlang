@@ -10,7 +10,7 @@ pool:
 container: build_container
 
 steps:
-- script: C:\BuildTools\Common7\Tools\VsDevCmd.bat && cmake ./src -B_build\Windows\x86\Release -GNinja -DCMAKE_INSTALL_PREFIX=install && ninja -C _build\Windows\x86\Release install -v
+- script: C:\BuildTools\Common7\Tools\VsDevCmd.bat && cmake ./src -B_build\Windows\x86\Release -GNinja -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX=install && ninja -C _build\Windows\x86\Release install -v
   displayName: 'build'
 - script: .\install\test\library\test_library.exe -r junit -o TEST-test_library.xml
   displayName: 'test_library'
