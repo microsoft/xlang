@@ -4,6 +4,54 @@ namespace coolrt
 {
     using namespace xlang::meta::reader;
 
+	void write_fundamental_type(writer& w, fundamental_type type)
+	{
+		switch (type)
+		{
+		case fundamental_type::Boolean:
+			w.write("bool");
+			break;
+		case fundamental_type::Char:
+			w.write("char");
+			break;
+		case fundamental_type::Int8:
+			w.write("sbyte");
+			break;
+		case fundamental_type::UInt8:
+			w.write("byte");
+			break;
+		case fundamental_type::Int16:
+			w.write("short");
+			break;
+		case fundamental_type::UInt16:
+			w.write("ushort");
+			break;
+		case fundamental_type::Int32:
+			w.write("int");
+			break;
+		case fundamental_type::UInt32:
+			w.write("uint");
+			break;
+		case fundamental_type::Int64:
+			w.write("long");
+			break;
+		case fundamental_type::UInt64:
+			w.write("ulong");
+			break;
+		case fundamental_type::Float:
+			w.write("float");
+			break;
+		case fundamental_type::Double:
+			w.write("double");
+			break;
+		case fundamental_type::String:
+			w.write("string");
+			break;
+		default:
+			throw_invalid("invalid fundamental type");
+		}
+	}
+
     void write_projected_type(writer& w, type_semantics const& semantics)
     {
         call(semantics,
@@ -23,123 +71,32 @@ namespace coolrt
                 }
                 w.write(">");
             },
-            [&](fundamental_type const& type)
-            {
-                switch (type)
-                {
-                case fundamental_type::Boolean:
-                    w.write("bool");
-                    break;
-                case fundamental_type::Char:
-                    w.write("char");
-                    break;
-                case fundamental_type::Int8:
-                    w.write("sbyte");
-                    break;
-                case fundamental_type::UInt8:
-                    w.write("byte");
-                    break;
-                case fundamental_type::Int16:
-                    w.write("short");
-                    break;
-                case fundamental_type::UInt16:
-                    w.write("ushort");
-                    break;
-                case fundamental_type::Int32:
-                    w.write("int");
-                    break;
-                case fundamental_type::UInt32:
-                    w.write("uint");
-                    break;
-                case fundamental_type::Int64:
-                    w.write("long");
-                    break;
-                case fundamental_type::UInt64:
-                    w.write("ulong");
-                    break;
-                case fundamental_type::Float:
-                    w.write("float");
-                    break;
-                case fundamental_type::Double:
-                    w.write("double");
-                    break;
-                case fundamental_type::String:
-                    w.write("string");
-                    break;
-                default:
-                    throw_invalid("invalid fundamental type");
-                }
-            });
+			[&](fundamental_type const& type) { write_fundamental_type(w, type); });
     }
 
-    void write_interop_type(writer& w, type_semantics const& semantics)
-    {
-        w.write("/*INTEROP*/ ");
-        call(semantics,
-            [&](object_type) { w.write("object"); },
-            [&](guid_type) { w.write("System.Guid"); },
-            [&](type_definition const& type) { w.write("%.@", type.TypeNamespace(), type.TypeName()); },
-            [&](generic_type_index const& var) { w.write(w.generic_param_stack.back()[var.index]); },
-            [&](generic_type_instance const& type)
-            {
-                write_projected_type(w, type.generic_type);
-                w.write("<");
-                separator s{ w };
-                for (auto&& type_arg : type.generic_args)
-                {
-                    s();
-                    write_projected_type(w, type_arg);
-                }
-                w.write(">");
-            },
-            [&](fundamental_type const& type)
-            {
-                switch (type)
-                {
-                case fundamental_type::Boolean:
-                    w.write("bool");
-                    break;
-                case fundamental_type::Char:
-                    w.write("char");
-                    break;
-                case fundamental_type::Int8:
-                    w.write("sbyte");
-                    break;
-                case fundamental_type::UInt8:
-                    w.write("byte");
-                    break;
-                case fundamental_type::Int16:
-                    w.write("short");
-                    break;
-                case fundamental_type::UInt16:
-                    w.write("ushort");
-                    break;
-                case fundamental_type::Int32:
-                    w.write("int");
-                    break;
-                case fundamental_type::UInt32:
-                    w.write("uint");
-                    break;
-                case fundamental_type::Int64:
-                    w.write("long");
-                    break;
-                case fundamental_type::UInt64:
-                    w.write("ulong");
-                    break;
-                case fundamental_type::Float:
-                    w.write("float");
-                    break;
-                case fundamental_type::Double:
-                    w.write("double");
-                    break;
-                case fundamental_type::String:
-                    w.write("string");
-                    break;
-                default:
-                    throw_invalid("invalid fundamental type");
-                }
-            });
-    }
+	void write_interop_type(writer& w, type_semantics const& semantics)
+	{
+		call(semantics,
+			[&](object_type) { w.write("object"); },
+			[&](guid_type) { w.write("System.Guid"); },
+			[&](type_definition const& type) { w.write("IntPtr"); },
+			[&](generic_type_index const& var) { w.write(w.generic_param_stack.back()[var.index]); },
+			[&](generic_type_instance const& type)
+			{
+				w.write("IntPtr");
+			},
+			[&](fundamental_type const& type) 
+			{ 
+				if (type == fundamental_type::String)
+				{
+					w.write("IntPtr");
+				}
+				else
+				{
+					write_fundamental_type(w, type);
+				}
+			});
+	}
 
     void write_ptype_name(writer& w, TypeDef const& type)
     {
@@ -161,30 +118,6 @@ namespace coolrt
     {
         writer::indent_guard g{ w };
         w.write("throw new System.NotImplementedException();\n");
-    }
-
-    void write_parameter_type(writer& w, method_signature::param_t const& param)
-    {
-        auto semantics = get_type_semantics(param.second->Type());
-
-        switch (get_param_category(param))
-        {
-        case param_category::in:
-            w.write("%", bind<write_projected_type>(semantics));
-            break;
-        case param_category::out:
-            w.write("out %", bind<write_projected_type>(semantics));
-            break;
-        case param_category::pass_array:
-            w.write("/*pass_array*/ %[]", bind<write_projected_type>(semantics));
-            break;
-        case param_category::fill_array:
-            w.write("/*fill_array*/ %[]", bind<write_projected_type>(semantics));
-            break;
-        case param_category::receive_array:
-            w.write("/*receive_array*/ %[]", bind<write_projected_type>(semantics));
-            break;
-        }
     }
 
     void write_parameter_name(writer& w, std::string_view name)
@@ -218,7 +151,28 @@ namespace coolrt
         for (auto&& param : signature.params())
         {
             s();
-            w.write("% %", bind<write_parameter_type>(param), bind<write_parameter_name>(param.first.Name()));
+			auto semantics = get_type_semantics(param.second->Type());
+
+			switch (get_param_category(param))
+			{
+			case param_category::in:
+				w.write("%", bind<write_projected_type>(semantics));
+				break;
+			case param_category::out:
+				w.write("out %", bind<write_projected_type>(semantics));
+				break;
+			case param_category::pass_array:
+				w.write("/*pass_array*/ %[]", bind<write_projected_type>(semantics));
+				break;
+			case param_category::fill_array:
+				w.write("/*fill_array*/ %[]", bind<write_projected_type>(semantics));
+				break;
+			case param_category::receive_array:
+				w.write("/*receive_array*/ %[]", bind<write_projected_type>(semantics));
+				break;
+			}
+
+            w.write(" %", bind<write_parameter_name>(param.first.Name()));
         }
     }
 
@@ -431,24 +385,37 @@ namespace coolrt
         w.write("}\n");
     }
 
-    void write_type(writer& w, TypeDef const& type)
+    void write_projection_type(writer& w, TypeDef const& type)
     {
-        switch (get_category(type))
+		auto write = [&](auto func)
+		{
+			w.write("namespace %\n{\n", type.TypeNamespace());
+			{
+				writer::indent_guard g{ w };
+				func(w, type);
+			}
+			w.write("}\n");
+		};
+		
+		switch (get_category(type))
         {
         case category::class_type:
-            write_class(w, type);
+			write(write_class);
             break;
         case category::delegate_type:
-            write_delegate(w, type);
+			write(write_delegate);
             break;
         case category::enum_type:
-            write_enum(w, type);
+			write(write_class);
             break;
         case category::interface_type:
-            write_interface(w, type);
+			if (!is_exclusive_to(type))
+			{
+				write(write_interface);
+			}
             break;
         case category::struct_type:
-            write_struct(w, type);
+			write(write_struct);
             break;
         }
     }
@@ -457,13 +424,36 @@ namespace coolrt
     {
         for (auto&& param : signature.params())
         {
-            // bind<write_parameter_type>(param)
-            w.write(", % %", "IntPtr", bind<write_parameter_name>(param.first.Name()));
+			w.write(", ");
+
+			auto semantics = get_type_semantics(param.second->Type());
+
+			switch (get_param_category(param))
+			{
+			case param_category::in:
+				w.write("%", bind<write_interop_type>(semantics));
+				break;
+			case param_category::out:
+				w.write("/*out*/ %", bind<write_interop_type>(semantics));
+				break;
+			case param_category::pass_array:
+				w.write("/*pass_array*/ %[]", bind<write_interop_type>(semantics));
+				break;
+			case param_category::fill_array:
+				w.write("/*fill_array*/ %[]", bind<write_interop_type>(semantics));
+				break;
+			case param_category::receive_array:
+				w.write("/*receive_array*/ %[]", bind<write_interop_type>(semantics));
+				break;
+			}
+
+			w.write(" %", bind<write_parameter_name>(param.first.Name()));
         }
 
         if (signature.return_signature())
         {
-            w.write(", [Out] %* %", "int", signature.return_param_name("@return"));
+			auto semantics = get_type_semantics(signature.return_signature().Type());
+            w.write(", [Out] %* %", bind<write_interop_type>(semantics), signature.return_param_name("@return"));
         }
     }
 
@@ -471,7 +461,6 @@ namespace coolrt
     {
         for (auto&& param : signature.params())
         {
-            // bind<write_parameter_type>(param)
             w.write(", %", bind<write_parameter_name>(param.first.Name()));
         }
 
@@ -481,29 +470,104 @@ namespace coolrt
         }
     }
 
-    void write_interop_type(writer& w, TypeDef const& type)
+	void write_iid(writer& w, TypeDef const& type)
+	{
+		auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+		if (!attribute)
+		{
+			throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+		}
+
+		auto args = attribute.Value().FixedArgs();
+
+		using std::get;
+
+		auto get_arg = [&](decltype(args)::size_type index) { return get<ElemSig>(args[index].value).value; };
+
+		w.write_printf("// {%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}\n",
+			get<uint32_t>(get_arg(0)),
+			get<uint16_t>(get_arg(1)),
+			get<uint16_t>(get_arg(2)),
+			get<uint8_t>(get_arg(3)),
+			get<uint8_t>(get_arg(4)),
+			get<uint8_t>(get_arg(5)),
+			get<uint8_t>(get_arg(6)),
+			get<uint8_t>(get_arg(7)),
+			get<uint8_t>(get_arg(8)),
+			get<uint8_t>(get_arg(9)),
+			get<uint8_t>(get_arg(10)));
+
+		w.write_printf("public static readonly Guid IID = new Guid(0x%08Xu,0x%04X,0x%04X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X);\n\n",
+			get<uint32_t>(get_arg(0)),
+			get<uint16_t>(get_arg(1)),
+			get<uint16_t>(get_arg(2)),
+			get<uint8_t>(get_arg(3)),
+			get<uint8_t>(get_arg(4)),
+			get<uint8_t>(get_arg(5)),
+			get<uint8_t>(get_arg(6)),
+			get<uint8_t>(get_arg(7)),
+			get<uint8_t>(get_arg(8)),
+			get<uint8_t>(get_arg(9)),
+			get<uint8_t>(get_arg(10)));
+	}
+
+	void write_interop_interface(writer& w, TypeDef const& type)
+	{
+		XLANG_ASSERT(get_category(type) == category::interface_type);
+
+		w.write("internal unsafe static class @\n{\n", type.TypeName());
+		{
+			writer::indent_guard g{ w };
+			write_iid(w, type);
+
+
+			//int offset = 6;
+			for (auto&& method : type.MethodList())
+			{
+				//method_signature signature{ method };
+				//w.write("delegate int delegate%([In] IntPtr ^@this%);\n", method.Name(), bind<write_interop_parameters>(signature));
+
+				//w.write("public static int invoke%(void* ^@this%)\n{\n", method.Name(), bind<write_interop_parameters>(signature));
+				//{
+				//	writer::indent_guard gg{ w };
+				//	w.write("var __delegate = __Interop__.Helper.GetDelegate<delegate%>(^@this, %);\n", method.Name(), offset++);
+				//	w.write("return __delegate(^@this%);\n", bind<write_interop_argument_names>(signature));
+				//}
+				//w.write("}\n");
+			}
+		}
+		w.write("}\n");
+	}
+
+	void write_interop_delegate(writer& w, TypeDef const& type)
+	{
+
+	}
+	
+	void write_interop_type(writer& w, TypeDef const& type)
     {
-        XLANG_ASSERT(get_category(type) == category::interface_type);
+		auto write = [&](auto func)
+		{
+			w.write("namespace __Interop__.%\n{\n", type.TypeNamespace());
+			w.write("#pragma warning disable 0649\n");
+			{
+				writer::indent_guard g{ w };
+				w.write("using System;\nusing System.Runtime.InteropServices;\n\n");
+				func(w, type);
+			}
+			w.write("#pragma warning restore 0649\n");
+			w.write("}\n");
+		};
 
-        w.write("internal unsafe static class @\n{\n", type.TypeName());
-        {
-            writer::indent_guard g{ w };
-
-            int offset = 6;
-            for (auto&& method : type.MethodList())
-            {
-                method_signature signature{ method };
-                w.write("delegate int delegate%(void* ^@this%);\n", method.Name(), bind<write_interop_parameters>(signature));
-                w.write("public static int invoke%(void* ^@this%)\n{\n", method.Name(), bind<write_interop_parameters>(signature));
-                {
-                    writer::indent_guard gg{ w };
-                    w.write("var __delegate = __Interop__.Helper.GetDelegate<delegate%>(^@this, %);\n", method.Name(), offset++);
-                    w.write("return __delegate(^@this%);\n", bind<write_interop_argument_names>(signature));
-                }
-                w.write("}\n");
-            }
-        }
-        w.write("}\n");
+		switch (get_category(type))
+		{
+		case category::delegate_type:
+			write(write_interop_delegate);
+			break;
+		case category::interface_type:
+			write(write_interop_interface);
+			break;
+		}
     }
 
     void write_type(TypeDef const& type)
@@ -514,28 +578,8 @@ namespace coolrt
         writer w;
         auto guard{ w.push_generic_params(type.GenericParam()) };
 
-        if (!is_exclusive_to(type))
-        {
-            w.write("namespace %\n{\n", type.TypeNamespace());
-            {
-                writer::indent_guard g{ w };
-                write_type(w, type);
-            }
-            w.write("}\n");
-        }
-
-        if (get_category(type) == category::interface_type)
-        {
-            w.write("namespace __Interop__.%\n{\n", type.TypeNamespace());
-            w.write("#pragma warning disable 0649\n");
-            {
-                writer::indent_guard g{ w };
-                w.write("using System;\nusing System.Runtime.InteropServices;\n\n");
-                write_interop_type(w, type);
-            }
-            w.write("#pragma warning restore 0649\n");
-            w.write("}\n");
-        }
+		write_projection_type(w, type);
+		write_interop_type(w, type);
 
         auto filename = w.write_temp("%.@.cs", type.TypeNamespace(), type.TypeName());
         w.flush_to_file(settings.output_folder / filename);

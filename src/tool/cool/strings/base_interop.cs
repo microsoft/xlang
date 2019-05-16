@@ -5,10 +5,10 @@ namespace __Interop__
 
     static class Helper
     {
-        public unsafe static T GetDelegate<T>(void* @this, int offset)
+        public unsafe static T GetDelegate<T>(IntPtr @this, int offset)
         {
-            void* __slot = (*(void***)@this)[offset];
-            return System.Runtime.InteropServices.Marshal.GetDelegateForFunctionPointer<T>(new System.IntPtr(__slot));
+            void* __slot = (*(void***)@this.ToPointer())[offset];
+            return Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
         }
     }
 }
@@ -92,7 +92,7 @@ namespace __Interop__.Windows.Foundation
         unsafe delegate int delegateQueryInterface(IntPtr @this, [In] ref Guid iid, IntPtr* @object);
         public static IntPtr QueryInterface(IntPtr @this, Guid iid)
         {
-            var __delegate = GetDelegate<delegateQueryInterface>(@this, 0);
+            var __delegate = Helper.GetDelegate<delegateQueryInterface>(@this, 0);
 
             IntPtr instance = IntPtr.Zero;
             unsafe
@@ -105,12 +105,12 @@ namespace __Interop__.Windows.Foundation
         delegate uint delegateAddRefRelease(IntPtr @this);
         public static uint AddRef(IntPtr @this)
         {
-            var __delegate = GetDelegate<delegateAddRefRelease>(@this, 1);
+            var __delegate = Helper.GetDelegate<delegateAddRefRelease>(@this, 1);
             return __delegate(@this);
         }
         public static uint Release(IntPtr @this)
         {
-            var __delegate = GetDelegate<delegateAddRefRelease>(@this, 2);
+            var __delegate = Helper.GetDelegate<delegateAddRefRelease>(@this, 2);
             return __delegate(@this);
         }
     }
@@ -122,7 +122,7 @@ namespace __Interop__.Windows.Foundation
         unsafe delegate int delegateActivateInstance([In] IntPtr @this, [Out] IntPtr* instance);
         public static IntPtr ActivateInstance(IntPtr @this)
         {
-            var __delegate = GetDelegate<delegateActivateInstance>(@this, 6);
+            var __delegate = Helper.GetDelegate<delegateActivateInstance>(@this, 6);
 
             IntPtr instance = IntPtr.Zero;
             unsafe
