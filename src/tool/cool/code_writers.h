@@ -4,6 +4,19 @@ namespace coolrt
 {
     using namespace xlang::meta::reader;
 
+	bool is_unsafe(method_signature const& signature)
+	{
+		if (signature.return_signature())
+		{
+			return true;
+		}
+
+		// I'm sure there are other scenarios where methods can be unsafe, 
+		// but I'll figure them out later
+
+		return false;
+	}
+
 	void write_fundamental_type(writer& w, fundamental_type type)
 	{
 		switch (type)
@@ -77,11 +90,11 @@ namespace coolrt
 	void write_interop_type(writer& w, type_semantics const& semantics)
 	{
 		call(semantics,
-			[&](object_type) { w.write("object"); },
+			[&](object_type) { w.write("IntPtr"); },
 			[&](guid_type) { w.write("System.Guid"); },
-			[&](type_definition const& type) { w.write("IntPtr"); },
+			[&](type_definition const&) { w.write("IntPtr"); },
 			[&](generic_type_index const& var) { w.write(w.generic_param_stack.back()[var.index]); },
-			[&](generic_type_instance const& type)
+			[&](generic_type_instance const&)
 			{
 				w.write("IntPtr");
 			},
@@ -420,7 +433,7 @@ namespace coolrt
         }
     }
 
-    void write_interop_parameters(writer& w, method_signature const& signature)
+    void write_interop_parameters(writer& w, method_signature const& signature, bool write_return)
     {
         for (auto&& param : signature.params())
         {
@@ -450,7 +463,7 @@ namespace coolrt
 			w.write(" %", bind<write_parameter_name>(param.first.Name()));
         }
 
-        if (signature.return_signature())
+        if (write_return && signature.return_signature())
         {
 			auto semantics = get_type_semantics(signature.return_signature().Type());
             w.write(", [Out] %* %", bind<write_interop_type>(semantics), signature.return_param_name("@return"));
@@ -511,35 +524,80 @@ namespace coolrt
 			get<uint8_t>(get_arg(10)));
 	}
 
+
+	void write_unsafe(writer& w,  method_signature const& signature)
+	{
+		if (is_unsafe(signature))
+		{
+			w.write("unsafe ");
+		}
+	}
+
+	void write_interop_return(writer& w, RetTypeSig const& signature)
+	{
+		if (signature)
+		{
+			write_interop_type(w, get_type_semantics(signature.Type()));
+		}
+		else
+		{
+			w.write("void");
+		}
+	}
+	
+
 	void write_interop_interface(writer& w, TypeDef const& type)
 	{
 		XLANG_ASSERT(get_category(type) == category::interface_type);
 
-		w.write("internal unsafe static class @\n{\n", type.TypeName());
+		if (is_ptype(type))
+		{
+			w.write("// parameterized interfaces TBD\n");
+			return;
+		}
+
+		w.write("public static class @\n{\n", type.TypeName());
 		{
 			writer::indent_guard g{ w };
 			write_iid(w, type);
 
-
-			//int offset = 6;
+			int offset = 6;
 			for (auto&& method : type.MethodList())
 			{
-				//method_signature signature{ method };
-				//w.write("delegate int delegate%([In] IntPtr ^@this%);\n", method.Name(), bind<write_interop_parameters>(signature));
+				method_signature signature{ method };
+				w.write("%delegate int delegate%([In] IntPtr ^@this%);\n", bind<write_unsafe>(signature), method.Name(), bind<write_interop_parameters>(signature, true));
 
-				//w.write("public static int invoke%(void* ^@this%)\n{\n", method.Name(), bind<write_interop_parameters>(signature));
-				//{
-				//	writer::indent_guard gg{ w };
-				//	w.write("var __delegate = __Interop__.Helper.GetDelegate<delegate%>(^@this, %);\n", method.Name(), offset++);
-				//	w.write("return __delegate(^@this%);\n", bind<write_interop_argument_names>(signature));
-				//}
-				//w.write("}\n");
+				w.write("public static %int invoke%(IntPtr ^@this%)\n{\n", bind<write_unsafe>(signature), method.Name(), bind<write_interop_parameters>(signature, true));
+				{
+					writer::indent_guard gg{ w };
+					w.write("var __delegate = Helper.GetDelegate<delegate%>(^@this, %);\n", method.Name(), offset++);
+					w.write("return __delegate(^@this%);\n", bind<write_interop_argument_names>(signature));
+				}
+				w.write("}\n");
+
+				w.write("public static %% %(IntPtr ^@this%)\n{\n", 
+					bind<write_unsafe>(signature), 
+					bind<write_interop_return>(signature.return_signature()), 
+					method.Name(), 
+					bind<write_interop_parameters>(signature, false));
+				{
+					writer::indent_guard gg{ w };
+					if (signature.return_signature())
+					{
+						w.write("% %;\n",
+							bind<write_interop_type>(get_type_semantics(signature.return_signature().Type())),
+							signature.return_param_name("@return"));
+						w.write("throw null;\n");
+					}
+
+				}
+				w.write("}\n");
 			}
 		}
 		w.write("}\n");
 	}
 
-	void write_interop_delegate(writer& w, TypeDef const& type)
+	void write_interop_delegate(writer& /*w*/, TypeDef const& /*type*/)
 	{
 
 	}

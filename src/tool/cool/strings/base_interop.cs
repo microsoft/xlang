@@ -19,7 +19,7 @@ namespace __Interop__.Windows.Foundation
     using System;
     using System.Runtime.InteropServices;
 
-    internal static class HString
+    public static class HString
     {
         [DllImport("api-ms-win-core-winrt-string-l1-1-0.dll", CallingConvention = CallingConvention.StdCall)]
         static extern unsafe int WindowsCreateString([MarshalAs(UnmanagedType.LPWStr)] string source, int length, [Out] IntPtr* hstring);
@@ -61,7 +61,7 @@ namespace __Interop__.Windows.Foundation
         }
     }
 
-    internal static class Platform
+    public static class Platform
     {
         [DllImport("api-ms-win-core-winrt-l1-1-0.dll", PreserveSig = true)]
         static extern unsafe int RoGetActivationFactory([In] IntPtr activatableClassId, [In] ref Guid iid, [Out] IntPtr* factory);
@@ -85,49 +85,73 @@ namespace __Interop__.Windows.Foundation
         }
     }
 
-    internal static class IUnknown
+    public static class IUnknown
     {
         public static readonly Guid IID = new Guid("00000000-0000-0000-C000-000000000046");
 
         unsafe delegate int delegateQueryInterface(IntPtr @this, [In] ref Guid iid, IntPtr* @object);
-        public static IntPtr QueryInterface(IntPtr @this, Guid iid)
+
+        unsafe public static int invokeQueryInterface(IntPtr @this, ref Guid iid, IntPtr* @object)
         {
             var __delegate = Helper.GetDelegate<delegateQueryInterface>(@this, 0);
+            return __delegate(@this, ref iid, @object);
+        }
 
+        public static IntPtr QueryInterface(IntPtr @this, Guid iid)
+        {
             IntPtr instance = IntPtr.Zero;
             unsafe
             {
-                Marshal.GetExceptionForHR(__delegate(@this, ref iid, &instance));
+                Marshal.GetExceptionForHR(invokeQueryInterface(@this, ref iid, &instance));
             }
             return instance;
         }
 
-        delegate uint delegateAddRefRelease(IntPtr @this);
+        delegate uint delegateAddRef(IntPtr @this);
+
+        public static uint invokeAddRef(IntPtr @this)
+        {
+            var __delegate = Helper.GetDelegate<delegateAddRef>(@this, 1);
+            return __delegate(@this);
+        }
+
         public static uint AddRef(IntPtr @this)
         {
-            var __delegate = Helper.GetDelegate<delegateAddRefRelease>(@this, 1);
+            return invokeAddRef(@this);
+        }
+
+        delegate uint delegateRelease(IntPtr @this);
+
+        public static uint invokeRelease(IntPtr @this)
+        {
+            var __delegate = Helper.GetDelegate<delegateRelease>(@this, 2);
             return __delegate(@this);
         }
+
         public static uint Release(IntPtr @this)
         {
-            var __delegate = Helper.GetDelegate<delegateAddRefRelease>(@this, 2);
-            return __delegate(@this);
+            return invokeRelease(@this);
         }
     }
-    
-    internal static class IActivationFactory
+
+    public static class IActivationFactory
     {
         public static readonly Guid IID = new Guid("00000035-0000-0000-C000-000000000046");
 
         unsafe delegate int delegateActivateInstance([In] IntPtr @this, [Out] IntPtr* instance);
-        public static IntPtr ActivateInstance(IntPtr @this)
+
+        unsafe public static int invokeActivateInstance(IntPtr @this, IntPtr* instance)
         {
             var __delegate = Helper.GetDelegate<delegateActivateInstance>(@this, 6);
+            return __delegate(@this, instance);
+        }
 
+        public static IntPtr ActivateInstance(IntPtr @this)
+        {
             IntPtr instance = IntPtr.Zero;
             unsafe
             {
-                Marshal.GetExceptionForHR(__delegate(@this, &instance));
+                Marshal.GetExceptionForHR(invokeActivateInstance(@this, &instance));
             }
             return instance;
         }

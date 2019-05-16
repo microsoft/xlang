@@ -22,6 +22,11 @@ namespace xlang::meta::reader
         return get_category(type) == category::class_type && extends_type(type, "System"sv, "Attribute"sv);
     }
 
+	bool is_ptype(TypeDef const& type)
+	{
+		return distance(type.GenericParam()) > 0;
+	}
+
     bool is_constructor(MethodDef const& method)
     {
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";
