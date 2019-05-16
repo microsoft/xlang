@@ -51,6 +51,11 @@ namespace __Interop__.Windows.Foundation
         [DllImport("api-ms-win-core-winrt-l1-1-0.dll", PreserveSig = true)]
         static extern unsafe int RoGetActivationFactory([In] IntPtr activatableClassId, [In] ref Guid iid, [Out] IntPtr* factory);
 
+        public static IntPtr GetActivationFactory(string className)
+        {
+            return GetActivationFactory(className, IActivationFactory.IID);
+        }
+
         public static IntPtr GetActivationFactory(string className, Guid iid)
         {
             var classNameHstring = HString.Create(className);
