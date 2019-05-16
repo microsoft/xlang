@@ -274,9 +274,9 @@ std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::
 template<typename T>
 auto find_type_by_name(table<T> const& type, std::string name, std::string namespace_name)
 {
-    auto const& ref = std::find_if(type.begin(), type.end(), [name, namespace_name](auto&& type_ref)
+    auto const& ref = std::find_if(type.begin(), type.end(), [name, namespace_name](auto&& t)
     {
-        return type_ref.TypeName() == name && type_ref.TypeNamespace() == namespace_name;
+        return t.TypeName() == name && t.TypeNamespace() == namespace_name;
     });
     REQUIRE(ref.TypeName() == name);
     REQUIRE(ref.TypeNamespace() == namespace_name);
@@ -727,6 +727,13 @@ TEST_CASE("Interface event metadata")
     )" };
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+    
+    REQUIRE(db.AssemblyRef.size() == 2);
+    auto const& iter = std::find_if(db.AssemblyRef.begin(), db.AssemblyRef.end(), [](auto&& assembly)
+    {
+        return assembly.Name() == "xlang_foundation";
+    });
+    REQUIRE(iter.Name() == "xlang_foundation");
 
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
     find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");

@@ -40,7 +40,9 @@ namespace xlang::xmeta
         std::shared_ptr<enum_model>,
         std::shared_ptr<interface_model>,
         std::shared_ptr<struct_model>,
-        std::shared_ptr<delegate_model>, std::shared_ptr<xlang::meta::reader::TypeDef>, std::less<>>;
+        std::shared_ptr<delegate_model>, 
+        std::shared_ptr<xlang::meta::reader::TypeDef>, 
+        std::less<>>;
 
     struct base_model
     {
