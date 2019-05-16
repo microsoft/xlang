@@ -466,20 +466,23 @@ namespace coolrt
         if (write_return && signature.return_signature())
         {
 			auto semantics = get_type_semantics(signature.return_signature().Type());
-            w.write(", [Out] %* %", bind<write_interop_type>(semantics), signature.return_param_name("@return"));
+            w.write(", [Out] %* %", bind<write_interop_type>(semantics), signature.return_param_name());
         }
     }
 
-    void write_interop_argument_names(writer& w, method_signature const& signature)
-    {
-        for (auto&& param : signature.params())
-        {
-            w.write(", %", bind<write_parameter_name>(param.first.Name()));
-        }
+	void write_interop_parameter_names(writer& w, method_signature const& signature)
+	{
+		for (auto&& param : signature.params())
+		{
+			w.write(", %", bind<write_parameter_name>(param.first.Name()));
+		}
+	}
 
+	void write_interop_return_parameter_name(writer& w, method_signature const& signature, bool reference)
+	{
         if (signature.return_signature())
         {
-            w.write(", %", signature.return_param_name("@return"));
+            w.write(", %%", reference ? "&" : "", signature.return_param_name());
         }
     }
 
@@ -571,7 +574,9 @@ namespace coolrt
 				{
 					writer::indent_guard gg{ w };
 					w.write("var __delegate = Helper.GetDelegate<delegate%>(^@this, %);\n", method.Name(), offset++);
-					w.write("return __delegate(^@this%);\n", bind<write_interop_argument_names>(signature));
+					w.write("return __delegate(^@this%%);\n", 
+						bind<write_interop_parameter_names>(signature),
+						bind<write_interop_return_parameter_name>(signature, false));
 				}
 				w.write("}\n");
 
@@ -584,12 +589,21 @@ namespace coolrt
 					writer::indent_guard gg{ w };
 					if (signature.return_signature())
 					{
-						w.write("% %;\n",
+						w.write("% % = default;\n",
 							bind<write_interop_type>(get_type_semantics(signature.return_signature().Type())),
-							signature.return_param_name("@return"));
-						w.write("throw null;\n");
+							signature.return_param_name());
+						w.write("Marshal.ThrowExceptionForHR(invoke%(^@this%%));\n", 
+							method.Name(), 
+							bind<write_interop_parameter_names>(signature),
+							bind<write_interop_return_parameter_name>(signature, true));
+						w.write("return %;\n", signature.return_param_name());
 					}
-
+					else
+					{
+						w.write("Marshal.ThrowExceptionForHR(invoke%(^@this%));\n",
+							method.Name(),
+							bind<write_interop_parameter_names>(signature));
+					}
 				}
 				w.write("}\n");
 			}
