@@ -1,18 +1,3 @@
-namespace __Interop__
-{
-    using System;
-    using System.Runtime.InteropServices;
-
-    static class Helper
-    {
-        public unsafe static T GetDelegate<T>(IntPtr @this, int offset)
-        {
-            void* __slot = (*(void***)@this.ToPointer())[offset];
-            return Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
-        }
-    }
-}
-
 namespace __Interop__.Windows.Foundation
 {
 #pragma warning disable 0649
@@ -93,7 +78,8 @@ namespace __Interop__.Windows.Foundation
 
         unsafe public static int invokeQueryInterface(IntPtr @this, ref Guid iid, IntPtr* @object)
         {
-            var __delegate = Helper.GetDelegate<delegateQueryInterface>(@this, 0);
+            void* __slot = (*(void***)@this.ToPointer())[0];
+            var __delegate = Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
             return __delegate(@this, ref iid, @object);
         }
 
@@ -111,7 +97,8 @@ namespace __Interop__.Windows.Foundation
 
         public static uint invokeAddRef(IntPtr @this)
         {
-            var __delegate = Helper.GetDelegate<delegateAddRef>(@this, 1);
+            void* __slot = (*(void***)@this.ToPointer())[1];
+            var __delegate = Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
             return __delegate(@this);
         }
 
@@ -124,7 +111,8 @@ namespace __Interop__.Windows.Foundation
 
         public static uint invokeRelease(IntPtr @this)
         {
-            var __delegate = Helper.GetDelegate<delegateRelease>(@this, 2);
+            void* __slot = (*(void***)@this.ToPointer())[2];
+            var __delegate = Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
             return __delegate(@this);
         }
 
@@ -142,7 +130,8 @@ namespace __Interop__.Windows.Foundation
 
         unsafe public static int invokeActivateInstance(IntPtr @this, IntPtr* instance)
         {
-            var __delegate = Helper.GetDelegate<delegateActivateInstance>(@this, 6);
+            void* __slot = (*(void***)@this.ToPointer())[6];
+            var __delegate = Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
             return __delegate(@this, instance);
         }
 

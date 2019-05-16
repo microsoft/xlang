@@ -570,10 +570,11 @@ namespace coolrt
 				method_signature signature{ method };
 				w.write("%delegate int delegate%([In] IntPtr ^@this%);\n", bind<write_unsafe>(signature), method.Name(), bind<write_interop_parameters>(signature, true));
 
-				w.write("public static %int invoke%(IntPtr ^@this%)\n{\n", bind<write_unsafe>(signature), method.Name(), bind<write_interop_parameters>(signature, true));
+				w.write("public static unsafe int invoke%(IntPtr ^@this%)\n{\n", method.Name(), bind<write_interop_parameters>(signature, true));
 				{
 					writer::indent_guard gg{ w };
-					w.write("var __delegate = Helper.GetDelegate<delegate%>(^@this, %);\n", method.Name(), offset++);
+					w.write("void* __slot = (*(void***)^@this.ToPointer())[%];\n", offset++);
+					w.write("var __delegate = Marshal.GetDelegateForFunctionPointer<delegate%>(new IntPtr(__slot));\n", method.Name());
 					w.write("return __delegate(^@this%%);\n", 
 						bind<write_interop_parameter_names>(signature),
 						bind<write_interop_return_parameter_name>(signature, false));
