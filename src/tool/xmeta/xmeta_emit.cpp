@@ -7,7 +7,7 @@
 #include <iostream>
 #include <codecvt>
 #include <locale>
-
+#include <variant>
 using namespace winrt;
 using namespace xlang::meta::reader;
 using namespace xlang::meta::writer;
@@ -287,10 +287,13 @@ namespace xlang::xmeta
             token_implements,
             &token_typedef));
 
-        mdTypeRef token_typeref;
-
-        check_hresult(m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &token_typeref));
-        type_references.emplace(name, token_typeref);
+        auto const& iter = type_references.find(name);
+        if (iter == type_references.end())
+        {
+            mdTypeRef md_ref;
+            m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &md_ref);
+            type_references.emplace(name, md_ref);
+        }
         return token_typedef;
     }
 
@@ -436,7 +439,7 @@ namespace xlang::xmeta
         assert(std::holds_alternative<std::shared_ptr<delegate_model>>(target));
         auto const& dm = std::get<std::shared_ptr<delegate_model>>(target);
 
-        mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_fully_qualified_id());
+        mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_fully_qualified_id(), xlang_model.m_assembly);
         mdEvent token_event;
         m_metadata_emitter->DefineEvent(
             token_def,
@@ -457,7 +460,7 @@ namespace xlang::xmeta
         std::vector<mdTypeRef> implements;
         for (auto const& val : model->get_all_interface_bases())
         {
-            implements.emplace_back(get_or_define_type_ref(val->get_fully_qualified_id()));
+            implements.emplace_back(get_or_define_type_ref(val->get_fully_qualified_id(), xlang_model.m_assembly));
         }
         implements.emplace_back(mdTokenNil);
         
@@ -706,29 +709,34 @@ namespace xlang::xmeta
             &token_param_def));
     }
 
-    mdTypeRef xmeta_emit::get_or_define_type_ref(std::string const& ref_name)
+    mdTypeRef xmeta_emit::get_or_define_type_ref(std::string const& ref_name, std::string const& assembly_ref)
     {
-  /*      if (assembly_references.find(assembly_ref) == assembly_references.end())
+        auto const& ref = assembly_references.find(assembly_ref);
+        mdAssemblyRef token_assembly_ref;
+        if (ref == assembly_references.end())
         {
-            BYTE strong_name;
-            ULONG strong_name_size;
             check_hresult(m_metadata_assembly_emitter->DefineAssemblyRef(
-                strong_name,
-                sizeof(strong_name_size),
-                L"mscorlib",
+                nullptr,
+                0,
+                s2ws(assembly_ref).c_str(),
                 &s_genericMetadata,
                 nullptr,
                 0,
                 afContentType_Default,
-                &token_mscorlib));
-            assembly_references.emplace(L"mscorlib", token_mscorlib);
-        }*/
+                &token_assembly_ref));
+            assembly_references.emplace(assembly_ref, token_assembly_ref);
+        }
+        else
+        {
+            token_assembly_ref = ref->second;
+        }
+
 
         auto const& iter = type_references.find(ref_name);
         if (iter == type_references.end())
         {
             mdTypeRef md_ref;
-            m_metadata_emitter->DefineTypeRefByName(to_token(m_module), s2ws(ref_name).c_str(), &md_ref);
+            m_metadata_emitter->DefineTypeRefByName(token_assembly_ref, s2ws(ref_name).c_str(), &md_ref);
             type_references.emplace(ref_name, md_ref);
             return md_ref;
         }
@@ -743,7 +751,13 @@ namespace xlang::xmeta
             if (std::holds_alternative<std::string>(semantic))
             {
                 std::string return_name = std::get<std::string>(semantic);
-                TypeRef type_ref = to_TypeRef(get_or_define_type_ref(return_name));
+                std::string assembly;
+                if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(ref->get_semantic().get_resolved_target()))
+                {
+                    auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(ref->get_semantic().get_resolved_target());
+                    assembly = type_def->get_database().Assembly[0].Name();
+                }
+                TypeRef type_ref = to_TypeRef(get_or_define_type_ref(return_name, assembly));
                 return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
             }
             else if (std::holds_alternative<object_type>(semantic))

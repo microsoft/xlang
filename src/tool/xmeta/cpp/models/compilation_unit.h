@@ -91,7 +91,7 @@ namespace xlang::xmeta
 
         std::map<std::string_view, std::shared_ptr<namespace_model>, std::less<>> namespaces;
         std::string m_assembly;
-        std::vector<std::string> m_imported_assembly_names;
+        std::vector<std::string> m_imported_assembly_names_paths;
         symbol_table symbols;
     };
 }

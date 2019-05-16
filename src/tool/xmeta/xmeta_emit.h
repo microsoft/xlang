@@ -49,6 +49,8 @@ namespace xlang::xmeta
 
         void define_assembly();
         void define_common_reference_assembly();
+        void define_imported_reference_assembly();
+
         mdTypeDef define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[]);
         
         void define_method(std::shared_ptr<method_model> const& model, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_references, mdTypeDef const& token_def);
@@ -61,7 +63,7 @@ namespace xlang::xmeta
         std::optional<xlang::meta::reader::TypeSig> create_type_sig(std::optional<type_ref> const& ref);
         xlang::meta::writer::signature_blob create_method_sig(std::optional<type_ref> const& return_type_ref, std::vector<formal_parameter_model> const& formal_parameters);
 
-        mdTypeRef get_or_define_type_ref(std::string const& ref_name);
+        mdTypeRef get_or_define_type_ref(std::string const& ref_name, std::string const& assembly_ref);
 
         // A generic assembly metadata struct.
         static constexpr ASSEMBLYMETADATA s_genericMetadata =
