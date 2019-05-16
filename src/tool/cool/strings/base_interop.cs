@@ -79,7 +79,7 @@ namespace __Interop__.Windows.Foundation
         unsafe public static int invokeQueryInterface(IntPtr @this, ref Guid iid, IntPtr* @object)
         {
             void* __slot = (*(void***)@this.ToPointer())[0];
-            var __delegate = Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
+            var __delegate = Marshal.GetDelegateForFunctionPointer<delegateQueryInterface>(new IntPtr(__slot));
             return __delegate(@this, ref iid, @object);
         }
 
@@ -95,10 +95,10 @@ namespace __Interop__.Windows.Foundation
 
         delegate uint delegateAddRef(IntPtr @this);
 
-        public static uint invokeAddRef(IntPtr @this)
+        unsafe public static uint invokeAddRef(IntPtr @this)
         {
             void* __slot = (*(void***)@this.ToPointer())[1];
-            var __delegate = Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
+            var __delegate = Marshal.GetDelegateForFunctionPointer<delegateAddRef>(new IntPtr(__slot));
             return __delegate(@this);
         }
 
@@ -109,10 +109,10 @@ namespace __Interop__.Windows.Foundation
 
         delegate uint delegateRelease(IntPtr @this);
 
-        public static uint invokeRelease(IntPtr @this)
+        unsafe public static uint invokeRelease(IntPtr @this)
         {
             void* __slot = (*(void***)@this.ToPointer())[2];
-            var __delegate = Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
+            var __delegate = Marshal.GetDelegateForFunctionPointer<delegateRelease>(new IntPtr(__slot));
             return __delegate(@this);
         }
 
@@ -131,7 +131,7 @@ namespace __Interop__.Windows.Foundation
         unsafe public static int invokeActivateInstance(IntPtr @this, IntPtr* instance)
         {
             void* __slot = (*(void***)@this.ToPointer())[6];
-            var __delegate = Marshal.GetDelegateForFunctionPointer<T>(new IntPtr(__slot));
+            var __delegate = Marshal.GetDelegateForFunctionPointer<delegateActivateInstance>(new IntPtr(__slot));
             return __delegate(@this, instance);
         }
 
