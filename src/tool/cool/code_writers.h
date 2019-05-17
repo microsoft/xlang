@@ -129,7 +129,6 @@ namespace coolrt
 
     void write_throw_not_impl(writer& w)
     {
-        writer::indent_guard g{ w };
         w.write("throw new System.NotImplementedException();\n");
     }
 
@@ -157,6 +156,18 @@ namespace coolrt
 
         w.write(name);
     }
+
+	void write_method_name(writer& w, std::string_view name)
+	{
+		static const std::set<std::string_view> special = { "ToString" };
+
+		if (std::find(special.begin(), special.end(), name) != special.end())
+		{
+			w.write("_");
+		}
+
+		w.write(name);
+	}
 
     void write_method_parameters(writer& w, method_signature const& signature)
     {
@@ -197,7 +208,7 @@ namespace coolrt
         }
         else
         {
-            if (method.Flags().Static())
+            if (is_static(method))
             {
                 w.write("static ");
             }
@@ -212,7 +223,7 @@ namespace coolrt
             {
                 w.write("void");
             }
-            w.write(" %", method.Name());
+            w.write(" %", bind<write_method_name>(method.Name()));
         }
 
         w.write("(%)", bind<write_method_parameters>(signature));
@@ -232,12 +243,14 @@ namespace coolrt
 
         separator s{ w };
 
-        if (get_category(type) == category::class_type)
+        if (get_category(type) == category::class_type && !is_static(type))
         {
             write_colon();
             s();
             w.write(bind<write_projected_type>(get_type_semantics(type.Extends())));
-        }
+			s();
+			w.write("System.IDisposable");
+		}
 
         for (auto&& iface : type.InterfaceImpl())
         {
@@ -264,11 +277,29 @@ namespace coolrt
         }
     }
 
+	void write_check_disposed(writer& w, MethodDef const& method)
+	{
+		if (!is_static(method))
+		{
+			w.write("if (_disposedValue) { throw new System.ObjectDisposedException(string.Empty); }\n");
+		}
+	}
+
     void write_class(writer& w, TypeDef const& type)
     {
-        w.write("public class @%\n{\n", type.TypeName(), bind<write_type_inheritance>(type));
+        w.write("public %class @%\n{\n", is_static(type) ? "static " : "", type.TypeName(), bind<write_type_inheritance>(type));
         {
             writer::indent_guard g{ w };
+
+			w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => __Interop__.Windows.Foundation.Platform.GetActivationFactory(\"%.%\"));\n",
+				type.TypeNamespace(), type.TypeName());
+
+			if (!is_static(type))
+			{
+				w.write("private System.IntPtr _instance;\n");
+				w.write(strings::dispose_pattern, type.TypeName());
+			}
+
             for (auto&& method : type.MethodList())
             {
                 if (!is_constructor(method))
@@ -278,7 +309,18 @@ namespace coolrt
 
                 method_signature signature{ method };
                 w.write("public %\n{\n", bind<write_method_signature>(method, signature));
-                write_throw_not_impl(w);
+				{
+					writer::indent_guard g{ w };
+
+					if (signature.has_params())
+					{
+						write_throw_not_impl(w);
+					}
+					else
+					{
+						w.write("_instance = __Interop__.Windows.Foundation.IActivationFactory.ActivateInstance(_factory.Value);\n");
+					}
+				}
                 w.write("}\n");
             }
 
@@ -291,7 +333,12 @@ namespace coolrt
 
                 method_signature signature{ method };
                 w.write("public %\n{\n", bind<write_method_signature>(method, signature));
-                write_throw_not_impl(w);
+				{
+					writer::indent_guard g{ w };
+					write_check_disposed(w, method);
+					write_throw_not_impl(w);
+				}
+               
                 w.write("}\n");
             }
 
@@ -299,13 +346,28 @@ namespace coolrt
             {
                 auto [getter, setter] = get_property_methods(prop);
                 auto semantics = get_type_semantics(prop.Type().Type());
-                w.write("public % %\n{\n", bind<write_projected_type>(semantics), prop.Name());
+                w.write("public %% %\n{\n", 
+					is_static(getter) ? "static " : "", 
+					bind<write_projected_type>(semantics), 
+					prop.Name());
                 {
                     writer::indent_guard gg{ w };
-                    w.write("get { throw new System.NotImplementedException(); }\n");
+                    w.write("get\n{\n");
+					{
+						writer::indent_guard ggg{ w };
+						write_check_disposed(w, getter);
+						write_throw_not_impl(w);
+					}
+					w.write("}\n");
                     if (setter)
                     {
-                        w.write("set { throw new System.NotImplementedException(); }\n");
+                        w.write("set\n{\n");
+						{
+							writer::indent_guard ggg{ w };
+							write_check_disposed(w, setter);
+							write_throw_not_impl(w);
+						}
+						w.write("}\n");
                     }
                 }
                 w.write("}\n");
@@ -313,8 +375,12 @@ namespace coolrt
 
             for (auto&& evt : type.EventList())
             {
-                auto semantics = get_type_semantics(evt.EventType());
-                w.write("public event % %;\n", bind<write_projected_type>(semantics), evt.Name());
+				auto [adder, remover] = get_event_methods(evt);
+				auto semantics = get_type_semantics(evt.EventType());
+				w.write("public event %% %;\n",
+					is_static(adder) ? "static " : "",
+					bind<write_projected_type>(semantics), 
+					evt.Name());
             }
         }
         w.write("}\n");
@@ -419,7 +485,7 @@ namespace coolrt
 			write(write_delegate);
             break;
         case category::enum_type:
-			write(write_class);
+			write(write_enum);
             break;
         case category::interface_type:
 			if (!is_exclusive_to(type))

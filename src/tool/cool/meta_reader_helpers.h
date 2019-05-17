@@ -27,6 +27,11 @@ namespace xlang::meta::reader
 		return distance(type.GenericParam()) > 0;
 	}
 
+	bool is_static(TypeDef const& type)
+	{
+		return get_category(type) == category::class_type && type.Flags().Abstract();
+	}
+
     bool is_constructor(MethodDef const& method)
     {
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";
@@ -36,6 +41,11 @@ namespace xlang::meta::reader
     {
         return method.SpecialName() || method.Flags().RTSpecialName();
     }
+
+	bool is_static(MethodDef const& method)
+	{
+		return method.Flags().Static();
+	}
 
     auto get_delegate_invoke(TypeDef const& type)
     {
@@ -338,4 +348,33 @@ namespace xlang::meta::reader
 
         return std::make_tuple(get_method, set_method);
     }
+
+	auto get_event_methods(Event const& evt)
+	{
+		MethodDef add_method{}, remove_method{};
+
+		for (auto&& method_semantic : evt.MethodSemantic())
+		{
+			auto semantic = method_semantic.Semantic();
+
+			if (semantic.AddOn())
+			{
+				add_method = method_semantic.Method();
+			}
+			else if (semantic.RemoveOn())
+			{
+				remove_method = method_semantic.Method();
+			}
+			else
+			{
+				throw_invalid("Events can only have add and remove methods");
+			}
+		}
+
+		XLANG_ASSERT(add_method);
+		XLANG_ASSERT(remove_method);
+		XLANG_ASSERT(add_method.Flags().Static() == remove_method.Flags().Static());
+
+		return std::make_tuple(add_method, remove_method);
+	}
 }
