@@ -214,6 +214,21 @@ namespace xlang::meta::reader
             }, signature.Type());
     }
 
+	TypeDef get_typedef(type_semantics const& semantics)
+	{
+		return std::visit(
+			impl::overloaded{
+				[](type_definition type) { return type; },
+				[](generic_type_instance type_instance) { return type_instance.generic_type; },
+				[](auto) -> TypeDef { throw_invalid("type doesn't contain typedef"); }
+			}, semantics);
+	};
+
+	TypeDef get_typedef(coded_index<TypeDefOrRef> const& type)
+	{
+		return get_typedef(get_type_semantics(type));
+	};
+
     struct method_signature
     {
         using param_t = std::pair<Param, ParamSig const*>;
