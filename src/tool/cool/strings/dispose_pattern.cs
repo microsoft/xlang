@@ -1,4 +1,3 @@
-#region IDisposable Support
 private bool _disposedValue = false; 
 protected virtual void _Dispose()
 {
@@ -19,4 +18,3 @@ public void Dispose()
     _Dispose();
     System.GC.SuppressFinalize(this);
 }
-#endregion

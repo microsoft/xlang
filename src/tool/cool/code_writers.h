@@ -223,7 +223,7 @@ namespace coolrt
             {
                 w.write("void");
             }
-            w.write(" %", bind<write_method_name>(method.Name()));
+            w.write(" %%", method.Flags().SpecialName() ? "_" : "", bind<write_method_name>(method.Name()));
         }
 
         w.write("(%)", bind<write_method_parameters>(signature));
@@ -277,19 +277,37 @@ namespace coolrt
         }
     }
 
-	void write_check_disposed(writer& w, MethodDef const& method)
+	void write_class_factory(writer& w, TypeDef const& type, activation_factory const& factory)
 	{
-		if (!is_static(method))
+		if (factory.type)
 		{
-			w.write("if (_disposedValue) { throw new System.ObjectDisposedException(string.Empty); }\n");
+			w.write("// activation %.%\n", factory.type.TypeNamespace(), factory.type.TypeName());
+			for (auto&& method : factory.type.MethodList())
+			{
+				w.write("//    %\n", method.Name());
+			}
+		}
+		else
+		{
+			w.write(strings::default_activation, type.TypeName());
+		}
+	}
+
+	void write_class_factory(writer& w, TypeDef const& type, static_factory const& factory)
+	{
+		XLANG_ASSERT(factory.type);
+		w.write("// static %.%\n", factory.type.TypeNamespace(), factory.type.TypeName());
+		for (auto&& method : factory.type.MethodList())
+		{
+			w.write("//    %\n", method.Name());
 		}
 	}
 
     void write_class(writer& w, TypeDef const& type)
     {
-        w.write("public %class @%\n{\n", is_static(type) ? "static " : "", type.TypeName(), bind<write_type_inheritance>(type));
-        {
-            writer::indent_guard g{ w };
+        w.write("public %class %%\n{\n", is_static(type) ? "static " : "", type.TypeName(), bind<write_type_inheritance>(type));
+		{
+			writer::indent_guard g{ w };
 
 			w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => __Interop__.Windows.Foundation.Platform.GetActivationFactory(\"%.%\"));\n",
 				type.TypeNamespace(), type.TypeName());
@@ -300,51 +318,40 @@ namespace coolrt
 				w.write(strings::dispose_pattern, type.TypeName());
 			}
 
-            for (auto&& method : type.MethodList())
-            {
-                if (!is_constructor(method))
-                {
-                    continue;
-                }
+			for (auto&& factory : get_factories(type))
+			{
+				call(factory, [&](auto const& info) { write_class_factory(w, type, info); });
+			}
 
-                method_signature signature{ method };
-                w.write("public %\n{\n", bind<write_method_signature>(method, signature));
+			for (auto&& ii : type.InterfaceImpl())
+			{
+				auto semantics = get_type_semantics(ii.Interface());
+				auto default_interface = has_attribute(ii, "Windows.Foundation.Metadata", "DefaultAttribute");
+
+				auto guard{ w.push_generic_params(semantics, [&](auto const& arg) { return w.write_temp("%", bind<write_projected_type>(arg)); }) };
+						
+				w.write("// %interface %\n", default_interface ? "default " : "", bind<write_projected_type>(semantics));
+				for (auto&& method : get_typedef(semantics).MethodList())
 				{
-					writer::indent_guard g{ w };
-
-					if (signature.has_params())
+					method_signature signature{ method };
+					w.write("%%\n{\n", 
+						method.Flags().SpecialName() ? "" : "public ",
+						bind<write_method_signature>(method, signature));
 					{
+						writer::indent_guard gg{ w };
+						w.write("if (_disposedValue) { throw new System.ObjectDisposedException(string.Empty); }\n");
 						write_throw_not_impl(w);
 					}
-					else
-					{
-						w.write("_instance = __Interop__.Windows.Foundation.IActivationFactory.ActivateInstance(_factory.Value);\n");
-					}
+					w.write("}\n");
 				}
-                w.write("}\n");
-            }
-
-            for (auto&& method : type.MethodList())
-            {
-                if (is_special(method))
-                {
-                    continue;
-                }
-
-                method_signature signature{ method };
-                w.write("public %\n{\n", bind<write_method_signature>(method, signature));
-				{
-					writer::indent_guard g{ w };
-					write_check_disposed(w, method);
-					write_throw_not_impl(w);
-				}
-               
-                w.write("}\n");
-            }
+			}
 
             for (auto&& prop : type.PropertyList())
             {
                 auto [getter, setter] = get_property_methods(prop);
+				if (is_static(getter))
+					continue;
+
                 auto semantics = get_type_semantics(prop.Type().Type());
                 w.write("public %% %\n{\n", 
 					is_static(getter) ? "static " : "", 
@@ -352,22 +359,10 @@ namespace coolrt
 					prop.Name());
                 {
                     writer::indent_guard gg{ w };
-                    w.write("get\n{\n");
-					{
-						writer::indent_guard ggg{ w };
-						write_check_disposed(w, getter);
-						write_throw_not_impl(w);
-					}
-					w.write("}\n");
+					w.write("get => _%();\n", getter.Name());
                     if (setter)
                     {
-                        w.write("set\n{\n");
-						{
-							writer::indent_guard ggg{ w };
-							write_check_disposed(w, setter);
-							write_throw_not_impl(w);
-						}
-						w.write("}\n");
+						w.write("set => _%(value);\n", setter.Name());
                     }
                 }
                 w.write("}\n");

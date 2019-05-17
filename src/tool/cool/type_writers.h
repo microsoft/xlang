@@ -156,6 +156,28 @@ namespace coolrt
             return generic_param_guard{ this };
         }
 
+		template <typename F>
+		[[nodiscard]] auto push_generic_params(type_semantics const& semantics, F func)
+		{
+			auto type_instance = std::get_if<generic_type_instance>(&semantics);
+			if (type_instance)
+			{
+				std::vector<std::string> names;
+
+				for (auto&& arg : type_instance->generic_args)
+				{
+					names.push_back(func(arg));
+				}
+
+				generic_param_stack.push_back(std::move(names));
+				return generic_param_guard{ this };
+			}
+			else
+			{
+				return generic_param_guard{ nullptr };
+			}
+		}
+
 #pragma endregion
 
         void write_code(std::string_view const& value)

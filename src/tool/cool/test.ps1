@@ -1,4 +1,4 @@
-param([switch]$clean, [switch]$build)
+param([switch]$clean, [switch]$build, [switch]$skipGeneration)
 
 $repoRootPath = (get-item $PSScriptRoot).Parent.Parent.Parent.FullName
 $coolrtexe = Get-ChildItem (Join-Path $repoRootPath _build) "coolrt.exe" -Recurse | ForEach-Object{$_.FullName} | Select-Object -First 1
@@ -6,7 +6,9 @@ $outputDir = join-path $env:TEMP "coolrt"
 
 if ($clean) { Remove-Item $outputDir -Recurse -force -ErrorAction SilentlyContinue }
 
-& $coolrtexe -input local -output $outputDir  -include Windows.Foundation -exclude Windows.Foundation.Metadata -exclude Windows.Foundation.Diagnostics -include Windows.Data.Json
+if (-not $skipGeneration) {
+	& $coolrtexe -input local -output $outputDir  -include Windows.Foundation -exclude Windows.Foundation.Metadata -exclude Windows.Foundation.Diagnostics -include Windows.Data.Json
+}
 
 function Test-Any() {
     begin {

@@ -2,19 +2,31 @@
 
 namespace xlang::meta::reader
 {
+	template <typename T>
+	bool has_attribute(T const& row, std::string_view const& type_namespace, std::string_view const& type_name)
+	{
+		return static_cast<bool>(get_attribute(row, type_namespace, type_name));
+	}
+
+	//template <typename T>
+	//auto get_attribute_value(CustomAttribute const& attribute, uint32_t const arg)
+	//{
+	//	return std::get<T>(std::get<ElemSig>(attribute.Value().FixedArgs()[arg].value).value);
+	//}
+
     bool is_exclusive_to(TypeDef const& type)
     {
-        return get_category(type) == category::interface_type && get_attribute(type, "Windows.Foundation.Metadata"sv, "ExclusiveToAttribute"sv);
+        return get_category(type) == category::interface_type && has_attribute(type, "Windows.Foundation.Metadata"sv, "ExclusiveToAttribute"sv);
     }
 
     bool is_flags_enum(TypeDef const& type)
     {
-        return get_category(type) == category::enum_type && get_attribute(type, "System"sv, "FlagsAttribute"sv);
+        return get_category(type) == category::enum_type && has_attribute(type, "System"sv, "FlagsAttribute"sv);
     }
 
     bool is_api_contract_type(TypeDef const& type)
     {
-        return get_category(type) == category::struct_type && get_attribute(type, "Windows.Foundation.Metadata"sv, "ApiContractAttribute"sv);
+        return get_category(type) == category::struct_type && has_attribute(type, "Windows.Foundation.Metadata"sv, "ApiContractAttribute"sv);
     }
 
     bool is_attribute_type(TypeDef const& type)
@@ -47,6 +59,7 @@ namespace xlang::meta::reader
 		return method.Flags().Static();
 	}
 
+	
     auto get_delegate_invoke(TypeDef const& type)
     {
         XLANG_ASSERT(get_category(type) == category::delegate_type);
@@ -392,4 +405,94 @@ namespace xlang::meta::reader
 
 		return std::make_tuple(add_method, remove_method);
 	}
+
+	struct activation_factory
+	{
+		TypeDef type;
+	};
+
+	struct static_factory
+	{
+		TypeDef type;
+	};
+
+	// TODO: composable factory
+
+	using factory_info = std::variant<activation_factory, static_factory>;
+
+	auto get_factories(TypeDef const& type)
+	{
+		auto get_system_type = [&](FixedArgSig const& fixed_arg, bool optional = false) -> TypeDef
+		{
+			if (auto type_param = std::get_if<ElemSig::SystemType>(&std::get<ElemSig>(fixed_arg.value).value))
+			{
+				return type.get_cache().find_required(type_param->name);
+			}
+			
+			if (optional)
+			{
+				return {};
+			}
+
+			throw_invalid("Invalid factory argument");
+		};
+
+		std::vector<factory_info> result;
+
+		for (auto&& attribute : type.CustomAttribute())
+		{
+			auto attribute_name = attribute.TypeNamespaceAndName();
+
+			if (attribute_name.first != "Windows.Foundation.Metadata")
+			{
+				continue;
+			}
+
+			auto fixed_args = attribute.Value().FixedArgs();
+
+			if (attribute_name.second == "ActivatableAttribute")
+			{
+				activation_factory info{ get_system_type(fixed_args[0], true) };
+				result.push_back(std::move(info));
+			}
+			else if (attribute_name.second == "StaticAttribute")
+			{
+				static_factory info{ get_system_type(fixed_args[0], true) };
+				XLANG_ASSERT((bool)info.type);
+				result.push_back(std::move(info));
+			}
+			else if (attribute_name.second == "ComposableAttribute")
+			{
+				throw_invalid("ComposableAttribute not implemented");
+				//info.type = get_system_type(fixed_args[0]);
+				//info.composable = true;
+
+				//auto compositionType = std::get<ElemSig::EnumValue>(std::get<ElemSig>(fixed_args[1].value).value);
+				//info.visible = std::get<int32_t>(compositionType.value) == 2;
+			}
+		}
+
+		return std::move(result);
+	}
+
+	/*static auto get_default_interface(TypeDef const& type)
+	{
+		auto impls = type.InterfaceImpl();
+
+		for (auto&& impl : impls)
+		{
+			if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
+			{
+				return impl.Interface();
+			}
+		}
+
+		if (!empty(impls))
+		{
+			throw_invalid("Type '", type.TypeNamespace(), ".", type.TypeName(), "' does not have a default interface");
+		}
+
+		return {};
+	}
+*/
 }
