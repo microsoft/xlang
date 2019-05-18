@@ -194,29 +194,6 @@ namespace coolrt
                 }
             }
         }
-
-        void write_value(int32_t value)
-        {
-            write_printf("%d", value);
-        }
-
-        void write_value(uint32_t value)
-        {
-            write_printf("%#0x", value);
-        }
-
-        void write(Constant const& value)
-        {
-            switch (value.Type())
-            {
-            case ConstantType::Int32:
-                write_value(value.ValueInt32());
-                break;
-            case ConstantType::UInt32:
-                write_value(value.ValueUInt32());
-                break;
-            }
-        }
     };
 
     struct separator
