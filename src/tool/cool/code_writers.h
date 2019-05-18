@@ -627,14 +627,6 @@ namespace coolrt
         }
     }
 
-	void write_unsafe(writer& w,  method_signature const& signature)
-	{
-		if (is_unsafe(signature))
-		{
-			w.write("unsafe ");
-		}
-	}
-
 	void write_interop_return(writer& w, method_signature const& signature)
 	{
 		if (signature.return_signature())
@@ -695,7 +687,7 @@ namespace coolrt
 
 				method_signature signature{ method };
 				w.write("private %delegate int %(%);\n",
-					bind<write_unsafe>(signature),
+					is_unsafe(signature) ? "unsafe " : "",
 					bind<write_interop_method_name>(method, "abi", offset),
 					bind<write_abi_parameters>(signature));
 
@@ -722,8 +714,8 @@ namespace coolrt
 				w.write("}\n");
 
 				w.write("internal static %% %(%)\n{\n", 
-					bind<write_unsafe>(signature), 
-					bind<write_interop_return>(signature), 
+					is_unsafe(signature) ? "unsafe " : "",
+					bind<write_interop_return>(signature),
 					bind<write_interop_method_name>(method, "", offset),
 					bind<write_interop_parameters>(signature));
 				{
