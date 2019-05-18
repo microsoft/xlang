@@ -3,47 +3,66 @@ using System.Runtime.InteropServices;
 
 namespace WinRT
 {
-    // IUnknown
-    unsafe delegate int QueryInterface([In] IntPtr pThis, [In] ref Guid iid, [Out] IntPtr* vftbl);
-    delegate uint AddRef([In] IntPtr pThis);
-    delegate uint Release([In] IntPtr pThis);
-
-    [Guid("00000000-0000-0000-C000-000000000046")]
-    internal struct IUnknownVftbl
-    {
-        public QueryInterface QueryInterface;
-        public AddRef AddRef;
-        public Release Release;
-    }
-
-    // IInspectable
-    enum TrustLevel
+    public enum TrustLevel
     {
         BaseTrust = 0,
         PartialTrust = (BaseTrust + 1),
         FullTrust = (PartialTrust + 1)
     };
 
-    delegate int GetIids([In] IntPtr pThis, [Out] uint iidCount, [Out] Guid[] iids);
-    delegate int GetRuntimeClassName([In] IntPtr pThis, [Out] IntPtr className);
-    delegate int GetTrustLevel([In] IntPtr pThis, [Out] TrustLevel trustLevel);
-
-    [Guid("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90")]
-    internal struct IInspectableVftbl
+    namespace Interop
     {
-        public IUnknownVftbl IUnknownVftbl;
-        public GetIids GetIids;
-        public GetRuntimeClassName GetRuntimeClassName;
-        public GetTrustLevel GetTrustLevel;
-    }
+        // IUnknown
 
-    // IActivationFactory
-    unsafe delegate int ActivateInstance([In] IntPtr pThis, [Out] IntPtr* instance);
-    [Guid("00000035-0000-0000-C000-000000000046")]
-    internal struct IActivationFactoryVftbl
-    {
-        public IInspectableVftbl IInspectableVftbl;
-        public ActivateInstance ActivateInstance;
+        [Guid("00000000-0000-0000-C000-000000000046")]
+        public struct IUnknownVftbl
+        {
+            public unsafe delegate int _QueryInterface([In] IntPtr pThis, [In] ref Guid iid, [Out] IntPtr* vftbl);
+            public delegate uint _AddRef([In] IntPtr pThis);
+            public delegate uint _Release([In] IntPtr pThis);
+
+            public _QueryInterface QueryInterface;
+            public _AddRef AddRef;
+            public _Release Release;
+        }
+
+        // IInspectable
+        [Guid("AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90")]
+        public struct IInspectableVftbl
+        {
+            public delegate int _GetIids([In] IntPtr pThis, [Out] uint iidCount, [Out] Guid[] iids);
+            public delegate int _GetRuntimeClassName([In] IntPtr pThis, [Out] IntPtr className);
+            public delegate int _GetTrustLevel([In] IntPtr pThis, [Out] TrustLevel trustLevel);
+
+            public IUnknownVftbl IUnknownVftbl;
+            public _GetIids GetIids;
+            public _GetRuntimeClassName GetRuntimeClassName;
+            public _GetTrustLevel GetTrustLevel;
+        }
+
+        // IActivationFactory
+        [Guid("00000035-0000-0000-C000-000000000046")]
+        public struct IActivationFactoryVftbl
+        {
+            public unsafe delegate int _ActivateInstance([In] IntPtr pThis, [Out] IntPtr* instance);
+
+            public IInspectableVftbl IInspectableVftbl;
+            public _ActivateInstance ActivateInstance;
+        }
+
+        // IEventHandler
+        public struct IEventHandlerVftbl
+        {
+            public unsafe delegate int _Invoke([In] IntPtr thisPtr, [In] IntPtr sender, [In] IntPtr args);
+
+            public IntPtr QueryInterface;
+            public IntPtr AddRef;
+            public IntPtr Release;
+            public IntPtr GetIids;
+            public IntPtr GetRuntimeClassName;
+            public IntPtr GetTrustLevel;
+            public IntPtr Invoke;
+        }
     }
 
     internal class Platform
@@ -126,17 +145,17 @@ namespace WinRT
 
     internal class ObjectReference<T> : IDisposable, ICloneable
     {
-        IUnknownVftbl _vftblIUnknown;
+        Interop.IUnknownVftbl _vftblIUnknown;
         public readonly T Vftbl;
         public readonly IntPtr ThisPtr;
         public readonly ModuleReference Module;
 
         public ObjectReference(ModuleReference module, IntPtr thisPtr)
         {
-            Module = (ModuleReference)module.Clone();
+            Module = (ModuleReference)module?.Clone();
             ThisPtr = thisPtr;
             var vftblPtr = Marshal.PtrToStructure<VftblPtr>(ThisPtr);
-            _vftblIUnknown = Marshal.PtrToStructure<IUnknownVftbl>(vftblPtr.Vftbl);
+            _vftblIUnknown = Marshal.PtrToStructure<Interop.IUnknownVftbl>(vftblPtr.Vftbl);
             Vftbl = Marshal.PtrToStructure<T>(vftblPtr.Vftbl);
         }
 
@@ -151,7 +170,7 @@ namespace WinRT
         public void Dispose()
         {
             _vftblIUnknown.Release(ThisPtr);
-            Module.Dispose();
+            Module?.Dispose();
         }
 
         public object Clone()
@@ -163,9 +182,9 @@ namespace WinRT
 
     internal abstract class IModule : IDisposable
     {
-        uint _refs = 0;
+        int _refs = 0;
         protected static object _cacheLock = new object();
-        public void AddRef() { ++_refs; }
+        public void AddRef() { System.Threading.Interlocked.Increment(ref _refs); }
         public void Release()
         {
             lock (_cacheLock)
@@ -175,14 +194,14 @@ namespace WinRT
                     throw new IndexOutOfRangeException();
                 }
 
-                --_refs;
+                System.Threading.Interlocked.Decrement(ref _refs);
                 if (_refs == 0)
                 {
                     Dispose();
                 }
             }
         }
-        public abstract ObjectReference<IActivationFactoryVftbl> GetActivationFactory(HString runtimeClassId);
+        public abstract ObjectReference<Interop.IActivationFactoryVftbl> GetActivationFactory(HString runtimeClassId);
         public abstract void Dispose();
     }
 
@@ -196,7 +215,7 @@ namespace WinRT
             _module.AddRef();
         }
 
-        public ObjectReference<IActivationFactoryVftbl> GetActivationFactory(HString runtimeClassId) { return _module.GetActivationFactory(runtimeClassId); }
+        public ObjectReference<Interop.IActivationFactoryVftbl> GetActivationFactory(HString runtimeClassId) { return _module.GetActivationFactory(runtimeClassId); }
 
         public object Clone()
         {
@@ -251,13 +270,13 @@ namespace WinRT
             _GetActivationFactory = Platform.GetProcAddress<DllGetActivationFactory>(_moduleHandle);
         }
 
-        public override ObjectReference<IActivationFactoryVftbl> GetActivationFactory(HString runtimeClassId)
+        public override ObjectReference<Interop.IActivationFactoryVftbl> GetActivationFactory(HString runtimeClassId)
         {
             IntPtr instancePtr;
             unsafe { Marshal.ThrowExceptionForHR(_GetActivationFactory(runtimeClassId.Handle, &instancePtr)); }
             using (var module = new ModuleReference(this))
             {
-                return new ObjectReference<IActivationFactoryVftbl>(module, instancePtr);
+                return new ObjectReference<Interop.IActivationFactoryVftbl>(module, instancePtr);
             }
         }
 
@@ -273,7 +292,6 @@ namespace WinRT
                 Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
             }
         }
-
     }
 
     internal class WinrtModule : IModule
@@ -292,14 +310,14 @@ namespace WinRT
             _mtaCookie = mtaCookie;
         }
 
-        public override ObjectReference<IActivationFactoryVftbl> GetActivationFactory(HString runtimeClassId)
+        public override ObjectReference<Interop.IActivationFactoryVftbl> GetActivationFactory(HString runtimeClassId)
         {
-            Guid iid = typeof(IActivationFactoryVftbl).GUID;
+            Guid iid = typeof(Interop.IActivationFactoryVftbl).GUID;
             IntPtr instancePtr;
             unsafe { Marshal.ThrowExceptionForHR(Platform.RoGetActivationFactory(runtimeClassId.Handle, ref iid, &instancePtr)); }
             using (var module = new ModuleReference(this))
             {
-                return new ObjectReference<IActivationFactoryVftbl>(module, instancePtr);
+                return new ObjectReference<Interop.IActivationFactoryVftbl>(module, instancePtr);
             }
         }
 
@@ -312,7 +330,7 @@ namespace WinRT
 
     internal class ActivationFactory<T> : IDisposable
     {
-        ObjectReference<IActivationFactoryVftbl> _IActivationFactory;
+        ObjectReference<Interop.IActivationFactoryVftbl> _IActivationFactory;
 
         public ActivationFactory()
         {
@@ -343,9 +361,9 @@ namespace WinRT
 
                 // If activation factory wasn't found by namespace, fall back to WinRT activation.
                 if (_IActivationFactory == null) using (var module = WinrtModule.Initialize())
-                    {
-                        _IActivationFactory = module.GetActivationFactory(runtimeClassId);
-                    }
+                {
+                    _IActivationFactory = module.GetActivationFactory(runtimeClassId);
+                }
             }
         }
 
@@ -353,15 +371,162 @@ namespace WinRT
         {
             IntPtr instancePtr = IntPtr.Zero;
             unsafe { Marshal.ThrowExceptionForHR(_IActivationFactory.Vftbl.ActivateInstance(_IActivationFactory.ThisPtr, &instancePtr)); }
-            using (var instance = new ObjectReference<IInspectableVftbl>(_IActivationFactory.Module, instancePtr))
+            using (var instance = new ObjectReference<Interop.IInspectableVftbl>(_IActivationFactory.Module, instancePtr))
             {
                 return instance.As<T>();
             }
+        }
+
+        public ObjectReference<T> As<T>()
+        {
+            return _IActivationFactory.As<T>();
         }
 
         public void Dispose()
         {
             _IActivationFactory.Dispose();
         }
+    }
+
+    public abstract class RuntimeClass<C, I> : ICloneable, IDisposable
+    {
+        private protected static readonly Lazy<WinRT.ActivationFactory<C>> _factory = new Lazy<WinRT.ActivationFactory<C>>();
+        private protected readonly ObjectReference<I> _obj;
+
+        private protected RuntimeClass(ObjectReference<I> obj)
+        {
+            _obj = (ObjectReference<I>)obj.Clone();
+        }
+
+        public abstract object Clone();
+
+        public virtual void Dispose()
+        {
+            _obj.Dispose();
+        }
+    }
+
+    public delegate void EventHandlerDelegate<S, A>(S sender, A args);
+
+    public abstract class EventHandlerObject<S, A> : IDisposable
+        where S : IDisposable
+        where A : IDisposable
+    {
+        EventHandlerDelegate<S, A> _delegate;
+        int _refs = 0;
+        readonly IntPtr _thisPtr;
+
+        static System.Collections.Generic.Dictionary<IntPtr, EventHandlerObject<S, A>> _objects = new System.Collections.Generic.Dictionary<IntPtr, EventHandlerObject<S, A>>();
+        static EventHandlerObject<S, A> FindObject(IntPtr thisPtr) { lock (_objects) { return _objects[thisPtr]; } }
+
+        // IUnknown
+        static unsafe readonly Interop.IUnknownVftbl._QueryInterface _QueryInterface = new Interop.IUnknownVftbl._QueryInterface(QueryInterface);
+        static readonly Interop.IUnknownVftbl._AddRef _AddRef = new Interop.IUnknownVftbl._AddRef(AddRef);
+        static readonly Interop.IUnknownVftbl._Release _Release = new Interop.IUnknownVftbl._Release(Release);
+
+        static unsafe int QueryInterface([In] IntPtr thisPtr, [In] ref Guid iid, [Out] IntPtr* obj)
+        {
+            // TODO: verify iid
+            *obj = thisPtr;
+            return 0; // S_OK;
+        }
+
+        static uint AddRef([In] IntPtr thisPtr)
+        {
+            return FindObject(thisPtr).AddRef();
+        }
+
+        static uint Release([In] IntPtr thisPtr)
+        {
+            return FindObject(thisPtr).Release();
+        }
+
+        // IInspectable
+        static readonly Interop.IInspectableVftbl._GetIids _GetIids = new Interop.IInspectableVftbl._GetIids(GetIids);
+        static readonly Interop.IInspectableVftbl._GetRuntimeClassName _GetRuntimeClassName = new Interop.IInspectableVftbl._GetRuntimeClassName(GetRuntimeClassName);
+        static readonly Interop.IInspectableVftbl._GetTrustLevel _GetTrustLevel = new Interop.IInspectableVftbl._GetTrustLevel(GetTrustLevel);
+
+        static int GetIids([In] IntPtr pThis, [Out] uint iidCount, [Out] Guid[] iids) { return Marshal.GetHRForException(new NotImplementedException()); }
+        static int GetRuntimeClassName([In] IntPtr pThis, [Out] IntPtr className) { return Marshal.GetHRForException(new NotImplementedException()); }
+        static int GetTrustLevel([In] IntPtr pThis, [Out] TrustLevel trustLevel) { return Marshal.GetHRForException(new NotImplementedException()); }
+
+        // ITypedEventHandler
+        static readonly Interop.IEventHandlerVftbl._Invoke _Invoke = new Interop.IEventHandlerVftbl._Invoke(Invoke);
+        static int Invoke(IntPtr thisPtr, IntPtr sender, IntPtr args)
+        {
+            return FindObject(thisPtr).Invoke(sender, args);
+        }
+
+        static VftblPtr _vftblPtr;
+
+
+        // IUnknown
+        uint AddRef()
+        {
+            System.Threading.Interlocked.Increment(ref _refs);
+            return (uint)_refs;
+        }
+
+        uint Release()
+        {
+            System.Threading.Interlocked.Decrement(ref _refs);
+            if (_refs == 0)
+            {
+                Dispose();
+                lock (_objects) { _objects.Remove(_thisPtr); }
+            }
+            return (uint)_refs;
+        }
+
+        // ITypedEventHandler
+        int Invoke(IntPtr senderPtr, IntPtr argsPtr)
+        {
+            try
+            {
+                using (var sender = GetSender(senderPtr))
+                using (var args = GetArgs(argsPtr))
+                {
+                    _delegate(sender, args);
+                }
+                return 0;
+            }
+            catch (Exception e)
+            {
+                return Marshal.GetHRForException(e);
+            }
+        }
+
+        static EventHandlerObject()
+        {
+            // lay out the vftable
+            Interop.IEventHandlerVftbl vftbl;
+            vftbl.QueryInterface = Marshal.GetFunctionPointerForDelegate(_QueryInterface);
+            vftbl.AddRef = Marshal.GetFunctionPointerForDelegate(_AddRef);
+            vftbl.Release = Marshal.GetFunctionPointerForDelegate(_Release);
+            vftbl.GetIids = Marshal.GetFunctionPointerForDelegate(_GetIids);
+            vftbl.GetRuntimeClassName = Marshal.GetFunctionPointerForDelegate(_GetRuntimeClassName);
+            vftbl.GetTrustLevel = Marshal.GetFunctionPointerForDelegate(_GetTrustLevel);
+            vftbl.Invoke = Marshal.GetFunctionPointerForDelegate(_Invoke);
+
+            _vftblPtr.Vftbl = Marshal.AllocCoTaskMem(Marshal.SizeOf(vftbl));
+            Marshal.StructureToPtr(vftbl, _vftblPtr.Vftbl, false);
+        }
+
+        public EventHandlerObject(EventHandlerDelegate<S, A> @delegate)
+        {
+            _thisPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf(_vftblPtr));
+            Marshal.StructureToPtr(_vftblPtr, _thisPtr, false);
+            lock (_objects) { _objects.Add(_thisPtr, this); }
+            _delegate = @delegate;
+        }
+
+        ~EventHandlerObject()
+        {
+            Marshal.FreeCoTaskMem(_thisPtr);
+        }
+
+        private protected abstract S GetSender(IntPtr senderPtr);
+        private protected abstract A GetArgs(IntPtr argsPtr);
+        public abstract void Dispose();
     }
 }
