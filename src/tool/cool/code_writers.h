@@ -318,7 +318,7 @@ namespace coolrt
 	{
 		if (method.Flags().SpecialName())
 		{
-			return	;
+			return;
 		}
 
 		method_signature signature{ method };
@@ -415,7 +415,7 @@ namespace coolrt
 		{
 			writer::indent_guard g{ w };
 
-			w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => __Interop__.Windows.Foundation.Platform.GetActivationFactory(\"%.%\"));\n",
+			w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => Windows.Foundation.IActivationFactory.Get(\"%.%\"));\n",
 				type.TypeNamespace(), type.TypeName());
 
 			if (!is_static(type))
@@ -670,7 +670,7 @@ namespace coolrt
 			return;
 		}
 
-		w.write("internal static class @\n{\n", type.TypeName());
+		w.write("internal static class _@\n{\n", type.TypeName());
 		{
 			writer::indent_guard g{ w };
 			write_iid_field(w, type);
@@ -761,7 +761,7 @@ namespace coolrt
     {
 		auto write = [&](auto func)
 		{
-			w.write("namespace __Interop__.%\n{\n", type.TypeNamespace());
+			w.write("namespace %\n{\n", type.TypeNamespace());
 			{
 				writer::indent_guard g{ w };
 				w.write("using System;\nusing System.Runtime.InteropServices;\n\n");

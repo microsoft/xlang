@@ -3,7 +3,8 @@ protected virtual void _Dispose()
 {
     if (!_disposedValue)
     {
-        __Interop__.Windows.Foundation.IUnknown.Release(_instance);
+        // TODO: call IClosable.Close() if appropriate 
+        Windows.Foundation.IUnknown.Release(_instance);
         _instance = System.IntPtr.Zero;
 
         _disposedValue = true;
