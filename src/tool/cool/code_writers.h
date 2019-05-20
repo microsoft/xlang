@@ -314,54 +314,96 @@ namespace coolrt
 		}
 	}
 
-	void write_class_factory(writer& w, TypeDef const& /*type*/, static_factory const& factory)
+	void write_class_method(writer& w, MethodDef const& method, bool is_static)
 	{
-		XLANG_ASSERT(factory.type);
-		//w.write("// static %.%\n", factory.type.TypeNamespace(), factory.type.TypeName());
-		for (auto&& method : factory.type.MethodList())
+		if (method.Flags().SpecialName())
 		{
-			if (is_special(method))
+			return	;
+		}
+
+		method_signature signature{ method };
+		w.write("public %% %(%)\n{\n",
+			is_static ? "static " : "",
+			bind<write_method_return>(signature),
+			method.Name(),
+			bind<write_method_parameters>(signature));
+		{
+			writer::indent_guard g{ w };
+			write_throw_not_impl(w);
+		}
+		w.write("}\n");
+	}
+
+	void write_class_property(writer& w, Property const& prop, bool is_static)
+	{
+		// TODO: WinRT requires property getters and allows setters to be added via a seperate interface
+
+		auto [getter, setter] = get_property_methods(prop);
+
+		w.write("public %% %\n{\n", 
+			is_static ? "static /*prop*/ " : "",
+			bind<write_projection_type>(get_type_semantics(prop.Type().Type())),
+			prop.Name());
+
+		{
+			writer::indent_guard g{ w };
+
+			if (getter)
 			{
-				continue;
+				w.write("get\n{\n");
+				{
+					writer::indent_guard gg{ w };
+					write_throw_not_impl(w);
+				}
+				w.write("}\n");
 			}
 
-			method_signature signature{ method };
-			w.write("public static % %(%)\n{\n",
-				bind<write_method_return>(signature),
-				method.Name(),
-				bind<write_method_parameters>(signature));
+			if (setter)
+			{
+				w.write("set\n{\n");
+				{
+					writer::indent_guard gg{ w };
+					write_throw_not_impl(w);
+				}
+				w.write("}\n");
+			}
+		}
+		w.write("}\n");
+	}
+
+	void write_class_event(writer& w, Event const& event, bool is_static)
+	{
+		w.write("public %event % %\n{\n",
+			is_static ? "static " : "",
+			bind<write_projection_type>(get_type_semantics(event.EventType())),
+			event.Name());
+		{
+			writer::indent_guard g{ w };
+			w.write("add\n{\n");
+			{
+				writer::indent_guard gg{ w };
+				write_throw_not_impl(w);
+			}
+			w.write("}\n");
+
+			w.write("remove\n{\n");
 			{
 				writer::indent_guard gg{ w };
 				write_throw_not_impl(w);
 			}
 			w.write("}\n");
 		}
+		w.write("}\n");
 
-		// TODO: WinRT requires property getters and allows setters to be added via a seperate interface
-		for (auto&& prop : factory.type.PropertyList())
-		{
-			auto [getter, setter] = get_property_methods(prop);
+	}
 
-			w.write("public static /*prop*/ % %\n{\n", bind<write_projection_type>(get_type_semantics(prop.Type().Type())), prop.Name());
-			if (getter)
-			{
-				writer::indent_guard gg{ w };
-				w.write("get => throw null;\n");
-			}
-			if (setter)
-			{
-				writer::indent_guard gg{ w };
-				w.write("set => throw null;\n");
-			}
-			w.write("}\n");
-		}
+	void write_class_factory(writer& w, TypeDef const& /*type*/, static_factory const& factory)
+	{
+		XLANG_ASSERT(factory.type);
 
-		for (auto&& evt : factory.type.EventList())
-		{
-			w.write("public static event % %;\n",
-				bind<write_projection_type>(get_type_semantics(evt.EventType())),
-				evt.Name());
-		}
+		w.write_each<write_class_method>(factory.type.MethodList(), true);
+		w.write_each<write_class_property>(factory.type.PropertyList(), true);
+		w.write_each<write_class_event>(factory.type.EventList(), true);
 	}
 
     void write_class(writer& w, TypeDef const& type)
@@ -375,7 +417,7 @@ namespace coolrt
 
 			if (!is_static(type))
 			{
-				w.write("public void Dispose()\n{\n    throw null;\n}\n");
+				w.write("public void Dispose()\n{\n    throw new System.NotImplementedException();\n}\n");
 			}
 
 			//w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => __Interop__.Windows.Foundation.Platform.GetActivationFactory(\"%.%\"));\n",
@@ -395,58 +437,21 @@ namespace coolrt
 			for (auto&& ii : type.InterfaceImpl())
 			{
 				auto semantics = get_type_semantics(ii.Interface());
+				auto interface_type = get_typedef(semantics);
+
+				if (interface_type.TypeName() == "IStringable" && interface_type.TypeNamespace() == "Windows.Foundation")
+				{
+					w.write("// IStringable TBD\n");
+					continue;
+				}
+
 				auto guard{ w.push_generic_params(semantics, [&](auto const& arg) { return w.write_temp("%", bind<write_projection_type>(arg)); }) };
 				auto default_interface = has_attribute(ii, "Windows.Foundation.Metadata", "DefaultAttribute");
 
-				auto interface_type = get_typedef(semantics);
-
-				for (auto&& method : interface_type.MethodList())
-				{
-					if (method.Flags().SpecialName())
-					{
-						continue;
-					}
-
-					method_signature signature{ method };
-					w.write("public % %(%)\n{\n", 
-						bind<write_method_return>(signature), 
-						method.Name(), 
-						bind<write_method_parameters>(signature));
-					{
-						writer::indent_guard gg{ w };
-						//w.write("if (_disposedValue) { throw new System.ObjectDisposedException(string.Empty); }\n");
-						write_throw_not_impl(w);
-					}
-					w.write("}\n");
-				}
-
-				// TODO: WinRT requires property getters and allows setters to be added via a seperate interface
-				for (auto&& prop : interface_type.PropertyList())
-				{
-					auto [getter, setter] = get_property_methods(prop);
-
-					w.write("public % %\n{\n", bind<write_projection_type>(get_type_semantics(prop.Type().Type())), prop.Name());
-					if (getter)
-					{
-						writer::indent_guard gg{ w };
-						w.write("get => throw null;\n");
-					}
-					if (setter)
-					{
-						writer::indent_guard gg{ w };
-						w.write("set => throw null;\n");
-					}
-					w.write("}\n");
-				}
-
-				for (auto&& evt : interface_type.EventList())
-				{
-					w.write("public event % %;\n",
-						bind<write_projection_type>(get_type_semantics(evt.EventType())),
-						evt.Name());
-				}
+				w.write_each<write_class_method>(interface_type.MethodList(), false);
+				w.write_each<write_class_property>(interface_type.PropertyList(), false);
+				w.write_each<write_class_event>(interface_type.EventList(), false);
 			}
-
         }
         w.write("}\n");
     }

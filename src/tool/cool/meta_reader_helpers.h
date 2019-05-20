@@ -59,7 +59,6 @@ namespace xlang::meta::reader
 		return method.Flags().Static();
 	}
 
-	
     auto get_delegate_invoke(TypeDef const& type)
     {
         XLANG_ASSERT(get_category(type) == category::delegate_type);
