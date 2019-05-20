@@ -439,9 +439,13 @@ namespace coolrt
 				auto semantics = get_type_semantics(ii.Interface());
 				auto interface_type = get_typedef(semantics);
 
-				if (interface_type.TypeName() == "IStringable" && interface_type.TypeNamespace() == "Windows.Foundation")
+				if (is_istringable(interface_type))
 				{
-					w.write("// IStringable TBD\n");
+					auto format = R"(public override string ToString()
+{
+    throw new System.NotImplementedException();
+})";
+					w.write(format);
 					continue;
 				}
 
