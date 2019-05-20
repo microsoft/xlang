@@ -132,7 +132,16 @@ namespace xlang::text
                 F(*static_cast<T*>(this), item, args...);
             }
         }
-        
+
+        template <typename F, typename List, typename... Args>
+        auto write_each(F fwrite, List const& list, Args const& ... args)
+        {
+            for (auto&& item : list)
+            {
+                fwrite(*static_cast<T*>(this), item, args...);
+            }
+        }
+
         void swap() noexcept
         {
             std::swap(m_second, m_first);
@@ -344,8 +353,8 @@ namespace xlang::text
         };
     }
 
-    template <auto F, typename T, typename... Args>
-    auto bind_list(std::string_view const& delimiter, T const& list, Args const&... args)
+    template <auto F, typename List, typename... Args>
+    auto bind_list(std::string_view const& delimiter, List const& list, Args const&... args)
     {
         return [&](auto& writer)
         {
@@ -367,8 +376,8 @@ namespace xlang::text
         };
     }
 
-    template <typename T>
-    auto bind_list(std::string_view const& delimiter, T const& list)
+    template <typename List, typename... Args>
+    auto bind_list(std::string_view const& delimiter, List const& list, Args const&... args)
     {
         return [&](auto& writer)
         {
@@ -385,7 +394,30 @@ namespace xlang::text
                     writer.write(delimiter);
                 }
 
-                writer.write(item);
+                writer.write(item, args...);
+            }
+        };
+    }
+
+    template <typename F, typename List, typename... Args>
+    auto bind_list(F fwrite, std::string_view const& delimiter, List const& list, Args const& ... args)
+    {
+        return [&, fwrite](auto & writer)
+        {
+            bool first{ true };
+
+            for (auto&& item : list)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    writer.write(delimiter);
+                }
+
+                fwrite(writer, item, args...);
             }
         };
     }
