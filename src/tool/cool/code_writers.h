@@ -92,15 +92,9 @@ namespace coolrt
             [&](generic_type_index const& var) { w.write(w.generic_param_stack.back()[var.index]); },
             [&](generic_type_instance const& type)
             {
-                write_projection_type(w, type.generic_type);
-                w.write("<");
-                separator s{ w };
-                for (auto&& type_arg : type.generic_args)
-                {
-                    s();
-                    write_projection_type(w, type_arg);
-                }
-                w.write(">");
+                w.write("%<%>", 
+                    bind<write_projection_type>(type.generic_type),
+                    bind_list<write_projection_type>(", ", type.generic_args));
             },
             [&](fundamental_type const& type) { write_fundamental_type(w, type); });
     }
@@ -110,21 +104,15 @@ namespace coolrt
         w.write("@", type.TypeName());
         if (distance(type.GenericParam()) > 0)
         {
-            w.write("<");
             separator s{ w };
-            for (auto&& gp : type.GenericParam())
-            {
-                s();
-                w.write(gp.Name());
-            }
-            w.write(">");
+            w.write("<%>", bind_each([&](writer & wr, GenericParam const& gp) { s();  wr.write(gp.Name()); }, type.GenericParam()));
         }
     }
 
     void write_type_inheritance(writer& w, TypeDef const& type)
     {
-        separator _s{ w };
-        bool colon_written = false;
+        bool first{ true };
+        bool colon_written{ false };
         auto s = [&]()
         {
             if (!colon_written)
@@ -132,7 +120,15 @@ namespace coolrt
                 w.write(" : ");
                 colon_written = true;
             }
-            _s();
+
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                w.write(", ");
+            }
         };
 
         if (get_category(type) == category::class_type && !is_static(type))
@@ -225,6 +221,10 @@ namespace coolrt
             get<uint8_t>(get_arg(10)));
     }
 
+    void write_check_disposed(writer& w, TypeDef const& type)
+    {
+        w.write("if (_disposed) throw new System.ObjectDisposedException(\"%.%\");\n", type.TypeNamespace(), type.TypeName());
+    }
 
 
 
@@ -275,18 +275,13 @@ namespace coolrt
         }
     }
 
-    void write_method_parameters(writer& w, method_signature const& signature)
+    void write_method_parameter(writer& w, method_signature::param_t const& param)
     {
-        separator s{ w };
-        for (auto&& param : signature.params())
-        {
-            s();
-            w.write("% %",
-                bind<write_projection_parameter_type>(param),
-                bind<write_parameter_name>(param));
-        }
+        w.write("% %",
+            bind<write_projection_parameter_type>(param),
+            bind<write_parameter_name>(param));
     }
-
+        
     void write_class_factory(writer& w, TypeDef const& type, activation_factory const& factory)
     {
         if (factory.type)
@@ -294,7 +289,7 @@ namespace coolrt
             for (auto&& method : factory.type.MethodList())
             {
                 method_signature signature{ method };
-                w.write("public %(%)\n{\n", type.TypeName(), bind<write_method_parameters>(signature));
+                w.write("public %(%)\n{\n", type.TypeName(), bind_list<write_method_parameter>(", ", signature.params()));
                 {
                     writer::indent_guard gg{ w };
                     write_throw_not_impl(w);
@@ -307,14 +302,13 @@ namespace coolrt
             w.write("public %()\n{\n", type.TypeName());
             {
                 writer::indent_guard gg{ w };
-                write_throw_not_impl(w);
+                w.write("_instance = Windows.Foundation.IActivationFactory.ActivateInstance(_factory.Value);\n");
             }
             w.write("}\n");
-            //w.write(strings::default_activation, type.TypeName());
         }
     }
 
-    void write_class_method(writer& w, MethodDef const& method, bool is_static)
+    void write_class_method(writer& w, MethodDef const& method, TypeDef const& type, bool is_static)
     {
         if (method.Flags().SpecialName())
         {
@@ -326,12 +320,63 @@ namespace coolrt
             is_static ? "static " : "",
             bind<write_method_return>(signature),
             method.Name(),
-            bind<write_method_parameters>(signature));
+            bind_list<write_method_parameter>(", ", signature.params()));
         {
             writer::indent_guard g{ w };
+            if (!is_static)
+            {
+                write_check_disposed(w, type);
+            }
+
             write_throw_not_impl(w);
         }
         w.write("}\n");
+    }
+
+    void write_class_methods(writer& w, TypeDef const& type, TypeDef const& method_container, bool is_static)
+    {
+        int offset = 5;
+        for (auto&& method : method_container.MethodList())
+        {
+            offset++;
+
+            if (method.Flags().SpecialName())
+            {
+                return;
+            }
+
+            method_signature signature{ method };
+            w.write("public %% %(%)\n{\n",
+                is_static ? "static " : "",
+                bind<write_method_return>(signature),
+                method.Name(),
+                bind_list<write_method_parameter>(", ", signature.params()));
+            {
+                writer::indent_guard g{ w };
+                if (!is_static)
+                {
+                    write_check_disposed(w, type);
+                }
+
+                auto params = signature.params();
+
+                //if (std::all_of(params.begin(), params.end(), [](method_signature::param_t const& param)
+                //    {
+                //        return get_param_category(param) == param_category::in;
+                //    }))
+                //{
+                //    for (auto&& param : signature.params())
+                //    {
+                //        w.write("var _% = %;\n", param.first.Name(), param.first.Name());
+                //    }
+                //}
+
+                w.write("// _%Interop.%%\n", method_container.TypeName(), method.Name(), offset);
+
+                write_throw_not_impl(w);
+            }
+            w.write("}\n");
+        }
     }
 
     void write_class_property(writer& w, Property const& prop, bool is_static)
@@ -397,11 +442,12 @@ namespace coolrt
 
     }
 
-    void write_class_factory(writer& w, TypeDef const& /*type*/, static_factory const& factory)
+    void write_class_factory(writer& w, TypeDef const& type, static_factory const& factory)
     {
         XLANG_ASSERT(factory.type);
 
-        w.write_each<write_class_method>(factory.type.MethodList(), true);
+        write_class_methods(w, type, factory.type, true);
+        //w.write_each<write_class_method>(factory.type.MethodList(), factory.type, true);
         w.write_each<write_class_property>(factory.type.PropertyList(), true);
         w.write_each<write_class_event>(factory.type.EventList(), true);
     }
@@ -435,7 +481,8 @@ namespace coolrt
             if (!is_static(type))
             {
                 auto format = R"(private System.IntPtr _instance;
-private %(System.IntPtr instance)
+internal System.IntPtr Instance => _instance;
+internal %(System.IntPtr instance)
 {
     _instance = instance;
 }
@@ -457,18 +504,14 @@ private %(System.IntPtr instance)
                 // temporarily projection IStringable as explicit interface implementation to avoid ToString name collision
                 if (interface_type.TypeName() == "IStringable" && interface_type.TypeNamespace() == "Windows.Foundation")
                 {
-                    w.write(R"(string Windows.Foundation.IStringable.ToString()
-{
-    throw new System.NotImplementedException();
-}
-)");
+                    w.write(strings::istringable, bind<write_check_disposed>(type));
                     continue;
                 }
 
                 auto guard{ w.push_generic_params(semantics, [&](auto const& arg) { return w.write_temp("%", bind<write_projection_type>(arg)); }) };
                 auto default_interface = has_attribute(ii, "Windows.Foundation.Metadata", "DefaultAttribute");
 
-                w.write_each<write_class_method>(interface_type.MethodList(), false);
+                w.write_each<write_class_method>(interface_type.MethodList(), interface_type, false);
                 w.write_each<write_class_property>(interface_type.PropertyList(), false);
                 w.write_each<write_class_event>(interface_type.EventList(), false);
             }
@@ -484,6 +527,11 @@ private %(System.IntPtr instance)
 
         write_interop_interface(w, type.TypeName(), type);
 
+        if (is_exclusive_to(type))
+        {
+            return;
+        }
+
         w.write("public interface %%\n{\n", 
             bind<write_type_name>(type), 
             bind<write_type_inheritance>(type));
@@ -498,7 +546,10 @@ private %(System.IntPtr instance)
                 }
 
                 method_signature signature{ method };
-                w.write("% %(%);\n", bind<write_method_return>(signature), method.Name(), bind<write_method_parameters>(signature));
+                w.write("% %(%);\n",
+                    bind<write_method_return>(signature),
+                    method.Name(),
+                    bind_list<write_method_parameter>(", ", signature.params()));
             }
 
             for (auto&& prop : type.PropertyList())
@@ -523,10 +574,10 @@ private %(System.IntPtr instance)
     void write_delegate(writer& w, TypeDef const& type)
     {
         method_signature signature{ get_delegate_invoke(type) };
-        w.write("public delegate % %(%);\n", 
-            bind<write_method_return>(signature), 
-            bind<write_type_name>(type), 
-            bind<write_method_parameters>(signature));
+        w.write("public delegate % %(%);\n",
+            bind<write_method_return>(signature),
+            bind<write_type_name>(type),
+            bind_list<write_method_parameter>(", ", signature.params()));
     }
 
     void write_enum(writer& w, TypeDef const& type)
@@ -672,13 +723,15 @@ private %(System.IntPtr instance)
             for (auto&& method : type.MethodList())
             {
                 offset++;
-
                 method_signature signature{ method };
+
+                // write delegate type needed for GetDelegateForFunctionPointer
                 w.write("private %delegate int %(%);\n",
                     is_unsafe(signature) ? "unsafe " : "",
                     bind<write_interop_method_name>(method, "abi", offset),
                     bind<write_abi_parameters>(signature));
 
+                // write GetDelegateForFunctionPointer wrapper. Eventually this will be replaced with IL generated CALLI based method
                 w.write("private static unsafe int %(%)\n{\n", 
                     bind<write_interop_method_name>(method, "invoke", offset),
                     bind<write_abi_parameters>(signature));
@@ -738,6 +791,91 @@ private %(System.IntPtr instance)
                     {
                         write_invoke();
                     }
+                }
+                w.write("}\n");
+
+
+                // TODO: this is where I left off. I'm building a static function that 
+                //  * declares a low level type for every parameter + return type as needed 
+                //  * starts a try block
+                //  * converts high level param type to low level 
+                //  * calls invoke method, wrapped in ThrowExceptionForHR 
+                //  * converts low level return value to high level and returns it (if needed)
+                //  * ends try block
+                //  * writes finally block that releases all low level types as needed
+                w.write("internal unsafe static % _%(System.IntPtr ^@this%)\n{\n",
+                    bind<write_method_return>(signature),
+                    bind<write_interop_method_name>(method, "", offset),
+                    bind_each([](writer & w, auto const& param) 
+                        { 
+                            w.write(", %", bind<write_method_parameter>(param));
+                        }, signature.params()));
+                {
+                    writer::indent_guard gg{ w };
+
+                    w.write_each([](auto& w, auto&& param) 
+                        { 
+                            w.write("% _% = default;\n", bind<write_interop_parameter_type>(param), param.first.Name()); 
+                        }, signature.params());
+                    if (signature.return_signature())
+                    {
+                        w.write("% % = default;\n",
+                            bind<write_interop_type>(get_type_semantics(signature.return_signature().Type())),
+                            signature.return_param_name());
+                    }
+
+                    w.write("try\n{\n");
+                    {
+                        writer::indent_guard gg{ w };
+                        w.write("System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(%(^@this",
+                            bind<write_interop_method_name>(method, "invoke", offset));
+                        for (auto&& param : signature.params())
+                        {
+                            w.write(", _%", bind<write_parameter_name>(param));
+                        }
+                        if (signature.return_signature())
+                        {
+                            w.write(", &%", signature.return_param_name());
+                        }
+                        w.write("));\n");
+
+                        if (signature.return_signature())
+                        {
+                            w.write("// return %\n", signature.return_param_name());
+                        }
+                    }
+                    w.write("}\nfinally\n{\n}\n");
+
+                    w.write("throw null;\n");
+                //    auto write_invoke = [&]()
+                //    {
+                //        w.write("System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(%(^@this",
+                //            bind<write_interop_method_name>(method, "invoke", offset));
+                //        for (auto&& param : signature.params())
+                //        {
+                //            w.write(", %", bind<write_parameter_name>(param));
+                //        }
+                //        if (signature.return_signature())
+                //        {
+                //            w.write(", &%", signature.return_param_name());
+                //        }
+                //        w.write("));\n");
+                //    };
+
+                //    if (signature.return_signature())
+                //    {
+                //        auto semantics = get_type_semantics(signature.return_signature().Type());
+
+                //        w.write("% % = default;\n",
+                //            bind<write_interop_type>(semantics),
+                //            signature.return_param_name());
+                //        write_invoke();
+                //        w.write("return %;\n", signature.return_param_name());
+                //    }
+                //    else
+                //    {
+                //        write_invoke();
+                //    }
                 }
                 w.write("}\n");
             }

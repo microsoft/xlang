@@ -53,7 +53,12 @@ namespace Windows
         }
 
         private IntPtr _handle;
-        private bool _disposed = false; 
+        private bool _disposed = false;
+
+        public HString(IntPtr handle)
+        {
+            _handle = handle;
+        }
 
         public HString() : this(null)
         {
@@ -64,13 +69,11 @@ namespace Windows
             _handle = Interop.Create(value);
         }
 
-        public IntPtr Handle => _handle;
+        public IntPtr Handle => _disposed ? throw new ObjectDisposedException("Windows.HString") : _handle;
 
         public override string ToString()
         {
-            if (_disposed)
-                throw new ObjectDisposedException("Windows.HString");
-
+            if (_disposed) throw new ObjectDisposedException("Windows.HString");
             return Interop.ToString(_handle);
         }
 
@@ -93,6 +96,47 @@ namespace Windows
         {
             _Dispose();
             GC.SuppressFinalize(this);
+        }
+    }
+
+    public sealed class ComPtr : IDisposable
+    {
+        private IntPtr _value;
+        private bool _disposed = false;
+
+        public ComPtr(IntPtr value)
+        {
+            _value = value;
+        }
+
+        public IntPtr Value => _disposed ? throw new ObjectDisposedException("Windows.ComPtr") : _value;
+
+        public ComPtr As(Guid iid)
+        {
+            if (_disposed) throw new ObjectDisposedException("Windows.ComPtr");
+            return Windows.Foundation.IUnknown.As(_value, iid);
+        }
+
+        void _Dispose()
+        {
+            if (!_disposed)
+            {
+                Windows.Foundation.IUnknown.Release(_value);
+                _value = IntPtr.Zero;
+
+                _disposed = true;
+            }
+        }
+
+        ~ComPtr()
+        {
+            _Dispose();
+        }
+
+        public void Dispose()
+        {
+            _Dispose();
+            System.GC.SuppressFinalize(this);
         }
     }
 
@@ -120,6 +164,11 @@ namespace Windows
                     Marshal.GetExceptionForHR(invokeQueryInterface(@this, ref iid, &instance));
                 }
                 return instance;
+            }
+
+            public static ComPtr As(IntPtr @this, Guid iid)
+            {
+                return new ComPtr(QueryInterface(@this, iid));
             }
 
             delegate uint delegateAddRef(IntPtr @this);

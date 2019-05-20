@@ -1,13 +1,13 @@
-private bool _disposedValue = false; 
+private bool _disposed = false; 
 void _Dispose()
 {
-    if (!_disposedValue)
+    if (!_disposed)
     {
         // TODO: call IClosable.Close() if appropriate 
         Windows.Foundation.IUnknown.Release(_instance);
         _instance = System.IntPtr.Zero;
 
-        _disposedValue = true;
+        _disposed = true;
     }
 }
 ~%()
