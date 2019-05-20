@@ -1,5 +1,5 @@
 private bool _disposedValue = false; 
-protected virtual void _Dispose()
+void _Dispose()
 {
     if (!_disposedValue)
     {

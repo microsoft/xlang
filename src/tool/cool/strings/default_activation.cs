@@ -1,4 +1,4 @@
 public %()
 {
-    _instance = __Interop__.Windows.Foundation.IActivationFactory.ActivateInstance(_factory.Value);
+    _instance = Windows.Foundation.IActivationFactory.ActivateInstance(_factory.Value);
 }
