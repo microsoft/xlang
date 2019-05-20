@@ -105,30 +105,6 @@ namespace coolrt
 			[&](fundamental_type const& type) { write_fundamental_type(w, type); });
     }
 
-	void write_interop_type(writer& w, type_semantics const& semantics)
-	{
-		call(semantics,
-			[&](object_type) { w.write("IntPtr"); },
-			[&](guid_type) { w.write("System.Guid"); },
-			[&](type_definition const&) { w.write("IntPtr"); },
-			[&](generic_type_index const& var) { w.write(w.generic_param_stack.back()[var.index]); },
-			[&](generic_type_instance const&)
-			{
-				w.write("IntPtr");
-			},
-			[&](fundamental_type const& type) 
-			{ 
-				if (type == fundamental_type::String)
-				{
-					w.write("IntPtr");
-				}
-				else
-				{
-					write_fundamental_type(w, type);
-				}
-			});
-	}
-
     void write_type_name(writer& w, TypeDef const& type)
     {
         w.write("@", type.TypeName());
@@ -262,35 +238,6 @@ namespace coolrt
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//void write_method_name(writer& w, std::string_view name)
-	//{
-	//	static const std::set<std::string_view> special = { "ToString" };
-
-	//	if (std::find(special.begin(), special.end(), name) != special.end())
-	//	{
-	//		w.write("_");
-	//	}
-
-	//	w.write(name);
-	//}
-
 	void write_projection_parameter_type(writer& w, method_signature::param_t const& param)
 	{
 		auto semantics = get_type_semantics(param.second->Type());
@@ -315,106 +262,54 @@ namespace coolrt
 		}
 	}
 
-	void write_interop_parameter_type(writer& w, method_signature::param_t const& param)
+	void write_method_return(writer& w, method_signature const& signature)
 	{
-		auto semantics = get_type_semantics(param.second->Type());
-
-		switch (get_param_category(param))
+		if (signature.return_signature())
 		{
-		case param_category::in:
-			w.write("%", bind<write_interop_type>(semantics));
-			break;
-		case param_category::out:
-			w.write("/*out*/ %", bind<write_interop_type>(semantics));
-			break;
-		case param_category::pass_array:
-			w.write("/*pass_array*/ %[]", bind<write_interop_type>(semantics));
-			break;
-		case param_category::fill_array:
-			w.write("/*fill_array*/ %[]", bind<write_interop_type>(semantics));
-			break;
-		case param_category::receive_array:
-			w.write("/*receive_array*/ %[]", bind<write_interop_type>(semantics));
-			break;
+			auto semantics = get_type_semantics(signature.return_signature().Type());
+			write_projection_type(w, semantics);
+		}
+		else
+		{
+			w.write("void");
 		}
 	}
-	void write_projection_parameter(writer& w, method_signature::param_t const& param)
+
+	void write_method_parameters(writer& w, method_signature const& signature)
 	{
-		w.write("% %", 
-			bind<write_projection_parameter_type>(param),
-			bind<write_parameter_name>(param));
+		separator s{ w };
+		for (auto&& param : signature.params())
+		{
+			s();
+			w.write("% %",
+				bind<write_projection_parameter_type>(param),
+				bind<write_parameter_name>(param));
+		}
 	}
 
-    void write_method_parameters(writer& w, method_signature const& signature)
-    {
-        separator s{ w };
-        for (auto&& param : signature.params())
-        {
-            s();
-			write_projection_parameter(w, param);
-        }
-    }
-
-	//template <typename F>
-	//void write_method_declaration(writer& w, std::string_view name, MethodDef const& method)
-	//{
-	//	method_signature signature{ method };
-
-	//	if (signature.return_signature())
-	//	{
-	//		auto semantics
-	//		w.write("% ", bind<F>());
-	//	}
-	//	else
-	//	{
-	//		w.write("void ");
-	//	}
-
-	//	w.write(name);
-	//}
-
-    void write_method_signature(writer& w, MethodDef const& method, method_signature const& signature)
-    {
-        if (is_constructor(method))
-        {
-            w.write(method.Parent().TypeName());
-        }
-        else
-        {
-            if (is_static(method))
-            {
-                w.write("static ");
-            }
-
-            auto retsig = signature.return_signature();
-            if (retsig)
-            {
-                auto semantics = get_type_semantics(retsig.Type());
-				write_projection_type(w, semantics);
-            }
-            else
-            {
-                w.write("void");
-            }
-            w.write(" %%", method.Flags().SpecialName() ? "_" : "", method.Name());
-        }
-
-        w.write("(%)", bind<write_method_parameters>(signature));
-    }
-
-	void write_class_factory(writer& w, TypeDef const& /*type*/, activation_factory const& factory)
+	void write_class_factory(writer& w, TypeDef const& type, activation_factory const& factory)
 	{
 		if (factory.type)
 		{
-			w.write("// activation %.%\n", factory.type.TypeNamespace(), factory.type.TypeName());
 			for (auto&& method : factory.type.MethodList())
 			{
-				w.write("//    %\n", method.Name());
+				method_signature signature{ method };
+				w.write("public %(%)\n{\n", type.TypeName(), bind<write_method_parameters>(signature));
+				{
+					writer::indent_guard gg{ w };
+					write_throw_not_impl(w);
+				}
+				w.write("}\n");
 			}
 		}
 		else
 		{
-			w.write("//    default .ctor\n");
+			w.write("public %()\n{\n", type.TypeName());
+			{
+				writer::indent_guard gg{ w };
+				write_throw_not_impl(w);
+			}
+			w.write("}\n");
 			//w.write(strings::default_activation, type.TypeName());
 		}
 	}
@@ -422,30 +317,75 @@ namespace coolrt
 	void write_class_factory(writer& w, TypeDef const& /*type*/, static_factory const& factory)
 	{
 		XLANG_ASSERT(factory.type);
-		w.write("// static %.%\n", factory.type.TypeNamespace(), factory.type.TypeName());
+		//w.write("// static %.%\n", factory.type.TypeNamespace(), factory.type.TypeName());
 		for (auto&& method : factory.type.MethodList())
 		{
-			w.write("//    %\n", method.Name());
+			if (is_special(method))
+			{
+				continue;
+			}
+
+			method_signature signature{ method };
+			w.write("public static % %(%)\n{\n",
+				bind<write_method_return>(signature),
+				method.Name(),
+				bind<write_method_parameters>(signature));
+			{
+				writer::indent_guard gg{ w };
+				write_throw_not_impl(w);
+			}
+			w.write("}\n");
+		}
+
+		// TODO: WinRT requires property getters and allows setters to be added via a seperate interface
+		for (auto&& prop : factory.type.PropertyList())
+		{
+			auto [getter, setter] = get_property_methods(prop);
+
+			w.write("public static /*prop*/ % %\n{\n", bind<write_projection_type>(get_type_semantics(prop.Type().Type())), prop.Name());
+			if (getter)
+			{
+				writer::indent_guard gg{ w };
+				w.write("get => throw null;\n");
+			}
+			if (setter)
+			{
+				writer::indent_guard gg{ w };
+				w.write("set => throw null;\n");
+			}
+			w.write("}\n");
+		}
+
+		for (auto&& evt : factory.type.EventList())
+		{
+			w.write("public static event % %;\n",
+				bind<write_projection_type>(get_type_semantics(evt.EventType())),
+				evt.Name());
 		}
 	}
 
     void write_class(writer& w, TypeDef const& type)
     {
-        w.write("public %class %//%\n{\n", 
+        w.write("public %class %%\n{\n", 
 			is_static(type) ? "static " : "", 
 			bind<write_type_name>(type), 
 			bind<write_type_inheritance>(type));
 		{
 			writer::indent_guard g{ w };
 
-			w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => __Interop__.Windows.Foundation.Platform.GetActivationFactory(\"%.%\"));\n",
-				type.TypeNamespace(), type.TypeName());
-
 			if (!is_static(type))
 			{
-				w.write("private System.IntPtr _instance;\n");
-				w.write(strings::dispose_pattern, type.TypeName());
+				w.write("public void Dispose()\n{\n    throw null;\n}\n");
 			}
+
+			//w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => __Interop__.Windows.Foundation.Platform.GetActivationFactory(\"%.%\"));\n",
+			//	type.TypeNamespace(), type.TypeName());
+
+			//if (!is_static(type))
+			//{
+			//	w.write("private System.IntPtr _instance;\n");
+			//	w.write(strings::dispose_pattern, type.TypeName());
+			//}
 
 			for (auto&& factory : get_factories(type))
 			{
@@ -458,54 +398,55 @@ namespace coolrt
 				auto guard{ w.push_generic_params(semantics, [&](auto const& arg) { return w.write_temp("%", bind<write_projection_type>(arg)); }) };
 				auto default_interface = has_attribute(ii, "Windows.Foundation.Metadata", "DefaultAttribute");
 
-				w.write("// %interface %\n", default_interface ? "default " : "", bind<write_projection_type>(semantics));
-				for (auto&& method : get_typedef(semantics).MethodList())
+				auto interface_type = get_typedef(semantics);
+
+				for (auto&& method : interface_type.MethodList())
 				{
-					w.write("//    %\n", method.Name());
-					//	method_signature signature{ method };
-				//	w.write("%%\n{\n", 
-				//		method.Flags().SpecialName() ? "" : "public ",
-				//		bind<write_method_signature>(method, signature));
-				//	{
-				//		writer::indent_guard gg{ w };
-				//		w.write("if (_disposedValue) { throw new System.ObjectDisposedException(string.Empty); }\n");
-				//		write_throw_not_impl(w);
-				//	}
-				//	w.write("}\n");
+					if (method.Flags().SpecialName())
+					{
+						continue;
+					}
+
+					method_signature signature{ method };
+					w.write("public % %(%)\n{\n", 
+						bind<write_method_return>(signature), 
+						method.Name(), 
+						bind<write_method_parameters>(signature));
+					{
+						writer::indent_guard gg{ w };
+						//w.write("if (_disposedValue) { throw new System.ObjectDisposedException(string.Empty); }\n");
+						write_throw_not_impl(w);
+					}
+					w.write("}\n");
+				}
+
+				// TODO: WinRT requires property getters and allows setters to be added via a seperate interface
+				for (auto&& prop : interface_type.PropertyList())
+				{
+					auto [getter, setter] = get_property_methods(prop);
+
+					w.write("public % %\n{\n", bind<write_projection_type>(get_type_semantics(prop.Type().Type())), prop.Name());
+					if (getter)
+					{
+						writer::indent_guard gg{ w };
+						w.write("get => throw null;\n");
+					}
+					if (setter)
+					{
+						writer::indent_guard gg{ w };
+						w.write("set => throw null;\n");
+					}
+					w.write("}\n");
+				}
+
+				for (auto&& evt : interface_type.EventList())
+				{
+					w.write("public event % %;\n",
+						bind<write_projection_type>(get_type_semantics(evt.EventType())),
+						evt.Name());
 				}
 			}
 
-    //        for (auto&& prop : type.PropertyList())
-    //        {
-    //            auto [getter, setter] = get_property_methods(prop);
-				//if (is_static(getter))
-				//	continue;
-
-    //            auto semantics = get_type_semantics(prop.Type().Type());
-    //            w.write("public %% %\n{\n", 
-				//	is_static(getter) ? "static " : "", 
-				//	bind<write_projected_type>(semantics), 
-				//	prop.Name());
-    //            {
-    //                writer::indent_guard gg{ w };
-				//	w.write("get => _%();\n", getter.Name());
-    //                if (setter)
-    //                {
-				//		w.write("set => _%(value);\n", setter.Name());
-    //                }
-    //            }
-    //            w.write("}\n");
-    //        }
-
-    //        for (auto&& evt : type.EventList())
-    //        {
-				//auto [adder, remover] = get_event_methods(evt);
-				//auto semantics = get_type_semantics(evt.EventType());
-				//w.write("public event %% %;\n",
-				//	is_static(adder) ? "static " : "",
-				//	bind<write_projected_type>(semantics), 
-				//	evt.Name());
-    //        }
         }
         w.write("}\n");
     }
@@ -524,8 +465,8 @@ namespace coolrt
                     continue;
                 }
 
-                method_signature signature{ method };
-                w.write("%;\n", bind<write_method_signature>(method, signature));
+				method_signature signature{ method };
+				w.write("% %(%);\n", bind<write_method_return>(signature), method.Name(), bind<write_method_parameters>(signature));
             }
 
             for (auto&& prop : type.PropertyList())
@@ -533,9 +474,9 @@ namespace coolrt
                 auto [getter, setter] = get_property_methods(prop);
 
                 auto semantics = get_type_semantics(prop.Type().Type());
-                w.write("% % { % % }\n", bind<write_projection_type>(semantics), prop.Name(),
-                    getter ? "get;" : "",
-                    setter ? "set;" : "");
+                w.write("% % { %%}\n", bind<write_projection_type>(semantics), prop.Name(),
+                    getter ? "get; " : "",
+                    setter ? "set; " : "");
             }
 
             for (auto&& evt : type.EventList())
@@ -547,12 +488,13 @@ namespace coolrt
         w.write("}\n");
     }
 
-
-
 	void write_delegate(writer& w, TypeDef const& type)
 	{
 		method_signature signature{ get_delegate_invoke(type) };
-		w.write("public delegate void %(%);\n", bind<write_type_name>(type), bind<write_method_parameters>(signature));
+		w.write("public delegate % %(%);\n", 
+			bind<write_method_return>(signature), 
+			bind<write_type_name>(type), 
+			bind<write_method_parameters>(signature));
 	}
 
 	void write_enum(writer& w, TypeDef const& type)
@@ -626,6 +568,54 @@ namespace coolrt
             break;
         }
     }
+
+	void write_interop_type(writer& w, type_semantics const& semantics)
+	{
+		call(semantics,
+			[&](object_type) { w.write("IntPtr"); },
+			[&](guid_type) { w.write("System.Guid"); },
+			[&](type_definition const&) { w.write("IntPtr"); },
+			[&](generic_type_index const& var) { w.write(w.generic_param_stack.back()[var.index]); },
+			[&](generic_type_instance const&)
+			{
+				w.write("IntPtr");
+			},
+			[&](fundamental_type const& type)
+			{
+				if (type == fundamental_type::String)
+				{
+					w.write("IntPtr");
+				}
+				else
+				{
+					write_fundamental_type(w, type);
+				}
+			});
+	}
+
+	void write_interop_parameter_type(writer& w, method_signature::param_t const& param)
+	{
+		auto semantics = get_type_semantics(param.second->Type());
+
+		switch (get_param_category(param))
+		{
+		case param_category::in:
+			w.write("%", bind<write_interop_type>(semantics));
+			break;
+		case param_category::out:
+			w.write("/*out*/ %", bind<write_interop_type>(semantics));
+			break;
+		case param_category::pass_array:
+			w.write("/*pass_array*/ %[]", bind<write_interop_type>(semantics));
+			break;
+		case param_category::fill_array:
+			w.write("/*fill_array*/ %[]", bind<write_interop_type>(semantics));
+			break;
+		case param_category::receive_array:
+			w.write("/*receive_array*/ %[]", bind<write_interop_type>(semantics));
+			break;
+		}
+	}
 
 	void write_interop_return(writer& w, method_signature const& signature)
 	{
@@ -767,13 +757,11 @@ namespace coolrt
 		auto write = [&](auto func)
 		{
 			w.write("namespace __Interop__.%\n{\n", type.TypeNamespace());
-			w.write("#pragma warning disable 0649\n");
 			{
 				writer::indent_guard g{ w };
 				w.write("using System;\nusing System.Runtime.InteropServices;\n\n");
 				func(w, type);
 			}
-			w.write("#pragma warning restore 0649\n");
 			w.write("}\n");
 		};
 
