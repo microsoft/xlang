@@ -44,11 +44,6 @@ namespace xlang::meta::reader
 		return get_category(type) == category::class_type && type.Flags().Abstract();
 	}
 
-	bool is_istringable(TypeDef const& type)
-	{
-		return type.TypeName() == "IStringable" && type.TypeNamespace() == "Windows.Foundation";
-	}
-
     bool is_constructor(MethodDef const& method)
     {
         return method.Flags().RTSpecialName() && method.Name() == ".ctor";

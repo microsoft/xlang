@@ -415,19 +415,14 @@ namespace coolrt
 		{
 			writer::indent_guard g{ w };
 
+			w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => __Interop__.Windows.Foundation.Platform.GetActivationFactory(\"%.%\"));\n",
+				type.TypeNamespace(), type.TypeName());
+
 			if (!is_static(type))
 			{
-				w.write("public void Dispose()\n{\n    throw new System.NotImplementedException();\n}\n");
+				w.write("private System.IntPtr _instance;\n");
+				w.write(strings::dispose_pattern, type.TypeName());
 			}
-
-			//w.write("static System.Lazy<System.IntPtr> _factory = new System.Lazy<System.IntPtr>(() => __Interop__.Windows.Foundation.Platform.GetActivationFactory(\"%.%\"));\n",
-			//	type.TypeNamespace(), type.TypeName());
-
-			//if (!is_static(type))
-			//{
-			//	w.write("private System.IntPtr _instance;\n");
-			//	w.write(strings::dispose_pattern, type.TypeName());
-			//}
 
 			for (auto&& factory : get_factories(type))
 			{
@@ -439,13 +434,14 @@ namespace coolrt
 				auto semantics = get_type_semantics(ii.Interface());
 				auto interface_type = get_typedef(semantics);
 
-				if (is_istringable(interface_type))
+				// temporarily projection IStringable as explicit interface implementation to avoid ToString name collision
+				if (interface_type.TypeName() == "IStringable" && interface_type.TypeNamespace() == "Windows.Foundation")
 				{
-					auto format = R"(public override string ToString()
+					w.write(R"(string Windows.Foundation.IStringable.ToString()
 {
     throw new System.NotImplementedException();
-})";
-					w.write(format);
+}
+)");
 					continue;
 				}
 
