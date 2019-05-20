@@ -1,9 +1,13 @@
 namespace Sample
 {
+	runtimeclass Class;
+
     [default_interface]
     runtimeclass Class
     {
         Class();
         Int32 MyProperty;
+
+		event Windows.Foundation.TypedEventHandler<Class, IInspectable> MyPropertyChanged;
     }
 }

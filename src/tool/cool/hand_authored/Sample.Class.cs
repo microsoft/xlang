@@ -6,15 +6,15 @@ namespace Sample
     namespace Interop
     {
         // IClass
-        public unsafe delegate int get_MyProperty([In] IntPtr thisPtr, [Out] int* value);
-        public delegate int put_MyProperty([In] IntPtr thisPtr, [In] int value);
-
         [Guid("F1702855-48DE-543A-BDB8-E179B86F3070")]
         public struct IClassVftbl
         {
-            WinRT.IInspectableVftbl IInspectableVftbl;
-            public get_MyProperty get_MyProperty;
-            public put_MyProperty put_MyProperty;
+            public unsafe delegate int _get_MyProperty([In] IntPtr thisPtr, [Out] int* value);
+            public delegate int _put_MyProperty([In] IntPtr thisPtr, [In] int value);
+
+            WinRT.Interop.IInspectableVftbl IInspectableVftbl;
+            public _get_MyProperty get_MyProperty;
+            public _put_MyProperty put_MyProperty;
         }
     }
 
