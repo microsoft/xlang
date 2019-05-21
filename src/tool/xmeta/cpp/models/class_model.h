@@ -14,21 +14,36 @@
 
 namespace xlang::xmeta
 {
-    // Note: All classes are implicitly public, and explicitly specifying this is not allowed.
-    enum class class_semantics
+    struct class_semantics
     {
-        sealed_instance_class,
-        unsealed_class,
-        static_class
+        bool is_sealed = false;
+        bool is_static = false;
     };
+
 
     struct class_model : class_or_interface_model
     {
         class_model() = delete;
-        class_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body, class_semantics const& sem, std::string_view const& base_id) :
+
+        class_model(std::string_view const& id, 
+                size_t decl_line, 
+                std::string_view const& assembly_name, 
+                std::shared_ptr<namespace_body_model> const& containing_ns_body, 
+                class_semantics const& sem, 
+                std::string_view const& base_id) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
             m_semantic{ sem },
             m_class_base_ref{ base_id }
+        { }
+        
+        class_model(std::string_view const& id, 
+                size_t decl_line, 
+                std::string_view const& assembly_name, 
+                std::shared_ptr<namespace_body_model> const& containing_ns_body, 
+                class_semantics const& sem) :
+            class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
+            m_semantic{ sem },
+            m_class_base_ref{ "" }
         { }
 
         auto const& get_class_base_ref() const noexcept

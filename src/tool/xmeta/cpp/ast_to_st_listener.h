@@ -4,6 +4,7 @@
 #include <string_view>
 #include "XlangParserBaseListener.h"
 #include "models/xmeta_models.h"
+#include "XlangParser.h"
 
 namespace xlang::xmeta
 {
@@ -21,6 +22,7 @@ struct ast_to_st_listener : XlangParserBaseListener
     ast_to_st_listener() = delete;
     ast_to_st_listener(xlang::xmeta::compilation_unit & xlang_model, xlang::xmeta::xlang_error_manager & error_manager);
 
+    void enterClass_declaration(XlangParser::Class_declarationContext * ctx) override;
     void enterInterface_declaration(XlangParser::Interface_declarationContext *ctx) override;
     void enterDelegate_declaration(XlangParser::Delegate_declarationContext* ctx) override;
     void enterEnum_declaration(XlangParser::Enum_declarationContext *ctx) override;
@@ -49,9 +51,18 @@ private:
     void extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, 
         std::variant<std::shared_ptr<xlang::xmeta::delegate_model>, std::shared_ptr<xlang::xmeta::method_model>> const& model);
 
-    listener_error extract_property_accessors(XlangParser::Interface_property_declarationContext* interface_property,
-        std::shared_ptr<xlang::xmeta::class_or_interface_model> model);
+    listener_error extract_property_accessors(std::string const& property_id,
+        xlang::xmeta::type_ref & tr,
+        size_t decl_line, 
+        XlangParser::Property_accessorsContext* property_accessors, 
+        std::shared_ptr<xlang::xmeta::class_or_interface_model> const& model);
     
+    listener_error extract_event_saccessors(std::string const& event_id,
+        xlang::xmeta::type_ref & tr,
+        size_t decl_line,
+        XlangParser::Event_accessorsContext* property_accessors,
+        std::shared_ptr<xlang::xmeta::class_or_interface_model> const& model);
+
     listener_error extract_event_accessors(XlangParser::Interface_event_declarationContext* interface_property,
         std::shared_ptr<xlang::xmeta::class_or_interface_model> model);
 

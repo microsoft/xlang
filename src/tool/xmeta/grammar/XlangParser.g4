@@ -196,12 +196,12 @@ attribute_body
     ;
 
 class_declaration
-    : attributes? class_modifier* CLASS IDENTIFIER type_parameter_list?
+    : attributes? class_modifiers* CLASS IDENTIFIER type_parameter_list?
         class_base? class_body SEMICOLON?
     ;
 
-class_modifier // Explicit Seal? allow it to be explicitly sealed
-    : UNSEALED
+class_modifiers // Explicit Seal? allow it to be explicitly sealed
+    : SEALED
     | STATIC
     ;
 
