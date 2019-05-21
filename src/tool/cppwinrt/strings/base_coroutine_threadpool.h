@@ -345,7 +345,7 @@ namespace std::experimental
 
             void unhandled_exception() const noexcept
             {
-                std::terminate();
+                winrt::terminate();
             }
         };
     };

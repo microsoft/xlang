@@ -479,7 +479,13 @@ $(XamlMetaDataProviderPch)
     </Target>
 
     <!-- Fast ABI component support -->
-    <Import Condition="'$(CppWinRTFastAbi)'=='true'"
-        Project="$(MSBuildThisFileDirectory)Microsoft.Windows.CppWinRT.FastAbi.targets" />
+    <PropertyGroup Condition="'$(CppWinRTFastAbi)'=='true'">
+        <CppWinRTParameters>$(CppWinRTParameters) -fastabi</CppWinRTParameters>
+    </PropertyGroup>
+    <ItemDefinitionGroup Condition="'$(CppWinRTFastAbi)'=='true'">
+        <Link>
+            <AdditionalDependencies>%(AdditionalDependencies);$(CppWinRTPackageDir)build\native\lib\$(Platform)\cppwinrt_fast_forwarder.lib</AdditionalDependencies>
+        </Link>
+    </ItemDefinitionGroup>
 
 </Project>

@@ -48,7 +48,7 @@ NESTED_END InvokeForwarder, _TEXT
 
 ; Define thunks
 WINRT_FF_THUNK MACRO i
-LEAF_ENTRY winrt_ff_thunk&i, _TEXT
+LEAF_ENTRY winrt_ff_thunk&i, _TEXT, NoPad
     mov rax, i
     jmp InvokeForwarder 
 LEAF_END winrt_ff_thunk&i, _TEXT

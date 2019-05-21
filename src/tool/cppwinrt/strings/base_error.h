@@ -380,10 +380,6 @@ namespace winrt
         {
             return hresult_error(impl::error_fail, to_hstring(e.what())).to_abi();
         }
-        catch (...)
-        {
-            std::terminate();
-        }
     }
 
     [[noreturn]] inline void throw_last_error()
@@ -435,5 +431,10 @@ namespace winrt
         }
 
         return pointer;
+    }
+
+    [[noreturn]] inline void terminate() noexcept
+    {
+        WINRT_RoFailFastWithErrorContext(to_hresult());
     }
 }
