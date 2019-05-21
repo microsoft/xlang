@@ -16,19 +16,22 @@ namespace xlang::xmeta
     {
         bool is_protected = false;
         bool is_static = false;
+        bool is_overridable = false;
     };
 
     enum class method_association
     {
         None,
         Property,
-        Event
+        Event,
+        Constructor
     };
 
     struct method_model : base_model
     {
         method_model() = delete;
-        method_model(std::string_view const& id, size_t decl_line, 
+        method_model(std::string_view const& id, 
+                size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::optional<type_ref>&& return_type, 
                 std::vector<formal_parameter_model>&& formal_params,
@@ -42,7 +45,8 @@ namespace xlang::xmeta
             m_implemented_method_ref{ "" }
         { }
 
-        method_model(std::string_view const& id, size_t decl_line,
+        method_model(std::string_view const& id,
+                size_t decl_line,
                 std::string_view const& assembly_name,
                 std::optional<type_ref>&& return_type,
                 method_association const& assoc) :
@@ -52,6 +56,18 @@ namespace xlang::xmeta
             m_implemented_method_ref{ "" }
         { }
 
+        method_model(std::string_view const& id,
+                size_t decl_line,
+                std::string_view const& assembly_name,
+                std::optional<type_ref>&& return_type,
+                method_semantics const& sem,
+                method_association const& assoc) :
+            base_model{ id, decl_line, assembly_name },
+            m_return_type{ std::move(return_type) },
+            m_semantic{ sem },
+            m_association{ assoc },
+            m_implemented_method_ref{ "" }
+        { }
 
         method_model(std::string_view const& id, 
                 size_t decl_line, 

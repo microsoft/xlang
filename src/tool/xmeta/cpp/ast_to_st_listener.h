@@ -53,18 +53,17 @@ private:
 
     listener_error extract_property_accessors(std::string const& property_id,
         xlang::xmeta::type_ref & tr,
-        size_t decl_line, 
-        XlangParser::Property_accessorsContext* property_accessors, 
-        std::shared_ptr<xlang::xmeta::class_or_interface_model> const& model);
+        size_t decl_line,
+        XlangParser::Property_accessorsContext* property_accessors,
+        std::shared_ptr<xlang::xmeta::class_or_interface_model> const& model,
+        xlang::xmeta::property_semantics const& property_sem = xlang::xmeta::property_semantics());
     
-    listener_error extract_event_saccessors(std::string const& event_id,
+    listener_error extract_event_accessors(std::string const& event_id,
         xlang::xmeta::type_ref & tr,
         size_t decl_line,
         XlangParser::Event_accessorsContext* property_accessors,
-        std::shared_ptr<xlang::xmeta::class_or_interface_model> const& model);
-
-    listener_error extract_event_accessors(XlangParser::Interface_event_declarationContext* interface_property,
-        std::shared_ptr<xlang::xmeta::class_or_interface_model> model);
+        std::shared_ptr<xlang::xmeta::class_or_interface_model> const& model,
+        xlang::xmeta::event_semantics const& event_sem = xlang::xmeta::event_semantics());
 
     std::shared_ptr<xlang::xmeta::namespace_body_model> m_cur_namespace_body;
     std::shared_ptr<xlang::xmeta::class_model> m_cur_class;

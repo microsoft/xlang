@@ -33,9 +33,11 @@ namespace xlang::xmeta
         property_model(std::string_view const& id,
                 size_t decl_line,
                 std::string_view const& assembly_name,
+                property_semantics const& sem,
                 type_ref&& type) :
             base_model{ id, decl_line, assembly_name },
-            m_type{ std::move(type) }
+            m_type{ std::move(type) },
+            m_semantic{ sem }
         { }
 
         auto const& get_semantic() const noexcept

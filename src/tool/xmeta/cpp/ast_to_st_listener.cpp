@@ -278,7 +278,8 @@ listener_error ast_to_st_listener::extract_property_accessors(std::string const&
     type_ref & tr, 
     size_t decl_line, 
     XlangParser::Property_accessorsContext* property_accessors, 
-    std::shared_ptr<class_or_interface_model> const& model)
+    std::shared_ptr<class_or_interface_model> const& model,
+    property_semantics const& property_sem)
 {
     std::shared_ptr<method_model> get_method = nullptr;
     std::shared_ptr<method_model> set_method = nullptr;
@@ -335,7 +336,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::string const&
     }
 
 
-    auto prop_model = std::make_shared<property_model>(property_id, decl_line, m_cur_assembly, std::move(tr));
+    auto prop_model = std::make_shared<property_model>(property_id, decl_line, m_cur_assembly, property_sem, std::move(tr));
     prop_model->set_get_method(get_method);
     prop_model->set_set_method(set_method);
     model->add_member(prop_model);
@@ -343,46 +344,25 @@ listener_error ast_to_st_listener::extract_property_accessors(std::string const&
 }
 
 
-listener_error ast_to_st_listener::extract_event_saccessors(std::string const& event_id,
+listener_error ast_to_st_listener::extract_event_accessors(std::string const& event_id,
     type_ref & tr,
     size_t decl_line,
     XlangParser::Event_accessorsContext* property_accessors,
-    std::shared_ptr<class_or_interface_model> const& model)
+    std::shared_ptr<class_or_interface_model> const& model,
+    event_semantics const& event_sem)
 {
     type_ref event_registration{ "Foundation.EventRegistrationToken" };
-    parameter_semantics sem = parameter_semantics::in;
+    parameter_semantics param_sem = parameter_semantics::in;
 
     std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event_id, decl_line, m_cur_assembly, std::move(event_registration), method_association::Event);
-    add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
+    add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, param_sem, std::move(tr) });
 
     std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Event);
-    remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(event_registration) });
+    remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, param_sem, std::move(event_registration) });
 
     model->add_member(add_method);
     model->add_member(remove_method);
-    auto event = std::make_shared<event_model>(event_id, decl_line, m_cur_assembly, add_method, remove_method, std::move(tr));
-    model->add_member(event);
-    return listener_error::passed;
-}
-
-listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interface_event_declarationContext* interface_event, std::shared_ptr<class_or_interface_model> model)
-{
-    std::string event_id = interface_event->IDENTIFIER()->getText();
-    type_ref event_registration{ "Foundation.EventRegistrationToken" };
-    type_ref tr{ interface_event->type()->getText() };
-    extract_type(interface_event->type(), tr);
-    auto decl_line = interface_event->IDENTIFIER()->getSymbol()->getLine();
-    parameter_semantics sem = parameter_semantics::in;
-
-    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event_id, decl_line, m_cur_assembly, std::move(event_registration), method_association::Event);
-    add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
-
-    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Event);
-    remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(event_registration) });
-
-    model->add_member(add_method);
-    model->add_member(remove_method);
-    auto event = std::make_shared<event_model>(event_id, decl_line, m_cur_assembly, add_method, remove_method, std::move(tr));
+    auto event = std::make_shared<event_model>(event_id, decl_line, m_cur_assembly, event_sem, add_method, remove_method, std::move(tr));
     model->add_member(event);
     return listener_error::passed;
 }
@@ -422,11 +402,24 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
         error_manager.write_namespace_member_name_error(decl_line, class_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
     }
+
     auto const& class_body = ctx->class_body();
     for (auto const& class_member_declarations : class_body->class_member_declarations())
     {
         for (auto const& class_member : class_member_declarations->class_member_declaration())
         {
+            if (class_member->class_constructor_declaration())
+            {
+                auto class_constructor = class_member->class_constructor_declaration();
+                std::string constructor_id = class_constructor->IDENTIFIER()->getText();
+
+                auto constructor_model = std::make_shared<method_model>(constructor_id, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_association::Constructor);
+                if (class_constructor->formal_parameter_list())
+                {
+                    extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), constructor_model);
+                }
+                model->add_member(constructor_model);
+            }
             if (class_member->class_method_declaration())
             {
                 auto class_method = class_member->class_method_declaration();
@@ -435,7 +428,24 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 std::optional<type_ref> tr = type_ref{ class_method->return_type()->getText() };
                 extract_type(class_method->return_type(), tr);
 
-                auto met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::None);
+                method_semantics method_sem;
+                for (auto const& method_modifier : class_method->method_modifier())
+                {
+                    if (method_modifier->OVERRIDABLE() || method_modifier->OVERRIDE())
+                    {
+                        method_sem.is_overridable = true;
+                    }
+                    if (method_modifier->PROTECTED())
+                    {
+                        method_sem.is_protected = true;
+                    }
+                    if (method_modifier->STATIC())
+                    {
+                        method_sem.is_static = true;
+                    }
+                }
+
+                auto met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_sem, method_association::None);
                 if (class_method->formal_parameter_list())
                 {
                     extract_formal_params(class_method->formal_parameter_list()->fixed_parameter(), met_model);
@@ -447,14 +457,62 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 auto const& class_property = class_member->class_property_declaration();
                 type_ref tr{ class_property->type()->getText() };
                 extract_type(class_property->type(), tr);
-                extract_property_accessors(class_property->IDENTIFIER()->getText(), tr, class_property->IDENTIFIER()->getSymbol()->getLine(), class_property->property_accessors(), model);
+
+                property_semantics property_sem;
+                for (auto const& property_modifier : class_property->property_modifier())
+                {
+                    if (property_modifier->PROTECTED())
+                    {
+                        if (property_sem.is_protected)
+                        {
+                            // report semantic error
+                        }
+                        property_sem.is_protected = true;
+                    }
+                    if (property_modifier->STATIC())
+                    {
+                        if (property_sem.is_static)
+                        {
+                            // report semantic error
+                        }
+                        property_sem.is_static = true;
+                    }
+                    if (property_modifier->OVERRIDABLE())
+                    {
+                        // TODO: figure out what to do with overridable
+                    }
+                }
+
+                extract_property_accessors(class_property->IDENTIFIER()->getText(), tr, class_property->IDENTIFIER()->getSymbol()->getLine(), class_property->property_accessors(), model, property_sem);
             }
             if (class_member->class_event_declaration())
             {
                 auto const& class_event = class_member->class_event_declaration();
                 type_ref tr{ class_event->type()->getText() };
                 extract_type(class_event->type(), tr);
-                extract_event_saccessors(class_event->IDENTIFIER()->getText(), tr, class_event->IDENTIFIER()->getSymbol()->getLine(), class_event->event_accessors(), model);
+
+                event_semantics event_sem;
+                for (auto const& event_modifier : class_event->event_modifier())
+                {
+                    if (event_modifier->PROTECTED())
+                    {
+                        if (event_sem.is_protected)
+                        {
+                            // report semantic error
+                        }
+                        event_sem.is_protected = true;
+                    }
+                    if (event_modifier->STATIC())
+                    {
+                        if (event_sem.is_static)
+                        {
+                            // report semantic error
+                        }
+                        event_sem.is_static = true;
+                    }
+                }
+
+                extract_event_accessors(class_event->IDENTIFIER()->getText(), tr, class_event->IDENTIFIER()->getSymbol()->getLine(), class_event->event_accessors(), model, event_sem);
             }
         }
     }
@@ -513,7 +571,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             auto const& interface_event = interface_member->interface_event_declaration();
             type_ref tr{ interface_event->type()->getText() };
             extract_type(interface_event->type(), tr);
-            extract_event_saccessors(interface_event->IDENTIFIER()->getText(), tr, interface_event->IDENTIFIER()->getSymbol()->getLine(), interface_event->event_accessors(), model);
+            extract_event_accessors(interface_event->IDENTIFIER()->getText(), tr, interface_event->IDENTIFIER()->getSymbol()->getLine(), interface_event->event_accessors(), model);
         }
     }
     if (ctx->interface_base())
