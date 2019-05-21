@@ -41,4 +41,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         </Link>
     </ItemDefinitionGroup>
 
+    <ItemGroup>
+        <PropertyPageSchema Include="$(MSBuildThisFileDirectory)\CppWinrtRules.Project.xml" Context="Project" />
+    </ItemGroup>
+
 </Project>
