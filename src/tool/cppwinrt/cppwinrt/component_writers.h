@@ -694,25 +694,7 @@ catch (...) { return winrt::to_hresult(); }
         }
         else
         {
-            bool has_tearoffs{};
-
-            for (auto&& [name, info] : get_interfaces(w, type))
-            {
-                if (info.is_default)
-                {
-                    continue;
-                }
-
-                if (!info.fastabi)
-                {
-                    break;
-                }
-
-                has_tearoffs = true;
-                break;
-            }
-
-            if (!has_tearoffs)
+            if (!has_fastabi_tearoffs(w, type))
             {
                 return;
             }

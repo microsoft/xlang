@@ -476,6 +476,21 @@ namespace xlang
         return result;
     }
 
+    bool has_fastabi_tearoffs(writer& w, TypeDef const& type)
+    {
+        for (auto&& [name, info] : get_interfaces(w, type))
+        {
+            if (info.is_default)
+            {
+                continue;
+            }
+
+            return info.fastabi;
+        }
+
+        return false;
+    }
+
     std::size_t get_fastabi_size(writer& w, TypeDef const& type)
     {
         if (!has_fastabi(type))
