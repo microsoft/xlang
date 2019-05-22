@@ -476,6 +476,40 @@ namespace xlang
         return result;
     }
 
+    std::size_t get_fastabi_size(writer& w, TypeDef const& type)
+    {
+        if (!has_fastabi(type))
+        {
+            return 0;
+        }
+
+        auto result = 6 + get_bases(type).size();
+
+        for (auto&& [name, info] : get_interfaces(w, type))
+        {
+            if (!info.fastabi)
+            {
+                break;
+            }
+
+            result += size(info.type.MethodList());
+        }
+
+        return result;
+    }
+
+    auto get_fastabi_size(writer& w, std::vector<TypeDef> const& classes)
+    {
+        std::size_t result{};
+
+        for (auto&& type : classes)
+        {
+            result = std::max(result, get_fastabi_size(w, type));
+        }
+
+        return result;
+    }
+
     struct factory_info
     {
         TypeDef type;

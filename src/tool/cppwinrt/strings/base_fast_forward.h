@@ -2,18 +2,23 @@
 #include <atomic>
 
 #if defined(_MSC_VER)
-#define WINRT_FF_NOVTABLE __declspec(novtable)
-#define WINRT_FF_CALL __stdcall
+#define WINRT_IMPL_NOVTABLE __declspec(novtable)
+#define WINRT_IMPL_CALL __stdcall
 #else
-#define WINRT_FF_NOVTABLE
-#define WINRT_FF_CALL
+#define WINRT_IMPL_NOVTABLE
+#define WINRT_IMPL_CALL
 #endif
+
+#define WINRT_IMPL_STRING_1(expression) #expression
+#define WINRT_IMPL_STRING(expression) WINRT_IMPL_STRING_1(expression)
 
 #if !defined(WINRT_FAST_ABI_SIZE)
 #define WINRT_FAST_ABI_SIZE %
 #endif
-#pragma detect_mismatch("WINRT_FAST_ABI_SIZE", "%")
+
 static_assert(WINRT_FAST_ABI_SIZE >= %);
+
+#pragma detect_mismatch("WINRT_FAST_ABI_SIZE", WINRT_IMPL_STRING(WINRT_FAST_ABI_SIZE))
 
 namespace winrt::impl
 {
@@ -33,14 +38,14 @@ namespace winrt::impl
             }
         };
 
-        struct WINRT_FF_NOVTABLE inspectable
+        struct WINRT_IMPL_NOVTABLE inspectable
         {
-            virtual int32_t WINRT_FF_CALL QueryInterface(guid const& id, void** object) noexcept = 0;
-            virtual uint32_t WINRT_FF_CALL AddRef() noexcept = 0;
-            virtual uint32_t WINRT_FF_CALL Release() noexcept = 0;
-            virtual int32_t WINRT_FF_CALL GetIids(uint32_t* count, guid** ids) noexcept = 0;
-            virtual int32_t WINRT_FF_CALL GetRuntimeClassName(void** name) noexcept = 0;
-            virtual int32_t WINRT_FF_CALL GetTrustLevel(uint32_t* level) noexcept = 0;
+            virtual int32_t WINRT_IMPL_CALL QueryInterface(guid const& id, void** object) noexcept = 0;
+            virtual uint32_t WINRT_IMPL_CALL AddRef() noexcept = 0;
+            virtual uint32_t WINRT_IMPL_CALL Release() noexcept = 0;
+            virtual int32_t WINRT_IMPL_CALL GetIids(uint32_t* count, guid** ids) noexcept = 0;
+            virtual int32_t WINRT_IMPL_CALL GetRuntimeClassName(void** name) noexcept = 0;
+            virtual int32_t WINRT_IMPL_CALL GetTrustLevel(uint32_t* level) noexcept = 0;
         };
 
         void* const* m_vfptr;
@@ -60,7 +65,7 @@ namespace winrt::impl
             m_owner->Release();
         }
 
-        static int32_t WINRT_FF_CALL QueryInterface(fast_abi_forwarder* self, guid const& iid, void** object) noexcept
+        static int32_t WINRT_IMPL_CALL QueryInterface(fast_abi_forwarder* self, guid const& iid, void** object) noexcept
         {
             if (iid != self->m_iid)
             {
@@ -72,12 +77,12 @@ namespace winrt::impl
         }
 
         // Note: COM interfaces use stdcall, not thiscall, ('this' gets no special treatment), permitting static implementations
-        static uint32_t WINRT_FF_CALL AddRef(fast_abi_forwarder* self) noexcept
+        static uint32_t WINRT_IMPL_CALL AddRef(fast_abi_forwarder* self) noexcept
         {
             return 1 + self->m_references.fetch_add(1, std::memory_order_relaxed);
         }
 
-        static uint32_t WINRT_FF_CALL Release(fast_abi_forwarder* self) noexcept
+        static uint32_t WINRT_IMPL_CALL Release(fast_abi_forwarder* self) noexcept
         {
             uint32_t const remaining = self->m_references.fetch_sub(1, std::memory_order_release) - 1;
             if (remaining == 0)
@@ -88,17 +93,17 @@ namespace winrt::impl
             return remaining;
         }
 
-        static uint32_t WINRT_FF_CALL GetIids(fast_abi_forwarder* self, uint32_t* count, guid** iids) noexcept
+        static uint32_t WINRT_IMPL_CALL GetIids(fast_abi_forwarder* self, uint32_t* count, guid** iids) noexcept
         {
             return self->m_owner->GetIids(count, iids);
         }
 
-        static uint32_t WINRT_FF_CALL GetRuntimeClassName(fast_abi_forwarder* self, void** name) noexcept
+        static uint32_t WINRT_IMPL_CALL GetRuntimeClassName(fast_abi_forwarder* self, void** name) noexcept
         {
             return self->m_owner->GetRuntimeClassName(name);
         }
 
-        static uint32_t WINRT_FF_CALL GetTrustLevel(fast_abi_forwarder* self, uint32_t* level) noexcept
+        static uint32_t WINRT_IMPL_CALL GetTrustLevel(fast_abi_forwarder* self, uint32_t* level) noexcept
         {
             return self->m_owner->GetTrustLevel(level);
         }
@@ -130,3 +135,8 @@ namespace winrt
         return new impl::fast_abi_forwarder(owner, *reinterpret_cast<ff_guid const*>(&guid), offset);
     }
 }
+
+#undef WINRT_IMPL_NOVTABLE
+#undef WINRT_IMPL_CALL
+#undef WINRT_IMPL_STRING
+#undef WINRT_IMPL_STRING_1

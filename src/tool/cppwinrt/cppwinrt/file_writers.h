@@ -50,10 +50,9 @@ namespace xlang
         write_preamble(w);
         write_open_file_guard(w, "FAST_FORWARD");
 
-        uint32_t const fast_abi_size = 10;
+        auto const fast_abi_size = get_fastabi_size(w, classes);
 
         w.write(strings::base_fast_forward,
-            fast_abi_size,
             fast_abi_size,
             fast_abi_size,
             bind<write_component_fast_abi_thunk>(),

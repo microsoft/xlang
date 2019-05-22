@@ -1210,7 +1210,7 @@ namespace winrt::@::implementation
         {
             auto format = R"(
 #if WINRT_FAST_ABI_SIZE > %
-    extern "C" void WINRT_FF_CALL winrt_ff_thunk%();
+    extern "C" void WINRT_IMPL_CALL winrt_ff_thunk%();
 #endif
 )";
             w.write(format,

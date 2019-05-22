@@ -2,6 +2,8 @@
 #include "catch.hpp"
 #include "winrt/base.h"
 
+#pragma detect_mismatch("WINRT_FAST_ABI_SIZE", "33")
+
 using namespace winrt;
 
 int main(int const argc, char** argv)
