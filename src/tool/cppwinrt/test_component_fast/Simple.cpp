@@ -2,6 +2,9 @@
 #include "Simple.h"
 #include "Simple.g.cpp"
 
+// Validates that WINRT_FAST_ABI_SIZE may be overridden using /D.
+#pragma detect_mismatch("WINRT_FAST_ABI_SIZE", "50")
+
 namespace winrt::test_component_fast::implementation
 {
     hstring Simple::Method1()

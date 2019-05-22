@@ -2,6 +2,7 @@
 #include "catch.hpp"
 #include "winrt/base.h"
 
+// Validates that cppwinrt actually calculates the precise vtable size correctly.
 #pragma detect_mismatch("WINRT_FAST_ABI_SIZE", "33")
 
 using namespace winrt;
