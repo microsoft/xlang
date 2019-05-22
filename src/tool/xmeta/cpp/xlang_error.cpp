@@ -99,4 +99,11 @@ namespace xlang::xmeta
         oss << "Member name '" << symbol << "' is not an delegate.";
         write_error(decl_line, oss.str());
     }
+    
+    void xlang_error_manager::write_property_accessor_error(size_t decl_line, std::string member)
+    {
+        std::ostringstream oss;
+        oss << "Invalid property setter and getter: " << member;
+        write_error(decl_line, oss.str());
+    }
 }

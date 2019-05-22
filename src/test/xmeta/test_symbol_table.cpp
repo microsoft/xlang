@@ -715,18 +715,110 @@ TEST_CASE("Interface property test")
 
     auto const& method0 = methods[0];
     REQUIRE(method0->get_id() == "get_property1");
+    REQUIRE(properties[0]->get_get_method() == method0);
+    REQUIRE(properties[0]->get_get_method()->get_id() == method0->get_id());
     auto method0_return_type = method0->get_return_type()->get_semantic();
     REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
 
     auto const& method1 = methods[1];
     REQUIRE(method1->get_id() == "set_property1");
+    REQUIRE(properties[0]->get_set_method() == method1);
+    REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
     REQUIRE(!method1->get_return_type());
 
     auto const& method2 = methods[2];
     REQUIRE(method2->get_id() == "get_property2");
+    REQUIRE(properties[1]->get_get_method() == method2);
+    REQUIRE(properties[1]->get_get_method()->get_id() == method2->get_id());
     auto method2_return_type = method2->get_return_type()->get_semantic();
     REQUIRE((method2_return_type.is_resolved() && std::get<simple_type>(method2_return_type.get_resolved_target()) == simple_type::Int32));
 }
+
+TEST_CASE("Interface invalid property accessor test")
+{
+    {
+        std::istringstream test_set_only_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_set_only_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_double_get_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_double_get_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_double_set_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_double_set_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_three_acessor_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; get; get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_three_acessor_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_add_and_remove_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; add; };
+                    Int32 property2 { get; remove; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_add_and_remove_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 2);
+        REQUIRE(reader.get_num_semantic_errors() == 0);
+    }
+}
+
 
 TEST_CASE("Interface property implicit accessors test")
 {

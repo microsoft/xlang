@@ -291,6 +291,7 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
             if (!property_accessor_methods[0]->GET())
             {
                 // WRITE SEMANTIC ERROR. Always need a get property.
+                error_manager.write_property_accessor_error(decl_line, property_id);
                 return listener_error::failed;
             }
         }
@@ -300,12 +301,14 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
                 || (property_accessor_methods[0]->SET() && property_accessor_methods[1]->SET()))
             {
                 // WRITE SEMANTIC ERROR
+                error_manager.write_property_accessor_error(decl_line, property_id);
                 return listener_error::failed;
             }
         }
         else if (property_accessor_methods.size() > 2)
         {
             // THIS PARSER BE TRIPPING :O
+            error_manager.write_property_accessor_error(decl_line, property_id);
             return listener_error::failed;
         }
 

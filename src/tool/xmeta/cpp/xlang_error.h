@@ -46,6 +46,8 @@ namespace xlang::xmeta
         void write_namespace_member_name_error(size_t decl_line, 
             std::string_view const& invalid_name, std::string_view const& namespace_id);
 
+        void write_property_accessor_error(size_t decl_line, std::string member);
+        
         size_t get_num_of_errors() const noexcept
         {
             return m_num_semantic_errors + m_num_syntax_errors; 
