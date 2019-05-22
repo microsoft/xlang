@@ -1,0 +1,173 @@
+Posting this as a convenience.
+
+The CLR has some custom handling in its projection of WINRT. This happens both at runtime and compile time. For example, HSTRING projects as System.String.
+
+Some of the custom projection is for Xaml types, listed below. 
+
+This is written from the POV of C#, but much/all of it applies to C++/CX.
+
+Full list is at https://github.com/dotnet/coreclr/blob/master/src/inc/winrtprojectedtypes.h
+
+Namespace/name conversions
+
+Xaml types that project to C# as a different type or namespace name (or both)
+
+ICommand	System.Windows.Input namespace
+IBindableIterable	IEnumerable
+IBindableVector	IList
+INotifyCollectionChanged	System.Collections.Specialized
+INotifyPropertyChanged	System.ComponentModel
+
+Note that IBindableIterable/IEnumerable is required for ListView. For example, say you bind ListView.ItemsSource to a List<T> object for some T. List<T> implements IEnumerable<T>, but ListView doesn't understand that. What ListView understands is IEnumerable, but not literally IEnumerable; it understands IBindableIterable, which is what the .Net projection uses.
+
+Most of these types are only consumed by Xaml though, all except ICommand. For example, while ItemsControl consumes IBindableIterable, Xaml has no APIs of type IBindableIterable. 
+
+Xaml has about 20 ICommand-typed APIs though.
+
+Type improvements
+
+Xaml types that get extra members in the C# projection.
+
+For example, Xaml's CornerRadius is just a struct:
+
+struct CornerRadius
+{
+    DOUBLE TopLeft;
+    DOUBLE TopRight;
+    DOUBLE BottomRight;
+    DOUBLE BottomLeft;
+};
+
+But when it's projected in C#, it acquires a constructor and comparison operators:
+
+    public struct CornerRadius
+    {
+        public CornerRadius(double topLeft, double topRight, double bottomRight, double bottomLeft);
+
+        public double BottomLeft { get; set; }
+        public double BottomRight { get; set; }
+        public double TopLeft { get; set; }
+        public double TopRight { get; set; }
+
+        public override bool Equals(object obj);
+        public bool Equals(CornerRadius cornerRadius);
+        public override int GetHashCode();
+        public override string ToString();
+        public static bool operator ==(CornerRadius cr1, CornerRadius cr2);
+        public static bool operator !=(CornerRadius cr1, CornerRadius cr2);
+    }
+
+There is actually a way for non-C# developers to get access to this same functionality with some Helper classes. For example, there's a CornerRadiusHelper class that has these members on it. These Helper classes are not projected by C#, since the functionality is on the structs already.
+
+Note that Point/Rect/Size are Windows.Foundation structs, but the helper classes are in Xaml's namespace (e.g. RectHelper).
+
+The types and their helpers
+
+CornerRadius	CornerRadiusHelper
+Duration	DurationHelper
+DurationType	
+GridLength	GridLengthHelper
+Thickness	ThicknessHelper
+GeneratorPosition	GeneratorPositionHelper
+Matrix	MatrixHelper
+Matrix3D	Matrix3DHelper
+KeyTime	KeyTimeHelper
+RepeatBehavior	RepeatBehaviorHelper
+RepeatBehaviorType	
+
+
+Type
+
+WinRT doesn't officially have the notion of a "type". There is no Windows.Foundatation.Type. You can ask an object (Iinspectable) for runtime class name, but that's only a string. 
+
+But, Xaml has a type named Windows.UI.Xaml.Interop.TypeName that projects in C# to System.Type.
+
+Type-typed APIs in Xaml:
+
+	ControlTemplate (Windows.UI.Xaml.Controls)
+	    TargetType
+	
+	DatePickerFlyoutItem (Windows.UI.Xaml.Controls)
+	    GetIndexedProperty
+	    Type
+	
+	DependencyProperty (Windows.UI.Xaml)
+	    GetMetadata
+	    Register
+	    RegisterAttached
+	
+	Frame (Windows.UI.Xaml.Controls)
+	    CurrentSourcePageType
+	    Navigate
+	    Navigate
+	    Navigate
+	    NavigateToType
+	    SourcePageType
+	
+	ICustomProperty (Windows.UI.Xaml.Data)
+	    Type
+	
+	ICustomPropertyProvider (Windows.UI.Xaml.Data)
+	    GetIndexedProperty
+	    Type
+	
+	INavigate (Windows.UI.Xaml.Controls)
+	    Navigate
+	
+	IValueConverter (Windows.UI.Xaml.Data)
+	    Convert
+	    ConvertBack
+	
+	IXamlMetadataProvider (Windows.UI.Xaml.Markup)
+	    GetXamlType
+	
+	IXamlServiceProvider (Windows.UI.Xaml)
+	    GetService
+	
+	IXamlType (Windows.UI.Xaml.Markup)
+	    UnderlyingType
+	
+	IXamlTypeResolver (Windows.UI.Xaml.Markup)
+	    Resolve
+	
+	JumpListItemBackgroundConverter (Windows.UI.Xaml.Controls.Primitives)
+	    Convert
+	    ConvertBack
+	
+	JumpListItemForegroundConverter (Windows.UI.Xaml.Controls.Primitives)
+	    Convert
+	    ConvertBack
+	
+	MarkupExtensionReturnTypeAttribute (Windows.UI.Xaml.Markup)
+	    ReturnType
+	
+	NavigatingCancelEventArgs (Windows.UI.Xaml.Navigation)
+	    SourcePageType
+	
+	NavigationEventArgs (Windows.UI.Xaml.Navigation)
+	    SourcePageType
+	
+	NavigationFailedEventArgs (Windows.UI.Xaml.Navigation)
+	    SourcePageType
+	
+	PageStackEntry (Windows.UI.Xaml.Navigation)
+	    PageStackEntry (Type, Object, NavigationTransitionInfo)
+	    SourcePageType
+	
+	ProvideValueTargetProperty (Windows.UI.Xaml.Markup)
+	    DeclaringType
+	    Type
+	
+	Style (Windows.UI.Xaml)
+	    Style (Type)
+	    TargetType
+	
+	StyleTypedPropertyAttribute (Windows.UI.Xaml)
+	    StyleTargetType
+	
+	TemplatePartAttribute (Windows.UI.Xaml)
+	    Type
+	
+	XamlBindingHelper (Windows.UI.Xaml.Markup)
+	    ConvertValue
+
