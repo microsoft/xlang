@@ -6,15 +6,14 @@ namespace Sample
     namespace Interop
     {
         // IClass
-        [Guid("F1702855-48DE-543A-BDB8-E179B86F3070")]
+        [Guid("C50B7217-25B5-5657-9DB8-A23874617520")]
         public struct IClassVftbl
         {
-            public unsafe delegate int _get_MyProperty([In] IntPtr thisPtr, [Out] int* value);
-            public delegate int _put_MyProperty([In] IntPtr thisPtr, [In] int value);
-
             WinRT.Interop.IInspectableVftbl IInspectableVftbl;
-            public _get_MyProperty get_MyProperty;
-            public _put_MyProperty put_MyProperty;
+            public WinRT.Interop._get_PropertyAsInt get_MyProperty;
+            public WinRT.Interop._put_PropertyAsInt put_MyProperty;
+            public WinRT.Interop._add_EventHandler add_MyPropertyChanged;
+            public WinRT.Interop._remove_EventHandler remove_MyPropertyChanged;
         }
     }
 
@@ -22,6 +21,7 @@ namespace Sample
     {
         static Lazy<WinRT.ActivationFactory<Class>> _factory = new Lazy<WinRT.ActivationFactory<Class>>();
         WinRT.ObjectReference<Interop.IClassVftbl> _IClass;
+        WinRT.EventSource<Class, object> _myPropertyChanged;
 
         Class(WinRT.ObjectReference<Interop.IClassVftbl> that)
         {
@@ -31,6 +31,7 @@ namespace Sample
         public Class()
         {
             _IClass = _factory.Value.ActivateInstance<Interop.IClassVftbl>();
+            _myPropertyChanged = new WinRT.EventSource<Class, object>(this, _IClass.ThisPtr, _IClass.Vftbl.add_MyPropertyChanged, _IClass.Vftbl.remove_MyPropertyChanged, (IntPtr) => null);
         }
 
         public int MyProperty
@@ -45,6 +46,12 @@ namespace Sample
             {
                 Marshal.ThrowExceptionForHR(_IClass.Vftbl.put_MyProperty(_IClass.ThisPtr, value));
             }
+        }
+
+        public event WinRT.TypedEventHandler<Class, object> MyPropertyChanged
+        {
+            add { _myPropertyChanged.Event += value; }
+            remove { _myPropertyChanged.Event -= value; }
         }
 
         public object Clone()

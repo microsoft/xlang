@@ -10,6 +10,9 @@ namespace WinRT
         FullTrust = (PartialTrust + 1)
     };
 
+    public delegate void EventHandler<A>(object sender, A args);
+    public delegate void TypedEventHandler<S, A>(S sender, A args);
+
     namespace Interop
     {
         // IUnknown
@@ -50,19 +53,27 @@ namespace WinRT
             public _ActivateInstance ActivateInstance;
         }
 
+        // standard accessors/mutators
+        public unsafe delegate int _get_PropertyAsInt([In] IntPtr thisPtr, [Out] int* value);
+        public delegate int _put_PropertyAsInt([In] IntPtr thisPtr, [In] int value);
+        public unsafe delegate int _add_EventHandler([In] IntPtr thisPtr, [In] IntPtr handler, [Out] WinRT.Interop.EventRegistrationToken* token);
+        public delegate int _remove_EventHandler([In] IntPtr thisPtr, [In] WinRT.Interop.EventRegistrationToken token);
+
         // IDelegate
         public struct IDelegateVftbl
         {
             public IntPtr QueryInterface;
             public IntPtr AddRef;
             public IntPtr Release;
-            public IntPtr GetIids;
-            public IntPtr GetRuntimeClassName;
-            public IntPtr GetTrustLevel;
             public IntPtr Invoke;
         }
 
-        public unsafe delegate int IEventHandler_Invoke([In] IntPtr thisPtr, [In] IntPtr sender, [In] IntPtr args);
+        public delegate int IEventHandler_Invoke([In] IntPtr thisPtr, [In] IntPtr sender, [In] IntPtr args);
+
+        public struct EventRegistrationToken
+        {
+            public long Value;
+        }
     }
 
     internal class Platform
@@ -406,14 +417,13 @@ namespace WinRT
         }
     }
 
-    public abstract class Delegate<D> : IDisposable
+    internal abstract class Delegate
     {
-        D _staticDelegate;
         int _refs = 0;
-        readonly IntPtr _thisPtr;
+        protected readonly IntPtr ThisPtr;
 
-        static System.Collections.Generic.Dictionary<IntPtr, Delegate<D>> _objects = new System.Collections.Generic.Dictionary<IntPtr, Delegate<D>>();
-        protected static Delegate<D> FindObject(IntPtr thisPtr) { lock (_objects) { return _objects[thisPtr]; } }
+        static System.Collections.Generic.Dictionary<IntPtr, Delegate> _objects = new System.Collections.Generic.Dictionary<IntPtr, Delegate>();
+        protected static Delegate FindObject(IntPtr thisPtr) { lock (_objects) { return _objects[thisPtr]; } }
 
         // IUnknown
         static unsafe readonly Interop.IUnknownVftbl._QueryInterface _QueryInterface = new Interop.IUnknownVftbl._QueryInterface(QueryInterface);
@@ -437,15 +447,6 @@ namespace WinRT
             return FindObject(thisPtr).Release();
         }
 
-        // IInspectable
-        static readonly Interop.IInspectableVftbl._GetIids _GetIids = new Interop.IInspectableVftbl._GetIids(GetIids);
-        static readonly Interop.IInspectableVftbl._GetRuntimeClassName _GetRuntimeClassName = new Interop.IInspectableVftbl._GetRuntimeClassName(GetRuntimeClassName);
-        static readonly Interop.IInspectableVftbl._GetTrustLevel _GetTrustLevel = new Interop.IInspectableVftbl._GetTrustLevel(GetTrustLevel);
-
-        static int GetIids([In] IntPtr pThis, [Out] uint iidCount, [Out] Guid[] iids) { return Marshal.GetHRForException(new NotImplementedException()); }
-        static int GetRuntimeClassName([In] IntPtr pThis, [Out] IntPtr className) { return Marshal.GetHRForException(new NotImplementedException()); }
-        static int GetTrustLevel([In] IntPtr pThis, [Out] TrustLevel trustLevel) { return Marshal.GetHRForException(new NotImplementedException()); }
-
         // IUnknown
         uint AddRef()
         {
@@ -458,8 +459,7 @@ namespace WinRT
             System.Threading.Interlocked.Decrement(ref _refs);
             if (_refs == 0)
             {
-                Dispose();
-                lock (_objects) { _objects.Remove(_thisPtr); }
+                lock (_objects) { _objects.Remove(ThisPtr); }
             }
             return (uint)_refs;
         }
@@ -484,75 +484,99 @@ namespace WinRT
             _vftblTemplate.QueryInterface = Marshal.GetFunctionPointerForDelegate(_QueryInterface);
             _vftblTemplate.AddRef = Marshal.GetFunctionPointerForDelegate(_AddRef);
             _vftblTemplate.Release = Marshal.GetFunctionPointerForDelegate(_Release);
-            _vftblTemplate.GetIids = Marshal.GetFunctionPointerForDelegate(_GetIids);
-            _vftblTemplate.GetRuntimeClassName = Marshal.GetFunctionPointerForDelegate(_GetRuntimeClassName);
-            _vftblTemplate.GetTrustLevel = Marshal.GetFunctionPointerForDelegate(_GetTrustLevel);
             _vftblTemplate.Invoke = IntPtr.Zero;
         }
 
         VftblPtr _vftblPtr;
-        public Delegate(D staticDelegate)
+        public Delegate(IntPtr invokePtr)
         {
-            _staticDelegate = staticDelegate;
-
             var vftbl = _vftblTemplate;
-            vftbl.Invoke = Marshal.GetFunctionPointerForDelegate(_staticDelegate);
+            vftbl.Invoke = invokePtr;
 
             _vftblPtr.Vftbl = Marshal.AllocCoTaskMem(Marshal.SizeOf(_vftblTemplate));
-            Marshal.StructureToPtr(_vftblTemplate, _vftblPtr.Vftbl, false);
+            Marshal.StructureToPtr(vftbl, _vftblPtr.Vftbl, false);
 
-            _thisPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf(_vftblPtr));
-            Marshal.StructureToPtr(_vftblPtr, _thisPtr, false);
+            ThisPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf(_vftblPtr));
+            Marshal.StructureToPtr(_vftblPtr, ThisPtr, false);
 
-            lock (_objects) { _objects.Add(_thisPtr, this); }
+            lock (_objects) { _objects.Add(ThisPtr, this); }
         }
-
 
         ~Delegate()
         {
-            Marshal.FreeCoTaskMem(_thisPtr);
-        }
-
-        public abstract void Dispose();
-    }
-
-    public abstract class Delegate0 : Delegate<Delegate0.StaticDelegate>
-    {
-        public delegate int StaticDelegate(IntPtr thisPtr);
-        public delegate void InstanceDelegate();
-        InstanceDelegate _delegate;
-
-        public Delegate0(InstanceDelegate @delegate) :
-            base(new StaticDelegate((IntPtr thisPtr) => MarshalInvoke(() => ((Delegate0)FindObject(thisPtr))._delegate())))
-
-        {
-            _delegate = @delegate;
+            Marshal.FreeCoTaskMem(ThisPtr);
         }
     }
 
-    public abstract class Delegate1<T1> : Delegate<Delegate1<T1>.StaticDelegate>
+    internal class EventSource<S, A> : Delegate
     {
-        public delegate int StaticDelegate(IntPtr thisPtr, T1 arg1);
-        public delegate void InstanceDelegate(T1 arg1);
-        InstanceDelegate _delegate;
+        static Interop.IEventHandler_Invoke _invoke = (IntPtr thisPtr, IntPtr senderPtr, IntPtr argsPtr) =>
+            MarshalInvoke(() => ((EventSource<S, A>)FindObject(thisPtr)).Invoke(senderPtr, argsPtr));
 
-        public Delegate1(InstanceDelegate @delegate) :
-            base(new StaticDelegate((IntPtr thisPtr, T1 arg1) => MarshalInvoke(() => ((Delegate1<T1>)FindObject(thisPtr))._delegate(arg1))))
+        internal delegate A UnmarshalArgs(IntPtr argsPtr);
+
+        readonly S _sender;
+        readonly IntPtr _senderPtr;
+        readonly Interop._add_EventHandler _addHandler;
+        readonly Interop._remove_EventHandler _removeHandler;
+        readonly UnmarshalArgs _unmarshalArgs;
+
+        Interop.EventRegistrationToken _token;
+        public event WinRT.TypedEventHandler<S, A> _event;
+        public event WinRT.TypedEventHandler<S, A> Event
         {
-            _delegate = @delegate;
+            add
+            {
+                lock (this)
+                {
+                    if (_event == null)
+                    {
+                        Interop.EventRegistrationToken token;
+                        unsafe { Marshal.ThrowExceptionForHR(_addHandler(_senderPtr, ThisPtr, &token)); }
+                        _token = token;
+                    }
+                    _event += value;
+                }
+            }
+            remove
+            {
+                _event -= value;
+                if (_event == null)
+                {
+                    _Unsubscribe();
+                }
+            }
         }
-    }
 
-    public abstract class Delegate2<T1, T2> : Delegate<Delegate2<T1, T2>.StaticDelegate>
-    {
-        public delegate int StaticDelegate(IntPtr thisPtr, T1 arg1, T2 arg2);
-        public delegate void InstanceDelegate(T1 arg1, T2 arg2);
-        InstanceDelegate _delegate;
-
-        public Delegate2(InstanceDelegate @delegate) :
-            base(new StaticDelegate((IntPtr thisPtr, T1 arg1, T2 arg2) => MarshalInvoke(() => ((Delegate2<T1, T2>)FindObject(thisPtr))._delegate(arg1, arg2))))
+        internal EventSource(S sender, IntPtr senderPtr, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs) :
+            base(Marshal.GetFunctionPointerForDelegate(_invoke))
         {
-            _delegate = @delegate;
+            _sender = sender;
+            _senderPtr = senderPtr;
+            _addHandler = addHandler;
+            _removeHandler = removeHandler;
+            _unmarshalArgs = unmarshalArgs;
+        }
+
+        ~EventSource()
+        {
+            _Unsubscribe();
+        }
+
+        protected void Invoke(IntPtr senderPtr, IntPtr argsPtr)
+        {
+            if (senderPtr != _senderPtr)
+            {
+                throw new ArgumentException("Mis-matched sender.");
+            }
+
+            _event?.Invoke(_sender, _unmarshalArgs(argsPtr));
+        }
+
+        public void _Unsubscribe()
+        {
+            Marshal.ThrowExceptionForHR(_removeHandler(_senderPtr, _token));
+            _token.Value = 0;
         }
     }
 }

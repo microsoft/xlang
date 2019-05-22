@@ -1,7 +1,5 @@
 namespace Sample
 {
-	runtimeclass Class;
-
     [default_interface]
     runtimeclass Class
     {
