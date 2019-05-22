@@ -18,13 +18,6 @@ namespace xlang::xmeta
         bool is_static = false;
     };
 
-    enum class method_association
-    {
-        None,
-        Property,
-        Event
-    };
-
     struct method_model : base_model
     {
         method_model() = delete;
@@ -114,7 +107,10 @@ namespace xlang::xmeta
                     auto const& iter = symbols.get_symbol(symbol);
                     if (std::holds_alternative<std::monostate>(iter))
                     {
-                        error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                        if (m_association == method_association::None) // this check is in place so we don't report  the error twice
+                        {
+                            error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                        }
                     }
                     else
                     {
@@ -124,7 +120,7 @@ namespace xlang::xmeta
             }
             for (formal_parameter_model & param : m_formal_parameters)
             {
-                param.resolve(symbols, error_manager, fully_qualified_id);
+                param.resolve(symbols, error_manager, fully_qualified_id, m_association);
             }
         }
 

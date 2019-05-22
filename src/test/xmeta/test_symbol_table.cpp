@@ -1316,3 +1316,25 @@ TEST_CASE("Interface circular inheritance test")
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() > 0);
 }
+
+TEST_CASE("Unresolved types interface test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    event StringListEvent Changed;
+                    FakeObject obj { get; set; };
+                    FakeObject doSomething2(FakeObject2 test);
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 4);
+    }
+}
