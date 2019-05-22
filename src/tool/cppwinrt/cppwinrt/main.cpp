@@ -309,8 +309,6 @@ Where <spec> is one or more of:
             if (settings.base)
             {
                 write_base_h();
-                write_coroutine_h();
-                write_fast_forward_h();
             }
 
             if (settings.component)
@@ -330,6 +328,7 @@ Where <spec> is one or more of:
 
                 if (!classes.empty())
                 {
+                    write_fast_forward_h(classes);
                     write_module_g_cpp(classes);
 
                     for (auto&& type : classes)
