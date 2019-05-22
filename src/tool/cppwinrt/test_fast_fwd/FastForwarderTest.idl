@@ -1,5 +1,17 @@
 import "Windows.Foundation.Idl";
 
+namespace Windows.Foundation.Metadata
+{
+    [attributeusage(target_runtimeclass)]
+    [attributename("fastabi2")]
+    [contract(Windows.Foundation.FoundationContract, 4)]
+    attribute FastAbiAttribute
+    {
+        type Contract;
+        unsigned __int32 Version;
+    }
+}
+
 namespace FastForwarderTest
 {
     [internal]
@@ -65,6 +77,7 @@ namespace FastForwarderTest
     }
 
     [contract(FastForwarderTest.InternalContract, 1)]
+    [fastabi2(FastForwarderTest.InternalContract, 1)]
     runtimeclass Class
     {
         Class();
