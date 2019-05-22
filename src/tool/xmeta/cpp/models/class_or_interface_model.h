@@ -87,6 +87,11 @@ namespace xlang::xmeta
                 contains_id(m_events, id);
         }
 
+        bool property_id_exists(std::string_view const& id)
+        {
+            return contains_id(m_properties, id);
+        }
+
         void validate(xlang_error_manager & error_manager)
         {
             for (auto const& prop : m_properties)

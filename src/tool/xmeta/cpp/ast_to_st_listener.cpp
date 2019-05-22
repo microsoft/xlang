@@ -308,7 +308,7 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
             if (property_accessor->GET())
             {
                 get_method = std::make_shared<method_model>("get_" + property_id, property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::Property);
-                if (model->add_member(get_method) == compilation_error::symbol_exists)
+                if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(decl_line, get_method->get_id(), model->get_fully_qualified_id());
                 }
@@ -318,7 +318,7 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
                 set_method = std::make_shared<method_model>("put_" + property_id, property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_association::Property);
                 parameter_semantics sem = parameter_semantics::in;
                 set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
-                if (model->add_member(set_method) == compilation_error::symbol_exists)
+                if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(decl_line, set_method->get_id(), model->get_fully_qualified_id());
                 }
@@ -328,20 +328,22 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
     else // Implicity declaration
     {
         get_method = std::make_shared<method_model>("get_" + property_id, decl_line, m_cur_assembly, std::move(tr), method_association::Property);
-        if (model->add_member(get_method) == compilation_error::symbol_exists)
-        {
-            error_manager.write_type_member_exists_error(decl_line, get_method->get_id(), model->get_fully_qualified_id());
-        }
+
         set_method = std::make_shared<method_model>("put_" + property_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Property);
         parameter_semantics sem = parameter_semantics::in;
         set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
-        if (model->add_member(set_method) == compilation_error::symbol_exists)
+
+        if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
+        {
+            error_manager.write_type_member_exists_error(decl_line, get_method->get_id(), model->get_fully_qualified_id());
+        }
+        if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
         {
             error_manager.write_type_member_exists_error(decl_line, set_method->get_id(), model->get_fully_qualified_id());
         }
     }
-
-    if (model->member_id_exists(property_id))
+    auto prop_model = std::make_shared<property_model>(property_id, decl_line, m_cur_assembly, std::move(tr));
+    if (model->property_id_exists(property_id))
     {
         auto const& existing_property = model->get_property_member(property_id);
         if (existing_property->get_type().get_semantic().get_ref_name() != tr.get_semantic().get_ref_name())
@@ -354,17 +356,30 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
             error_manager.write_property_accessor_error(decl_line, property_id);
             return listener_error::failed;
         }
+        else
+        {
+            prop_model->set_get_method(get_method);
+        }
         if (existing_property->set_set_method(set_method) == compilation_error::accessor_exists)
         {
             error_manager.write_property_accessor_error(decl_line, property_id);
             return listener_error::failed;
         }
-        return listener_error::passed;
+        else
+        {
+            prop_model->set_set_method(set_method);
+        }
     }
-    auto prop_model = std::make_shared<property_model>(property_id, decl_line, m_cur_assembly, std::move(tr));
-    prop_model->set_get_method(get_method);
-    prop_model->set_set_method(set_method);
-    model->add_member(prop_model);
+    else
+    {
+        prop_model->set_get_method(get_method);
+        prop_model->set_set_method(set_method);
+    }
+
+    if (model->add_member(prop_model) == compilation_error::symbol_exists)
+    {
+        error_manager.write_type_member_exists_error(decl_line, property_id, model->get_fully_qualified_id());
+    }
     return listener_error::passed;
 }
 
@@ -383,12 +398,21 @@ listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interfac
     std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Event);
     remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(event_registration) });
 
-    model->add_member(add_method);
-    model->add_member(remove_method);
+    if (model->add_member(add_method) == compilation_error::symbol_exists)
+    {
+        error_manager.write_type_member_exists_error(decl_line, add_method->get_id(), model->get_fully_qualified_id());
+        return listener_error::failed;
+    }
+    if (model->add_member(remove_method) == compilation_error::symbol_exists)
+    {
+        error_manager.write_type_member_exists_error(decl_line, add_method->get_id(), model->get_fully_qualified_id());
+        return listener_error::failed;
+    }
     auto event = std::make_shared<event_model>(event_id, decl_line, m_cur_assembly, add_method, remove_method, std::move(tr));
     if (model->add_member(event) == compilation_error::symbol_exists)
     {
         error_manager.write_type_member_exists_error(decl_line, event_id, model->get_fully_qualified_id());
+        return listener_error::failed;
     }
     return listener_error::passed;
 }

@@ -1187,6 +1187,110 @@ TEST_CASE("Interface event test")
     REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
 }
 
+TEST_CASE("Interface event explicit accessor not allowed test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(Int32 sender);
+            interface IControl
+            {
+                event StringListEvent Changed { add; remove; };
+            }
+        }
+    )" };
+    std::vector<std::string> paths = { "Foundation.xmeta" };
+    xmeta_idl_reader reader{ "" , paths };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() > 0);
+}
+
+TEST_CASE("Interface duplicate event test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    event StringListEvent Changed;
+                    event StringListEvent Changed;
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    event StringListEvent Changed;
+                    event StringStackEvent Changed;
+                }
+                delegate void StringStackEvent(Int32 sender);
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+}
+
+TEST_CASE("Interface event and property name collision test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    event StringListEvent Changed;
+                    Int32 Changed;
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+}
+
+TEST_CASE("Interface event and method name test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    void remove_Changed();
+                    event StringListEvent Changed;
+                    void add_Changed();
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+}
+
 TEST_CASE("Interface circular inheritance test")
 {
     std::istringstream test_idl{ R"(
