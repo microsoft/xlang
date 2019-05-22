@@ -55,6 +55,18 @@ const MethodAttributes interface_method_property_attributes()
     return result;
 }
 
+const MethodAttributes interface_method_event_attributes()
+{
+    MethodAttributes result{};
+    result.Access(MemberAccess::Public);
+    result.Final(true);
+    result.Virtual(true);
+    result.HideBySig(true);
+    result.Layout(VtableLayout::NewSlot);
+    result.SpecialName(true);
+    return result;
+}
+
 const TypeAttributes struct_type_attributes()
 {
     TypeAttributes result{};
@@ -687,22 +699,24 @@ TEST_CASE("Interface property metadata")
     REQUIRE(property1.Flags().value == method_attributes_no_flags().value);
     
     REQUIRE(db.MethodSemantics.size() == 2);
-    for (size_t i = 0; i < db.MethodSemantics.size(); i++)
+    for (auto const& sem : property1.MethodSemantic())
     {
-        auto const& assoc = db.MethodSemantics[i].Association().type();
+        REQUIRE(sem.Association().Property() == property1);
+        auto const& assoc = sem.Association().type();
         REQUIRE(assoc == HasSemantics::Property);
-        auto const& property_sig = db.MethodSemantics[i].Association().Property().Type();
+        auto const& property_sig = sem.Association().Property().Type();
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(property_sig.Type().Type()).TypeRef() == S1_ref);
-        REQUIRE(db.MethodSemantics[i].Association().Property().Name() == property1.Name());
+        REQUIRE(sem.Association().Property().Name() == property1.Name());
     }
-    auto const& get_method = db.MethodSemantics[0].Method();
+    auto const& get_method = property1.MethodSemantic().first[0].Method();
     REQUIRE(get_method.Name() == "get_property1");
     {
         auto const& sig = get_method.Signature();
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
         REQUIRE(size(sig.Params()) == 0);
+        REQUIRE(get_method.Flags().value == interface_method_property_attributes().value);
     }
-    auto const& set_method = db.MethodSemantics[1].Method();
+    auto const& set_method = property1.MethodSemantic().first[1].Method();
     REQUIRE(set_method.Name() == "put_property1");
     {
         auto const& sig = set_method.Signature();
@@ -710,6 +724,7 @@ TEST_CASE("Interface property metadata")
         REQUIRE(size(sig.Params()) == 1);
         auto const& param_sig = sig.Params().first[0];
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == S1_ref);
+        REQUIRE(set_method.Flags().value == interface_method_property_attributes().value);
     }
 }
 
@@ -753,15 +768,16 @@ TEST_CASE("Interface event metadata")
     REQUIRE(event1.EventFlags().value == event_attributes_no_flags().value);
 
     REQUIRE(db.MethodSemantics.size() == 2);
-    for (size_t i = 0; i < db.MethodSemantics.size(); i++)
+    for (auto const& sem : event1.MethodSemantic())
     {
-        auto const& assoc = db.MethodSemantics[i].Association().type();
+        REQUIRE(sem.Association().Event() == event1);
+        auto const& assoc = sem.Association().type();
         REQUIRE(assoc == HasSemantics::Event);
-        auto const& event_sig = db.MethodSemantics[i].Association().Event().EventType();
+        auto const& event_sig = sem.Association().Event().EventType();
         REQUIRE(event_sig.TypeRef().TypeName() == string_list_event_ref.TypeName());
-        REQUIRE(db.MethodSemantics[i].Association().Event().Name() == event1.Name());
+        REQUIRE(sem.Association().Event().Name() == event1.Name());
     }
-    auto const& add_method = db.MethodSemantics[0].Method();
+    auto const& add_method = event1.MethodSemantic().first[0].Method();
     REQUIRE(add_method.Name() == "add_Changed");
     {
         auto const& sig = add_method.Signature();
@@ -769,8 +785,9 @@ TEST_CASE("Interface event metadata")
         REQUIRE(size(sig.Params()) == 1);
         auto const& param_sig = sig.Params().first[0];
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == string_list_event_ref);
+        REQUIRE(add_method.Flags().value == interface_method_event_attributes().value);
     }
-    auto const& remove_method = db.MethodSemantics[1].Method();
+    auto const& remove_method = event1.MethodSemantic().first[1].Method();
     REQUIRE(remove_method.Name() == "remove_Changed");
     {
         auto const& sig = remove_method.Signature();
@@ -778,6 +795,7 @@ TEST_CASE("Interface event metadata")
         REQUIRE(size(sig.Params()) == 1);
         auto const& param_sig = sig.Params().first[0];
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == event_registration_token_ref);
+        REQUIRE(remove_method.Flags().value == interface_method_event_attributes().value);
     }
 }
 
