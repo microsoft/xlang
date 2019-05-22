@@ -887,6 +887,28 @@ TEST_CASE("Interface property method ordering different line test")
     }
 }
 
+TEST_CASE("Interface property method name collision test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    void get_property1();
+                    Int32 property1 { get; set; };
+                    void set_property1();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+}
+
 TEST_CASE("Interface invalid property accessor test")
 {
     {
@@ -989,7 +1011,7 @@ TEST_CASE("Interface duplicate property id test")
         xmeta_idl_reader reader{ "" };
         reader.read(test_set_only_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.get_num_semantic_errors() > 1);
     }
 }
 

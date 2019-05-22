@@ -57,7 +57,7 @@ namespace xlang::xmeta
         compilation_error add_member(std::shared_ptr<method_model> const& member)
         {
             // TODO: the case with overloading
-            if (contains_id(m_events, member->get_id()) || contains_id(m_properties, member->get_id()))
+            if (member_id_exists(member->get_id()))
             {
                 return compilation_error::symbol_exists;
             }

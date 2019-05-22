@@ -308,25 +308,37 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
             if (property_accessor->GET())
             {
                 get_method = std::make_shared<method_model>("get_" + property_id, property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::Property);
-                model->add_member(get_method);
+                if (model->add_member(get_method) == compilation_error::symbol_exists)
+                {
+                    error_manager.write_type_member_exists_error(decl_line, get_method->get_id(), model->get_fully_qualified_id());
+                }
             }
             else if (property_accessor->SET())
             {
                 set_method = std::make_shared<method_model>("set_" + property_id, property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_association::Property);
                 parameter_semantics sem = parameter_semantics::in;
                 set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
-                model->add_member(set_method);
+                if (model->add_member(set_method) == compilation_error::symbol_exists)
+                {
+                    error_manager.write_type_member_exists_error(decl_line, set_method->get_id(), model->get_fully_qualified_id());
+                }
             }
         }
     }
     else // Implicity declaration
     {
         get_method = std::make_shared<method_model>("get_" + property_id, decl_line, m_cur_assembly, std::move(tr), method_association::Property);
-        model->add_member(get_method);
+        if (model->add_member(get_method) == compilation_error::symbol_exists)
+        {
+            error_manager.write_type_member_exists_error(decl_line, get_method->get_id(), model->get_fully_qualified_id());
+        }
         set_method = std::make_shared<method_model>("set_" + property_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Property);
         parameter_semantics sem = parameter_semantics::in;
         set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
-        model->add_member(set_method);
+        if (model->add_member(set_method) == compilation_error::symbol_exists)
+        {
+            error_manager.write_type_member_exists_error(decl_line, set_method->get_id(), model->get_fully_qualified_id());
+        }
     }
 
     if (model->member_id_exists(property_id))
@@ -411,7 +423,10 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             {
                 extract_formal_params(interface_method->formal_parameter_list()->fixed_parameter(), met_model);
             }
-            model->add_member(met_model);
+            if (model->add_member(met_model) == compilation_error::symbol_exists)
+            {
+                error_manager.write_type_member_exists_error(decl_line, met_model->get_id(), model->get_fully_qualified_id());
+            }
         }
         if (interface_member->interface_property_declaration())
         {
