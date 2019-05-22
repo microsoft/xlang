@@ -799,7 +799,17 @@ TEST_CASE("Interface event metadata")
     }
 }
 
-TEST_CASE("Interface type metadata")
+// Disabling and coming back later
+// TODO: fix base problem once we have attributes to specify which interface becomes the base
+/*
+DefaultRyan 20 hours ago  Member
+This case seems odd for two reasons :
+
+I didn't think xlang was supporting multiple interface inheritance. And multiple "requires" isn't supported
+without some sort of attribute specifying which required interface becomes the base for inheritance purposes.
+This makes IComboBox.Paint() ambiguous.This should require some sort of disambiguation on the method.
+*/
+TEST_CASE("Interface type metadata 2", "[!hide]")
 {
     std::istringstream test_idl{ R"(
         namespace N
@@ -883,6 +893,72 @@ TEST_CASE("Interface type metadata")
     {
         REQUIRE(size(c2_impls) == 1);
         auto const& iter = std::find_if(c2_impls.first, c2_impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+}
+
+TEST_CASE("Interface type metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl requires M.IControl3
+            {
+                void Paint();
+            }
+    
+            interface IComboBox requires IControl
+            {
+                Int32 property1;
+            }
+        }
+        namespace M
+        {
+            interface IControl3
+            {
+                void Paint3();
+            }
+        }
+
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    auto const& control3_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl3", "M");
+    auto const& control_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl", "N");
+
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
+    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
+    auto const& c1 = find_type_by_name<TypeDef>(db.TypeDef, "IControl", "N");
+
+    test_interface_type_properties(combo);
+
+    REQUIRE(db.InterfaceImpl.size() == 3);
+    auto const& impls = combo.InterfaceImpl();
+    REQUIRE(size(impls) == 2);
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control_ref);
+    }
+    auto const& c1_impls = c1.InterfaceImpl();
+    {
+        REQUIRE(size(c1_impls) == 1);
+        auto const& iter = std::find_if(c1_impls.first, c1_impls.second, [control3_ref](auto&& type_ref)
         {
             return type_ref.Interface().TypeRef() == control3_ref;
         });

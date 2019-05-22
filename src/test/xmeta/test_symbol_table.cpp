@@ -516,7 +516,17 @@ TEST_CASE("Resolving type ref across namespaces test")
     }
 }
 
-TEST_CASE("Interface base test")
+// Disabling and coming back later
+// TODO: fix base problem once we have attributes to specify which interface becomes the base
+/*
+DefaultRyan 20 hours ago  Member
+This case seems odd for two reasons :
+
+I didn't think xlang was supporting multiple interface inheritance. And multiple "requires" isn't supported 
+without some sort of attribute specifying which required interface becomes the base for inheritance purposes.
+This makes IComboBox.Paint() ambiguous.This should require some sort of disambiguation on the method.
+*/
+TEST_CASE("Interface base test", "[!hide]")
 {
     std::istringstream test_idl{ R"(
         namespace N
