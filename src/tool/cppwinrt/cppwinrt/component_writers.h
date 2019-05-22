@@ -1190,14 +1190,10 @@ namespace winrt::@::implementation
     {
         for (uint32_t slot = 6; slot < 1024; ++slot)
         {
-            auto format = R"(
-#if WINRT_FAST_ABI_SIZE > %
-    extern "C" void WINRT_IMPL_CALL winrt_ff_thunk%();
-#endif
+            auto format = R"(    extern "C" void WINRT_IMPL_CALL winrt_ff_thunk%();
 )";
-            w.write(format,
-                slot,
-                slot);
+
+            w.write(format, slot);
         }
     }
 
