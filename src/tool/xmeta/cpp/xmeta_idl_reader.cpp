@@ -64,6 +64,7 @@ namespace xlang::xmeta
 
     void xlang_model_pass_1::listen_interface_model(std::shared_ptr<interface_model> const& model)
     {
+        model->validate(m_error_manager);
         model->resolve(m_symbols, m_error_manager);
     }
 

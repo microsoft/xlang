@@ -286,16 +286,7 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
     if (interface_property->property_accessors()->property_accessor_method().size() > 0)
     {
         auto const& property_accessor_methods = interface_property->property_accessors()->property_accessor_method();
-        if (property_accessor_methods.size() == 1)
-        {
-            if (!property_accessor_methods[0]->GET())
-            {
-                // WRITE SEMANTIC ERROR. Always need a get property.
-                error_manager.write_property_accessor_error(decl_line, property_id);
-                return listener_error::failed;
-            }
-        }
-        else if (property_accessor_methods.size() == 2)
+        if (property_accessor_methods.size() == 2)
         {
             if ((property_accessor_methods[0]->GET() && property_accessor_methods[1]->GET())
                 || (property_accessor_methods[0]->SET() && property_accessor_methods[1]->SET()))
@@ -338,7 +329,26 @@ listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Inter
         model->add_member(set_method);
     }
 
-
+    if (model->member_id_exists(property_id))
+    {
+        auto const& existing_property = model->get_property_member(property_id);
+        if (existing_property->get_type().get_semantic().get_ref_name() != tr.get_semantic().get_ref_name())
+        {
+            error_manager.write_duplicate_property_error(decl_line, property_id);
+            return listener_error::failed;
+        }
+        if (existing_property->set_get_method(get_method) == compilation_error::accessor_exists)
+        {
+            error_manager.write_property_accessor_error(decl_line, property_id);
+            return listener_error::failed;
+        }
+        if (existing_property->set_set_method(set_method) == compilation_error::accessor_exists)
+        {
+            error_manager.write_property_accessor_error(decl_line, property_id);
+            return listener_error::failed;
+        }
+        return listener_error::passed;
+    }
     auto prop_model = std::make_shared<property_model>(property_id, decl_line, m_cur_assembly, std::move(tr));
     prop_model->set_get_method(get_method);
     prop_model->set_set_method(set_method);
@@ -364,7 +374,10 @@ listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interfac
     model->add_member(add_method);
     model->add_member(remove_method);
     auto event = std::make_shared<event_model>(event_id, decl_line, m_cur_assembly, add_method, remove_method, std::move(tr));
-    model->add_member(event);
+    if (model->add_member(event) == compilation_error::symbol_exists)
+    {
+        error_manager.write_type_member_exists_error(decl_line, event_id, model->get_fully_qualified_id());
+    }
     return listener_error::passed;
 }
 

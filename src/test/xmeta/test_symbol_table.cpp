@@ -671,7 +671,7 @@ TEST_CASE("Resolving interface method type ref test")
     }
 }
 
-TEST_CASE("Interface property test")
+TEST_CASE("Interface property method ordering test")
 {
     std::istringstream test_idl{ R"(
         namespace N
@@ -680,6 +680,7 @@ TEST_CASE("Interface property test")
             {
                 Int32 property1 { get; set; };
                 Int32 property2 { get; };
+                Int32 property3 { set; get; };
             }
         }
     )" };
@@ -702,6 +703,7 @@ TEST_CASE("Interface property test")
     auto const& properties = model->get_properties();
     REQUIRE(properties[0]->get_id() == "property1");
     REQUIRE(properties[1]->get_id() == "property2");
+    REQUIRE(properties[2]->get_id() == "property3");
     {
         auto const& property_type = properties[0]->get_type().get_semantic();
         REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
@@ -710,8 +712,12 @@ TEST_CASE("Interface property test")
         auto const& property_type = properties[1]->get_type().get_semantic();
         REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
     }
+    {
+        auto const& property_type = properties[2]->get_type().get_semantic();
+        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+    }
     auto const& methods = model->get_methods();
-    REQUIRE(methods.size() == 3);
+    REQUIRE(methods.size() == 5);
 
     auto const& method0 = methods[0];
     REQUIRE(method0->get_id() == "get_property1");
@@ -732,6 +738,153 @@ TEST_CASE("Interface property test")
     REQUIRE(properties[1]->get_get_method()->get_id() == method2->get_id());
     auto method2_return_type = method2->get_return_type()->get_semantic();
     REQUIRE((method2_return_type.is_resolved() && std::get<simple_type>(method2_return_type.get_resolved_target()) == simple_type::Int32));
+
+    auto const& method3 = methods[3];
+    REQUIRE(method3->get_id() == "set_property3");
+    REQUIRE(properties[2]->get_set_method() == method3);
+    REQUIRE(properties[2]->get_set_method()->get_id() == method3->get_id());
+    REQUIRE(!method3->get_return_type());
+
+    auto const& method4 = methods[4];
+    REQUIRE(method4->get_id() == "get_property3");
+    REQUIRE(properties[2]->get_get_method() == method4);
+    REQUIRE(properties[2]->get_get_method()->get_id() == method4->get_id());
+    auto method4_return_type = method4->get_return_type()->get_semantic();
+    REQUIRE((method4_return_type.is_resolved() && std::get<simple_type>(method4_return_type.get_resolved_target()) == simple_type::Int32));
+}
+
+TEST_CASE("Interface property method ordering different line test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int32 property1 { set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+
+        auto const& namespaces = reader.get_namespaces();
+        auto const& it = namespaces.find("N");
+        REQUIRE(it != namespaces.end());
+        auto const& ns_bodies = it->second->get_namespace_bodies();
+        REQUIRE(ns_bodies.size() == 1);
+        auto const& interfaces = ns_bodies[0]->get_interfaces();
+        REQUIRE(interfaces.size() == 1);
+
+        REQUIRE(interfaces.find("IControl") != interfaces.end());
+        auto const& model = interfaces.at("IControl");
+
+        auto const& properties = model->get_properties();
+        REQUIRE(properties.size() == 1);
+        REQUIRE(properties[0]->get_id() == "property1");
+        {
+            auto const& property_type = properties[0]->get_type().get_semantic();
+            REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+        }
+        auto const& methods = model->get_methods();
+        REQUIRE(methods.size() == 2);
+        auto const& method0 = methods[0];
+        REQUIRE(method0->get_id() == "get_property1");
+        REQUIRE(properties[0]->get_get_method() == method0);
+        REQUIRE(properties[0]->get_get_method()->get_id() == method0->get_id());
+        auto method0_return_type = method0->get_return_type()->get_semantic();
+        REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
+
+        auto const& method1 = methods[1];
+        REQUIRE(method1->get_id() == "set_property1");
+        REQUIRE(properties[0]->get_set_method() == method1);
+        REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
+        REQUIRE(!method1->get_return_type());
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; };
+                    Int32 property1 { get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+
+        auto const& namespaces = reader.get_namespaces();
+        auto const& it = namespaces.find("N");
+        REQUIRE(it != namespaces.end());
+        auto const& ns_bodies = it->second->get_namespace_bodies();
+        REQUIRE(ns_bodies.size() == 1);
+        auto const& interfaces = ns_bodies[0]->get_interfaces();
+        REQUIRE(interfaces.size() == 1);
+
+        REQUIRE(interfaces.find("IControl") != interfaces.end());
+        auto const& model = interfaces.at("IControl");
+
+        auto const& properties = model->get_properties();
+        REQUIRE(properties.size() == 1);
+        REQUIRE(properties[0]->get_id() == "property1");
+        {
+            auto const& property_type = properties[0]->get_type().get_semantic();
+            REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+        }
+        auto const& methods = model->get_methods();
+        REQUIRE(methods.size() == 2);
+        auto const& method0 = methods[0];
+        REQUIRE(method0->get_id() == "set_property1");
+        REQUIRE(properties[0]->get_set_method() == method0);
+        REQUIRE(properties[0]->get_set_method()->get_id() == method0->get_id());
+        REQUIRE(!method0->get_return_type());
+
+        auto const& method1 = methods[1];
+        REQUIRE(method1->get_id() == "get_property1");
+        REQUIRE(properties[0]->get_get_method() == method1);
+        REQUIRE(properties[0]->get_get_method()->get_id() == method1->get_id());
+        auto method1_return_type = method1->get_return_type()->get_semantic();
+        REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int32 property2 { set; };
+                    void draw();
+                    Int32 property1 { set; };
+                    Int32 property2 { get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        auto const& namespaces = reader.get_namespaces();
+        auto const& it = namespaces.find("N");
+        auto const& ns_bodies = it->second->get_namespace_bodies();
+        auto const& interfaces = ns_bodies[0]->get_interfaces();
+        REQUIRE(interfaces.find("IControl") != interfaces.end());
+        auto const& model = interfaces.at("IControl");
+        auto const& methods = model->get_methods();
+        REQUIRE(methods.size() == 5);
+        REQUIRE(methods[0]->get_id() == "get_property1");
+        REQUIRE(methods[1]->get_id() == "set_property2");
+        REQUIRE(methods[2]->get_id() == "draw");
+        REQUIRE(methods[3]->get_id() == "set_property1");
+        REQUIRE(methods[4]->get_id() == "get_property2");
+    }
 }
 
 TEST_CASE("Interface invalid property accessor test")
@@ -819,6 +972,26 @@ TEST_CASE("Interface invalid property accessor test")
     }
 }
 
+TEST_CASE("Interface duplicate property id test")
+{
+    {
+        std::istringstream test_set_only_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int64 property1 { get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_set_only_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+}
 
 TEST_CASE("Interface property implicit accessors test")
 {
