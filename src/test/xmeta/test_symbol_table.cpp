@@ -727,7 +727,7 @@ TEST_CASE("Interface property method ordering test")
     REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
 
     auto const& method1 = methods[1];
-    REQUIRE(method1->get_id() == "set_property1");
+    REQUIRE(method1->get_id() == "put_property1");
     REQUIRE(properties[0]->get_set_method() == method1);
     REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
     REQUIRE(!method1->get_return_type());
@@ -740,7 +740,7 @@ TEST_CASE("Interface property method ordering test")
     REQUIRE((method2_return_type.is_resolved() && std::get<simple_type>(method2_return_type.get_resolved_target()) == simple_type::Int32));
 
     auto const& method3 = methods[3];
-    REQUIRE(method3->get_id() == "set_property3");
+    REQUIRE(method3->get_id() == "put_property3");
     REQUIRE(properties[2]->get_set_method() == method3);
     REQUIRE(properties[2]->get_set_method()->get_id() == method3->get_id());
     REQUIRE(!method3->get_return_type());
@@ -799,7 +799,7 @@ TEST_CASE("Interface property method ordering different line test")
         REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
 
         auto const& method1 = methods[1];
-        REQUIRE(method1->get_id() == "set_property1");
+        REQUIRE(method1->get_id() == "put_property1");
         REQUIRE(properties[0]->get_set_method() == method1);
         REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
         REQUIRE(!method1->get_return_type());
@@ -841,7 +841,7 @@ TEST_CASE("Interface property method ordering different line test")
         auto const& methods = model->get_methods();
         REQUIRE(methods.size() == 2);
         auto const& method0 = methods[0];
-        REQUIRE(method0->get_id() == "set_property1");
+        REQUIRE(method0->get_id() == "put_property1");
         REQUIRE(properties[0]->get_set_method() == method0);
         REQUIRE(properties[0]->get_set_method()->get_id() == method0->get_id());
         REQUIRE(!method0->get_return_type());
@@ -880,9 +880,9 @@ TEST_CASE("Interface property method ordering different line test")
         auto const& methods = model->get_methods();
         REQUIRE(methods.size() == 5);
         REQUIRE(methods[0]->get_id() == "get_property1");
-        REQUIRE(methods[1]->get_id() == "set_property2");
+        REQUIRE(methods[1]->get_id() == "put_property2");
         REQUIRE(methods[2]->get_id() == "draw");
-        REQUIRE(methods[3]->get_id() == "set_property1");
+        REQUIRE(methods[3]->get_id() == "put_property1");
         REQUIRE(methods[4]->get_id() == "get_property2");
     }
 }
@@ -897,7 +897,7 @@ TEST_CASE("Interface property method name collision test")
                 {
                     void get_property1();
                     Int32 property1 { get; set; };
-                    void set_property1();
+                    void put_property1();
                 }
             }
         )" };
@@ -1093,7 +1093,7 @@ TEST_CASE("Interface property implicit accessors test")
     REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
 
     auto const& method1 = methods[1];
-    REQUIRE(method1->get_id() == "set_property1");
+    REQUIRE(method1->get_id() == "put_property1");
     REQUIRE(!method1->get_return_type());
 }
 

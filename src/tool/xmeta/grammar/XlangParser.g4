@@ -239,7 +239,7 @@ class_method_declaration //Do not need generics in method
     ;
 
 class_event_declaration // this has to be a delegate type aka class_type
-    : attributes? event_modifier* EVENT type IDENTIFIER event_accessors
+    : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
     ;
 
 class_property_declaration // Restrict property_identifier first ///TODO: Property accessors are optional
@@ -350,7 +350,7 @@ interface_property_declaration
     ;
 
 interface_event_declaration
-    : attributes? EVENT type IDENTIFIER event_accessors
+    : attributes? EVENT type IDENTIFIER SEMICOLON
     ;
 
 /* Enums */

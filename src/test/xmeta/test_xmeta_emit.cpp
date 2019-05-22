@@ -703,7 +703,7 @@ TEST_CASE("Interface property metadata")
         REQUIRE(size(sig.Params()) == 0);
     }
     auto const& set_method = db.MethodSemantics[1].Method();
-    REQUIRE(set_method.Name() == "set_property1");
+    REQUIRE(set_method.Name() == "put_property1");
     {
         auto const& sig = set_method.Signature();
         REQUIRE(!sig.ReturnType());
