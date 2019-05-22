@@ -1323,7 +1323,7 @@ TEST_CASE("Unresolved types interface test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface IControl requires fakebase
                 {
                     event StringListEvent Changed;
                     FakeObject obj { get; set; };
@@ -1335,6 +1335,6 @@ TEST_CASE("Unresolved types interface test")
         xmeta_idl_reader reader{ "" , paths };
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 4);
+        REQUIRE(reader.get_num_semantic_errors() == 5);
     }
 }
