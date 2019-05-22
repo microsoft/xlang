@@ -44,13 +44,20 @@ namespace xlang
         w.flush_to_file(settings.output_folder + "winrt/base.h");
     }
 
-    static void write_fast_forward_h()
+    static void write_fast_forward_h(std::vector<TypeDef> const& classes)
     {
         writer w;
         write_preamble(w);
         write_open_file_guard(w, "FAST_FORWARD");
 
-        w.write(strings::base_fast_forward);
+        uint32_t const fast_abi_size = 10;
+
+        w.write(strings::base_fast_forward,
+            fast_abi_size,
+            fast_abi_size,
+            fast_abi_size,
+            bind<write_component_fast_abi_thunk>(),
+            bind<write_component_fast_abi_vtable>());
 
         write_close_file_guard(w);
         w.flush_to_file(settings.output_folder + "winrt/fast_forward.h");

@@ -694,6 +694,29 @@ catch (...) { return winrt::to_hresult(); }
         }
         else
         {
+            bool has_tearoffs{};
+
+            for (auto&& [name, info] : get_interfaces(w, type))
+            {
+                if (info.is_default)
+                {
+                    continue;
+                }
+
+                if (!info.fastabi)
+                {
+                    break;
+                }
+
+                has_tearoffs = true;
+                break;
+            }
+
+            if (!has_tearoffs)
+            {
+                return;
+            }
+
             auto format = R"(
         int32_t query_interface_tearoff(guid const& id, void** result) const noexcept override
         {%
@@ -1179,5 +1202,35 @@ namespace winrt::@::implementation
             bind<write_generated_static_assert>(),
             type.TypeNamespace(),
             bind<write_component_member_definitions>(type));
+    }
+
+    static void write_component_fast_abi_thunk(writer& w)
+    {
+        for (uint32_t slot = 6; slot < 1024; ++slot)
+        {
+            auto format = R"(
+#if WINRT_FAST_ABI_SIZE > %
+    extern "C" void WINRT_FF_CALL winrt_ff_thunk%();
+#endif
+)";
+            w.write(format,
+                slot,
+                slot);
+        }
+    }
+
+    static void write_component_fast_abi_vtable(writer& w)
+    {
+        for (uint32_t slot = 6; slot < 1024; ++slot)
+        {
+            auto format = R"(
+#if WINRT_FAST_ABI_SIZE > %
+            winrt_ff_thunk%,
+#endif
+)";
+            w.write(format,
+                slot,
+                slot);
+        }
     }
 }
