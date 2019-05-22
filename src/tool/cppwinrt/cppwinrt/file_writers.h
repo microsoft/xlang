@@ -44,25 +44,6 @@ namespace xlang
         w.flush_to_file(settings.output_folder + "winrt/base.h");
     }
 
-    static void write_coroutine_h()
-    {
-        writer w;
-        write_preamble(w);
-        write_open_file_guard(w, "COROUTINE");
-
-        w.write(R"(
-#include "winrt/Windows.Foundation.h"
-#include "winrt/Windows.System.h"
-#include "winrt/Windows.UI.Core.h"
-
-#pragma message (__FILE__ "(" WINRT_IMPL_STRING(__LINE__) "): This header is deprecated and will be removed in a future update. Please directly include the namespace headers you need.")
-
-)");
-
-        write_close_file_guard(w);
-        w.flush_to_file(settings.output_folder + "winrt/coroutine.h");
-    }
-
     static void write_fast_forward_h()
     {
         writer w;
