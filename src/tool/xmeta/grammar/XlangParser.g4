@@ -247,7 +247,7 @@ class_property_declaration // Restrict property_identifier first ///TODO: Proper
     ;
 
 class_constructor_declaration
-    : attributes? class_constructor_modifier* IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : attributes? class_constructor_modifier? IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 method_modifier
