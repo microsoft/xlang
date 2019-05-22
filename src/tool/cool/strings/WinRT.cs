@@ -154,7 +154,7 @@ namespace WinRT
         public IntPtr Vftbl;
     }
 
-    internal class ObjectReference<T> : IDisposable, ICloneable
+    internal class ObjectReference<T>
     {
         Interop.IUnknownVftbl _vftblIUnknown;
         public readonly T Vftbl;
@@ -178,16 +178,10 @@ namespace WinRT
             return new ObjectReference<T>(Module, thatPtr);
         }
 
-        public void Dispose()
+        ~ObjectReference()
         {
             _vftblIUnknown.Release(ThisPtr);
             Module?.Dispose();
-        }
-
-        public object Clone()
-        {
-            _vftblIUnknown.AddRef(ThisPtr);
-            return new ObjectReference<T>(Module, ThisPtr);
         }
     }
 
@@ -339,7 +333,7 @@ namespace WinRT
     }
 
 
-    internal class ActivationFactory<T> : IDisposable
+    internal class ActivationFactory<T>
     {
         ObjectReference<Interop.IActivationFactoryVftbl> _IActivationFactory;
 
@@ -382,38 +376,23 @@ namespace WinRT
         {
             IntPtr instancePtr = IntPtr.Zero;
             unsafe { Marshal.ThrowExceptionForHR(_IActivationFactory.Vftbl.ActivateInstance(_IActivationFactory.ThisPtr, &instancePtr)); }
-            using (var instance = new ObjectReference<Interop.IInspectableVftbl>(_IActivationFactory.Module, instancePtr))
-            {
-                return instance.As<T>();
-            }
+            return new ObjectReference<Interop.IInspectableVftbl>(_IActivationFactory.Module, instancePtr).As<T>();
         }
 
         public ObjectReference<T> As<T>()
         {
             return _IActivationFactory.As<T>();
         }
-
-        public void Dispose()
-        {
-            _IActivationFactory.Dispose();
-        }
     }
 
-    public abstract class RuntimeClass<C, I> : ICloneable, IDisposable
+    public abstract class RuntimeClass<C, I>
     {
         private protected static readonly Lazy<WinRT.ActivationFactory<C>> _factory = new Lazy<WinRT.ActivationFactory<C>>();
         private protected readonly ObjectReference<I> _obj;
 
         private protected RuntimeClass(ObjectReference<I> obj)
         {
-            _obj = (ObjectReference<I>)obj.Clone();
-        }
-
-        public abstract object Clone();
-
-        public virtual void Dispose()
-        {
-            _obj.Dispose();
+            _obj = obj;
         }
     }
 

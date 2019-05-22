@@ -6,6 +6,6 @@ namespace Sample
         Class();
         Int32 MyProperty;
 
-		event Windows.Foundation.TypedEventHandler<Class, IInspectable> MyPropertyChanged;
+        event Windows.Foundation.TypedEventHandler<Class, IInspectable> MyPropertyChanged;
     }
 }

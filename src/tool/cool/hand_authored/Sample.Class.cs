@@ -17,16 +17,11 @@ namespace Sample
         }
     }
 
-    public class Class : ICloneable, IDisposable
+    public class Class
     {
         static Lazy<WinRT.ActivationFactory<Class>> _factory = new Lazy<WinRT.ActivationFactory<Class>>();
         WinRT.ObjectReference<Interop.IClassVftbl> _IClass;
         WinRT.EventSource<Class, object> _myPropertyChanged;
-
-        Class(WinRT.ObjectReference<Interop.IClassVftbl> that)
-        {
-            _IClass = (WinRT.ObjectReference<Interop.IClassVftbl>)that.Clone();
-        }
 
         public Class()
         {
@@ -52,16 +47,6 @@ namespace Sample
         {
             add { _myPropertyChanged.Event += value; }
             remove { _myPropertyChanged.Event -= value; }
-        }
-
-        public object Clone()
-        {
-            return new Class(_IClass);
-        }
-
-        public void Dispose()
-        {
-            _IClass.Dispose();
         }
     }
 }
