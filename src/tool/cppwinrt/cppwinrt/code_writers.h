@@ -2849,8 +2849,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             auto method_name = get_name(method);
             w.async_types = is_async(method, signature);
 
-            w.write("        static % %(%);\n",
-                signature.return_signature(),
+            w.write("        static auto %(%);\n",
                 method_name,
                 bind<write_consume_params>(signature));
 
@@ -2879,14 +2878,13 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         w.async_types = is_async(method, signature);
 
         {
-            auto format = R"(    inline % %::%(%)
+            auto format = R"(    inline auto %::%(%)
     {
         %impl::call_factory<%, %>([&](auto&& f) { return f.%(%); });
     }
 )";
 
             w.write(format,
-                signature.return_signature(),
                 type_name,
                 method_name,
                 bind<write_consume_params>(signature),

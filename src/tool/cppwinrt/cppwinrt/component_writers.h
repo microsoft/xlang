@@ -481,7 +481,7 @@ catch (...) { return winrt::to_hresult(); }
 
                     if (is_add_overload(method) || is_remove_overload(method))
                     {
-                        auto format = R"(    % %::%(%)
+                        auto format = R"(    auto %::%(%)
     {
         auto f = make<winrt::@::factory_implementation::%>().as<%>();
         return f.%(%);
@@ -490,7 +490,6 @@ catch (...) { return winrt::to_hresult(); }
 
 
                         w.write(format,
-                            signature.return_signature(),
                             type_name,
                             method_name,
                             bind<write_consume_params>(signature),
@@ -502,7 +501,7 @@ catch (...) { return winrt::to_hresult(); }
                     }
                     else
                     {
-                        auto format = R"(    % %::%(%)
+                        auto format = R"(    auto %::%(%)
     {
         return @::implementation::%::%(%);
     }
@@ -510,7 +509,6 @@ catch (...) { return winrt::to_hresult(); }
 
 
                         w.write(format,
-                            signature.return_signature(),
                             type_name,
                             method_name,
                             bind<write_consume_params>(signature),
