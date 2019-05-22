@@ -2,9 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <!--To troubleshoot CppWinRT build issues, set CppWinRTVerbosity to 'high'
-    For complete documentation on CppWinRT project customization, please see:
-    https://github.com/Microsoft/xlang/tree/master/src/package/cppwinrt/nuget -->
+    <!--
+    To customize common C++/WinRT project properties: 
+    * right-click the project node
+    * expand the Common Properties item
+    * select the C++/WinRT property page
+
+    For more advanced scenarios, and complete documentation, please see:
+    https://github.com/Microsoft/xlang/tree/master/src/package/cppwinrt/nuget 
+    -->
     <CppWinRTVerbosity>normal</CppWinRTVerbosity>
   </PropertyGroup>
   <PropertyGroup />
