@@ -37,7 +37,7 @@ namespace xlang::xmeta
         }
 
         // TODO: fully_qualified_id will be a vector of strings once  we have using directives
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id)
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id, method_association m_association = method_association::None)
         {
             if (!m_type.get_semantic().is_resolved())
             {
@@ -46,7 +46,10 @@ namespace xlang::xmeta
                 auto const& iter = symbols.get_symbol(symbol);
                 if (std::holds_alternative<std::monostate>(iter))
                 {
-                    error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                    if (m_association == method_association::None)
+                    {
+                        error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                    }
                 }
                 else
                 {

@@ -44,6 +44,14 @@ namespace xlang::xmeta
         std::shared_ptr<xlang::meta::reader::TypeDef>, 
         std::less<>>;
 
+    enum class method_association
+    {
+        None,
+        Property,
+        Event,
+        Constructor
+    };
+
     struct base_model
     {
         base_model() = delete;

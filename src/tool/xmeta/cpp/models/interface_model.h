@@ -73,7 +73,10 @@ namespace xlang::xmeta
             }
             for (auto const& base : this->get_interface_bases())
             {
-                assert(base.get_semantic().is_resolved());
+                if (!base.get_semantic().is_resolved())
+                {
+                    return false;
+                }
                 auto const& type = base.get_semantic().get_resolved_target();
                 if (std::holds_alternative<std::shared_ptr<interface_model>>(type))
                 {

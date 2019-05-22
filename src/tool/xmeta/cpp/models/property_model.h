@@ -60,14 +60,40 @@ namespace xlang::xmeta
             return m_set_method;
         }
 
-        void set_get_method(std::shared_ptr<method_model> const& m)
+        compilation_error set_get_method(std::shared_ptr<method_model> const& m)
         {
+            if (!m)
+            {
+                // TODO: consider throwing an exception
+                return compilation_error::passed;
+            }
+            if (m_get_method)
+            {
+                return compilation_error::accessor_exists;
+            }
             m_get_method = m;
         }
 
-        void set_set_method(std::shared_ptr<method_model> const& m)
+        compilation_error set_set_method(std::shared_ptr<method_model> const& m)
         {
+            if (!m)
+            {
+                // TODO: consider throwing an exception
+                return compilation_error::passed;
+            }
+            if (m_set_method)
+            {
+                return compilation_error::accessor_exists;
+            }
             m_set_method = m;
+        }
+
+        void validate(xlang_error_manager & error_manager)
+        {
+            if (!m_get_method)
+            {
+                error_manager.write_property_accessor_error(get_decl_line(), get_id());
+            }
         }
 
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id)

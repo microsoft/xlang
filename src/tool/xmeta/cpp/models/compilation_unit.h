@@ -8,10 +8,11 @@
 
 namespace xlang::xmeta
 {
-    enum class compilation_error : bool
+    enum class compilation_error
     {
-        passed = true,
-        symbol_exists = false
+        passed = 0,
+        symbol_exists,
+        accessor_exists
     };
 
     struct symbol_table

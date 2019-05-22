@@ -55,6 +55,18 @@ const MethodAttributes interface_method_property_attributes()
     return result;
 }
 
+const MethodAttributes interface_method_event_attributes()
+{
+    MethodAttributes result{};
+    result.Access(MemberAccess::Public);
+    result.Final(true);
+    result.Virtual(true);
+    result.HideBySig(true);
+    result.Layout(VtableLayout::NewSlot);
+    result.SpecialName(true);
+    return result;
+}
+
 const TypeAttributes struct_type_attributes()
 {
     TypeAttributes result{};
@@ -687,29 +699,32 @@ TEST_CASE("Interface property metadata")
     REQUIRE(property1.Flags().value == method_attributes_no_flags().value);
     
     REQUIRE(db.MethodSemantics.size() == 2);
-    for (size_t i = 0; i < db.MethodSemantics.size(); i++)
+    for (auto const& sem : property1.MethodSemantic())
     {
-        auto const& assoc = db.MethodSemantics[i].Association().type();
+        REQUIRE(sem.Association().Property() == property1);
+        auto const& assoc = sem.Association().type();
         REQUIRE(assoc == HasSemantics::Property);
-        auto const& property_sig = db.MethodSemantics[i].Association().Property().Type();
+        auto const& property_sig = sem.Association().Property().Type();
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(property_sig.Type().Type()).TypeRef() == S1_ref);
-        REQUIRE(db.MethodSemantics[i].Association().Property().Name() == property1.Name());
+        REQUIRE(sem.Association().Property().Name() == property1.Name());
     }
-    auto const& get_method = db.MethodSemantics[0].Method();
+    auto const& get_method = property1.MethodSemantic().first[0].Method();
     REQUIRE(get_method.Name() == "get_property1");
     {
         auto const& sig = get_method.Signature();
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
         REQUIRE(size(sig.Params()) == 0);
+        REQUIRE(get_method.Flags().value == interface_method_property_attributes().value);
     }
-    auto const& set_method = db.MethodSemantics[1].Method();
-    REQUIRE(set_method.Name() == "set_property1");
+    auto const& set_method = property1.MethodSemantic().first[1].Method();
+    REQUIRE(set_method.Name() == "put_property1");
     {
         auto const& sig = set_method.Signature();
         REQUIRE(!sig.ReturnType());
         REQUIRE(size(sig.Params()) == 1);
         auto const& param_sig = sig.Params().first[0];
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == S1_ref);
+        REQUIRE(set_method.Flags().value == interface_method_property_attributes().value);
     }
 }
 
@@ -753,15 +768,16 @@ TEST_CASE("Interface event metadata")
     REQUIRE(event1.EventFlags().value == event_attributes_no_flags().value);
 
     REQUIRE(db.MethodSemantics.size() == 2);
-    for (size_t i = 0; i < db.MethodSemantics.size(); i++)
+    for (auto const& sem : event1.MethodSemantic())
     {
-        auto const& assoc = db.MethodSemantics[i].Association().type();
+        REQUIRE(sem.Association().Event() == event1);
+        auto const& assoc = sem.Association().type();
         REQUIRE(assoc == HasSemantics::Event);
-        auto const& event_sig = db.MethodSemantics[i].Association().Event().EventType();
+        auto const& event_sig = sem.Association().Event().EventType();
         REQUIRE(event_sig.TypeRef().TypeName() == string_list_event_ref.TypeName());
-        REQUIRE(db.MethodSemantics[i].Association().Event().Name() == event1.Name());
+        REQUIRE(sem.Association().Event().Name() == event1.Name());
     }
-    auto const& add_method = db.MethodSemantics[0].Method();
+    auto const& add_method = event1.MethodSemantic().first[0].Method();
     REQUIRE(add_method.Name() == "add_Changed");
     {
         auto const& sig = add_method.Signature();
@@ -769,8 +785,9 @@ TEST_CASE("Interface event metadata")
         REQUIRE(size(sig.Params()) == 1);
         auto const& param_sig = sig.Params().first[0];
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == string_list_event_ref);
+        REQUIRE(add_method.Flags().value == interface_method_event_attributes().value);
     }
-    auto const& remove_method = db.MethodSemantics[1].Method();
+    auto const& remove_method = event1.MethodSemantic().first[1].Method();
     REQUIRE(remove_method.Name() == "remove_Changed");
     {
         auto const& sig = remove_method.Signature();
@@ -778,10 +795,21 @@ TEST_CASE("Interface event metadata")
         REQUIRE(size(sig.Params()) == 1);
         auto const& param_sig = sig.Params().first[0];
         REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == event_registration_token_ref);
+        REQUIRE(remove_method.Flags().value == interface_method_event_attributes().value);
     }
 }
 
-TEST_CASE("Interface type metadata")
+// Disabling and coming back later
+// TODO: fix base problem once we have attributes to specify which interface becomes the base
+/*
+DefaultRyan 20 hours ago  Member
+This case seems odd for two reasons :
+
+I didn't think xlang was supporting multiple interface inheritance. And multiple "requires" isn't supported
+without some sort of attribute specifying which required interface becomes the base for inheritance purposes.
+This makes IComboBox.Paint() ambiguous.This should require some sort of disambiguation on the method.
+*/
+TEST_CASE("Interface type metadata 2", "[!hide]")
 {
     std::istringstream test_idl{ R"(
         namespace N
@@ -865,6 +893,72 @@ TEST_CASE("Interface type metadata")
     {
         REQUIRE(size(c2_impls) == 1);
         auto const& iter = std::find_if(c2_impls.first, c2_impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+}
+
+TEST_CASE("Interface type metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl requires M.IControl3
+            {
+                void Paint();
+            }
+    
+            interface IComboBox requires IControl
+            {
+                Int32 property1;
+            }
+        }
+        namespace M
+        {
+            interface IControl3
+            {
+                void Paint3();
+            }
+        }
+
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    auto const& control3_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl3", "M");
+    auto const& control_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl", "N");
+
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
+    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
+    auto const& c1 = find_type_by_name<TypeDef>(db.TypeDef, "IControl", "N");
+
+    test_interface_type_properties(combo);
+
+    REQUIRE(db.InterfaceImpl.size() == 3);
+    auto const& impls = combo.InterfaceImpl();
+    REQUIRE(size(impls) == 2);
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control_ref);
+    }
+    auto const& c1_impls = c1.InterfaceImpl();
+    {
+        REQUIRE(size(c1_impls) == 1);
+        auto const& iter = std::find_if(c1_impls.first, c1_impls.second, [control3_ref](auto&& type_ref)
         {
             return type_ref.Interface().TypeRef() == control3_ref;
         });

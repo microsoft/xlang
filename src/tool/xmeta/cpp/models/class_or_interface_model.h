@@ -44,31 +44,40 @@ namespace xlang::xmeta
             m_interface_base_refs.emplace_back(interface_base_ref);
         }
 
-        bool add_member(std::shared_ptr<property_model> const& member)
+        compilation_error add_member(std::shared_ptr<property_model> const& member)
         {
             if (member_id_exists(member->get_id()))
             {
-                return false;
+                return compilation_error::symbol_exists;
             }
             m_properties.emplace_back(member);
-            return true;
+            return compilation_error::passed;
         }
 
-        bool add_member(std::shared_ptr<method_model> const& member)
+        compilation_error add_member(std::shared_ptr<method_model> const& member)
         {
             // TODO: the case with overloading
-            if (contains_id(m_events, member->get_id()) || contains_id(m_properties, member->get_id()))
+            if (member_id_exists(member->get_id()))
             {
-                return false;
+                return compilation_error::symbol_exists;
             }
             m_methods.emplace_back(member);
-            return true;
+            return compilation_error::passed;
         }
 
-        bool add_member(std::shared_ptr<event_model> const& member)
+        compilation_error add_member(std::shared_ptr<event_model> const& member)
         {
+            if (member_id_exists(member->get_id()))
+            {
+                return compilation_error::symbol_exists;
+            }
             m_events.emplace_back(member);
-            return true;
+            return compilation_error::passed;
+        }
+
+        auto const& get_property_member(std::string const& member_id)
+        {
+            return *get_it(m_properties, member_id);
         }
 
         bool member_id_exists(std::string_view const& id)
@@ -76,6 +85,19 @@ namespace xlang::xmeta
             return contains_id(m_properties, id) ||
                 contains_id(m_methods, id) ||
                 contains_id(m_events, id);
+        }
+
+        bool property_id_exists(std::string_view const& id)
+        {
+            return contains_id(m_properties, id);
+        }
+
+        void validate(xlang_error_manager & error_manager)
+        {
+            for (auto const& prop : m_properties)
+            {
+                prop->validate(error_manager);
+            }
         }
 
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager)
