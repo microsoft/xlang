@@ -24,6 +24,7 @@
     <file src="$cppwinrt_fast_fwd_arm64$" target="build\native\lib\arm64"/>
     <file src="Microsoft.Windows.CppWinRT.props" target="build\native"/>
     <file src="Microsoft.Windows.CppWinRT.targets" target="build\native"/>
+    <file src="CppWinrtRules.Project.xml" target="build\native"/>
     <file src="readme.txt"/>
   </files>
 </package>
