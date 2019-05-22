@@ -927,6 +927,7 @@ TEST_CASE("Interface invalid property accessor test")
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
     }
+    // multiple getters
     {
         std::istringstream test_double_get_idl{ R"(
             namespace N
@@ -944,6 +945,24 @@ TEST_CASE("Interface invalid property accessor test")
         REQUIRE(reader.get_num_semantic_errors() == 1);
     }
     {
+        std::istringstream test_double_get_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int32 property1 { get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_double_get_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() >= 1);
+    }
+    // multiple setters
+    {
         std::istringstream test_double_set_idl{ R"(
             namespace N
             {
@@ -958,6 +977,23 @@ TEST_CASE("Interface invalid property accessor test")
         reader.read(test_double_set_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_double_set_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; };
+                    Int32 property1 { set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_double_set_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() >= 1);
     }
     {
         std::istringstream test_three_acessor_idl{ R"(
@@ -1011,7 +1047,7 @@ TEST_CASE("Interface duplicate property id test")
         xmeta_idl_reader reader{ "" };
         reader.read(test_set_only_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() > 1);
+        REQUIRE(reader.get_num_semantic_errors() >= 1);
     }
 }
 
