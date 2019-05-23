@@ -1851,7 +1851,7 @@ namespace xlang
 
     static void write_dispatch_overridable_method(writer& w, MethodDef const& method)
     {
-        auto format = R"(    % %(%)
+        auto format = R"(    auto %(%)
     {
         if (auto overridable = this->shim_overridable())
         {
@@ -1865,7 +1865,6 @@ namespace xlang
         method_signature signature{ method };
 
         w.write(format,
-            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             get_name(method),
@@ -2304,7 +2303,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         template <typename O, typename M> %(O* object, M method);
         template <typename O, typename M> %(com_ptr<O>&& object, M method);
         template <typename O, typename M> %(weak_ref<O>&& object, M method);
-        % operator()(%) const;
+        auto operator()(%) const;
     };
 )";
 
@@ -2320,7 +2319,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             type_name,
             type_name,
             type_name,
-            signature.return_signature(),
             bind<write_consume_params>(signature));
     }
 
@@ -2383,7 +2381,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
     {
     }
-    template <%> % %<%>::operator()(%) const
+    template <%> auto %<%>::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%<%>>**)this)->Invoke(%));%
     }
@@ -2420,7 +2418,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 type_name,
                 type_name,
                 bind<write_generic_typenames>(generics),
-                signature.return_signature(),
                 type_name,
                 bind_list(", ", generics),
                 bind<write_consume_params>(signature),
@@ -2452,7 +2449,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
     {
     }
-    inline % %::operator()(%) const
+    inline auto %::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
     }
@@ -2475,7 +2472,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 type_name,
                 type_name,
                 type_name,
-                signature.return_signature(),
                 type_name,
                 bind<write_consume_params>(signature),
                 bind<write_consume_return_type>(signature),
