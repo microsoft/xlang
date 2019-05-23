@@ -32,8 +32,12 @@ namespace xlang::xmeta
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
         m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());
         pass1_resolving_refs();
+        if (get_num_syntax_errors() != 0 || get_num_semantic_errors() != 0)
+        {
+            return;
+        }
         pass2_resolving_circular_semantics();
-        if (get_num_syntax_errors() != 0 || get_num_semantic_errors())
+        if (get_num_syntax_errors() != 0 || get_num_semantic_errors() != 0)
         {
             return;
         }
@@ -62,9 +66,12 @@ namespace xlang::xmeta
         walker.walk();
     }
 
+    void xlang_model_pass_1::listen_class_model(std::shared_ptr<class_model> const& model)
+    {
+    }
+
     void xlang_model_pass_1::listen_interface_model(std::shared_ptr<interface_model> const& model)
     {
-        model->validate(m_error_manager);
         model->resolve(m_symbols, m_error_manager);
     }
 
@@ -80,7 +87,11 @@ namespace xlang::xmeta
 
     void xlang_model_pass_2::listen_interface_model(std::shared_ptr<interface_model> const& model)
     {
-        model->has_circular_inheritance(m_error_manager);
+        if (model->has_circular_inheritance(m_error_manager))
+        {
+            return;
+        }
+        model->validate(m_error_manager);
     }
 
     void xlang_model_pass_2::listen_struct_model(std::shared_ptr<struct_model> const& model)

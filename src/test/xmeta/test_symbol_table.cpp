@@ -1174,7 +1174,7 @@ TEST_CASE("Interface event test")
     )" };
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths};
-    reader.read(test_idl);
+    reader.read(test_idl, true);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     auto const& namespaces = reader.get_namespaces();
@@ -1326,6 +1326,155 @@ TEST_CASE("Interface circular inheritance test")
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() > 0);
 }
+
+TEST_CASE("Interface member declared in inheritance test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires IListBox
+                {
+                    void Paint();
+                }
+                interface IListBox requires ITextBox
+                {
+                    void Paint();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() > 0);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    void get_value();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    void get_value();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    Int32 value;
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    event StringListEvent value;
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    event StringListEvent value;
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                delegate void StringListEvent2(Int32 sender);
+                interface IControl requires IListBox
+                {
+                    event StringListEvent value;
+                }
+                interface IListBox
+                {
+                    event StringListEvent2 value;
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+}
+
 
 TEST_CASE("Unresolved types interface test")
 {

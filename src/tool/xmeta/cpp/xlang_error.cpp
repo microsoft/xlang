@@ -93,6 +93,13 @@ namespace xlang::xmeta
         write_error(decl_line, oss.str());
     }
 
+    void xlang_error_manager::write_not_a_class_error(size_t decl_line, std::string_view const& symbol)
+    {
+        std::ostringstream oss;
+        oss << "Member name '" << symbol << "' is not an class.";
+        write_error(decl_line, oss.str());
+    }
+
     void xlang_error_manager::write_not_a_delegate_error(size_t decl_line, std::string_view const& symbol)
     {
         std::ostringstream oss;

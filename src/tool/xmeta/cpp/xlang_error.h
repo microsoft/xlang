@@ -23,6 +23,8 @@ namespace xlang::xmeta
 
         void write_not_an_interface_error(size_t decl_line, std::string_view const& symbol);
 
+        void write_not_a_class_error(size_t decl_line, std::string_view const& symbol);
+
         void write_not_a_delegate_error(size_t decl_line, std::string_view const& symbol);
 
         void write_struct_field_error(size_t decl_line, 

@@ -872,10 +872,18 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
     }
     if (ctx->class_base())
     {
-        auto const& class_bases = ctx->class_base()->type_base();
-        for (auto const& class_base : class_bases)
+        auto const& cls_base = ctx->class_base();
+        if (cls_base->interface_base())
         {
-            clss_model->add_interface_base_ref(class_base->class_type()->getText());
+            auto const& interface_basese = cls_base->interface_base()->type_base();
+            for (auto const& interface_base : interface_basese)
+            {
+                clss_model->add_interface_base_ref(interface_base->class_type()->getText());
+            }
+        }
+        if (cls_base->type_base())
+        {
+            clss_model->add_class_base_ref(cls_base->type_base()->class_type()->getText());
         }
     }
     m_cur_namespace_body->add_class(clss_model);

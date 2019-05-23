@@ -44,6 +44,41 @@ namespace xlang::xmeta
             return bases;
         }
 
+        void validate(xlang_error_manager & error_manager)
+        {
+            std::set<std::shared_ptr<interface_model>> bases = get_all_interface_bases();
+            for (auto const& base : bases)
+            {
+                for (auto const& base_event : base->get_events())
+                {
+                    if (member_id_exists(base_event->get_id()))
+                    {
+                        error_manager.write_type_member_exists_error(get_decl_line(), base_event->get_id(), get_fully_qualified_id());
+                        return;
+                    }
+                }
+
+                for (auto const& base_properties : base->get_properties())
+                {
+                    if (member_id_exists(base_properties->get_id()))
+                    {
+                        error_manager.write_type_member_exists_error(get_decl_line(), base_properties->get_id(), get_fully_qualified_id());
+                        return;
+                    }
+                }
+
+                for (auto const& base_method : base->get_methods())
+                {
+                    if (member_id_exists(base_method->get_id()))
+                    {
+                        error_manager.write_type_member_exists_error(get_decl_line(), base_method->get_id(), get_fully_qualified_id());
+                        return;
+                    }
+                }
+            }
+            class_or_interface_model::validate(error_manager);
+        }
+
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager)
         {
             class_or_interface_model::resolve(symbols, error_manager);

@@ -420,7 +420,7 @@ namespace xlang::xmeta
         mdMethodDef token_remove_method = mdTokenNil;
         mdTypeDef implements[] = { mdTokenNil };
 
-        std::shared_ptr<method_model> add_method_model = model->get_add_method();
+        std::shared_ptr<method_model> const& add_method_model = model->get_add_method();
         assert(add_method_model != nullptr); //There must always be a add
         {
             auto const& iter = method_defs.find(add_method_model->get_id());
@@ -428,7 +428,7 @@ namespace xlang::xmeta
             token_add_method = iter->second;
         }
 
-        std::shared_ptr<method_model> remove_method_model = model->get_remove_method();
+        std::shared_ptr<method_model> const& remove_method_model = model->get_remove_method();
         assert(remove_method_model != nullptr); //There must always be a remove
         {
             auto const& iter = method_defs.find(remove_method_model->get_id());
