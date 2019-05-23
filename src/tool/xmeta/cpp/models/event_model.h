@@ -31,7 +31,19 @@ namespace xlang::xmeta
             m_semantic{ sem },
             m_add_method{ add_method },
             m_remove_method{ remove_method },
-            m_type{ std::move(t) }
+            m_type{ std::move(t) },
+            m_implemented_event_ref{ "" }
+        { }
+
+        event_model(std::string_view const& id,
+            size_t decl_line,
+            std::string_view const& assembly_name,
+            event_semantics const& sem,
+            type_ref&& t) :
+            base_model{ id, decl_line, assembly_name },
+            m_semantic{ sem },
+            m_type{ std::move(t) },
+            m_implemented_event_ref{ "" }
         { }
 
         event_model(std::string_view const& id,
@@ -43,7 +55,8 @@ namespace xlang::xmeta
             base_model{ id, decl_line, assembly_name },
             m_add_method{ add_method },
             m_remove_method{ remove_method },
-            m_type{ std::move(t) }
+            m_type{ std::move(t) },
+            m_implemented_event_ref{ "" }
         { }
 
 
@@ -65,6 +78,44 @@ namespace xlang::xmeta
         auto const& get_type() const noexcept
         {
             return m_type;
+        }
+
+        void set_overridden_event_ref(std::shared_ptr<event_model> const& ref) noexcept
+        {
+            assert(ref != nullptr);
+            m_implemented_event_ref.resolve(ref);
+            m_add_method->set_overridden_method_ref(ref->get_add_method());
+            m_remove_method->set_overridden_method_ref(ref->get_remove_method());
+        }
+
+        compilation_error set_add_method(std::shared_ptr<method_model> const& m)
+        {
+            if (!m)
+            {
+                // TODO: consider throwing an exception
+                return compilation_error::passed;
+            }
+            if (m_add_method)
+            {
+                return compilation_error::accessor_exists;
+            }
+            m_add_method = m;
+            return compilation_error::passed;
+        }
+
+        compilation_error set_remove_method(std::shared_ptr<method_model> const& m)
+        {
+            if (!m)
+            {
+                // TODO: consider throwing an exception
+                return compilation_error::passed;
+            }
+            if (m_remove_method)
+            {
+                return compilation_error::accessor_exists;
+            }
+            m_remove_method = m;
+            return compilation_error::passed;
         }
 
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id)
@@ -93,9 +144,9 @@ namespace xlang::xmeta
 
     private:
         event_semantics m_semantic;
+        model_ref<std::shared_ptr<event_model>> m_implemented_event_ref;
         type_ref m_type;
-
-        std::shared_ptr<method_model> m_add_method;
-        std::shared_ptr<method_model> m_remove_method;
+        std::shared_ptr<method_model> m_add_method = nullptr;
+        std::shared_ptr<method_model> m_remove_method = nullptr;
     };
 }

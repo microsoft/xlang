@@ -102,6 +102,7 @@ namespace xlang::xmeta
 
         void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept
         {
+            assert(ref != nullptr);
             m_implemented_method_ref.resolve(ref);
         }
 

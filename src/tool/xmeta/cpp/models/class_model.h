@@ -56,15 +56,31 @@ namespace xlang::xmeta
             return m_semantic;
         }
 
+        void add_static_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
+        {
+            m_static_interfaces.emplace_back(static_interface_ref);
+        }
+
         void add_protected_interface_ref(std::shared_ptr<interface_model> const& protected_interface_ref)
         {
             m_protected_interfaces.emplace_back(protected_interface_ref);
         }
 
-        void add_static_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
+        void add_factory_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
         {
             m_static_interfaces.emplace_back(static_interface_ref);
         }
+
+        void add_overrides_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
+        {
+            m_static_interfaces.emplace_back(static_interface_ref);
+        }
+
+        void add_instance_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
+        {
+            m_static_interfaces.emplace_back(static_interface_ref);
+        }
+
 
     private:
         model_ref<std::shared_ptr<class_model>> m_class_base_ref;
@@ -73,5 +89,8 @@ namespace xlang::xmeta
 
         std::vector<std::shared_ptr<interface_model>> m_static_interfaces;
         std::vector<std::shared_ptr<interface_model>> m_protected_interfaces;
+        std::vector<std::shared_ptr<interface_model>> m_factory_interfaces;
+        std::vector<std::shared_ptr<interface_model>> m_overrides_interfaces;
+        std::vector<std::shared_ptr<interface_model>> m_instance_interfaces;
     };
 }

@@ -27,7 +27,8 @@ namespace xlang::xmeta
             m_semantic{ sem },
             m_type{ std::move(type) },
             m_get_method{ get_method },
-            m_set_method{ set_method }
+            m_set_method{ set_method },
+            m_implemented_property_ref{ "" }
         { }
 
         property_model(std::string_view const& id,
@@ -37,7 +38,8 @@ namespace xlang::xmeta
                 type_ref&& type) :
             base_model{ id, decl_line, assembly_name },
             m_type{ std::move(type) },
-            m_semantic{ sem }
+            m_semantic{ sem },
+            m_implemented_property_ref{ "" }
         { }
 
         auto const& get_semantic() const noexcept
@@ -60,6 +62,14 @@ namespace xlang::xmeta
             return m_set_method;
         }
 
+        void set_overridden_property_ref(std::shared_ptr<property_model> const& ref) noexcept
+        {
+            assert(ref != nullptr);
+            m_implemented_property_ref.resolve(ref);
+            m_get_method->set_overridden_method_ref(ref->get_get_method());
+            m_set_method->set_overridden_method_ref(ref->get_set_method());
+        }
+
         compilation_error set_get_method(std::shared_ptr<method_model> const& m)
         {
             if (!m)
@@ -72,6 +82,7 @@ namespace xlang::xmeta
                 return compilation_error::accessor_exists;
             }
             m_get_method = m;
+            return compilation_error::passed;
         }
 
         compilation_error set_set_method(std::shared_ptr<method_model> const& m)
@@ -86,6 +97,7 @@ namespace xlang::xmeta
                 return compilation_error::accessor_exists;
             }
             m_set_method = m;
+            return compilation_error::passed;
         }
 
         void validate(xlang_error_manager & error_manager)
@@ -119,6 +131,7 @@ namespace xlang::xmeta
 
     private:
         property_semantics m_semantic;
+        model_ref<std::shared_ptr<property_model>> m_implemented_property_ref;
         type_ref m_type;
         bool m_is_array;
         std::shared_ptr<method_model> m_get_method;
