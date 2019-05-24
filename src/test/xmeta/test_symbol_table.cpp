@@ -12,6 +12,9 @@
 using namespace antlr4;
 using namespace xlang::xmeta;
 
+constexpr method_semantics default_method_semantics = { false, false, false };
+constexpr method_semantics in_method_semantics = { false, true, false };
+
 auto find_namespace(xmeta_idl_reader & reader, std::string name)
 {
     auto namespaces = reader.get_namespaces();
@@ -28,6 +31,77 @@ auto find_namespace_body(xmeta_idl_reader & reader, std::string name, int index)
     auto const& ns_bodies = it->second->get_namespace_bodies();
     return ns_bodies[index];
 }
+
+struct ExpectedFormalParameterModel
+{
+    std::string id;
+    parameter_semantics sem;
+    type_ref type;
+    ExpectedFormalParameterModel(std::string const& name, parameter_semantics const& sem, type_ref const& type)
+        : id{ name }, sem{ sem }, type{ type } {}
+
+    void VerifyType(std::shared_ptr<formal_parameter_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_semantic() == sem);
+        REQUIRE(actual->get_type() == type);
+    }
+
+    void VerifyType(formal_parameter_model const& actual)
+    {
+        REQUIRE(actual.get_id() == id);
+        REQUIRE(actual.get_semantic() == sem);
+        REQUIRE(actual.get_type() == type);
+    }
+};
+
+struct ExpectedMethodModel
+{
+    std::string id;
+    method_semantics sem;
+    std::optional<type_ref> return_type;
+    std::vector<ExpectedFormalParameterModel> params;
+
+    ExpectedMethodModel(std::string const& name, method_semantics const& sem, std::optional<type_ref> const& return_type, std::vector<ExpectedFormalParameterModel> params)
+        : id{ name }, sem{ sem }, return_type{ return_type }, params{ params } {}
+
+    void VerifyType(std::shared_ptr<method_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_semantic().is_static == sem.is_static);
+        REQUIRE(actual->get_return_type() == return_type);
+
+        auto const& actual_params = actual->get_formal_parameters();
+        REQUIRE(actual_params.size() == params.size());
+        for (size_t i = 0; i < params.size(); i++)
+        {
+            params[i].VerifyType(actual_params[i]);
+        }
+    }
+};
+
+struct ExepectedStructModel
+{
+    std::string fully_qualified_id;
+    std::vector<std::pair<type_ref, std::string>> fields;
+
+    ExepectedStructModel(std::string const& name, std::vector<std::pair<type_ref, std::string>> fields)
+        : fully_qualified_id{ name }, fields{ fields } {}
+
+    void VerifyType(std::shared_ptr<struct_model> const& actual)
+    {
+        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+
+        auto const& actual_fields = actual->get_fields();
+        REQUIRE(actual_fields.size() == fields.size());
+        for (size_t i = 0; i < fields.size(); i++)
+        {
+            REQUIRE(actual_fields.at(i).first == fields.at(i).first);
+            REQUIRE(actual_fields.at(i).second == fields.at(i).second);
+        }
+    }
+};
+
 
 TEST_CASE("Duplicate Namespaces")
 {
@@ -222,6 +296,20 @@ TEST_CASE("Struct test")
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
+    ExepectedStructModel expected{ "N.S" , { 
+        { type_ref{ simple_type::Boolean } , "field_1" },
+        { type_ref{ simple_type::String } , "field_2" },
+        { type_ref{ simple_type::Int16 } , "field_3" },
+        { type_ref{ simple_type::Int32 } , "field_4" },
+        { type_ref{ simple_type::Int64 } , "field_5" },
+        { type_ref{ simple_type::UInt8 } , "field_6" },
+        { type_ref{ simple_type::UInt16 } , "field_7" },
+        { type_ref{ simple_type::UInt32 } , "field_8" },
+        { type_ref{ simple_type::Char16 } , "field_9" },
+        { type_ref{ simple_type::Single } , "field_10" },
+        { type_ref{ simple_type::Double } , "field_11" }
+    } };
+
     auto namespaces = reader.get_namespaces();
     auto it = namespaces.find("N");
     REQUIRE(it != namespaces.end());
@@ -233,41 +321,7 @@ TEST_CASE("Struct test")
     REQUIRE(structs.size() == 1);
     REQUIRE(structs.find("S") != structs.end());
     auto struct1 = structs.at("S");
-    auto fields = struct1->get_fields();
-    REQUIRE(fields.size() == 11);
-    REQUIRE(fields[0].second == "field_1");
-    auto type1 = fields[0].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type1.get_resolved_target()) == simple_type::Boolean);
-    REQUIRE(fields[1].second == "field_2");
-    auto type2 = fields[1].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type2.get_resolved_target()) == simple_type::String);
-    REQUIRE(fields[2].second == "field_3");
-    auto type3 = fields[2].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type3.get_resolved_target()) == simple_type::Int16);
-    REQUIRE(fields[3].second == "field_4");
-    auto type4 = fields[3].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type4.get_resolved_target()) == simple_type::Int32);
-    REQUIRE(fields[4].second == "field_5");
-    auto type5 = fields[4].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type5.get_resolved_target()) == simple_type::Int64);
-    REQUIRE(fields[5].second == "field_6");
-    auto type6 = fields[5].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type6.get_resolved_target()) == simple_type::UInt8);
-    REQUIRE(fields[6].second == "field_7");
-    auto type7 = fields[6].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type7.get_resolved_target()) == simple_type::UInt16);
-    REQUIRE(fields[7].second == "field_8");
-    auto type8 = fields[7].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type8.get_resolved_target()) == simple_type::UInt32);
-    REQUIRE(fields[8].second == "field_9");
-    auto type9 = fields[8].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type9.get_resolved_target()) == simple_type::Char16);
-    REQUIRE(fields[9].second == "field_10");
-    auto type10 = fields[9].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type10.get_resolved_target()) == simple_type::Single);
-    REQUIRE(fields[10].second == "field_11");
-    auto type11 = fields[10].first.get_semantic();
-    REQUIRE(std::get<simple_type>(type11.get_resolved_target()) == simple_type::Double);
+    expected.VerifyType(struct1);
 }
 
 TEST_CASE("Struct circular test")
@@ -1506,29 +1560,6 @@ TEST_CASE("Unresolved types interface test")
     }
 }
 
-template <typename T>
-void check_method(std::shared_ptr<method_model> method, method_model expected)
-{
-    // std::vector<formal_parameter_model> m_formal_parameters;
-    //REQUIRE(method->get_id() == expected.get_id());
-    //if (method->get_return_type() == std::nullopt)
-    //{
-    //    REQUIRE(expected.get_return_type == std::nullopt);
-    //}
-    //type_ref actual = method->get_return_type();
-    //type_ref expected = xpected.get_return_type();
-    //REQUIRE(actual == expected);
-   
-    //auto const& formal_parameters = method->get_formal_parameters();
-    //REQUIRE(formal_parameters.size() == params.size());
-    //int index = 0;
-    //for (auto const& [t, n] : params)
-    //{
-    //    REQUIRE(formal_parameters[index].get_id() == n);
-    //    REQUIRE(std::get<T>(method1_formal_parameters[0].get_type().get_semantic().get_resolved_target()) == t);
-    //}
-}
-
 TEST_CASE("Class methods test")
 {
     std::istringstream test_idl{ R"(
@@ -1536,10 +1567,10 @@ TEST_CASE("Class methods test")
         {
             runtimeclass c1
             {
-                static void m1();
-                Int32 m2(String s);
-                S1 m3();
-                M.S1 m4();
+                static void m0();
+                Int32 m1(String s);
+                S1 m2();
+                M.S1 m3();
             }
 
             struct S1
@@ -1554,9 +1585,6 @@ TEST_CASE("Class methods test")
             }
         }
     )" };
-
-    method_model method_expected{ "m1", type_ref{ simple_type::Int32 },  { formal_parameter_model{ "s", parameter_semantics::in, type_ref{ simple_type::String } } } };
-
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
@@ -1568,28 +1596,20 @@ TEST_CASE("Class methods test")
     auto const& model = classes.at("c1");
 
     auto const& methods = model->get_methods();
-    REQUIRE(methods.size() == 4);
-
-    auto const& method0 = methods[0];
-    REQUIRE(method0->get_id() == "m1");
-    REQUIRE(method0->get_return_type() == std::nullopt);
-    check_method<simple_type>(methods[0], method_expected);
-    REQUIRE(method0->get_semantic().is_static);
-
-    auto const& method1 = methods[1];
-    REQUIRE(method1->get_id() == "m2");
-    REQUIRE((std::get<simple_type>(method1->get_return_type()->get_semantic().get_resolved_target()) == simple_type::Int32));
-    REQUIRE(method1->get_formal_parameters().size() == 1);
-    //check_method<simple_type>(methods[1], "m2", simple_type::Int32);
+    REQUIRE(methods.size() == 4); 
+    ExpectedMethodModel m0{ "m0", in_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel m1{ "m1", default_method_semantics, type_ref{ simple_type::Int32 }, { ExpectedFormalParameterModel{ "s", parameter_semantics::in, type_ref{ simple_type::String } } } };
+    m0.VerifyType(methods[0]);
+    m1.VerifyType(methods[1]);
 
     auto const& method2 = methods[2];
-    REQUIRE(method2->get_id() == "m3");
+    REQUIRE(method2->get_id() == "m2");
     REQUIRE(method2->get_return_type()->get_semantic().is_resolved());
     REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(method2->get_return_type()->get_semantic().get_resolved_target()));
     REQUIRE(std::get<std::shared_ptr<struct_model>>(method2->get_return_type()->get_semantic().get_resolved_target())->get_fully_qualified_id() == "N.S1");
 
     auto const& method3 = methods[3];
-    REQUIRE(method3->get_id() == "m4");
+    REQUIRE(method3->get_id() == "m3");
     REQUIRE(method3->get_return_type()->get_semantic().is_resolved());
     REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(method3->get_return_type()->get_semantic().get_resolved_target()));
     REQUIRE(std::get<std::shared_ptr<struct_model>>(method3->get_return_type()->get_semantic().get_resolved_target())->get_fully_qualified_id() == "M.S1");

@@ -45,7 +45,7 @@ namespace xlang::xmeta
 
         void set_semantic(object_type o);
 
-        //bool operator==(type_ref const& right_ref);
+        bool operator==(type_ref const& right_ref) const;
 
     private:
         model_ref<type_semantics> m_semantic;

@@ -74,9 +74,11 @@ namespace xlang::xmeta
         { }
 
         method_model(std::string_view const& id,
+                method_semantics const& sem,
                 std::optional<type_ref>&& return_type,
                 std::vector<formal_parameter_model>&& formal_params) : 
             base_model{ id, 0, "test only" },
+            m_semantic{ sem },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
             m_implemented_method_ref{ "" }
