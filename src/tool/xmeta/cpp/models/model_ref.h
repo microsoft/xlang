@@ -22,6 +22,10 @@ namespace xlang::xmeta
             m_ref{ std::string(name) }
         { }
 
+        explicit model_ref(resolved_type const& val) :
+            m_ref{ val }
+        { }
+
         bool is_resolved() const noexcept
         {
             return m_ref.index() != 0;

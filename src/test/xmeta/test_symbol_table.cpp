@@ -80,16 +80,43 @@ struct ExpectedMethodModel
     }
 };
 
-struct ExepectedStructModel
+struct ExpectedEnumModel
 {
+    std::string id;
+    std::string fully_qualified_id;
+    std::vector<enum_member> fields;
+    enum_semantics sem;
+
+    ExpectedEnumModel(std::string const& id, std::string const& fully_qualified_id, enum_semantics sem, std::vector<enum_member> fields)
+        : id{ id }, fully_qualified_id{ fully_qualified_id }, fields{ fields }, sem{ sem } {}
+
+    void VerifyType(std::shared_ptr<enum_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        REQUIRE(actual->get_type() == sem);
+        auto & actual_members = actual->get_members();
+        REQUIRE(actual_members.size() == fields.size());
+        for (size_t i = 0; i < fields.size(); i++)
+        {
+            REQUIRE(actual_members.at(i) == fields.at(i));
+        }
+    }
+};
+
+
+struct ExpectedStructModel
+{
+    std::string id;
     std::string fully_qualified_id;
     std::vector<std::pair<type_ref, std::string>> fields;
 
-    ExepectedStructModel(std::string const& name, std::vector<std::pair<type_ref, std::string>> fields)
-        : fully_qualified_id{ name }, fields{ fields } {}
+    ExpectedStructModel(std::string const& id, std::string const& fully_qualified_id, std::vector<std::pair<type_ref, std::string>> fields)
+        : id{ id }, fully_qualified_id { fully_qualified_id }, fields{ fields } {}
 
     void VerifyType(std::shared_ptr<struct_model> const& actual)
     {
+        REQUIRE(actual->get_id() == id);
         REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
 
         auto const& actual_fields = actual->get_fields();
@@ -98,6 +125,59 @@ struct ExepectedStructModel
         {
             REQUIRE(actual_fields.at(i).first == fields.at(i).first);
             REQUIRE(actual_fields.at(i).second == fields.at(i).second);
+        }
+    }
+};
+
+struct ExpectedNamespaceModel
+{
+    std::string id;
+    std::string fully_qualified_id;
+    std::vector<ExpectedNamespaceModel> children;
+    std::vector<ExpectedStructModel> structs;
+    std::vector<ExpectedEnumModel> enums;
+
+    ExpectedNamespaceModel(std::string const& id, 
+            std::string const& fully_qualified_id, 
+            std::vector<ExpectedNamespaceModel> namespaces, 
+            std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel>> declarations)
+        : id{ id }, fully_qualified_id{ fully_qualified_id }, children { namespaces } 
+    {
+        for (auto & declaration : declarations)
+        {
+            if (std::holds_alternative<ExpectedStructModel>(declaration))
+            {
+                structs.push_back(std::get<ExpectedStructModel>(declaration));
+            }
+            if (std::holds_alternative<ExpectedEnumModel>(declaration))
+            {
+                enums.push_back(std::get<ExpectedEnumModel>(declaration));
+            }
+        }
+    }
+
+    void VerifyType(std::shared_ptr<namespace_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+
+        for (auto const& actual_bodies : actual->get_namespace_bodies())
+        {
+            auto const& actual_structs = actual_bodies->get_structs();
+            for (auto expected_struct : structs)
+            {
+                auto const& it = actual_structs.find(expected_struct.id);
+                REQUIRE(it != actual_structs.end());
+                expected_struct.VerifyType(it->second);
+            }
+        }
+
+        auto const& actual_child_namespaces = actual->get_child_namespaces();
+        for (auto & child : children)
+        {
+            auto const& it = actual_child_namespaces.find(child.id);
+            REQUIRE(it != actual_child_namespaces.end());
+            child.VerifyType(it->second);
         }
     }
 };
@@ -160,30 +240,16 @@ TEST_CASE("Enum test")
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-
-    auto ns = find_namespace(reader, "N");
-    REQUIRE(ns->get_namespace_bodies().size() == 1);
-    auto ns_body = ns->get_namespace_bodies()[0];
-
-    auto enums = ns_body->get_enums();
-    REQUIRE(enums.find("E") != enums.end());
-    auto const& enum_members = enums["E"]->get_members();
-    REQUIRE(enum_members.size() == 5);
-    REQUIRE(enum_members[0].get_id() == "e_member_1");
-    REQUIRE(enum_members[1].get_id() == "e_member_2");
-    REQUIRE(enum_members[2].get_id() == "e_member_3");
-    REQUIRE(enum_members[3].get_id() == "e_member_4");
-    REQUIRE(enum_members[4].get_id() == "e_member_5");
-    auto const& val1 = enum_members[0].get_value();
-    auto const& val2 = enum_members[1].get_value();
-    auto const& val3 = enum_members[2].get_value();
-    auto const& val4 = enum_members[3].get_value();
-    auto const& val5 = enum_members[4].get_value();
-    REQUIRE((val1.is_resolved() && std::get<int32_t>(val1.get_resolved_target()) == 0));
-    REQUIRE((val2.is_resolved() && std::get<int32_t>(val2.get_resolved_target()) == 3));
-    REQUIRE((val3.is_resolved() && std::get<int32_t>(val3.get_resolved_target()) == 4));
-    REQUIRE((val4.is_resolved() && std::get<int32_t>(val4.get_resolved_target()) == 0x21));
-    REQUIRE((val5.is_resolved() && std::get<int32_t>(val5.get_resolved_target()) == 0x21));
+    
+    ExpectedEnumModel expected_enum{ "E", "N.E" , enum_semantics::Int32, { 
+        enum_member{ "e_member_1", 0 },
+        enum_member{ "e_member_2", 3 },
+        enum_member{ "e_member_3", 4 },
+        enum_member{ "e_member_4", 0x21 },
+        enum_member{ "e_member_5", 0x21 }
+    } };;
+    ExpectedNamespaceModel expected_namespace{ "N", "N", {}, { expected_enum } };
+    expected_namespace.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Enum circular implicit dependency")
@@ -296,7 +362,7 @@ TEST_CASE("Struct test")
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExepectedStructModel expected{ "N.S" , { 
+    ExpectedStructModel expected_struct{ "S", "N.S" , { 
         { type_ref{ simple_type::Boolean } , "field_1" },
         { type_ref{ simple_type::String } , "field_2" },
         { type_ref{ simple_type::Int16 } , "field_3" },
@@ -309,19 +375,8 @@ TEST_CASE("Struct test")
         { type_ref{ simple_type::Single } , "field_10" },
         { type_ref{ simple_type::Double } , "field_11" }
     } };
-
-    auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto ns = it->second;
-    REQUIRE(ns->get_namespace_bodies().size() == 1);
-    auto ns_body = ns->get_namespace_bodies()[0];
-
-    auto structs = ns_body->get_structs();
-    REQUIRE(structs.size() == 1);
-    REQUIRE(structs.find("S") != structs.end());
-    auto struct1 = structs.at("S");
-    expected.VerifyType(struct1);
+    ExpectedNamespaceModel expected_namespace{ "N", "N", {}, { expected_struct } };
+    expected_namespace.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Struct circular test")

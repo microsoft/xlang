@@ -36,9 +36,15 @@ namespace xlang::xmeta
         {
         }
 
-        bool operator==(enum_member const& rhs)
+        enum_member(std::string_view const& id, enum_value_semantics const& value) :
+            base_model{ id, 0, "" },
+            m_value{ value }
         {
-            return rhs.get_id() == get_id();
+        }
+
+        bool operator==(enum_member const& rhs) const
+        {
+            return rhs.get_id() == get_id() && rhs.get_resolved_value() == get_resolved_value();
         }
 
         auto const& get_value() const noexcept
