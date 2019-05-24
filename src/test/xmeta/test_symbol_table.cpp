@@ -12,6 +12,23 @@
 using namespace antlr4;
 using namespace xlang::xmeta;
 
+auto find_namespace(xmeta_idl_reader & reader, std::string name)
+{
+    auto namespaces = reader.get_namespaces();
+    auto it = namespaces.find(name);
+    REQUIRE(it != namespaces.end());
+    return it->second;
+}
+
+auto find_namespace_body(xmeta_idl_reader & reader, std::string name, int index)
+{
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find(name);
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    return ns_bodies[index];
+}
+
 TEST_CASE("Duplicate Namespaces")
 {
     std::istringstream test_idl(R"(
@@ -22,11 +39,7 @@ TEST_CASE("Duplicate Namespaces")
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-
-    auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto ns = it->second;
+    auto ns = find_namespace(reader, "N");
     REQUIRE(ns->get_namespace_bodies().size() == 2);
     REQUIRE(ns->get_namespace_bodies()[0]->get_containing_namespace() == ns);
     REQUIRE(ns->get_namespace_bodies()[1]->get_containing_namespace() == ns);
@@ -74,10 +87,7 @@ TEST_CASE("Enum test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto ns = it->second;
+    auto ns = find_namespace(reader, "N");
     REQUIRE(ns->get_namespace_bodies().size() == 1);
     auto ns_body = ns->get_namespace_bodies()[0];
 
@@ -1497,3 +1507,938 @@ TEST_CASE("Unresolved types interface test")
         REQUIRE(reader.get_num_semantic_errors() == 5);
     }
 }
+
+template <typename T>
+void check_method(std::shared_ptr<method_model> method, method_model expected)
+{
+    // std::vector<formal_parameter_model> m_formal_parameters;
+    //REQUIRE(method->get_id() == expected.get_id());
+    //if (method->get_return_type() == std::nullopt)
+    //{
+    //    REQUIRE(expected.get_return_type == std::nullopt);
+    //}
+    //type_ref actual = method->get_return_type();
+    //type_ref expected = xpected.get_return_type();
+    //REQUIRE(actual == expected);
+   
+    //auto const& formal_parameters = method->get_formal_parameters();
+    //REQUIRE(formal_parameters.size() == params.size());
+    //int index = 0;
+    //for (auto const& [t, n] : params)
+    //{
+    //    REQUIRE(formal_parameters[index].get_id() == n);
+    //    REQUIRE(std::get<T>(method1_formal_parameters[0].get_type().get_semantic().get_resolved_target()) == t);
+    //}
+}
+
+TEST_CASE("Class methods test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            runtimeclass c1
+            {
+                static void m1();
+                Int32 m2(String s);
+                S1 m3();
+                M.S1 m4();
+            }
+
+            struct S1
+            {
+            }
+        }
+
+        namespace M
+        {
+            struct S1
+            {
+            }
+        }
+    )" };
+
+    method_model method_expected{ "m1", type_ref{ simple_type::Int32 },  { formal_parameter_model{ "s", parameter_semantics::in, type_ref{ simple_type::String } } } };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    auto const& ns_body = find_namespace_body(reader, "N", 0);
+    auto const& classes = ns_body->get_classes();
+    REQUIRE(classes.size() == 1);
+
+    REQUIRE(classes.find("c1") != classes.end());
+    auto const& model = classes.at("c1");
+
+    auto const& methods = model->get_methods();
+    REQUIRE(methods.size() == 4);
+
+    auto const& method0 = methods[0];
+    REQUIRE(method0->get_id() == "m1");
+    REQUIRE(method0->get_return_type() == std::nullopt);
+    check_method<simple_type>(methods[0], method_expected);
+    REQUIRE(method0->get_semantic().is_static);
+
+    auto const& method1 = methods[1];
+    REQUIRE(method1->get_id() == "m2");
+    REQUIRE((std::get<simple_type>(method1->get_return_type()->get_semantic().get_resolved_target()) == simple_type::Int32));
+    REQUIRE(method1->get_formal_parameters().size() == 1);
+    //check_method<simple_type>(methods[1], "m2", simple_type::Int32);
+
+    auto const& method2 = methods[2];
+    REQUIRE(method2->get_id() == "m3");
+    REQUIRE(method2->get_return_type()->get_semantic().is_resolved());
+    REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(method2->get_return_type()->get_semantic().get_resolved_target()));
+    REQUIRE(std::get<std::shared_ptr<struct_model>>(method2->get_return_type()->get_semantic().get_resolved_target())->get_fully_qualified_id() == "N.S1");
+
+    auto const& method3 = methods[3];
+    REQUIRE(method3->get_id() == "m4");
+    REQUIRE(method3->get_return_type()->get_semantic().is_resolved());
+    REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(method3->get_return_type()->get_semantic().get_resolved_target()));
+    REQUIRE(std::get<std::shared_ptr<struct_model>>(method3->get_return_type()->get_semantic().get_resolved_target())->get_fully_qualified_id() == "M.S1");
+}
+
+TEST_CASE("Class methods synthesized test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            runtimeclass c1
+            {
+                static void m1();
+                Int32 m2(String s);
+                S1 m3();
+                M.S1 m4();
+            }
+
+            struct S1
+            {
+            }
+        }
+
+        namespace M
+        {
+            struct S1
+            {
+            }
+        }
+    )" };
+}
+
+/*
+TEST_CASE("Interface property method ordering test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl
+            {
+                Int32 property1 { get; set; };
+                Int32 property2 { get; };
+                Int32 property3 { set; get; };
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& properties = model->get_properties();
+    REQUIRE(properties[0]->get_id() == "property1");
+    REQUIRE(properties[1]->get_id() == "property2");
+    REQUIRE(properties[2]->get_id() == "property3");
+    {
+        auto const& property_type = properties[0]->get_type().get_semantic();
+        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+    }
+    {
+        auto const& property_type = properties[1]->get_type().get_semantic();
+        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+    }
+    {
+        auto const& property_type = properties[2]->get_type().get_semantic();
+        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+    }
+    auto const& methods = model->get_methods();
+    REQUIRE(methods.size() == 5);
+
+    auto const& method0 = methods[0];
+    REQUIRE(method0->get_id() == "get_property1");
+    REQUIRE(properties[0]->get_get_method() == method0);
+    REQUIRE(properties[0]->get_get_method()->get_id() == method0->get_id());
+    auto method0_return_type = method0->get_return_type()->get_semantic();
+    REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
+
+    auto const& method1 = methods[1];
+    REQUIRE(method1->get_id() == "put_property1");
+    REQUIRE(properties[0]->get_set_method() == method1);
+    REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
+    REQUIRE(!method1->get_return_type());
+
+    auto const& method2 = methods[2];
+    REQUIRE(method2->get_id() == "get_property2");
+    REQUIRE(properties[1]->get_get_method() == method2);
+    REQUIRE(properties[1]->get_get_method()->get_id() == method2->get_id());
+    auto method2_return_type = method2->get_return_type()->get_semantic();
+    REQUIRE((method2_return_type.is_resolved() && std::get<simple_type>(method2_return_type.get_resolved_target()) == simple_type::Int32));
+
+    auto const& method3 = methods[3];
+    REQUIRE(method3->get_id() == "put_property3");
+    REQUIRE(properties[2]->get_set_method() == method3);
+    REQUIRE(properties[2]->get_set_method()->get_id() == method3->get_id());
+    REQUIRE(!method3->get_return_type());
+
+    auto const& method4 = methods[4];
+    REQUIRE(method4->get_id() == "get_property3");
+    REQUIRE(properties[2]->get_get_method() == method4);
+    REQUIRE(properties[2]->get_get_method()->get_id() == method4->get_id());
+    auto method4_return_type = method4->get_return_type()->get_semantic();
+    REQUIRE((method4_return_type.is_resolved() && std::get<simple_type>(method4_return_type.get_resolved_target()) == simple_type::Int32));
+}
+
+TEST_CASE("Interface property method ordering different line test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int32 property1 { set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+
+        auto const& namespaces = reader.get_namespaces();
+        auto const& it = namespaces.find("N");
+        REQUIRE(it != namespaces.end());
+        auto const& ns_bodies = it->second->get_namespace_bodies();
+        REQUIRE(ns_bodies.size() == 1);
+        auto const& interfaces = ns_bodies[0]->get_interfaces();
+        REQUIRE(interfaces.size() == 1);
+
+        REQUIRE(interfaces.find("IControl") != interfaces.end());
+        auto const& model = interfaces.at("IControl");
+
+        auto const& properties = model->get_properties();
+        REQUIRE(properties.size() == 1);
+        REQUIRE(properties[0]->get_id() == "property1");
+        {
+            auto const& property_type = properties[0]->get_type().get_semantic();
+            REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+        }
+        auto const& methods = model->get_methods();
+        REQUIRE(methods.size() == 2);
+        auto const& method0 = methods[0];
+        REQUIRE(method0->get_id() == "get_property1");
+        REQUIRE(properties[0]->get_get_method() == method0);
+        REQUIRE(properties[0]->get_get_method()->get_id() == method0->get_id());
+        auto method0_return_type = method0->get_return_type()->get_semantic();
+        REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
+
+        auto const& method1 = methods[1];
+        REQUIRE(method1->get_id() == "put_property1");
+        REQUIRE(properties[0]->get_set_method() == method1);
+        REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
+        REQUIRE(!method1->get_return_type());
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; };
+                    Int32 property1 { get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+
+        auto const& namespaces = reader.get_namespaces();
+        auto const& it = namespaces.find("N");
+        REQUIRE(it != namespaces.end());
+        auto const& ns_bodies = it->second->get_namespace_bodies();
+        REQUIRE(ns_bodies.size() == 1);
+        auto const& interfaces = ns_bodies[0]->get_interfaces();
+        REQUIRE(interfaces.size() == 1);
+
+        REQUIRE(interfaces.find("IControl") != interfaces.end());
+        auto const& model = interfaces.at("IControl");
+
+        auto const& properties = model->get_properties();
+        REQUIRE(properties.size() == 1);
+        REQUIRE(properties[0]->get_id() == "property1");
+        {
+            auto const& property_type = properties[0]->get_type().get_semantic();
+            REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+        }
+        auto const& methods = model->get_methods();
+        REQUIRE(methods.size() == 2);
+        auto const& method0 = methods[0];
+        REQUIRE(method0->get_id() == "put_property1");
+        REQUIRE(properties[0]->get_set_method() == method0);
+        REQUIRE(properties[0]->get_set_method()->get_id() == method0->get_id());
+        REQUIRE(!method0->get_return_type());
+
+        auto const& method1 = methods[1];
+        REQUIRE(method1->get_id() == "get_property1");
+        REQUIRE(properties[0]->get_get_method() == method1);
+        REQUIRE(properties[0]->get_get_method()->get_id() == method1->get_id());
+        auto method1_return_type = method1->get_return_type()->get_semantic();
+        REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int32 property2 { set; };
+                    void draw();
+                    Int32 property1 { set; };
+                    Int32 property2 { get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        auto const& namespaces = reader.get_namespaces();
+        auto const& it = namespaces.find("N");
+        auto const& ns_bodies = it->second->get_namespace_bodies();
+        auto const& interfaces = ns_bodies[0]->get_interfaces();
+        REQUIRE(interfaces.find("IControl") != interfaces.end());
+        auto const& model = interfaces.at("IControl");
+        auto const& methods = model->get_methods();
+        REQUIRE(methods.size() == 5);
+        REQUIRE(methods[0]->get_id() == "get_property1");
+        REQUIRE(methods[1]->get_id() == "put_property2");
+        REQUIRE(methods[2]->get_id() == "draw");
+        REQUIRE(methods[3]->get_id() == "put_property1");
+        REQUIRE(methods[4]->get_id() == "get_property2");
+    }
+}
+
+TEST_CASE("Interface property method name collision test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    void get_property1();
+                    Int32 property1 { get; set; };
+                    void put_property1();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+}
+
+TEST_CASE("Interface invalid property accessor test")
+{
+    {
+        std::istringstream test_set_only_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_set_only_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    // multiple getters
+    {
+        std::istringstream test_double_get_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_double_get_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_double_get_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int32 property1 { get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_double_get_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() >= 1);
+    }
+    // multiple setters
+    {
+        std::istringstream test_double_set_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_double_set_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_double_set_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; };
+                    Int32 property1 { set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_double_set_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() >= 1);
+    }
+    {
+        std::istringstream test_three_acessor_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { set; get; get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_three_acessor_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_add_and_remove_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; add; };
+                    Int32 property2 { get; remove; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_add_and_remove_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 2);
+        REQUIRE(reader.get_num_semantic_errors() == 0);
+    }
+}
+
+TEST_CASE("Interface duplicate property id test")
+{
+    {
+        std::istringstream test_set_only_idl{ R"(
+            namespace N
+            {
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int64 property1 { get; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_set_only_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() >= 1);
+    }
+}
+
+TEST_CASE("Interface property implicit accessors test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl
+            {
+                Int32 property1;
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& properties = model->get_properties();
+    REQUIRE(properties[0]->get_id() == "property1");
+
+    auto const& property_type = properties[0]->get_type().get_semantic();
+    REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
+
+    auto const& methods = model->get_methods();
+    REQUIRE(methods.size() == 2);
+
+    auto const& method0 = methods[0];
+    REQUIRE(method0->get_id() == "get_property1");
+    auto method0_return_type = method0->get_return_type()->get_semantic();
+    REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
+
+    auto const& method1 = methods[1];
+    REQUIRE(method1->get_id() == "put_property1");
+    REQUIRE(!method1->get_return_type());
+}
+
+TEST_CASE("Resolving Interface property type ref test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct S1
+            {
+            };
+
+            interface IControl
+            {
+                S1 property1;
+                M.S2 property2;
+            }
+        }
+        namespace M
+        {
+            struct S2
+            {
+            };
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& properties = model->get_properties();
+    {
+        REQUIRE(properties[0]->get_id() == "property1");
+        auto const& property_type = properties[0]->get_type().get_semantic();
+        REQUIRE(property_type.is_resolved());
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(property_type.get_resolved_target())->get_id() == "S1");
+    }
+    {
+        REQUIRE(properties[1]->get_id() == "property2");
+        auto const& property_type = properties[1]->get_type().get_semantic();
+        REQUIRE(property_type.is_resolved());
+        REQUIRE(std::get<std::shared_ptr<struct_model>>(property_type.get_resolved_target())->get_id() == "S2");
+    }
+}
+
+TEST_CASE("Interface event test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(Int32 sender);
+            interface IControl
+            {
+                event StringListEvent Changed;
+            }
+        }
+    )" };
+    std::vector<std::string> paths = { "Foundation.xmeta" };
+    xmeta_idl_reader reader{ "" , paths };
+    reader.read(test_idl, true);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+
+    auto const& namespaces = reader.get_namespaces();
+    auto const& it = namespaces.find("N");
+    REQUIRE(it != namespaces.end());
+    auto const& ns_bodies = it->second->get_namespace_bodies();
+    REQUIRE(ns_bodies.size() == 1);
+    auto const& interfaces = ns_bodies[0]->get_interfaces();
+    REQUIRE(interfaces.size() == 1);
+
+    REQUIRE(interfaces.find("IControl") != interfaces.end());
+    auto const& model = interfaces.at("IControl");
+
+    auto const& events = model->get_events();
+    REQUIRE(events[0]->get_id() == "Changed");
+
+    auto const& property_type = events[0]->get_type().get_semantic();
+    REQUIRE(property_type.is_resolved());
+    REQUIRE(std::holds_alternative<std::shared_ptr<delegate_model>>(property_type.get_resolved_target()));
+    REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
+}
+
+TEST_CASE("Interface event explicit accessor not allowed test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(Int32 sender);
+            interface IControl
+            {
+                event StringListEvent Changed { add; remove; };
+            }
+        }
+    )" };
+    std::vector<std::string> paths = { "Foundation.xmeta" };
+    xmeta_idl_reader reader{ "" , paths };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() > 0);
+}
+
+TEST_CASE("Interface duplicate event test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    event StringListEvent Changed;
+                    event StringListEvent Changed;
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    event StringListEvent Changed;
+                    event StringStackEvent Changed;
+                }
+                delegate void StringStackEvent(Int32 sender);
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+}
+
+TEST_CASE("Interface event and property name collision test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    event StringListEvent Changed;
+                    Int32 Changed;
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+}
+
+TEST_CASE("Interface event and method name test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    void remove_Changed();
+                    event StringListEvent Changed;
+                    void add_Changed();
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+}
+
+TEST_CASE("Interface circular inheritance test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl requires IListBox
+            {
+                void Paint();
+            }
+            interface ITextBox requires IControl
+            {
+                void SetText(String text);
+            }
+            interface IListBox requires ITextBox
+            {
+               void SetItem(String items);
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() > 0);
+}
+
+TEST_CASE("Interface member declared in inheritance test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires IListBox
+                {
+                    void Paint();
+                }
+                interface IListBox requires ITextBox
+                {
+                    void Paint();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() > 0);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    void get_value();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    void get_value();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    Int32 value;
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    event StringListEvent value;
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl requires IListBox
+                {
+                    Int32 value;
+                }
+                interface IListBox
+                {
+                    event StringListEvent value;
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                delegate void StringListEvent2(Int32 sender);
+                interface IControl requires IListBox
+                {
+                    event StringListEvent value;
+                }
+                interface IListBox
+                {
+                    event StringListEvent2 value;
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
+    }
+}
+
+
+TEST_CASE("Unresolved types interface test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface IControl requires fakebase
+                {
+                    event StringListEvent Changed;
+                    FakeObject obj { get; set; };
+                    FakeObject doSomething2(FakeObject2 test);
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 5);
+    }
+}
+*/

@@ -68,6 +68,7 @@ namespace xlang::xmeta
 
     void xlang_model_pass_1::listen_class_model(std::shared_ptr<class_model> const& model)
     {
+        model->resolve(m_symbols, m_error_manager);
     }
 
     void xlang_model_pass_1::listen_interface_model(std::shared_ptr<interface_model> const& model)
@@ -89,6 +90,7 @@ namespace xlang::xmeta
     {
         if (model->has_circular_inheritance(m_error_manager))
         {
+            // This needs to return or else the next validate step will fail due to stack overflow. 
             return;
         }
         model->validate(m_error_manager);

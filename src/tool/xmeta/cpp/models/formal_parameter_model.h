@@ -26,6 +26,12 @@ namespace xlang::xmeta
             m_type{ std::move(type) }
         { }
 
+        formal_parameter_model(std::string_view const& id, parameter_semantics sem, type_ref&& type) :
+            base_model{ id, 0, "test_only" },
+            m_semantic{ sem },
+            m_type{ std::move(type) }
+        { }
+
         auto const& get_semantic() const noexcept
         {
             return m_semantic;

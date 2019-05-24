@@ -75,6 +75,16 @@ namespace xlang::xmeta
             m_implemented_method_ref{ std::string(overridden_method_ref) }
         { }
 
+        method_model(std::string_view const& id,
+                std::optional<type_ref>&& return_type,
+                std::vector<formal_parameter_model>&& formal_params) : 
+            base_model{ id, 0, "test only" },
+            m_formal_parameters{ std::move(formal_params) },
+            m_return_type{ std::move(return_type) },
+            m_implemented_method_ref{ "" }
+        { }
+
+
         auto const& get_method_association()
         {
             return m_association;
