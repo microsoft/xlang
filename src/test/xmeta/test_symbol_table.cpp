@@ -44,6 +44,7 @@ struct ExpectedFormalParameterModel
     {
         REQUIRE(actual->get_id() == id);
         REQUIRE(actual->get_semantic() == sem);
+        REQUIRE(actual->get_type().get_semantic().is_resolved());
         REQUIRE(actual->get_type() == type);
     }
 
@@ -51,6 +52,7 @@ struct ExpectedFormalParameterModel
     {
         REQUIRE(actual.get_id() == id);
         REQUIRE(actual.get_semantic() == sem);
+        REQUIRE(actual.get_type().get_semantic().is_resolved());
         REQUIRE(actual.get_type() == type);
     }
 };
@@ -69,6 +71,38 @@ struct ExpectedMethodModel
     {
         REQUIRE(actual->get_id() == id);
         REQUIRE(actual->get_semantic().is_static == sem.is_static);
+        REQUIRE(actual->get_return_type()->get_semantic().is_resolved());
+        REQUIRE(actual->get_return_type() == return_type);
+
+        auto const& actual_params = actual->get_formal_parameters();
+        REQUIRE(actual_params.size() == params.size());
+        for (size_t i = 0; i < params.size(); i++)
+        {
+            params[i].VerifyType(actual_params[i]);
+        }
+    }
+};
+
+struct ExpectedInterfaceModel
+{
+
+};
+
+struct ExpectedDelegateModel
+{
+    std::string id;
+    std::string fully_qualified_id;
+    std::optional<type_ref> return_type;
+    std::vector<ExpectedFormalParameterModel> params;
+
+    ExpectedDelegateModel(std::string const& id, std::string const& fully_qualified_id, std::optional<type_ref> const& return_type, std::vector<ExpectedFormalParameterModel> params)
+        : id{ id }, fully_qualified_id{ fully_qualified_id }, return_type{ return_type }, params{ params } {}
+
+    void VerifyType(std::shared_ptr<delegate_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        REQUIRE(actual->get_return_type()->get_semantic().is_resolved());
         REQUIRE(actual->get_return_type() == return_type);
 
         auto const& actual_params = actual->get_formal_parameters();
@@ -104,7 +138,6 @@ struct ExpectedEnumModel
     }
 };
 
-
 struct ExpectedStructModel
 {
     std::string id;
@@ -123,6 +156,7 @@ struct ExpectedStructModel
         REQUIRE(actual_fields.size() == fields.size());
         for (size_t i = 0; i < fields.size(); i++)
         {
+            REQUIRE(actual_fields.at(i).first.get_semantic().is_resolved());
             REQUIRE(actual_fields.at(i).first == fields.at(i).first);
             REQUIRE(actual_fields.at(i).second == fields.at(i).second);
         }
@@ -136,11 +170,12 @@ struct ExpectedNamespaceModel
     std::vector<ExpectedNamespaceModel> children;
     std::vector<ExpectedStructModel> structs;
     std::vector<ExpectedEnumModel> enums;
+    std::vector<ExpectedDelegateModel> delegates;
 
     ExpectedNamespaceModel(std::string const& id, 
             std::string const& fully_qualified_id, 
             std::vector<ExpectedNamespaceModel> namespaces, 
-            std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel>> declarations)
+            std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel, ExpectedDelegateModel>> declarations)
         : id{ id }, fully_qualified_id{ fully_qualified_id }, children { namespaces } 
     {
         for (auto & declaration : declarations)
@@ -152,6 +187,10 @@ struct ExpectedNamespaceModel
             if (std::holds_alternative<ExpectedEnumModel>(declaration))
             {
                 enums.push_back(std::get<ExpectedEnumModel>(declaration));
+            }
+            if (std::holds_alternative<ExpectedDelegateModel>(declaration))
+            {
+                delegates.push_back(std::get<ExpectedDelegateModel>(declaration));
             }
         }
     }
@@ -169,6 +208,22 @@ struct ExpectedNamespaceModel
                 auto const& it = actual_structs.find(expected_struct.id);
                 REQUIRE(it != actual_structs.end());
                 expected_struct.VerifyType(it->second);
+            }
+
+            auto const& actual_delegates = actual_bodies->get_delegates();
+            for (auto expected_delegate : delegates)
+            {
+                auto const& it = actual_delegates.find(expected_delegate.id);
+                REQUIRE(it != actual_delegates.end());
+                expected_delegate.VerifyType(it->second);
+            }
+
+            auto const& actual_enums = actual_bodies->get_enums();
+            for (auto epected_enum : enums)
+            {
+                auto const& it = actual_enums.find(epected_enum.id);
+                REQUIRE(it != actual_enums.end());
+                epected_enum.VerifyType(it->second);
             }
         }
 
@@ -307,33 +362,17 @@ TEST_CASE("Delegate test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto delegates = ns_bodies[0]->get_delegates();
-    REQUIRE(delegates.size() == 2);
+    ExpectedEnumModel E{ "E", "N.E" , enum_semantics::Int32, {} };
+    ExpectedEnumModel F{ "F", "N.F" , enum_semantics::Int32, {} };
+    ExpectedDelegateModel D1{ "D1", "N.D1", type_ref{ simple_type::Int32 }, { 
+        ExpectedFormalParameterModel{ "i", parameter_semantics::in, type_ref{ simple_type::Int32 } },
+        ExpectedFormalParameterModel{ "d", parameter_semantics::in, type_ref{ simple_type::Double } },
+        ExpectedFormalParameterModel{ "e", parameter_semantics::in, type_ref{ "N.E" } },
+    } };
+    ExpectedDelegateModel D2{ "D2", "N.D2", std::nullopt, {} };
 
-    REQUIRE(delegates.find("D1") != delegates.end());
-    REQUIRE(delegates.at("D1")->get_return_type() != std::nullopt);
-    auto del0_return_type = delegates.at("D1")->get_return_type()->get_semantic();
-    REQUIRE((del0_return_type.is_resolved() && std::get<simple_type>(del0_return_type.get_resolved_target()) == simple_type::Int32));
-    auto del0_formal_params = delegates.at("D1")->get_formal_parameters();
-    REQUIRE(del0_formal_params.size() == 3);
-    auto del0_formal_param_0_type = del0_formal_params[0].get_type().get_semantic();
-    auto del0_formal_param_1_type = del0_formal_params[1].get_type().get_semantic();
-    auto del0_formal_param_2_type = del0_formal_params[2].get_type().get_semantic();
-    REQUIRE(del0_formal_params[0].get_id() == "i");
-    REQUIRE(del0_formal_params[1].get_id() == "d");
-    REQUIRE(del0_formal_params[2].get_id() == "e");
-    REQUIRE((del0_formal_param_0_type.is_resolved() && std::get<simple_type>(del0_formal_param_0_type.get_resolved_target()) == simple_type::Int32));
-    REQUIRE((del0_formal_param_1_type.is_resolved() && std::get<simple_type>(del0_formal_param_1_type.get_resolved_target()) == simple_type::Double));
-    REQUIRE(del0_formal_param_2_type.is_resolved());
-    REQUIRE(std::get<std::shared_ptr<enum_model>>(del0_formal_param_2_type.get_resolved_target())->get_id() == "E");
-    REQUIRE(delegates.find("D2") != delegates.end());
-    REQUIRE(delegates.at("D2")->get_return_type() == std::nullopt);
-    REQUIRE(delegates.at("D2")->get_formal_parameters().empty());
+    ExpectedNamespaceModel expected{ "N", "N", {}, { E, F, D1, D2 } };
+    expected.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Struct test")
@@ -455,7 +494,6 @@ TEST_CASE("Struct duplicate member test")
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
-    auto namespaces = reader.get_namespaces();
 }
 
 TEST_CASE("Resolving delegates type ref test")
@@ -478,44 +516,14 @@ TEST_CASE("Resolving delegates type ref test")
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-
-    auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto ns = it->second;
-    REQUIRE(ns->get_namespace_bodies().size() == 1);
-    auto ns_body = ns->get_namespace_bodies()[0];
-
-    auto delegates = ns_body->get_delegates();
-    REQUIRE(delegates.size() == 1);
-    REQUIRE(delegates.find("D1") != delegates.end());
-    auto delegate1 = delegates.at("D1");
-    auto return_semantic = delegate1->get_return_type()->get_semantic();
-    REQUIRE(return_semantic.is_resolved());
-    auto resolved_return_semantic = return_semantic.get_resolved_target();
-    REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(resolved_return_semantic));
-    REQUIRE(std::get<std::shared_ptr<enum_model>>(resolved_return_semantic)->get_id() == "E1");
-
-    {
-        auto param = delegate1->get_formal_parameters()[0];
-        param.get_type().get_semantic();
-        REQUIRE(param.get_id() == "param1");
-        auto type = param.get_type().get_semantic();
-        REQUIRE(type.is_resolved());
-        auto target = type.get_resolved_target();
-        REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(target));
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(target)->get_id() == "S1");
-    }
-    {
-        auto param = delegate1->get_formal_parameters()[1];
-        param.get_type().get_semantic();
-        REQUIRE(param.get_id() == "param2");
-        auto type = param.get_type().get_semantic();
-        REQUIRE(type.is_resolved());
-        auto target = type.get_resolved_target();
-        REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(target));
-        REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
-    }
+    ExpectedStructModel S1{ "S1", "N.S1", {} };
+    ExpectedEnumModel E1{ "E1", "N.E1" , enum_semantics::Int32, {} };
+    ExpectedDelegateModel D1{ "D1", "N.D1", type_ref{ "N.E1" }, {
+        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, type_ref{ "N.S1" } },
+        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, type_ref{ "N.E1" } },
+    } };
+    ExpectedNamespaceModel expected{ "N", "N", {}, { S1, E1, D1 } };
+    expected.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Resolving struct type ref test")
@@ -538,40 +546,17 @@ TEST_CASE("Resolving struct type ref test")
             };
         }
     )" };
-
     xmeta_idl_reader reader{ "" };
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-
-    auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto ns = it->second;
-    REQUIRE(ns->get_namespace_bodies().size() == 1);
-    auto ns_body = ns->get_namespace_bodies()[0];
-
-    auto structs = ns_body->get_structs();
-    REQUIRE(structs.find("S2") != structs.end());
-    auto struct2 = structs.at("S2");
-    auto fields = struct2->get_fields();
-    REQUIRE(fields.size() == 2);
-    {
-        REQUIRE(fields[0].second == "field_1");
-        auto type = fields[0].first.get_semantic();
-        REQUIRE(type.is_resolved());
-        auto target = type.get_resolved_target();
-        REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(target));
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(target)->get_id() == "S1");
-    }
-    {
-        REQUIRE(fields[1].second == "field_2");
-        auto type = fields[1].first.get_semantic();
-        REQUIRE(type.is_resolved());
-        auto target = type.get_resolved_target();
-        REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(target));
-        REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
-
-    }
+    ExpectedStructModel S1{ "S1", "N.S1", {} };
+    ExpectedEnumModel E1{ "E1", "N.E1" , enum_semantics::Int32, {} };
+    ExpectedStructModel S2{ "S2", "N.S2", {
+        { type_ref{ "N.S1" } , "field_1" },
+        { type_ref{ "N.E1" } , "field_2" },
+    } };
+    ExpectedNamespaceModel expected{ "N", "N", {}, { S1, E1, S2 } };
+    expected.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Resolving type ref across namespaces test")
@@ -602,37 +587,24 @@ TEST_CASE("Resolving type ref across namespaces test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto namespaces = reader.get_namespaces();
-    auto it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto ns = it->second;
-    REQUIRE(ns->get_namespace_bodies().size() == 1);
-    auto ns_body = ns->get_namespace_bodies()[0];
+    ExpectedStructModel S1{ "S1", "A.S1", {} };
+    
+    ExpectedDelegateModel D1{ "D1", "N.D1", type_ref{ simple_type::Boolean }, {
+        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, type_ref{ "A.S1" } },
+        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, type_ref{ "B.C.E1" } } } 
+    };
 
-    auto delegates = ns_body->get_delegates();
-    REQUIRE(delegates.size() == 1);
-    REQUIRE(delegates.find("D1") != delegates.end());
-    auto delegate1 = delegates.at("D1");
-    {
-        auto param = delegate1->get_formal_parameters()[0];
-        param.get_type().get_semantic();
-        REQUIRE(param.get_id() == "param1");
-        auto type = param.get_type().get_semantic();
-        REQUIRE(type.is_resolved());
-        auto target = type.get_resolved_target();
-        REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(target));
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(target)->get_id() == "S1");
-    }
-    {
-        auto param = delegate1->get_formal_parameters()[1];
-        param.get_type().get_semantic();
-        REQUIRE(param.get_id() == "param2");
-        auto type = param.get_type().get_semantic();
-        REQUIRE(type.is_resolved());
-        auto target = type.get_resolved_target();
-        REQUIRE(std::holds_alternative<std::shared_ptr<enum_model>>(target));
-        REQUIRE(std::get<std::shared_ptr<enum_model>>(target)->get_id() == "E1");
-    }
+    ExpectedEnumModel E1{ "E1", "B.C.E1" , enum_semantics::Int32, {} };
+
+    ExpectedNamespaceModel A{ "A", "A", {}, { S1 } };
+    ExpectedNamespaceModel N{ "N", "N", {}, { D1 } };
+
+    ExpectedNamespaceModel C{ "C", "B.C", {}, { E1 } };
+    ExpectedNamespaceModel B{ "B", "B", { C }, { } };
+
+    A.VerifyType(find_namespace(reader, "A"));
+    N.VerifyType(find_namespace(reader, "N"));
+    B.VerifyType(find_namespace(reader, "B"));
 }
 
 // Disabling and coming back later

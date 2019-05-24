@@ -73,12 +73,74 @@ namespace xlang::xmeta
         m_semantic.resolve(o);
     }
 
+    // To be use for testing purposes only
     bool type_ref::operator==(type_ref const& right_ref) const
     {
+        if (!m_semantic.is_resolved() && right_ref.get_semantic().is_resolved())
+        {
+            std::string left_type = get_semantic().get_ref_name();
+            type_semantics right_type = right_ref.get_semantic().get_resolved_target();
+
+            if (std::holds_alternative<std::shared_ptr<class_model>>(right_type))
+            {
+                return left_type == std::get<std::shared_ptr<class_model>>(right_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<interface_model>>(right_type))
+            {
+                return left_type == std::get<std::shared_ptr<interface_model>>(right_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<enum_model>>(right_type))
+            {
+                return left_type == std::get<std::shared_ptr<enum_model>>(right_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<struct_model>>(right_type))
+            {
+                return left_type == std::get<std::shared_ptr<struct_model>>(right_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<delegate_model>>(right_type))
+            {
+                return left_type == std::get<std::shared_ptr<delegate_model>>(right_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(right_type))
+            {
+                // TODO: maybe also check the type?
+                return left_type == std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(right_type)->FullyQualifiedName();
+            }
+        }
+        if (m_semantic.is_resolved() && !right_ref.get_semantic().is_resolved())
+        {
+            std::string right_type = right_ref.get_semantic().get_ref_name();
+            type_semantics left_type = m_semantic.get_resolved_target();
+
+            if (std::holds_alternative<std::shared_ptr<class_model>>(left_type))
+            {
+                return right_type == std::get<std::shared_ptr<class_model>>(left_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<interface_model>>(left_type))
+            {
+                return right_type == std::get<std::shared_ptr<interface_model>>(left_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<enum_model>>(left_type))
+            {
+                return right_type == std::get<std::shared_ptr<enum_model>>(left_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<struct_model>>(left_type))
+            {
+                return right_type == std::get<std::shared_ptr<struct_model>>(left_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<delegate_model>>(left_type))
+            {
+                return right_type == std::get<std::shared_ptr<delegate_model>>(left_type)->get_fully_qualified_id();
+            }
+            if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(left_type))
+            {
+                // TODO: maybe also check the type?
+                return right_type == std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(left_type)->FullyQualifiedName();
+            }
+        }
         if (m_semantic.is_resolved() && right_ref.get_semantic().is_resolved())
         {
             type_semantics left_type = m_semantic.get_resolved_target();
-
             type_semantics right_type = right_ref.get_semantic().get_resolved_target();
             if (std::holds_alternative<simple_type>(left_type) && std::holds_alternative<simple_type>(right_type))
             {
@@ -90,28 +152,28 @@ namespace xlang::xmeta
             }
             if (std::holds_alternative<std::shared_ptr<class_model>>(left_type) && std::holds_alternative<std::shared_ptr<class_model>>(right_type))
             {
-                return std::get<std::shared_ptr<class_model>>(left_type)->get_fully_qualified_id() == std::get<std::shared_ptr<class_model>>(right_type)->get_fully_qualified_id();
+                return std::get<std::shared_ptr<class_model>>(left_type) == std::get<std::shared_ptr<class_model>>(right_type);
             }
             if (std::holds_alternative<std::shared_ptr<interface_model>>(left_type) && std::holds_alternative<std::shared_ptr<interface_model>>(right_type))
             {
-                return std::get<std::shared_ptr<interface_model>>(left_type)->get_fully_qualified_id() == std::get<std::shared_ptr<interface_model>>(right_type)->get_fully_qualified_id();
+                return std::get<std::shared_ptr<interface_model>>(left_type) == std::get<std::shared_ptr<interface_model>>(right_type);
             }
             if (std::holds_alternative<std::shared_ptr<enum_model>>(left_type) && std::holds_alternative<std::shared_ptr<enum_model>>(right_type))
             {
-                return std::get<std::shared_ptr<enum_model>>(left_type)->get_fully_qualified_id() == std::get<std::shared_ptr<enum_model>>(right_type)->get_fully_qualified_id();
+                return std::get<std::shared_ptr<enum_model>>(left_type) == std::get<std::shared_ptr<enum_model>>(right_type);
             }
             if (std::holds_alternative<std::shared_ptr<struct_model>>(left_type) && std::holds_alternative<std::shared_ptr<struct_model>>(right_type))
             {
-                return std::get<std::shared_ptr<struct_model>>(left_type)->get_fully_qualified_id() == std::get<std::shared_ptr<struct_model>>(right_type)->get_fully_qualified_id();
+                return std::get<std::shared_ptr<struct_model>>(left_type) == std::get<std::shared_ptr<struct_model>>(right_type);
             }
             if (std::holds_alternative<std::shared_ptr<delegate_model>>(left_type) && std::holds_alternative<std::shared_ptr<delegate_model>>(right_type))
             {
-                return std::get<std::shared_ptr<delegate_model>>(left_type)->get_fully_qualified_id() == std::get<std::shared_ptr<delegate_model>>(right_type)->get_fully_qualified_id();
+                return std::get<std::shared_ptr<delegate_model>>(left_type) == std::get<std::shared_ptr<delegate_model>>(right_type);
             }
             if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(left_type) && std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(right_type))
             {
                 // TODO: maybe also check the type?
-                return std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(left_type)->FullyQualifiedName() == std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(right_type)->FullyQualifiedName();
+                return std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(left_type) == std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(right_type);
             }
         }
         return false;

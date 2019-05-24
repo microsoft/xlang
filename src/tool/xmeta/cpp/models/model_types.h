@@ -45,6 +45,7 @@ namespace xlang::xmeta
 
         void set_semantic(object_type o);
 
+        // To be use for testing purposes only
         bool operator==(type_ref const& right_ref) const;
 
     private:
