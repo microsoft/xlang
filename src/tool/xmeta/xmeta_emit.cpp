@@ -1,3 +1,4 @@
+#include "xmeta_models.h"
 #include "xmeta_emit.h"
 #include <winrt/base.h>
 #include <locale>
@@ -8,6 +9,7 @@
 #include <codecvt>
 #include <locale>
 #include <variant>
+
 using namespace winrt;
 using namespace xlang::meta::reader;
 using namespace xlang::meta::writer;
@@ -175,6 +177,7 @@ namespace
             return std::get<object_type>(ts);
         }
         assert(false);
+        return "";
     }
 
     std::string remove_extension(const std::string& filename) {
@@ -381,9 +384,11 @@ namespace xlang::xmeta
 
         std::shared_ptr<method_model> get_method_model = model->get_get_method();
         assert(get_method_model != nullptr); //There must always be a get
-        auto const& iter = method_defs.find(get_method_model->get_id());
-        assert(iter != method_defs.end());
-        token_get_method = iter->second;
+        {
+            auto const& iter = method_defs.find(get_method_model->get_id());
+            assert(iter != method_defs.end());
+            token_get_method = iter->second;
+        }
 
         std::shared_ptr<method_model> set_method_model = model->get_set_method();
         if (set_method_model != nullptr)

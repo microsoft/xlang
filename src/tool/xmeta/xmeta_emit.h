@@ -1,5 +1,6 @@
 #pragma once
-#include "xmeta_models.h"
+
+#include "base_model.h"
 #include "xlang_model_listener.h"
 #include <winrt/base.h>
 #include <vector>

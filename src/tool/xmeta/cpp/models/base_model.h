@@ -10,11 +10,12 @@
 
 #include "xlang_error.h"
 #include "meta_reader.h"
+#include "model_ref.h"
+
 namespace xlang::xmeta
 {
     struct namespace_body_model;
     struct namespace_model;
-
     struct namespace_member_model;
 
     struct using_alias_directive_model;
@@ -30,19 +31,18 @@ namespace xlang::xmeta
     struct method_model;
     struct event_model;
 
+    struct formal_parameter_model;
     struct symbol_table;
     struct compilation_unit;
-
     struct type_ref;
 
-    using class_type_semantics = std::variant<std::monostate,
-        std::shared_ptr<class_model>,
-        std::shared_ptr<enum_model>,
-        std::shared_ptr<interface_model>,
-        std::shared_ptr<struct_model>,
-        std::shared_ptr<delegate_model>, 
-        std::shared_ptr<xlang::meta::reader::TypeDef>, 
-        std::less<>>;
+    enum class compilation_error
+    {
+        passed = 0,
+        symbol_exists,
+        accessor_exists
+    };
+
 
     enum class method_association
     {
@@ -51,6 +51,44 @@ namespace xlang::xmeta
         Event,
         Constructor
     };
+
+    enum class simple_type
+    {
+        Boolean,
+        String,
+        Int8,
+        Int16,
+        Int32,
+        Int64,
+        UInt8,
+        UInt16,
+        UInt32,
+        UInt64,
+        Char16,
+        Single,
+        Double,
+    };
+
+    struct object_type {};
+
+    using class_type_semantics = std::variant<std::monostate,
+        std::shared_ptr<class_model>,
+        std::shared_ptr<enum_model>,
+        std::shared_ptr<interface_model>,
+        std::shared_ptr<struct_model>,
+        std::shared_ptr<delegate_model>,
+        std::shared_ptr<xlang::meta::reader::TypeDef>,
+        std::less<>>;
+
+    using type_semantics = std::variant<
+        std::shared_ptr<class_model>,
+        std::shared_ptr<enum_model>,
+        std::shared_ptr<interface_model>,
+        std::shared_ptr<struct_model>,
+        std::shared_ptr<delegate_model>,
+        std::shared_ptr<xlang::meta::reader::TypeDef>,
+        simple_type,
+        object_type>;
 
     struct base_model
     {

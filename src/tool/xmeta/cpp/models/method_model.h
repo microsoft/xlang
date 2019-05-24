@@ -5,10 +5,8 @@
 #include <vector>
 
 #include "base_model.h"
-#include "formal_parameter_model.h"
-#include "model_ref.h"
-#include "model_types.h"
 #include "compilation_unit.h"
+#include "formal_parameter_model.h"
 
 namespace xlang::xmeta
 {
@@ -110,45 +108,14 @@ namespace xlang::xmeta
             return m_semantic;
         }
 
-        void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept
-        {
-            assert(ref != nullptr);
-            m_implemented_method_ref.resolve(ref);
-        }
-
         void add_formal_parameter(formal_parameter_model&& formal_param)
         {
             m_formal_parameters.emplace_back(std::move(formal_param));
         }
 
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id)
-        {
-            if (m_return_type)
-            {
-                if (!m_return_type->get_semantic().is_resolved())
-                {
-                    // TODO: Once we have using directives, we will need to go through many fully_qualified_ids here
-                    std::string const& ref_name = m_return_type->get_semantic().get_ref_name();
-                    std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : fully_qualified_id + "." + ref_name;
-                    auto const& iter = symbols.get_symbol(symbol);
-                    if (std::holds_alternative<std::monostate>(iter))
-                    {
-                        if (m_association == method_association::None) // this check is in place so we don't report  the error twice
-                        {
-                            error_manager.write_unresolved_type_error(get_decl_line(), symbol);
-                        }
-                    }
-                    else
-                    {
-                        m_return_type->set_semantic(iter);
-                    }
-                }
-            }
-            for (formal_parameter_model & param : m_formal_parameters)
-            {
-                param.resolve(symbols, error_manager, fully_qualified_id, m_association);
-            }
-        }
+        void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept;
+
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id);
 
     private:
         method_semantics m_semantic;

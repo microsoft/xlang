@@ -675,8 +675,6 @@ TEST_CASE("Resolving interface method type ref test")
     REQUIRE(std::get<std::shared_ptr<enum_model>>(return_type.get_resolved_target())->get_id() == "E1");
 
     auto const& params = methods[0]->get_formal_parameters();
-    auto const& param_type = params[0].get_type().get_semantic();
-    auto const& properties = model->get_properties();
     {
         REQUIRE(params[0].get_id() == "p1");
         auto const& param_type = params[0].get_type().get_semantic();

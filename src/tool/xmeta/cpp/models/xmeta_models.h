@@ -11,3 +11,4 @@
 #include "property_model.h"
 #include "struct_model.h"
 #include "compilation_unit.h"
+#include "formal_parameter_model.h"
