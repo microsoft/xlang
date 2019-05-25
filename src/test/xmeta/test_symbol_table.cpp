@@ -32,12 +32,99 @@ auto find_namespace_body(xmeta_idl_reader & reader, std::string name, int index)
     return ns_bodies[index];
 }
 
+struct ExpectedEnumRef
+{
+    std::string fully_qualified_id;
+    ExpectedEnumRef(std::string_view id) : fully_qualified_id{ id } {}
+};
+
+struct ExpectedDelegateRef
+{
+    std::string fully_qualified_id;
+    ExpectedDelegateRef(std::string_view id) : fully_qualified_id{ id } {}
+};
+
+struct ExpectedStructRef
+{
+    std::string fully_qualified_id;
+    ExpectedStructRef(std::string_view id) : fully_qualified_id{ id } {}
+};
+
+struct ExpectedTypeRefModel
+{
+   std::variant<ExpectedEnumRef,
+        ExpectedDelegateRef,
+        ExpectedStructRef,
+        simple_type,
+        object_type> type;
+
+    ExpectedTypeRefModel(ExpectedDelegateRef const& type)
+        : type{ type } {}
+
+    ExpectedTypeRefModel(ExpectedEnumRef const& type)
+        : type{ type } {}
+
+    ExpectedTypeRefModel(ExpectedStructRef const& type)
+        : type{ type } {}
+
+    ExpectedTypeRefModel(object_type const& type)
+        : type{ type } {}
+
+    ExpectedTypeRefModel(simple_type const& type)
+        : type{ type } {}
+
+    void VerifyType(type_ref const& actual)
+    {
+        REQUIRE(actual.get_semantic().is_resolved());
+        //std::get<simple_type>(method1_return_type.get_resolved_target());
+        auto const& target = actual.get_semantic().get_resolved_target();
+        //if (std::holds_alternative<std::shared_ptr<class_model>>(target))
+        //{
+        //    auto const& actual_model = std::get<std::shared_ptr<class_model>>(target);
+        //    REQUIRE(actual_model->get_fully_qualified_id() == fully_qualified_id_or_type);
+        //    REQUIRE(std::holds_alternative<object_type>(type));
+        //}
+        if (std::holds_alternative<std::shared_ptr<delegate_model>>(target))
+        {
+            REQUIRE(std::holds_alternative<ExpectedDelegateRef>(type));
+            auto const& model = std::get<ExpectedDelegateRef>(type);
+            auto const& actual_model = std::get<std::shared_ptr<delegate_model>>(target);
+            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+        }
+        if (std::holds_alternative<std::shared_ptr<struct_model>>(target))
+        {
+            REQUIRE(std::holds_alternative<ExpectedStructRef>(type));
+            auto const& model = std::get<ExpectedStructRef>(type);
+            auto const& actual_model = std::get<std::shared_ptr<struct_model>>(target);
+            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+        }
+        if (std::holds_alternative<std::shared_ptr<enum_model>>(target))
+        {
+            REQUIRE(std::holds_alternative<ExpectedEnumRef>(type));
+            auto const& model = std::get<ExpectedEnumRef>(type);
+            auto const& actual_model = std::get<std::shared_ptr<enum_model>>(target);
+            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+        }
+        if (std::holds_alternative<simple_type>(target))
+        {
+            REQUIRE(std::holds_alternative<simple_type>(type));
+            auto const& model = std::get<simple_type>(type);
+            auto const& actual_model = std::get<simple_type>(target);
+            REQUIRE(actual_model == model);
+        }
+        if (std::holds_alternative<object_type>(target))
+        {
+            REQUIRE(std::holds_alternative<object_type>(type));
+        }
+    }
+};
+
 struct ExpectedFormalParameterModel
 {
     std::string id;
     parameter_semantics sem;
-    type_ref type;
-    ExpectedFormalParameterModel(std::string const& name, parameter_semantics const& sem, type_ref const& type)
+    ExpectedTypeRefModel type;
+    ExpectedFormalParameterModel(std::string const& name, parameter_semantics const& sem, ExpectedTypeRefModel const& type)
         : id{ name }, sem{ sem }, type{ type } {}
 
     void VerifyType(std::shared_ptr<formal_parameter_model> const& actual)
@@ -45,7 +132,7 @@ struct ExpectedFormalParameterModel
         REQUIRE(actual->get_id() == id);
         REQUIRE(actual->get_semantic() == sem);
         REQUIRE(actual->get_type().get_semantic().is_resolved());
-        REQUIRE(actual->get_type() == type);
+        type.VerifyType(actual->get_type());
     }
 
     void VerifyType(formal_parameter_model const& actual)
@@ -53,7 +140,7 @@ struct ExpectedFormalParameterModel
         REQUIRE(actual.get_id() == id);
         REQUIRE(actual.get_semantic() == sem);
         REQUIRE(actual.get_type().get_semantic().is_resolved());
-        REQUIRE(actual.get_type() == type);
+        type.VerifyType(actual.get_type());
     }
 };
 
@@ -61,10 +148,10 @@ struct ExpectedMethodModel
 {
     std::string id;
     method_semantics sem;
-    std::optional<type_ref> return_type;
+    std::optional<ExpectedTypeRefModel> return_type;
     std::vector<ExpectedFormalParameterModel> params;
 
-    ExpectedMethodModel(std::string const& name, method_semantics const& sem, std::optional<type_ref> const& return_type, std::vector<ExpectedFormalParameterModel> params)
+    ExpectedMethodModel(std::string const& name, method_semantics const& sem, std::optional<ExpectedTypeRefModel> const& return_type, std::vector<ExpectedFormalParameterModel> params)
         : id{ name }, sem{ sem }, return_type{ return_type }, params{ params } {}
 
     void VerifyType(std::shared_ptr<method_model> const& actual)
@@ -72,7 +159,16 @@ struct ExpectedMethodModel
         REQUIRE(actual->get_id() == id);
         REQUIRE(actual->get_semantic().is_static == sem.is_static);
         REQUIRE(actual->get_return_type()->get_semantic().is_resolved());
-        REQUIRE(actual->get_return_type() == return_type);
+
+        if (return_type == std::nullopt)
+        {
+            REQUIRE(actual->get_return_type() == std::nullopt);
+        }
+        else
+        {
+            REQUIRE(actual->get_return_type()->get_semantic().is_resolved());
+            return_type->VerifyType(*actual->get_return_type());
+        }
 
         auto const& actual_params = actual->get_formal_parameters();
         REQUIRE(actual_params.size() == params.size());
@@ -85,25 +181,33 @@ struct ExpectedMethodModel
 
 struct ExpectedInterfaceModel
 {
-
+    std::vector<ExpectedMethodModel> methods;
 };
 
 struct ExpectedDelegateModel
 {
     std::string id;
     std::string fully_qualified_id;
-    std::optional<type_ref> return_type;
+    std::optional<ExpectedTypeRefModel> return_type;
     std::vector<ExpectedFormalParameterModel> params;
 
-    ExpectedDelegateModel(std::string const& id, std::string const& fully_qualified_id, std::optional<type_ref> const& return_type, std::vector<ExpectedFormalParameterModel> params)
+    ExpectedDelegateModel(std::string const& id, std::string const& fully_qualified_id, std::optional<ExpectedTypeRefModel> const& return_type, std::vector<ExpectedFormalParameterModel> params)
         : id{ id }, fully_qualified_id{ fully_qualified_id }, return_type{ return_type }, params{ params } {}
 
     void VerifyType(std::shared_ptr<delegate_model> const& actual)
     {
         REQUIRE(actual->get_id() == id);
         REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
-        REQUIRE(actual->get_return_type()->get_semantic().is_resolved());
-        REQUIRE(actual->get_return_type() == return_type);
+
+        if (return_type == std::nullopt)
+        {
+            REQUIRE(actual->get_return_type() == std::nullopt);
+        }
+        else
+        {
+            REQUIRE(actual->get_return_type()->get_semantic().is_resolved());
+            return_type->VerifyType(*actual->get_return_type());
+        }
 
         auto const& actual_params = actual->get_formal_parameters();
         REQUIRE(actual_params.size() == params.size());
@@ -142,9 +246,9 @@ struct ExpectedStructModel
 {
     std::string id;
     std::string fully_qualified_id;
-    std::vector<std::pair<type_ref, std::string>> fields;
+    std::vector<std::pair<ExpectedTypeRefModel, std::string>> fields;
 
-    ExpectedStructModel(std::string const& id, std::string const& fully_qualified_id, std::vector<std::pair<type_ref, std::string>> fields)
+    ExpectedStructModel(std::string const& id, std::string const& fully_qualified_id, std::vector<std::pair<ExpectedTypeRefModel, std::string>> fields)
         : id{ id }, fully_qualified_id { fully_qualified_id }, fields{ fields } {}
 
     void VerifyType(std::shared_ptr<struct_model> const& actual)
@@ -157,7 +261,7 @@ struct ExpectedStructModel
         for (size_t i = 0; i < fields.size(); i++)
         {
             REQUIRE(actual_fields.at(i).first.get_semantic().is_resolved());
-            REQUIRE(actual_fields.at(i).first == fields.at(i).first);
+            fields.at(i).first.VerifyType(actual_fields.at(i).first);
             REQUIRE(actual_fields.at(i).second == fields.at(i).second);
         }
     }
@@ -364,10 +468,10 @@ TEST_CASE("Delegate test")
 
     ExpectedEnumModel E{ "E", "N.E" , enum_semantics::Int32, {} };
     ExpectedEnumModel F{ "F", "N.F" , enum_semantics::Int32, {} };
-    ExpectedDelegateModel D1{ "D1", "N.D1", type_ref{ simple_type::Int32 }, { 
-        ExpectedFormalParameterModel{ "i", parameter_semantics::in, type_ref{ simple_type::Int32 } },
-        ExpectedFormalParameterModel{ "d", parameter_semantics::in, type_ref{ simple_type::Double } },
-        ExpectedFormalParameterModel{ "e", parameter_semantics::in, type_ref{ "N.E" } },
+    ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ simple_type::Int32 }, {
+        ExpectedFormalParameterModel{ "i", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } },
+        ExpectedFormalParameterModel{ "d", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Double } },
+        ExpectedFormalParameterModel{ "e", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef { E.fully_qualified_id } } },
     } };
     ExpectedDelegateModel D2{ "D2", "N.D2", std::nullopt, {} };
 
@@ -402,17 +506,17 @@ TEST_CASE("Struct test")
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedStructModel expected_struct{ "S", "N.S" , { 
-        { type_ref{ simple_type::Boolean } , "field_1" },
-        { type_ref{ simple_type::String } , "field_2" },
-        { type_ref{ simple_type::Int16 } , "field_3" },
-        { type_ref{ simple_type::Int32 } , "field_4" },
-        { type_ref{ simple_type::Int64 } , "field_5" },
-        { type_ref{ simple_type::UInt8 } , "field_6" },
-        { type_ref{ simple_type::UInt16 } , "field_7" },
-        { type_ref{ simple_type::UInt32 } , "field_8" },
-        { type_ref{ simple_type::Char16 } , "field_9" },
-        { type_ref{ simple_type::Single } , "field_10" },
-        { type_ref{ simple_type::Double } , "field_11" }
+        { ExpectedTypeRefModel{ simple_type::Boolean } , "field_1" },
+        { ExpectedTypeRefModel{ simple_type::String } , "field_2" },
+        { ExpectedTypeRefModel{ simple_type::Int16 } , "field_3" },
+        { ExpectedTypeRefModel{ simple_type::Int32 } , "field_4" },
+        { ExpectedTypeRefModel{ simple_type::Int64 } , "field_5" },
+        { ExpectedTypeRefModel{ simple_type::UInt8 } , "field_6" },
+        { ExpectedTypeRefModel{ simple_type::UInt16 } , "field_7" },
+        { ExpectedTypeRefModel{ simple_type::UInt32 } , "field_8" },
+        { ExpectedTypeRefModel{ simple_type::Char16 } , "field_9" },
+        { ExpectedTypeRefModel{ simple_type::Single } , "field_10" },
+        { ExpectedTypeRefModel{ simple_type::Double } , "field_11" }
     } };
     ExpectedNamespaceModel expected_namespace{ "N", "N", {}, { expected_struct } };
     expected_namespace.VerifyType(find_namespace(reader, "N"));
@@ -518,9 +622,9 @@ TEST_CASE("Resolving delegates type ref test")
     REQUIRE(reader.get_num_syntax_errors() == 0);
     ExpectedStructModel S1{ "S1", "N.S1", {} };
     ExpectedEnumModel E1{ "E1", "N.E1" , enum_semantics::Int32, {} };
-    ExpectedDelegateModel D1{ "D1", "N.D1", type_ref{ "N.E1" }, {
-        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, type_ref{ "N.S1" } },
-        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, type_ref{ "N.E1" } },
+    ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id } }, {
+        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id } } },
+        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id }  } },
     } };
     ExpectedNamespaceModel expected{ "N", "N", {}, { S1, E1, D1 } };
     expected.VerifyType(find_namespace(reader, "N"));
@@ -552,8 +656,8 @@ TEST_CASE("Resolving struct type ref test")
     ExpectedStructModel S1{ "S1", "N.S1", {} };
     ExpectedEnumModel E1{ "E1", "N.E1" , enum_semantics::Int32, {} };
     ExpectedStructModel S2{ "S2", "N.S2", {
-        { type_ref{ "N.S1" } , "field_1" },
-        { type_ref{ "N.E1" } , "field_2" },
+        { ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id }} , "field_1" },
+        { ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id } } , "field_2" },
     } };
     ExpectedNamespaceModel expected{ "N", "N", {}, { S1, E1, S2 } };
     expected.VerifyType(find_namespace(reader, "N"));
@@ -588,13 +692,13 @@ TEST_CASE("Resolving type ref across namespaces test")
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedStructModel S1{ "S1", "A.S1", {} };
-    
-    ExpectedDelegateModel D1{ "D1", "N.D1", type_ref{ simple_type::Boolean }, {
-        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, type_ref{ "A.S1" } },
-        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, type_ref{ "B.C.E1" } } } 
-    };
 
     ExpectedEnumModel E1{ "E1", "B.C.E1" , enum_semantics::Int32, {} };
+
+    ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ simple_type::Boolean }, {
+        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id } } },
+        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id } } } }
+    };
 
     ExpectedNamespaceModel A{ "A", "A", {}, { S1 } };
     ExpectedNamespaceModel N{ "N", "N", {}, { D1 } };
@@ -1625,7 +1729,8 @@ TEST_CASE("Class methods test")
     auto const& methods = model->get_methods();
     REQUIRE(methods.size() == 4); 
     ExpectedMethodModel m0{ "m0", in_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel m1{ "m1", default_method_semantics, type_ref{ simple_type::Int32 }, { ExpectedFormalParameterModel{ "s", parameter_semantics::in, type_ref{ simple_type::String } } } };
+    ExpectedMethodModel m1{ "m1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, { 
+        ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
     m0.VerifyType(methods[0]);
     m1.VerifyType(methods[1]);
 
