@@ -179,9 +179,99 @@ struct ExpectedMethodModel
     }
 };
 
+struct ExpectedPropertyModel
+{
+    std::string id;
+    property_semantics sem;
+    ExpectedTypeRefModel type;
+
+    ExpectedMethodModel get_method;
+    std::optional<ExpectedMethodModel> set_method;
+
+    ExpectedPropertyModel(std::string const& name, 
+            property_semantics const& sem, 
+            ExpectedTypeRefModel const& type, 
+            ExpectedMethodModel const& get_method,
+            std::optional<ExpectedMethodModel> const& set_method)
+        : id{ name }, sem{ sem }, type{ type }, get_method{ get_method }, set_method{ set_method } {}
+
+    void VerifyType(std::shared_ptr<property_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_semantic().is_static == sem.is_static);
+        REQUIRE(actual->get_type().get_semantic().is_resolved());
+        type.VerifyType(actual->get_type());
+
+        REQUIRE(actual->get_get_method());
+        get_method.VerifyType(actual->get_get_method());
+
+        if (actual->get_set_method())
+        {
+            set_method->VerifyType(actual->get_set_method());
+        }
+        else
+        {
+            REQUIRE(set_method == std::nullopt);
+        }
+    }
+};
+
+struct ExpectedEventModel
+{
+    std::string id;
+    event_semantics sem;
+    ExpectedTypeRefModel type;
+
+    ExpectedMethodModel add_method;
+    ExpectedMethodModel remove_method;
+
+    ExpectedEventModel(std::string const& name,
+        event_semantics const& sem,
+        ExpectedTypeRefModel const& type,
+        ExpectedMethodModel const& add_method,
+        ExpectedMethodModel const& remove_method)
+        : id{ name }, sem{ sem }, type{ type }, add_method{ add_method }, remove_method{ remove_method } {}
+
+    void VerifyType(std::shared_ptr<event_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_semantic().is_static == sem.is_static);
+        REQUIRE(actual->get_type().get_semantic().is_resolved());
+        type.VerifyType(actual->get_type());
+
+        REQUIRE(actual->get_add_method());
+        add_method.VerifyType(actual->get_add_method());
+        REQUIRE(actual->get_remove_method());
+        remove_method.VerifyType(actual->get_remove_method());
+    }
+};
+
 struct ExpectedInterfaceModel
 {
+    std::string id;
+    std::string fully_qualified_id;
     std::vector<ExpectedMethodModel> methods;
+    std::vector<ExpectedPropertyModel> properties;
+    std::vector<ExpectedInterfaceModel> bases;
+
+    ExpectedInterfaceModel(std::string const& id, 
+            std::string const& fully_qualified_id, 
+            std::vector<ExpectedMethodModel> const& methods,
+            std::vector<ExpectedPropertyModel> const& properties,
+            std::vector<ExpectedInterfaceModel> const& bases)
+        : id{ id }, fully_qualified_id{ fully_qualified_id }, methods{ methods }, properties{ properties }, bases{ bases } {}
+
+    void VerifyType(std::shared_ptr<interface_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        auto const& actual_methods = actual->get_methods();
+        REQUIRE(actual_methods.size() == methods.size());
+        for (size_t i = 0; i < methods.size(); i++)
+        {
+            methods[i].VerifyType(actual_methods[i]);
+        }
+    }
 };
 
 struct ExpectedDelegateModel
@@ -272,6 +362,8 @@ struct ExpectedNamespaceModel
     std::string id;
     std::string fully_qualified_id;
     std::vector<ExpectedNamespaceModel> children;
+
+    std::vector<ExpectedInterfaceModel> interfaces;
     std::vector<ExpectedStructModel> structs;
     std::vector<ExpectedEnumModel> enums;
     std::vector<ExpectedDelegateModel> delegates;
@@ -279,7 +371,7 @@ struct ExpectedNamespaceModel
     ExpectedNamespaceModel(std::string const& id, 
             std::string const& fully_qualified_id, 
             std::vector<ExpectedNamespaceModel> namespaces, 
-            std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel, ExpectedDelegateModel>> declarations)
+            std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel, ExpectedDelegateModel, ExpectedInterfaceModel>> declarations)
         : id{ id }, fully_qualified_id{ fully_qualified_id }, children { namespaces } 
     {
         for (auto & declaration : declarations)
@@ -296,6 +388,10 @@ struct ExpectedNamespaceModel
             {
                 delegates.push_back(std::get<ExpectedDelegateModel>(declaration));
             }
+            if (std::holds_alternative<ExpectedInterfaceModel>(declaration))
+            {
+                interfaces.push_back(std::get<ExpectedInterfaceModel>(declaration));
+            }
         }
     }
 
@@ -306,6 +402,20 @@ struct ExpectedNamespaceModel
 
         for (auto const& actual_bodies : actual->get_namespace_bodies())
         {
+            auto const& actual_interfaces = actual_bodies->get_interfaces();
+            
+            for (auto const& inter : actual_interfaces)
+            {
+                std::cout << inter.second->get_id() << std::endl;
+            }
+            for (auto expected_interface : interfaces)
+            {
+                std::cout << "finding" << expected_interface.id << std::endl;
+                auto const& it = actual_interfaces.find(expected_interface.id);
+                REQUIRE(it != actual_interfaces.end());
+                expected_interface.VerifyType(it->second);
+            }
+
             auto const& actual_structs = actual_bodies->get_structs();
             for (auto expected_struct : structs)
             {
@@ -780,35 +890,15 @@ TEST_CASE("Interface methods test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
+    ExpectedMethodModel Paint{ "Paint", default_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel Draw{ "Draw", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
+        ExpectedFormalParameterModel{ "i", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } },
+        ExpectedFormalParameterModel{ "d", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } }
+    } };
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
-
-    auto const& methods = model->get_methods();
-    REQUIRE(methods.size() == 2);
-
-    auto const& method0 = methods[0];
-    REQUIRE(method0->get_id() == "Paint");
-    REQUIRE(method0->get_return_type() == std::nullopt);
-    REQUIRE(method0->get_formal_parameters().size() == 0);
-
-    auto const& method1 = methods[1];
-    REQUIRE(method1->get_id() == "Draw");
-    auto const& method1_return_type = method1->get_return_type()->get_semantic();
-    REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
-    auto const& method1_formal_parameters = method1->get_formal_parameters();
-    REQUIRE(method1_formal_parameters.size() == 2);
-    REQUIRE(method1_formal_parameters[0].get_id() == "i");
-    REQUIRE(std::get<simple_type>(method1_formal_parameters[0].get_type().get_semantic().get_resolved_target()) == simple_type::Int32);
-    REQUIRE(method1_formal_parameters[1].get_id() == "d");
-    REQUIRE(std::get<simple_type>(method1_formal_parameters[1].get_type().get_semantic().get_resolved_target()) == simple_type::Int32);
+    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", { Paint, Draw }, {}, {} };
+    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Resolving interface method type ref test")
