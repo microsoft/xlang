@@ -931,37 +931,14 @@ TEST_CASE("Resolving interface method type ref test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
+    ExpectedMethodModel Draw{ "Draw", default_method_semantics, ExpectedTypeRefModel{ ExpectedEnumRef{ "N.E1" } }, {
+        ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } } },
+        ExpectedFormalParameterModel{ "p2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "M.S2" } } }
+    } };
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
-
-    auto const& methods = model->get_methods();
-    REQUIRE(methods[0]->get_id() == "Draw");
-
-    auto const& return_type = methods[0]->get_return_type()->get_semantic();
-    REQUIRE(return_type.is_resolved());
-    REQUIRE(std::get<std::shared_ptr<enum_model>>(return_type.get_resolved_target())->get_id() == "E1");
-
-    auto const& params = methods[0]->get_formal_parameters();
-    {
-        REQUIRE(params[0].get_id() == "p1");
-        auto const& param_type = params[0].get_type().get_semantic();
-        REQUIRE(param_type.is_resolved());
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(param_type.get_resolved_target())->get_id() == "S1");
-    }
-    {
-        REQUIRE(params[1].get_id() == "p2");
-        auto const& param_type = params[1].get_type().get_semantic();
-        REQUIRE(param_type.is_resolved());
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(param_type.get_resolved_target())->get_id() == "S2");
-    }
+    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", { Draw }, {}, {} };
+    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Interface property method ordering test")
