@@ -15,6 +15,7 @@ using namespace xlang::xmeta;
 constexpr method_semantics default_method_semantics = { false, false, false };
 constexpr method_semantics in_method_semantics = { false, true, false };
 constexpr property_semantics default_property_semantics = { false, false };
+constexpr event_semantics default_event_semantics = { false, false };
 
 auto find_namespace(xmeta_idl_reader & reader, std::string name)
 {
@@ -79,6 +80,29 @@ struct ExpectedTypeRefModel
         REQUIRE(actual.get_semantic().is_resolved());
         //std::get<simple_type>(method1_return_type.get_resolved_target());
         auto const& target = actual.get_semantic().get_resolved_target();
+        if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(target))
+        {
+            auto const& typedef_model = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
+            std::string actual_fully_qualified_id = std::string(typedef_model->TypeNamespace()) + "." + std::string(typedef_model->TypeName());
+            if (typedef_model->is_delegate())
+            {
+                REQUIRE(std::holds_alternative<ExpectedDelegateRef>(type));
+                auto const& model = std::get<ExpectedDelegateRef>(type);
+                REQUIRE(actual_fully_qualified_id == model.fully_qualified_id);
+            }
+            if (typedef_model->is_enum())
+            {
+                REQUIRE(std::holds_alternative<ExpectedEnumRef>(type));
+                auto const& model = std::get<ExpectedEnumRef>(type);
+                REQUIRE(actual_fully_qualified_id == model.fully_qualified_id);
+            }
+            if (typedef_model->is_struct())
+            {
+                REQUIRE(std::holds_alternative<ExpectedStructRef>(type));
+                auto const& model = std::get<ExpectedStructRef>(type);
+                REQUIRE(actual_fully_qualified_id == model.fully_qualified_id);
+            }
+        }
         //if (std::holds_alternative<std::shared_ptr<class_model>>(target))
         //{
         //    auto const& actual_model = std::get<std::shared_ptr<class_model>>(target);
@@ -228,10 +252,12 @@ struct ExpectedEventModel
 
     ExpectedEventModel(std::string const& name,
         event_semantics const& sem,
-        ExpectedTypeRefModel const& type,
-        ExpectedMethodModel const& add_method,
-        ExpectedMethodModel const& remove_method)
-        : id{ name }, sem{ sem }, type{ type }, add_method{ add_method }, remove_method{ remove_method } {}
+        ExpectedTypeRefModel const& type)
+        : id{ name }, sem{ sem }, type{ type }, 
+            add_method{ "add_" + id, default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "Foundation.EventRegistrationToken" } }, {
+                ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, type } } },
+            remove_method{ "remove_" + id, default_method_semantics, std::nullopt, {
+                ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "Foundation.EventRegistrationToken" } } } } } {}
 
     void VerifyType(std::shared_ptr<event_model> const& actual)
     {
@@ -244,6 +270,16 @@ struct ExpectedEventModel
         add_method.VerifyType(actual->get_add_method());
         REQUIRE(actual->get_remove_method());
         remove_method.VerifyType(actual->get_remove_method());
+    }
+
+    auto const& get_add_method()
+    {
+        return add_method;
+    }
+
+    auto const& get_remove_method()
+    {
+        return remove_method;
     }
 };
 
@@ -280,6 +316,13 @@ struct ExpectedInterfaceModel
         for (size_t i = 0; i < properties.size(); i++)
         {
             properties[i].VerifyType(actual_properties[i]);
+        }
+
+        auto const& actual_events = actual->get_events();
+        REQUIRE(actual_events.size() == events.size());
+        for (size_t i = 0; i < events.size(); i++)
+        {
+            events[i].VerifyType(actual_events[i]);
         }
     }
 };
@@ -1098,6 +1141,36 @@ TEST_CASE("Interface property method ordering different line test")
         ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
         N.VerifyType(find_namespace(reader, "N"));
     }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface IControl
+                {
+                    Int32 property1 { get; };
+                    Int32 property2 { set; };
+                    void draw();
+                    Int32 property1 { set; };
+                    event StringListEvent Changed;
+                    Int32 property2 { get; };
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl, true);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+
+        ExpectedEventModel Changed{ "Changed", default_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+
+        ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+            { get_property1, set_property2, draw, set_property1, Changed.get_add_method(), Changed.get_remove_method(), get_property2 },
+            { property1, property2 },
+            { Changed },
+            {}
+        };
+    }
 }
 
 TEST_CASE("Interface property method name collision test")
@@ -1376,24 +1449,17 @@ TEST_CASE("Interface event test")
     reader.read(test_idl, true);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
+    ExpectedEventModel Changed{ "Changed", default_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
+    ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+        { Changed.get_add_method(), Changed.get_remove_method() },
+        {},
+        { Changed },
+        {}
+    };
 
-    auto const& events = model->get_events();
-    REQUIRE(events[0]->get_id() == "Changed");
-
-    auto const& property_type = events[0]->get_type().get_semantic();
-    REQUIRE(property_type.is_resolved());
-    REQUIRE(std::holds_alternative<std::shared_ptr<delegate_model>>(property_type.get_resolved_target()));
-    REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
+    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Interface event explicit accessor not allowed test")
