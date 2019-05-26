@@ -14,6 +14,7 @@ using namespace xlang::xmeta;
 
 constexpr method_semantics default_method_semantics = { false, false, false };
 constexpr method_semantics in_method_semantics = { false, true, false };
+constexpr property_semantics default_property_semantics = { false, false };
 
 auto find_namespace(xmeta_idl_reader & reader, std::string name)
 {
@@ -252,14 +253,16 @@ struct ExpectedInterfaceModel
     std::string fully_qualified_id;
     std::vector<ExpectedMethodModel> methods;
     std::vector<ExpectedPropertyModel> properties;
+    std::vector<ExpectedEventModel> events;
     std::vector<ExpectedInterfaceModel> bases;
 
     ExpectedInterfaceModel(std::string const& id, 
             std::string const& fully_qualified_id, 
             std::vector<ExpectedMethodModel> const& methods,
             std::vector<ExpectedPropertyModel> const& properties,
+            std::vector<ExpectedEventModel> const& events,
             std::vector<ExpectedInterfaceModel> const& bases)
-        : id{ id }, fully_qualified_id{ fully_qualified_id }, methods{ methods }, properties{ properties }, bases{ bases } {}
+        : id{ id }, fully_qualified_id{ fully_qualified_id }, methods{ methods }, properties{ properties }, events{ events }, bases{ bases } {}
 
     void VerifyType(std::shared_ptr<interface_model> const& actual)
     {
@@ -270,6 +273,13 @@ struct ExpectedInterfaceModel
         for (size_t i = 0; i < methods.size(); i++)
         {
             methods[i].VerifyType(actual_methods[i]);
+        }
+
+        auto const& actual_properties = actual->get_properties();
+        REQUIRE(actual_properties.size() == properties.size());
+        for (size_t i = 0; i < properties.size(); i++)
+        {
+            properties[i].VerifyType(actual_properties[i]);
         }
     }
 };
@@ -406,11 +416,11 @@ struct ExpectedNamespaceModel
             
             for (auto const& inter : actual_interfaces)
             {
-                std::cout << inter.second->get_id() << std::endl;
+                //std::cout << inter.second->get_id() << std::endl;
             }
             for (auto expected_interface : interfaces)
             {
-                std::cout << "finding" << expected_interface.id << std::endl;
+                /*std::cout << "finding" << expected_interface.id << std::endl;*/
                 auto const& it = actual_interfaces.find(expected_interface.id);
                 REQUIRE(it != actual_interfaces.end());
                 expected_interface.VerifyType(it->second);
@@ -896,7 +906,7 @@ TEST_CASE("Interface methods test")
         ExpectedFormalParameterModel{ "d", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } }
     } };
 
-    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", { Paint, Draw }, {}, {} };
+    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", { Paint, Draw }, {}, {}, {} };
     ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
     N.VerifyType(find_namespace(reader, "N"));
 }
@@ -936,7 +946,7 @@ TEST_CASE("Resolving interface method type ref test")
         ExpectedFormalParameterModel{ "p2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "M.S2" } } }
     } };
 
-    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", { Draw }, {}, {} };
+    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", { Draw }, {}, {}, {} };
     ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
     N.VerifyType(find_namespace(reader, "N"));
 }
@@ -959,72 +969,65 @@ TEST_CASE("Interface property method ordering test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
+    ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
+        { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
+    ExpectedPropertyModel property1{ "property1",
+        default_property_semantics,
+        ExpectedTypeRefModel{ simple_type::Int32 },
+        get_property1,
+        set_property1
+    };
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
+    ExpectedMethodModel get_property2{ "get_property2", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedPropertyModel property2{ "property2",
+        default_property_semantics,
+        ExpectedTypeRefModel{ simple_type::Int32 },
+        get_property2,
+        std::nullopt
+    };
 
-    auto const& properties = model->get_properties();
-    REQUIRE(properties[0]->get_id() == "property1");
-    REQUIRE(properties[1]->get_id() == "property2");
-    REQUIRE(properties[2]->get_id() == "property3");
-    {
-        auto const& property_type = properties[0]->get_type().get_semantic();
-        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-    }
-    {
-        auto const& property_type = properties[1]->get_type().get_semantic();
-        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-    }
-    {
-        auto const& property_type = properties[2]->get_type().get_semantic();
-        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-    }
-    auto const& methods = model->get_methods();
-    REQUIRE(methods.size() == 5);
+    ExpectedMethodModel get_property3{ "get_property3", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedMethodModel set_property3{ "put_property3", default_method_semantics, std::nullopt,
+        { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
+    ExpectedPropertyModel property3{ "property3",
+        default_property_semantics,
+        ExpectedTypeRefModel{ simple_type::Int32 },
+        get_property3,
+        set_property3
+    };
 
-    auto const& method0 = methods[0];
-    REQUIRE(method0->get_id() == "get_property1");
-    REQUIRE(properties[0]->get_get_method() == method0);
-    REQUIRE(properties[0]->get_get_method()->get_id() == method0->get_id());
-    auto method0_return_type = method0->get_return_type()->get_semantic();
-    REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
+    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", 
+        { get_property1, set_property1, get_property2, set_property3, get_property3 },
+        { property1, property2, property3 },
+        {},
+        {} };
 
-    auto const& method1 = methods[1];
-    REQUIRE(method1->get_id() == "put_property1");
-    REQUIRE(properties[0]->get_set_method() == method1);
-    REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
-    REQUIRE(!method1->get_return_type());
-
-    auto const& method2 = methods[2];
-    REQUIRE(method2->get_id() == "get_property2");
-    REQUIRE(properties[1]->get_get_method() == method2);
-    REQUIRE(properties[1]->get_get_method()->get_id() == method2->get_id());
-    auto method2_return_type = method2->get_return_type()->get_semantic();
-    REQUIRE((method2_return_type.is_resolved() && std::get<simple_type>(method2_return_type.get_resolved_target()) == simple_type::Int32));
-
-    auto const& method3 = methods[3];
-    REQUIRE(method3->get_id() == "put_property3");
-    REQUIRE(properties[2]->get_set_method() == method3);
-    REQUIRE(properties[2]->get_set_method()->get_id() == method3->get_id());
-    REQUIRE(!method3->get_return_type());
-
-    auto const& method4 = methods[4];
-    REQUIRE(method4->get_id() == "get_property3");
-    REQUIRE(properties[2]->get_get_method() == method4);
-    REQUIRE(properties[2]->get_get_method()->get_id() == method4->get_id());
-    auto method4_return_type = method4->get_return_type()->get_semantic();
-    REQUIRE((method4_return_type.is_resolved() && std::get<simple_type>(method4_return_type.get_resolved_target()) == simple_type::Int32));
+    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Interface property method ordering different line test")
 {
+    ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
+        { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
+    ExpectedPropertyModel property1{ "property1",
+        default_property_semantics,
+        ExpectedTypeRefModel{ simple_type::Int32 },
+        get_property1,
+        set_property1
+    };
+    ExpectedMethodModel get_property2{ "get_property2", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedMethodModel set_property2{ "put_property2", default_method_semantics, std::nullopt,
+        { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
+    ExpectedPropertyModel property2{ "property2",
+        default_property_semantics,
+        ExpectedTypeRefModel{ simple_type::Int32 },
+        get_property2,
+        set_property2
+    };
+    ExpectedMethodModel draw{ "draw", default_method_semantics, std::nullopt, {} };
     {
         std::istringstream test_idl{ R"(
             namespace N
@@ -1040,39 +1043,13 @@ TEST_CASE("Interface property method ordering different line test")
         xmeta_idl_reader reader{ "" };
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-
-        auto const& namespaces = reader.get_namespaces();
-        auto const& it = namespaces.find("N");
-        REQUIRE(it != namespaces.end());
-        auto const& ns_bodies = it->second->get_namespace_bodies();
-        REQUIRE(ns_bodies.size() == 1);
-        auto const& interfaces = ns_bodies[0]->get_interfaces();
-        REQUIRE(interfaces.size() == 1);
-
-        REQUIRE(interfaces.find("IControl") != interfaces.end());
-        auto const& model = interfaces.at("IControl");
-
-        auto const& properties = model->get_properties();
-        REQUIRE(properties.size() == 1);
-        REQUIRE(properties[0]->get_id() == "property1");
-        {
-            auto const& property_type = properties[0]->get_type().get_semantic();
-            REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-        }
-        auto const& methods = model->get_methods();
-        REQUIRE(methods.size() == 2);
-        auto const& method0 = methods[0];
-        REQUIRE(method0->get_id() == "get_property1");
-        REQUIRE(properties[0]->get_get_method() == method0);
-        REQUIRE(properties[0]->get_get_method()->get_id() == method0->get_id());
-        auto method0_return_type = method0->get_return_type()->get_semantic();
-        REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
-
-        auto const& method1 = methods[1];
-        REQUIRE(method1->get_id() == "put_property1");
-        REQUIRE(properties[0]->get_set_method() == method1);
-        REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
-        REQUIRE(!method1->get_return_type());
+        ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+            { get_property1, set_property1 },
+            { property1 },
+            {},
+            {} };
+        ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+        N.VerifyType(find_namespace(reader, "N"));
     }
     {
         std::istringstream test_idl{ R"(
@@ -1085,43 +1062,16 @@ TEST_CASE("Interface property method ordering different line test")
                 }
             }
         )" };
-
         xmeta_idl_reader reader{ "" };
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-
-        auto const& namespaces = reader.get_namespaces();
-        auto const& it = namespaces.find("N");
-        REQUIRE(it != namespaces.end());
-        auto const& ns_bodies = it->second->get_namespace_bodies();
-        REQUIRE(ns_bodies.size() == 1);
-        auto const& interfaces = ns_bodies[0]->get_interfaces();
-        REQUIRE(interfaces.size() == 1);
-
-        REQUIRE(interfaces.find("IControl") != interfaces.end());
-        auto const& model = interfaces.at("IControl");
-
-        auto const& properties = model->get_properties();
-        REQUIRE(properties.size() == 1);
-        REQUIRE(properties[0]->get_id() == "property1");
-        {
-            auto const& property_type = properties[0]->get_type().get_semantic();
-            REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-        }
-        auto const& methods = model->get_methods();
-        REQUIRE(methods.size() == 2);
-        auto const& method0 = methods[0];
-        REQUIRE(method0->get_id() == "put_property1");
-        REQUIRE(properties[0]->get_set_method() == method0);
-        REQUIRE(properties[0]->get_set_method()->get_id() == method0->get_id());
-        REQUIRE(!method0->get_return_type());
-
-        auto const& method1 = methods[1];
-        REQUIRE(method1->get_id() == "get_property1");
-        REQUIRE(properties[0]->get_get_method() == method1);
-        REQUIRE(properties[0]->get_get_method()->get_id() == method1->get_id());
-        auto method1_return_type = method1->get_return_type()->get_semantic();
-        REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
+        ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+            { set_property1, get_property1 },
+            { property1 },
+            {},
+            {} };
+        ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+        N.VerifyType(find_namespace(reader, "N"));
     }
     {
         std::istringstream test_idl{ R"(
@@ -1137,23 +1087,16 @@ TEST_CASE("Interface property method ordering different line test")
                 }
             }
         )" };
-
         xmeta_idl_reader reader{ "" };
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        auto const& namespaces = reader.get_namespaces();
-        auto const& it = namespaces.find("N");
-        auto const& ns_bodies = it->second->get_namespace_bodies();
-        auto const& interfaces = ns_bodies[0]->get_interfaces();
-        REQUIRE(interfaces.find("IControl") != interfaces.end());
-        auto const& model = interfaces.at("IControl");
-        auto const& methods = model->get_methods();
-        REQUIRE(methods.size() == 5);
-        REQUIRE(methods[0]->get_id() == "get_property1");
-        REQUIRE(methods[1]->get_id() == "put_property2");
-        REQUIRE(methods[2]->get_id() == "draw");
-        REQUIRE(methods[3]->get_id() == "put_property1");
-        REQUIRE(methods[4]->get_id() == "get_property2");
+        ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+            { get_property1, set_property2, draw, set_property1, get_property2 },
+            { property1, property2 },
+            {},
+            {} };
+        ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+        N.VerifyType(find_namespace(reader, "N"));
     }
 }
 
@@ -1337,34 +1280,25 @@ TEST_CASE("Interface property implicit accessors test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
+    ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
+        { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
+    ExpectedPropertyModel property1{ "property1",
+        default_property_semantics,
+        ExpectedTypeRefModel{ simple_type::Int32 },
+        get_property1,
+        set_property1
+    };
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
+    ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+        { get_property1, set_property1 },
+        { property1 },
+        {},
+        {} 
+    };
 
-    auto const& properties = model->get_properties();
-    REQUIRE(properties[0]->get_id() == "property1");
-
-    auto const& property_type = properties[0]->get_type().get_semantic();
-    REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-
-    auto const& methods = model->get_methods();
-    REQUIRE(methods.size() == 2);
-
-    auto const& method0 = methods[0];
-    REQUIRE(method0->get_id() == "get_property1");
-    auto method0_return_type = method0->get_return_type()->get_semantic();
-    REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
-
-    auto const& method1 = methods[1];
-    REQUIRE(method1->get_id() == "put_property1");
-    REQUIRE(!method1->get_return_type());
+    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Resolving Interface property type ref test")
@@ -1379,12 +1313,12 @@ TEST_CASE("Resolving Interface property type ref test")
             interface IControl
             {
                 S1 property1;
-                M.S2 property2;
+                M.E2 property2;
             }
         }
         namespace M
         {
-            struct S2
+            enum E2
             {
             };
         }
@@ -1394,30 +1328,35 @@ TEST_CASE("Resolving Interface property type ref test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
+    ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } }, {} };
+    ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
+        { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } } } } };
+    ExpectedPropertyModel property1{ "property1",
+        default_property_semantics,
+        ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } },
+        get_property1,
+        set_property1
+    };
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
+    ExpectedMethodModel get_property2{ "get_property2", default_method_semantics, ExpectedTypeRefModel{ ExpectedEnumRef{ "M.E2" } }, {} };
+    ExpectedMethodModel set_property2{ "put_property2", default_method_semantics, std::nullopt,
+        { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ "M.E2" } } } } };
+    ExpectedPropertyModel property2{ "property2",
+        default_property_semantics,
+        ExpectedTypeRefModel{ ExpectedEnumRef{ "M.E2" } },
+        get_property2,
+        set_property2
+    };
 
-    auto const& properties = model->get_properties();
-    {
-        REQUIRE(properties[0]->get_id() == "property1");
-        auto const& property_type = properties[0]->get_type().get_semantic();
-        REQUIRE(property_type.is_resolved());
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(property_type.get_resolved_target())->get_id() == "S1");
-    }
-    {
-        REQUIRE(properties[1]->get_id() == "property2");
-        auto const& property_type = properties[1]->get_type().get_semantic();
-        REQUIRE(property_type.is_resolved());
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(property_type.get_resolved_target())->get_id() == "S2");
-    }
+    ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+        { get_property1, set_property1, get_property2, set_property2 },
+        { property1, property2 },
+        {},
+        {}
+    };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
 TEST_CASE("Interface event test")
