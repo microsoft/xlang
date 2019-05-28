@@ -365,12 +365,15 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     if (model->property_id_exists(prop_model->get_id()))
     {
         auto const& existing_property = model->get_property_member(prop_model->get_id());
+
+        // Check that the type is the same
         if (existing_property->get_type().get_semantic().get_ref_name() != prop_model->get_type().get_semantic().get_ref_name())
         {
             error_manager.write_duplicate_property_error(prop_model->get_decl_line(), prop_model->get_id());
             return listener_error::failed;
         }
 
+        // Set the get property if not declared
         if (existing_property->set_get_method(get_method) == compilation_error::accessor_exists)
         {
             error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_id());
@@ -381,6 +384,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             prop_model->set_get_method(get_method);
         }
 
+        // Set the set property if not declared
         if (existing_property->set_set_method(set_method) == compilation_error::accessor_exists)
         {
             error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_id());
@@ -395,13 +399,14 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     {
         prop_model->set_get_method(get_method);
         prop_model->set_set_method(set_method);
+
+        if (model->add_member(prop_model) == compilation_error::symbol_exists)
+        {
+            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), prop_model->get_id(), model->get_fully_qualified_id());
+            return listener_error::failed;
+        }
     }
 
-    if (model->add_member(prop_model) == compilation_error::symbol_exists)
-    {
-        error_manager.write_type_member_exists_error(prop_model->get_decl_line(), prop_model->get_id(), model->get_fully_qualified_id());
-        return listener_error::failed;
-    }
     return listener_error::passed;
 }
 

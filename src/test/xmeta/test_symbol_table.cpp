@@ -2583,41 +2583,143 @@ TEST_CASE("Class static method test")
 
 TEST_CASE("Class static property test")
 {
-    std::istringstream test_idl{ R"(
-        namespace N
-        {
-            runtimeclass c1
-            {
-                static Int32 p1;
-            }
-        }
-    )" };
-    xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
-    REQUIRE(reader.get_num_syntax_errors() == 0);
-
     ExpectedMethodModel get_p1{ "get_p1", static_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
     ExpectedMethodModel set_p1{ "put_p1", static_method_semantics, std::nullopt, {
         ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
 
     ExpectedPropertyModel p1{ "p1", static_property_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, get_p1, set_p1 };
-    ExpectedClassModel c1{ "c1", "N.c1",
-        { get_p1, set_p1 },
-        { p1 },
-        {},
-        std::nullopt,
-        {}
-    };
 
-    ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
-        { get_p1, set_p1 },
-        { p1 },
-        {},
-        {}
-    };
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                runtimeclass c1
+                {
+                    static Int32 p1;
+                }
+            }
+        )" };
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { get_p1, set_p1 },
+            { p1 },
+            {},
+            std::nullopt,
+            {}
+        };
 
-    ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
-    N.VerifyType(find_namespace(reader, "N"));
+        ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+            { get_p1, set_p1 },
+            { p1 },
+            {},
+            {}
+        };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+        N.VerifyType(find_namespace(reader, "N"));
+    }
+
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                runtimeclass c1
+                {
+                    static Int32 p1 { get; set; };
+                }
+            }
+        )" };
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { get_p1, set_p1 },
+            { p1 },
+            {},
+            std::nullopt,
+            {}
+        };
+
+        ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+            { get_p1, set_p1 },
+            { p1 },
+            {},
+            {}
+        };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+        N.VerifyType(find_namespace(reader, "N"));
+    }
+
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                runtimeclass c1
+                {
+                    static Int32 p1 { get; } 
+                    static Int32 p1 { set; };
+                }
+            }
+        )" };
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { get_p1, set_p1 },
+            { p1 },
+            {},
+            std::nullopt,
+            {}
+        };
+
+        ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+            { get_p1, set_p1 },
+            { p1 },
+            {},
+            {}
+        };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+        N.VerifyType(find_namespace(reader, "N"));
+    }
+
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                runtimeclass c1
+                {
+                    static Int32 p1 { get; };
+                }
+            }
+        )" };
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+
+        ExpectedPropertyModel p1g{ "p1", static_property_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, get_p1, std::nullopt };
+
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { get_p1 },
+            { p1g },
+            {},
+            std::nullopt,
+            {}
+        };
+
+        ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+            { get_p1 },
+            { p1g },
+            {},
+            {}
+        };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+        N.VerifyType(find_namespace(reader, "N"));
+    }
 }
 
 
@@ -2656,4 +2758,239 @@ TEST_CASE("Class static events test")
 
     ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
     N.VerifyType(find_namespace(reader, "N"));
+}
+
+TEST_CASE("Runtime class synthensized interfaces test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(Int32 sender);
+            runtimeclass c1
+            {
+                void m0();
+                static Int32 m1(String s);
+            }
+        }
+    )" };
+    
+    ExpectedMethodModel m0{ "m0", default_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel m1{ "m1", static_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
+        ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
+    
+    std::vector<std::string> paths = { "Foundation.xmeta" };
+    xmeta_idl_reader reader{ "" , paths };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { m0, m1 },
+        {},
+        {},
+        std::nullopt,
+        {}
+    };
+
+    ExpectedInterfaceModel syn_c1{ "Ic1", "N.Ic1",
+        { m0 },
+        {},
+        {},
+        {}
+    };
+
+    ExpectedInterfaceModel syn_static_c1{ "Ic1Statics", "N.Ic1Statics",
+        { m1 },
+        {},
+        {},
+        {}
+    };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1, syn_static_c1 } };
+
+    N.VerifyType(find_namespace(reader, "N"));
+    
+
+}
+
+TEST_CASE("Runtime class synthensized instance interface test")
+{
+    ExpectedMethodModel m0{ "m0", default_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel m1{ "m1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
+        ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
+
+    ExpectedEventModel e1{ "e1", default_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+
+    ExpectedMethodModel get_p1{ "get_p1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedMethodModel set_p1{ "put_p1", default_method_semantics, std::nullopt, {
+        ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
+    ExpectedPropertyModel p1{ "p1", default_property_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, get_p1, set_p1 };
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                runtimeclass c1
+                {
+                    event StringListEvent e1;
+                    void m0();
+                    Int32 p1;
+                    Int32 m1(String s);
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { e1.add_method, e1.remove_method, m0, get_p1, set_p1, m1 },
+            { p1 },
+            { e1 },
+            std::nullopt,
+            {}
+        };
+
+        ExpectedInterfaceModel syn_c1{ "Ic1", "N.Ic1",
+            { e1.add_method, e1.remove_method, m0, get_p1, set_p1, m1 },
+            { p1 },
+            { e1 },
+            {}
+        };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+
+        N.VerifyType(find_namespace(reader, "N"));
+    }
+
+    // Testing different ordering
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                runtimeclass c1
+                {
+                    void m0();
+                    Int32 p1 { get; };
+                    Int32 m1(String s);
+                    event StringListEvent e1;
+                    Int32 p1 { set; };
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { m0, get_p1, m1, e1.add_method, e1.remove_method, set_p1 },
+            { p1 },
+            { e1 },
+            std::nullopt,
+            {}
+                };
+
+        ExpectedInterfaceModel syn_c1{ "Ic1", "N.Ic1",
+            { m0, get_p1, m1, e1.add_method, e1.remove_method, set_p1 },
+            { p1 },
+            { e1 },
+            {}
+        };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+
+        N.VerifyType(find_namespace(reader, "N"));
+    }
+}
+
+TEST_CASE("Runtime class synthensized static interface test")
+{
+    ExpectedMethodModel m0{ "m0", static_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel m1{ "m1", static_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
+        ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
+
+    ExpectedEventModel e1{ "e1", static_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+
+    ExpectedMethodModel get_p1{ "get_p1", static_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedMethodModel set_p1{ "put_p1", static_method_semantics, std::nullopt, {
+        ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
+    ExpectedPropertyModel p1{ "p1", static_property_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, get_p1, set_p1 };
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                runtimeclass c1
+                {
+                    static event StringListEvent e1;
+                    static void m0();
+                    static Int32 p1;
+                    static Int32 m1(String s);
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { e1.add_method, e1.remove_method, m0, get_p1, set_p1, m1 },
+            { p1 },
+            { e1 },
+            std::nullopt,
+            {}
+        };
+
+        ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+            { e1.add_method, e1.remove_method, m0, get_p1, set_p1, m1 },
+            { p1 },
+            { e1 },
+            {}
+        };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+
+        N.VerifyType(find_namespace(reader, "N"));
+    }
+
+    // Testing different ordering
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                runtimeclass c1
+                {
+                    static void m0();
+                    static Int32 p1 { get; };
+                    static Int32 m1(String s);
+                    static event StringListEvent e1;
+                    static Int32 p1 { set; };
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { m0, get_p1, m1, e1.add_method, e1.remove_method, set_p1 },
+            { p1 },
+            { e1 },
+            std::nullopt,
+            {}
+        };
+
+        ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+            { m0, get_p1, m1, e1.add_method, e1.remove_method, set_p1 },
+            { p1 },
+            { e1 },
+            {}
+        };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+
+        N.VerifyType(find_namespace(reader, "N"));
+    }
 }
