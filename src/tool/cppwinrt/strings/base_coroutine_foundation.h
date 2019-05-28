@@ -539,7 +539,7 @@ namespace std::experimental
             {
                 if (auto handler = Progress())
                 {
-                    invoke(handler, *this, result);
+                    winrt::impl::invoke(handler, *this, result);
                 }
             }
 
@@ -610,7 +610,7 @@ namespace std::experimental
             {
                 if (auto handler = Progress())
                 {
-                    invoke(handler, *this, result);
+                    winrt::impl::invoke(handler, *this, result);
                 }
             }
 
