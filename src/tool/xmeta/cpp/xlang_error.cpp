@@ -120,4 +120,11 @@ namespace xlang::xmeta
         oss << "Duplicate property: " << member;
         write_error(decl_line, oss.str());
     }
+
+    void xlang_error_manager::write_static_member_only_error(size_t decl_line, std::string_view const& member)
+    {
+        std::ostringstream oss;
+        oss << "Static class can only contain only static members: " << member;
+        write_error(decl_line, oss.str());
+    }
 }

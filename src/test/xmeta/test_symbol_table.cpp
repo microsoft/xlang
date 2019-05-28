@@ -2760,12 +2760,31 @@ TEST_CASE("Class static events test")
     N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Runtime class synthensized interfaces test")
+TEST_CASE("Static class has static members only test")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
             delegate void StringListEvent(Int32 sender);
+            static runtimeclass c1
+            {
+                void m0s();
+                Int32 p1;
+                event StringListEvent e1;
+            }
+        }
+    )" };
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 3);
+}
+
+TEST_CASE("Runtime class synthensized interfaces test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
             runtimeclass c1
             {
                 void m0();

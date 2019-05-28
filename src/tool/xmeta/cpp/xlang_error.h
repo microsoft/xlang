@@ -51,6 +51,8 @@ namespace xlang::xmeta
         void write_property_accessor_error(size_t decl_line, std::string_view const& member);
 
         void write_duplicate_property_error(size_t decl_line, std::string_view const& member);
+
+        void write_static_member_only_error(size_t decl_line, std::string_view const& member);
         
         size_t get_num_of_errors() const noexcept
         {
