@@ -335,6 +335,29 @@ namespace winrt::impl
 #pragma warning(suppress: 6386)
         return { new(raw) event_array<T>(capacity), take_ownership_from_abi };
     }
+
+    template <typename Delegate, typename... Arg>
+    bool invoke(Delegate const& delegate, Arg const&... args) noexcept
+    {
+        try
+        {
+            delegate(args...);
+        }
+        catch (...)
+        {
+            int32_t const code = to_hresult();
+            WINRT_RoTransformError(code, 0, nullptr);
+
+            if (code == static_cast<int32_t>(0x80010108) || // RPC_E_DISCONNECTED
+                code == static_cast<int32_t>(0x800706BA) || // HRESULT_FROM_WIN32(RPC_S_SERVER_UNAVAILABLE)
+                code == static_cast<int32_t>(0x89020001))   // JSCRIPT_E_CANTEXECUTE
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 namespace winrt
@@ -450,23 +473,7 @@ namespace winrt
             {
                 for (delegate_type const& element : *temp_targets)
                 {
-                    bool remove_delegate = false;
-
-                    try
-                    {
-                        element(args...);
-                    }
-                    catch (hresult_error const& e)
-                    {
-                        if (e.code() == static_cast<int32_t>(0x80010108) || // RPC_E_DISCONNECTED
-                            e.code() == static_cast<int32_t>(0x800706BA) || // HRESULT_FROM_WIN32(RPC_S_SERVER_UNAVAILABLE)
-                            e.code() ==  static_cast<int32_t>(0x89020001))  // JSCRIPT_E_CANTEXECUTE
-                        {
-                            remove_delegate = true;
-                        }
-                    }
-
-                    if (remove_delegate)
+                    if (!impl::invoke(element, args...))
                     {
                         remove(get_token(element));
                     }
