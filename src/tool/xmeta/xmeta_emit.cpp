@@ -463,8 +463,9 @@ namespace xlang::xmeta
         auto const& interface_name = model->get_fully_qualified_id();
         
         std::vector<mdTypeRef> implements;
-        for (auto const& val : model->get_all_interface_bases())
+        for (auto const& interface_ref : model->get_interface_bases())
         {
+            auto const& val = std::get<std::shared_ptr<interface_model>>(interface_ref.get_semantic().get_resolved_target());
             implements.emplace_back(get_or_define_type_ref(val->get_fully_qualified_id(), xlang_model.m_assembly));
         }
         implements.emplace_back(mdTokenNil);

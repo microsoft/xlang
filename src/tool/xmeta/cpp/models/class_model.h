@@ -63,11 +63,11 @@ namespace xlang::xmeta
 
         void add_instance_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref);
 
-        std::set<std::shared_ptr<class_or_interface_model>> get_all_bases();
-
         void validate(xlang_error_manager & error_manager);
 
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager);
+
+        bool has_circular_inheritance(xlang_error_manager & error_manager);
 
     private:
         std::optional<type_ref> m_class_base_ref;
@@ -79,5 +79,9 @@ namespace xlang::xmeta
         std::vector<std::shared_ptr<interface_model>> m_factory_interfaces;
         std::vector<std::shared_ptr<interface_model>> m_overrides_interfaces;
         std::vector<std::shared_ptr<interface_model>> m_instance_interfaces;
+
+        std::set<std::shared_ptr<class_or_interface_model>> get_all_bases();
+
+        bool has_circular_inheritance(std::set<std::string> & symbol_set, xlang_error_manager & error_manager);
     };
 }

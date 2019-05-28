@@ -19,18 +19,13 @@ namespace xlang::xmeta
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_name }
         { }
 
-
-        std::set<std::shared_ptr<interface_model>> get_all_interface_bases();
-
         void validate(xlang_error_manager & error_manager);
 
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager);
 
         bool has_circular_inheritance(xlang_error_manager & error_manager);
 
-        bool has_circular_inheritance(std::set<std::string> & symbol_set, xlang_error_manager & error_manager);
-
     private:
-        bool contains_itself = false;
+        bool has_circular_inheritance(std::set<std::string> & symbol_set, xlang_error_manager & error_manager);
     };
 }

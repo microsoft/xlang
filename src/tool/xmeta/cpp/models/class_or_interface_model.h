@@ -10,6 +10,9 @@ namespace xlang::xmeta
 {
     struct class_or_interface_model : namespace_member_model
     {
+        friend interface_model;
+        friend class_model;
+
         class_or_interface_model() = delete;
 
         class_or_interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
@@ -62,9 +65,13 @@ namespace xlang::xmeta
         std::vector<type_ref> m_interface_base_refs;
         // TODO: Add type parameters (generic types)
 
+        bool contains_itself = false;
+
         // Members
         std::vector<std::shared_ptr<property_model>> m_properties;
         std::vector<std::shared_ptr<method_model>> m_methods;
         std::vector<std::shared_ptr<event_model>> m_events;
+
+        std::set<std::shared_ptr<interface_model>> get_all_interface_bases();
     };
 }

@@ -10,25 +10,6 @@
 
 namespace xlang::xmeta
 {
-    std::set<std::shared_ptr<interface_model>> interface_model::get_all_interface_bases()
-    {
-        std::set<std::shared_ptr<interface_model>> bases;
-        for (auto const& base : this->get_interface_bases())
-        {
-            auto const& type = base.get_semantic().get_resolved_target();
-            assert(base.get_semantic().is_resolved());
-            assert(std::holds_alternative<std::shared_ptr<interface_model>>(type));
-            std::shared_ptr<interface_model> const& interface_base = std::get<std::shared_ptr<interface_model>>(base.get_semantic().get_resolved_target());
-            bases.insert(interface_base);
-            std::set<std::shared_ptr<interface_model>> super_bases = interface_base->get_all_interface_bases();
-            for (auto const& iter : super_bases)
-            {
-                bases.insert(iter);
-            }
-        }
-        return bases;
-    }
-
     void interface_model::validate(xlang_error_manager & error_manager)
     {
         std::set<std::shared_ptr<interface_model>> bases = get_all_interface_bases();
@@ -111,5 +92,4 @@ namespace xlang::xmeta
         }
         return false;
     }
-
 }

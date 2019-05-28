@@ -93,6 +93,7 @@ namespace xlang::xmeta
         {}
         xlang_model_pass_2() = delete;
 
+        void listen_class_model(std::shared_ptr<class_model> const& model) final;
         void listen_interface_model(std::shared_ptr<interface_model> const& model) final;
         void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
 

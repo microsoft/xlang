@@ -900,7 +900,7 @@ TEST_CASE("Interface type metadata 2", "[!hide]")
     }
 }
 
-TEST_CASE("Interface type metadata")
+TEST_CASE("Interface type metadata", "[!hide]")
 {
     std::istringstream test_idl{ R"(
         namespace N
