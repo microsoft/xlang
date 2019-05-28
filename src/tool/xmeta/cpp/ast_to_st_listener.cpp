@@ -282,6 +282,13 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     std::shared_ptr<method_model> set_method = nullptr;
     type_ref tr = prop_model->get_type();
 
+    method_semantics property_method_semantics;
+    if (prop_model->get_semantic().is_static)
+    {
+        property_method_semantics.is_static = true;
+    }
+
+
     if (property_accessors->property_accessor_method().size() > 0)
     {
         auto const& property_accessor_methods = property_accessors->property_accessor_method();
@@ -307,7 +314,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         {
             if (property_accessor->GET())
             {
-                get_method = std::make_shared<method_model>("get_" + prop_model->get_id(), property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(prop_model->get_type()), method_association::Property);
+                get_method = std::make_shared<method_model>("get_" + prop_model->get_id(), property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
                 if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_id(), model->get_fully_qualified_id());
@@ -316,7 +323,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             }
             else if (property_accessor->SET())
             {
-                set_method = std::make_shared<method_model>("put_" + prop_model->get_id(), property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_association::Property);
+                set_method = std::make_shared<method_model>("put_" + prop_model->get_id(), property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), property_method_semantics, method_association::Property);
                 parameter_semantics sem = parameter_semantics::in;
                 set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
@@ -333,9 +340,9 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     }
     else // Implicity declaration
     {
-        get_method = std::make_shared<method_model>("get_" + prop_model->get_id(), prop_model->get_decl_line(), m_cur_assembly, std::move(prop_model->get_type()), method_association::Property);
+        get_method = std::make_shared<method_model>("get_" + prop_model->get_id(), prop_model->get_decl_line(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
 
-        set_method = std::make_shared<method_model>("put_" + prop_model->get_id(), prop_model->get_decl_line(), m_cur_assembly, std::move(std::nullopt), method_association::Property);
+        set_method = std::make_shared<method_model>("put_" + prop_model->get_id(), prop_model->get_decl_line(), m_cur_assembly, std::move(std::nullopt), property_method_semantics, method_association::Property);
         parameter_semantics sem = parameter_semantics::in;
         set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
 
@@ -404,10 +411,19 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     type_ref event_registration{ "Foundation.EventRegistrationToken" };
     parameter_semantics param_sem = parameter_semantics::in;
     type_ref tr = event->get_type();
-    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_id(), event->get_decl_line(), m_cur_assembly, std::move(event_registration), method_association::Event);
+
+    method_semantics event_method_semantics;
+    if (event->get_semantic().is_static)
+    {
+        event_method_semantics.is_static = true;
+    }
+
+
+
+    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_id(), event->get_decl_line(), m_cur_assembly, std::move(event_registration), event_method_semantics, method_association::Event);
     add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), m_cur_assembly, param_sem, std::move(tr) });
 
-    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_id(), event->get_decl_line(), m_cur_assembly, std::move(std::nullopt), method_association::Event);
+    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_id(), event->get_decl_line(), m_cur_assembly, std::move(std::nullopt), event_method_semantics, method_association::Event);
     remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), m_cur_assembly, param_sem, std::move(event_registration) });
 
     assert(event->set_add_method(add_method) == compilation_error::passed);
@@ -709,218 +725,8 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
     }
     m_cur_namespace_body->add_class(clss_model);
     m_cur_namespace_body->add_interface(synthesized_interface);
+    m_cur_namespace_body->add_interface(synthesized_interface_statics);
 }
-
-//void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationContext * ctx)
-//{
-//    auto id = ctx->IDENTIFIER();
-//    std::string class_name{ id->getText() };
-//    auto decl_line = id->getSymbol()->getLine();
-//
-//    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + class_name;
-//    class_semantics class_sem;
-//    for (auto const& class_mod : ctx->class_modifiers())
-//    {
-//        if (class_mod->SEALED())
-//        {
-//            if (class_sem.is_sealed)
-//            {
-//                // report semantic error
-//            }
-//            class_sem.is_sealed = true;
-//        }
-//        if (class_mod->STATIC())
-//        {
-//            if (class_sem.is_static)
-//            {
-//                // report semantic error
-//            }
-//            class_sem.is_static = true;
-//        }
-//    }
-//
-//    auto clss_model = std::make_shared<class_model>(class_name, decl_line, m_cur_assembly, m_cur_namespace_body, class_sem);
-//
-//    auto synthesized_interface = std::make_shared<interface_model>("I" + class_name, decl_line, m_cur_assembly, m_cur_namespace_body);
-//    auto synthesized_interface_factory = std::make_shared<interface_model>("I" + class_name + "Factory", decl_line, m_cur_assembly, m_cur_namespace_body);
-//    auto synthesized_interface_statics = std::make_shared<interface_model>("I" + class_name + "Statics", decl_line, m_cur_assembly, m_cur_namespace_body);
-//    //auto synthesized_interface_protected = std::make_shared<interface_model>("I" + class_name + "Protected", decl_line, m_cur_assembly, m_cur_namespace_body);
-//    //auto synthesized_interface_overrides = std::make_shared<interface_model>("I" + class_name + "Overrides", decl_line, m_cur_assembly, m_cur_namespace_body);
-//
-//    if (xlang_model.symbols.set_symbol(symbol, clss_model) == compilation_error::symbol_exists)
-//    {
-//        error_manager.write_namespace_member_name_error(decl_line, class_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
-//        return;
-//    }
-//
-//    auto const& class_body = ctx->class_body();
-//    for (auto const& class_member_declarations : class_body->class_member_declarations())
-//    {
-//        for (auto const& class_member : class_member_declarations->class_member_declaration())
-//        {
-//            if (class_member->class_constructor_declaration())
-//            {
-//                auto class_constructor = class_member->class_constructor_declaration();
-//                std::string constructor_id = class_constructor->IDENTIFIER()->getText();
-//
-//                method_semantics method_sem;
-//                if (class_constructor->class_constructor_modifier() && class_constructor->class_constructor_modifier()->PROTECTED())
-//                {
-//                    method_sem.is_protected = true;
-//                }
-//
-//                auto constructor_model = std::make_shared<method_model>(constructor_id, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
-//                if (class_constructor->formal_parameter_list())
-//                {
-//                    extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), constructor_model);
-//                }
-//
-//                clss_model->add_member(constructor_model);
-//            }
-//            if (class_member->class_method_declaration())
-//            {
-//                auto class_method = class_member->class_method_declaration();
-//                std::string method_id = class_method->IDENTIFIER()->getText();
-//
-//                std::optional<type_ref> tr = type_ref{ class_method->return_type()->getText() };
-//                extract_type(class_method->return_type(), tr);
-//
-//                // TODO: semantic checks
-//                method_semantics method_sem;
-//                for (auto const& method_modifier : class_method->method_modifier())
-//                {
-//                    if (method_modifier->OVERRIDABLE() || method_modifier->OVERRIDE())
-//                    {
-//                        if (method_sem.is_protected)
-//                        {
-//                            // REPORT semantic error
-//                        }
-//                        method_sem.is_overridable = true;
-//                    }
-//                    if (method_modifier->PROTECTED())
-//                    {
-//                        if (method_sem.is_protected)
-//                        {
-//                            // REPORT semantic error
-//                        }
-//                        method_sem.is_protected = true;
-//                    }
-//                    if (method_modifier->STATIC())
-//                    {
-//                        if (method_modifier->PROTECTED() || method_modifier->OVERRIDABLE() || method_modifier->OVERRIDE())
-//                        {
-//                            // REPORT static methods cannot be overrridable and protected
-//                        }
-//                        if (method_sem.is_static)
-//                        {
-//                            // REPORT semantic error
-//                        }
-//                        method_sem.is_static = true;
-//                    }
-//                }
-//
-//                if (class_sem.is_static && !method_sem.is_static)
-//                {
-//                    // REPORT static class must only have static methods
-//                }
-//
-//                auto met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_sem, method_association::None);
-//                if (class_method->formal_parameter_list())
-//                {
-//                    extract_formal_params(class_method->formal_parameter_list()->fixed_parameter(), met_model);
-//                }
-//                clss_model->add_member(met_model);
-//            }
-//            if (class_member->class_property_declaration())
-//            {
-//                auto const& class_property = class_member->class_property_declaration();
-//                type_ref tr{ class_property->type()->getText() };
-//                extract_type(class_property->type(), tr);
-//
-//                // TODO: semantic checks
-//                property_semantics property_sem;
-//                for (auto const& property_modifier : class_property->property_modifier())
-//                {
-//                    if (property_modifier->PROTECTED())
-//                    {
-//                        if (property_sem.is_protected)
-//                        {
-//                            // REPORT semantic error
-//                        }
-//                        property_sem.is_protected = true;
-//                    }
-//                    if (property_modifier->OVERRIDABLE())
-//                    {
-//                        // TODO: figure out what to do with overridable
-//                    }
-//                    if (property_modifier->STATIC())
-//                    {
-//                        if (property_modifier->PROTECTED() || property_modifier->OVERRIDABLE())
-//                        {
-//                            // REPORT static methods cannot be overrridable and protected
-//                        }
-//                        if (property_sem.is_static)
-//                        {
-//                            // REPORT semantic error
-//                        }
-//                        property_sem.is_static = true;
-//                    }
-//                }
-//
-//                auto prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, property_sem, std::move(tr));
-//                extract_property_accessors(prop_model, class_property->property_accessors(), clss_model);
-//            }
-//            if (class_member->class_event_declaration())
-//            {
-//                auto const& class_event = class_member->class_event_declaration();
-//                type_ref tr{ class_event->type()->getText() };
-//                extract_type(class_event->type(), tr);
-//
-//                // TODO: semantic checks
-//                event_semantics event_sem;
-//                for (auto const& event_modifier : class_event->event_modifier())
-//                {
-//                    if (event_modifier->PROTECTED())
-//                    {
-//                        if (event_sem.is_protected)
-//                        {
-//                            // report semantic error
-//                        }
-//                        event_sem.is_protected = true;
-//                    }
-//                    if (event_modifier->STATIC())
-//                    {
-//                        if (event_sem.is_static)
-//                        {
-//                            // report semantic error
-//                        }
-//                        event_sem.is_static = true;
-//                    }
-//                }
-//
-//                auto eve_model = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, event_sem, std::move(tr));
-//                extract_event_accessors(eve_model, clss_model);
-//            }
-//        }
-//    }
-//    if (ctx->class_base())
-//    {
-//        auto const& cls_base = ctx->class_base();
-//        if (cls_base->interface_base())
-//        {
-//            auto const& interface_basese = cls_base->interface_base()->type_base();
-//            for (auto const& interface_base : interface_basese)
-//            {
-//                clss_model->add_interface_base_ref(interface_base->class_type()->getText());
-//            }
-//        }
-//        if (cls_base->type_base())
-//        {
-//            clss_model->add_class_base_ref(cls_base->type_base()->class_type()->getText());
-//        }
-//    }
-//    m_cur_namespace_body->add_class(clss_model);
-//}
 
 void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_declarationContext *ctx)
 {
@@ -1184,3 +990,214 @@ void ast_to_st_listener::pop_namespace()
         }
     }
 }
+
+//void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationContext * ctx)
+//{
+//    auto id = ctx->IDENTIFIER();
+//    std::string class_name{ id->getText() };
+//    auto decl_line = id->getSymbol()->getLine();
+//
+//    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + class_name;
+//    class_semantics class_sem;
+//    for (auto const& class_mod : ctx->class_modifiers())
+//    {
+//        if (class_mod->SEALED())
+//        {
+//            if (class_sem.is_sealed)
+//            {
+//                // report semantic error
+//            }
+//            class_sem.is_sealed = true;
+//        }
+//        if (class_mod->STATIC())
+//        {
+//            if (class_sem.is_static)
+//            {
+//                // report semantic error
+//            }
+//            class_sem.is_static = true;
+//        }
+//    }
+//
+//    auto clss_model = std::make_shared<class_model>(class_name, decl_line, m_cur_assembly, m_cur_namespace_body, class_sem);
+//
+//    auto synthesized_interface = std::make_shared<interface_model>("I" + class_name, decl_line, m_cur_assembly, m_cur_namespace_body);
+//    auto synthesized_interface_factory = std::make_shared<interface_model>("I" + class_name + "Factory", decl_line, m_cur_assembly, m_cur_namespace_body);
+//    auto synthesized_interface_statics = std::make_shared<interface_model>("I" + class_name + "Statics", decl_line, m_cur_assembly, m_cur_namespace_body);
+//    //auto synthesized_interface_protected = std::make_shared<interface_model>("I" + class_name + "Protected", decl_line, m_cur_assembly, m_cur_namespace_body);
+//    //auto synthesized_interface_overrides = std::make_shared<interface_model>("I" + class_name + "Overrides", decl_line, m_cur_assembly, m_cur_namespace_body);
+//
+//    if (xlang_model.symbols.set_symbol(symbol, clss_model) == compilation_error::symbol_exists)
+//    {
+//        error_manager.write_namespace_member_name_error(decl_line, class_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+//        return;
+//    }
+//
+//    auto const& class_body = ctx->class_body();
+//    for (auto const& class_member_declarations : class_body->class_member_declarations())
+//    {
+//        for (auto const& class_member : class_member_declarations->class_member_declaration())
+//        {
+//            if (class_member->class_constructor_declaration())
+//            {
+//                auto class_constructor = class_member->class_constructor_declaration();
+//                std::string constructor_id = class_constructor->IDENTIFIER()->getText();
+//
+//                method_semantics method_sem;
+//                if (class_constructor->class_constructor_modifier() && class_constructor->class_constructor_modifier()->PROTECTED())
+//                {
+//                    method_sem.is_protected = true;
+//                }
+//
+//                auto constructor_model = std::make_shared<method_model>(constructor_id, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
+//                if (class_constructor->formal_parameter_list())
+//                {
+//                    extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), constructor_model);
+//                }
+//
+//                clss_model->add_member(constructor_model);
+//            }
+//            if (class_member->class_method_declaration())
+//            {
+//                auto class_method = class_member->class_method_declaration();
+//                std::string method_id = class_method->IDENTIFIER()->getText();
+//
+//                std::optional<type_ref> tr = type_ref{ class_method->return_type()->getText() };
+//                extract_type(class_method->return_type(), tr);
+//
+//                // TODO: semantic checks
+//                method_semantics method_sem;
+//                for (auto const& method_modifier : class_method->method_modifier())
+//                {
+//                    if (method_modifier->OVERRIDABLE() || method_modifier->OVERRIDE())
+//                    {
+//                        if (method_sem.is_protected)
+//                        {
+//                            // REPORT semantic error
+//                        }
+//                        method_sem.is_overridable = true;
+//                    }
+//                    if (method_modifier->PROTECTED())
+//                    {
+//                        if (method_sem.is_protected)
+//                        {
+//                            // REPORT semantic error
+//                        }
+//                        method_sem.is_protected = true;
+//                    }
+//                    if (method_modifier->STATIC())
+//                    {
+//                        if (method_modifier->PROTECTED() || method_modifier->OVERRIDABLE() || method_modifier->OVERRIDE())
+//                        {
+//                            // REPORT static methods cannot be overrridable and protected
+//                        }
+//                        if (method_sem.is_static)
+//                        {
+//                            // REPORT semantic error
+//                        }
+//                        method_sem.is_static = true;
+//                    }
+//                }
+//
+//                if (class_sem.is_static && !method_sem.is_static)
+//                {
+//                    // REPORT static class must only have static methods
+//                }
+//
+//                auto met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_sem, method_association::None);
+//                if (class_method->formal_parameter_list())
+//                {
+//                    extract_formal_params(class_method->formal_parameter_list()->fixed_parameter(), met_model);
+//                }
+//                clss_model->add_member(met_model);
+//            }
+//            if (class_member->class_property_declaration())
+//            {
+//                auto const& class_property = class_member->class_property_declaration();
+//                type_ref tr{ class_property->type()->getText() };
+//                extract_type(class_property->type(), tr);
+//
+//                // TODO: semantic checks
+//                property_semantics property_sem;
+//                for (auto const& property_modifier : class_property->property_modifier())
+//                {
+//                    if (property_modifier->PROTECTED())
+//                    {
+//                        if (property_sem.is_protected)
+//                        {
+//                            // REPORT semantic error
+//                        }
+//                        property_sem.is_protected = true;
+//                    }
+//                    if (property_modifier->OVERRIDABLE())
+//                    {
+//                        // TODO: figure out what to do with overridable
+//                    }
+//                    if (property_modifier->STATIC())
+//                    {
+//                        if (property_modifier->PROTECTED() || property_modifier->OVERRIDABLE())
+//                        {
+//                            // REPORT static methods cannot be overrridable and protected
+//                        }
+//                        if (property_sem.is_static)
+//                        {
+//                            // REPORT semantic error
+//                        }
+//                        property_sem.is_static = true;
+//                    }
+//                }
+//
+//                auto prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, property_sem, std::move(tr));
+//                extract_property_accessors(prop_model, class_property->property_accessors(), clss_model);
+//            }
+//            if (class_member->class_event_declaration())
+//            {
+//                auto const& class_event = class_member->class_event_declaration();
+//                type_ref tr{ class_event->type()->getText() };
+//                extract_type(class_event->type(), tr);
+//
+//                // TODO: semantic checks
+//                event_semantics event_sem;
+//                for (auto const& event_modifier : class_event->event_modifier())
+//                {
+//                    if (event_modifier->PROTECTED())
+//                    {
+//                        if (event_sem.is_protected)
+//                        {
+//                            // report semantic error
+//                        }
+//                        event_sem.is_protected = true;
+//                    }
+//                    if (event_modifier->STATIC())
+//                    {
+//                        if (event_sem.is_static)
+//                        {
+//                            // report semantic error
+//                        }
+//                        event_sem.is_static = true;
+//                    }
+//                }
+//
+//                auto eve_model = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, event_sem, std::move(tr));
+//                extract_event_accessors(eve_model, clss_model);
+//            }
+//        }
+//    }
+//    if (ctx->class_base())
+//    {
+//        auto const& cls_base = ctx->class_base();
+//        if (cls_base->interface_base())
+//        {
+//            auto const& interface_basese = cls_base->interface_base()->type_base();
+//            for (auto const& interface_base : interface_basese)
+//            {
+//                clss_model->add_interface_base_ref(interface_base->class_type()->getText());
+//            }
+//        }
+//        if (cls_base->type_base())
+//        {
+//            clss_model->add_class_base_ref(cls_base->type_base()->class_type()->getText());
+//        }
+//    }
+//    m_cur_namespace_body->add_class(clss_model);
+//}

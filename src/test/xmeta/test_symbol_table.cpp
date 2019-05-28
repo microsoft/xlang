@@ -13,9 +13,11 @@ using namespace antlr4;
 using namespace xlang::xmeta;
 
 constexpr method_semantics default_method_semantics = { false, false, false };
-constexpr method_semantics in_method_semantics = { false, true, false };
+constexpr method_semantics static_method_semantics = { false, true, false };
 constexpr property_semantics default_property_semantics = { false, false };
+constexpr property_semantics static_property_semantics = { false, true };
 constexpr event_semantics default_event_semantics = { false, false };
+constexpr event_semantics static_event_semantics = { false, true };
 
 auto find_namespace(xmeta_idl_reader & reader, std::string name)
 {
@@ -205,6 +207,8 @@ struct ExpectedMethodModel
     std::optional<ExpectedTypeRefModel> return_type;
     std::vector<ExpectedFormalParameterModel> params;
 
+    ExpectedMethodModel() {};
+
     ExpectedMethodModel(std::string const& name, method_semantics const& sem, std::optional<ExpectedTypeRefModel> const& return_type, std::vector<ExpectedFormalParameterModel> params)
         : id{ name }, sem{ sem }, return_type{ return_type }, params{ params } {}
 
@@ -282,11 +286,19 @@ struct ExpectedEventModel
     ExpectedEventModel(std::string const& name,
         event_semantics const& sem,
         ExpectedTypeRefModel const& type)
-        : id{ name }, sem{ sem }, type{ type }, 
-            add_method{ "add_" + id, default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "Foundation.EventRegistrationToken" } }, {
-                ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, type } } },
-            remove_method{ "remove_" + id, default_method_semantics, std::nullopt, {
-                ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "Foundation.EventRegistrationToken" } } } } } {}
+        : id{ name }, sem{ sem }, type{ type }
+    {
+        method_semantics method_sem;
+        if (sem.is_static)
+        {
+            method_sem.is_static = true;
+        }
+        add_method = { "add_" + id, method_sem, ExpectedTypeRefModel{ ExpectedStructRef{ "Foundation.EventRegistrationToken" } }, {
+            ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, type } } };
+
+        remove_method = { "remove_" + id, method_sem, std::nullopt, {
+            ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "Foundation.EventRegistrationToken" } } } } };
+    }
 
     void VerifyType(std::shared_ptr<event_model> const& actual)
     {
@@ -2478,14 +2490,13 @@ TEST_CASE("Unresolved types Runtimeclass test")
     REQUIRE(reader.get_num_semantic_errors() >= 5);
 }
 
-TEST_CASE("Class methods test")
+TEST_CASE("Class methods synthesized test")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
             runtimeclass c1
             {
-                static void m0();
                 Int32 m1(String s);
                 S1 m2();
                 M.S1 m3();
@@ -2507,866 +2518,142 @@ TEST_CASE("Class methods test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel m0{ "m0", in_method_semantics, std::nullopt, {} };
     ExpectedMethodModel m1{ "m1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
         ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
     ExpectedMethodModel m2{ "m2", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } }, {} };
     ExpectedMethodModel m3{ "m3", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "M.S1" } }, {} };
+
     ExpectedClassModel c1{ "c1", "N.c1",
-        { m0, m1, m2, m3 },
+        { m1, m2, m3 },
         {},
         {},
         std::nullopt,
         {}
     };
 
-    ExpectedNamespaceModel N{ "N", "N", {}, { c1 } };
-    N.VerifyType(find_namespace(reader, "N"));
+    ExpectedInterfaceModel syn_c1{ "Ic1", "N.Ic1",
+        { m1, m2, m3 },
+        {},
+        {},
+        {}
+    };
 
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Class methods synthesized test")
+TEST_CASE("Class static method test")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
             runtimeclass c1
             {
-                static void m1();
-                Int32 m2(String s);
-                S1 m3();
-                M.S1 m4();
-            }
-
-            struct S1
-            {
-            }
-        }
-
-        namespace M
-        {
-            struct S1
-            {
+                static void m0s();
+                static Int32 m1s(String s);
             }
         }
     )" };
-}
-
-/*
-TEST_CASE("Interface property method ordering test")
-{
-    std::istringstream test_idl{ R"(
-        namespace N
-        {
-            interface i1
-            {
-                Int32 property1 { get; set; };
-                Int32 property2 { get; };
-                Int32 property3 { set; get; };
-            }
-        }
-    )" };
-
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
+    ExpectedMethodModel m0s{ "m0s", static_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel m1s{ "m1s", static_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
+        ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { m0s, m1s },
+        {},
+        {},
+        std::nullopt,
+        {}
+    };
 
-    REQUIRE(interfaces.find("i1") != interfaces.end());
-    auto const& model = interfaces.at("i1");
+    ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+        { m0s, m1s },
+        {},
+        {},
+        {}
+    };
 
-    auto const& properties = model->get_properties();
-    REQUIRE(properties[0]->get_id() == "property1");
-    REQUIRE(properties[1]->get_id() == "property2");
-    REQUIRE(properties[2]->get_id() == "property3");
-    {
-        auto const& property_type = properties[0]->get_type().get_semantic();
-        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-    }
-    {
-        auto const& property_type = properties[1]->get_type().get_semantic();
-        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-    }
-    {
-        auto const& property_type = properties[2]->get_type().get_semantic();
-        REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-    }
-    auto const& methods = model->get_methods();
-    REQUIRE(methods.size() == 5);
-
-    auto const& method0 = methods[0];
-    REQUIRE(method0->get_id() == "get_property1");
-    REQUIRE(properties[0]->get_get_method() == method0);
-    REQUIRE(properties[0]->get_get_method()->get_id() == method0->get_id());
-    auto method0_return_type = method0->get_return_type()->get_semantic();
-    REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
-
-    auto const& method1 = methods[1];
-    REQUIRE(method1->get_id() == "put_property1");
-    REQUIRE(properties[0]->get_set_method() == method1);
-    REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
-    REQUIRE(!method1->get_return_type());
-
-    auto const& method2 = methods[2];
-    REQUIRE(method2->get_id() == "get_property2");
-    REQUIRE(properties[1]->get_get_method() == method2);
-    REQUIRE(properties[1]->get_get_method()->get_id() == method2->get_id());
-    auto method2_return_type = method2->get_return_type()->get_semantic();
-    REQUIRE((method2_return_type.is_resolved() && std::get<simple_type>(method2_return_type.get_resolved_target()) == simple_type::Int32));
-
-    auto const& method3 = methods[3];
-    REQUIRE(method3->get_id() == "put_property3");
-    REQUIRE(properties[2]->get_set_method() == method3);
-    REQUIRE(properties[2]->get_set_method()->get_id() == method3->get_id());
-    REQUIRE(!method3->get_return_type());
-
-    auto const& method4 = methods[4];
-    REQUIRE(method4->get_id() == "get_property3");
-    REQUIRE(properties[2]->get_get_method() == method4);
-    REQUIRE(properties[2]->get_get_method()->get_id() == method4->get_id());
-    auto method4_return_type = method4->get_return_type()->get_semantic();
-    REQUIRE((method4_return_type.is_resolved() && std::get<simple_type>(method4_return_type.get_resolved_target()) == simple_type::Int32));
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Interface property method ordering different line test")
-{
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { get; };
-                    Int32 property1 { set; };
-                }
-            }
-        )" };
 
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-
-        auto const& namespaces = reader.get_namespaces();
-        auto const& it = namespaces.find("N");
-        REQUIRE(it != namespaces.end());
-        auto const& ns_bodies = it->second->get_namespace_bodies();
-        REQUIRE(ns_bodies.size() == 1);
-        auto const& interfaces = ns_bodies[0]->get_interfaces();
-        REQUIRE(interfaces.size() == 1);
-
-        REQUIRE(interfaces.find("i1") != interfaces.end());
-        auto const& model = interfaces.at("i1");
-
-        auto const& properties = model->get_properties();
-        REQUIRE(properties.size() == 1);
-        REQUIRE(properties[0]->get_id() == "property1");
-        {
-            auto const& property_type = properties[0]->get_type().get_semantic();
-            REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-        }
-        auto const& methods = model->get_methods();
-        REQUIRE(methods.size() == 2);
-        auto const& method0 = methods[0];
-        REQUIRE(method0->get_id() == "get_property1");
-        REQUIRE(properties[0]->get_get_method() == method0);
-        REQUIRE(properties[0]->get_get_method()->get_id() == method0->get_id());
-        auto method0_return_type = method0->get_return_type()->get_semantic();
-        REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
-
-        auto const& method1 = methods[1];
-        REQUIRE(method1->get_id() == "put_property1");
-        REQUIRE(properties[0]->get_set_method() == method1);
-        REQUIRE(properties[0]->get_set_method()->get_id() == method1->get_id());
-        REQUIRE(!method1->get_return_type());
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { set; };
-                    Int32 property1 { get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-
-        auto const& namespaces = reader.get_namespaces();
-        auto const& it = namespaces.find("N");
-        REQUIRE(it != namespaces.end());
-        auto const& ns_bodies = it->second->get_namespace_bodies();
-        REQUIRE(ns_bodies.size() == 1);
-        auto const& interfaces = ns_bodies[0]->get_interfaces();
-        REQUIRE(interfaces.size() == 1);
-
-        REQUIRE(interfaces.find("i1") != interfaces.end());
-        auto const& model = interfaces.at("i1");
-
-        auto const& properties = model->get_properties();
-        REQUIRE(properties.size() == 1);
-        REQUIRE(properties[0]->get_id() == "property1");
-        {
-            auto const& property_type = properties[0]->get_type().get_semantic();
-            REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-        }
-        auto const& methods = model->get_methods();
-        REQUIRE(methods.size() == 2);
-        auto const& method0 = methods[0];
-        REQUIRE(method0->get_id() == "put_property1");
-        REQUIRE(properties[0]->get_set_method() == method0);
-        REQUIRE(properties[0]->get_set_method()->get_id() == method0->get_id());
-        REQUIRE(!method0->get_return_type());
-
-        auto const& method1 = methods[1];
-        REQUIRE(method1->get_id() == "get_property1");
-        REQUIRE(properties[0]->get_get_method() == method1);
-        REQUIRE(properties[0]->get_get_method()->get_id() == method1->get_id());
-        auto method1_return_type = method1->get_return_type()->get_semantic();
-        REQUIRE((method1_return_type.is_resolved() && std::get<simple_type>(method1_return_type.get_resolved_target()) == simple_type::Int32));
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { get; };
-                    Int32 property2 { set; };
-                    void draw();
-                    Int32 property1 { set; };
-                    Int32 property2 { get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        auto const& namespaces = reader.get_namespaces();
-        auto const& it = namespaces.find("N");
-        auto const& ns_bodies = it->second->get_namespace_bodies();
-        auto const& interfaces = ns_bodies[0]->get_interfaces();
-        REQUIRE(interfaces.find("i1") != interfaces.end());
-        auto const& model = interfaces.at("i1");
-        auto const& methods = model->get_methods();
-        REQUIRE(methods.size() == 5);
-        REQUIRE(methods[0]->get_id() == "get_property1");
-        REQUIRE(methods[1]->get_id() == "put_property2");
-        REQUIRE(methods[2]->get_id() == "draw");
-        REQUIRE(methods[3]->get_id() == "put_property1");
-        REQUIRE(methods[4]->get_id() == "get_property2");
-    }
-}
-
-TEST_CASE("Interface property method name collision test")
-{
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    void get_property1();
-                    Int32 property1 { get; set; };
-                    void put_property1();
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 2);
-    }
-}
-
-TEST_CASE("Interface invalid property accessor test")
-{
-    {
-        std::istringstream test_set_only_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { set; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_set_only_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    // multiple getters
-    {
-        std::istringstream test_double_get_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { get; get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_double_get_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_double_get_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { get; };
-                    Int32 property1 { get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_double_get_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() >= 1);
-    }
-    // multiple setters
-    {
-        std::istringstream test_double_set_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { set; set; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_double_set_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_double_set_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { set; };
-                    Int32 property1 { set; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_double_set_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() >= 1);
-    }
-    {
-        std::istringstream test_three_acessor_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { set; get; get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_three_acessor_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_add_and_remove_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { get; add; };
-                    Int32 property2 { get; remove; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_add_and_remove_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 2);
-        REQUIRE(reader.get_num_semantic_errors() == 0);
-    }
-}
-
-TEST_CASE("Interface duplicate property id test")
-{
-    {
-        std::istringstream test_set_only_idl{ R"(
-            namespace N
-            {
-                interface i1
-                {
-                    Int32 property1 { get; };
-                    Int64 property1 { get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_set_only_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() >= 1);
-    }
-}
-
-TEST_CASE("Interface property implicit accessors test")
+TEST_CASE("Class static property test")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface i1
+            runtimeclass c1
             {
-                Int32 property1;
+                static Int32 p1;
             }
         }
     )" };
-
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
+    ExpectedMethodModel get_p1{ "get_p1", static_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
+    ExpectedMethodModel set_p1{ "put_p1", static_method_semantics, std::nullopt, {
+        ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } } } };
 
-    REQUIRE(interfaces.find("i1") != interfaces.end());
-    auto const& model = interfaces.at("i1");
+    ExpectedPropertyModel p1{ "p1", static_property_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, get_p1, set_p1 };
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { get_p1, set_p1 },
+        { p1 },
+        {},
+        std::nullopt,
+        {}
+    };
 
-    auto const& properties = model->get_properties();
-    REQUIRE(properties[0]->get_id() == "property1");
+    ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+        { get_p1, set_p1 },
+        { p1 },
+        {},
+        {}
+    };
 
-    auto const& property_type = properties[0]->get_type().get_semantic();
-    REQUIRE((property_type.is_resolved() && std::get<simple_type>(property_type.get_resolved_target()) == simple_type::Int32));
-
-    auto const& methods = model->get_methods();
-    REQUIRE(methods.size() == 2);
-
-    auto const& method0 = methods[0];
-    REQUIRE(method0->get_id() == "get_property1");
-    auto method0_return_type = method0->get_return_type()->get_semantic();
-    REQUIRE((method0_return_type.is_resolved() && std::get<simple_type>(method0_return_type.get_resolved_target()) == simple_type::Int32));
-
-    auto const& method1 = methods[1];
-    REQUIRE(method1->get_id() == "put_property1");
-    REQUIRE(!method1->get_return_type());
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Resolving Interface property type ref test")
-{
-    std::istringstream test_idl{ R"(
-        namespace N
-        {
-            struct S1
-            {
-            };
 
-            interface i1
-            {
-                S1 property1;
-                M.S2 property2;
-            }
-        }
-        namespace M
-        {
-            struct S2
-            {
-            };
-        }
-    )" };
-
-    xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
-    REQUIRE(reader.get_num_syntax_errors() == 0);
-
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
-
-    REQUIRE(interfaces.find("i1") != interfaces.end());
-    auto const& model = interfaces.at("i1");
-
-    auto const& properties = model->get_properties();
-    {
-        REQUIRE(properties[0]->get_id() == "property1");
-        auto const& property_type = properties[0]->get_type().get_semantic();
-        REQUIRE(property_type.is_resolved());
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(property_type.get_resolved_target())->get_id() == "S1");
-    }
-    {
-        REQUIRE(properties[1]->get_id() == "property2");
-        auto const& property_type = properties[1]->get_type().get_semantic();
-        REQUIRE(property_type.is_resolved());
-        REQUIRE(std::get<std::shared_ptr<struct_model>>(property_type.get_resolved_target())->get_id() == "S2");
-    }
-}
-
-TEST_CASE("Interface event test")
+TEST_CASE("Class static events test")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
             delegate void StringListEvent(Int32 sender);
-            interface i1
+            runtimeclass c1
             {
-                event StringListEvent Changed;
-            }
-        }
-    )" };
-    std::vector<std::string> paths = { "Foundation.xmeta" };
-    xmeta_idl_reader reader{ "" , paths };
-    reader.read(test_idl, true);
-    REQUIRE(reader.get_num_syntax_errors() == 0);
-
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 1);
-
-    REQUIRE(interfaces.find("i1") != interfaces.end());
-    auto const& model = interfaces.at("i1");
-
-    auto const& events = model->get_events();
-    REQUIRE(events[0]->get_id() == "Changed");
-
-    auto const& property_type = events[0]->get_type().get_semantic();
-    REQUIRE(property_type.is_resolved());
-    REQUIRE(std::holds_alternative<std::shared_ptr<delegate_model>>(property_type.get_resolved_target()));
-    REQUIRE(std::get<std::shared_ptr<delegate_model>>(property_type.get_resolved_target())->get_id() == "StringListEvent");
-}
-
-TEST_CASE("Interface event explicit accessor not allowed test")
-{
-    std::istringstream test_idl{ R"(
-        namespace N
-        {
-            delegate void StringListEvent(Int32 sender);
-            interface i1
-            {
-                event StringListEvent Changed { add; remove; };
+                static event StringListEvent e1;
             }
         }
     )" };
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths };
     reader.read(test_idl);
-    REQUIRE(reader.get_num_syntax_errors() > 0);
-}
-
-TEST_CASE("Interface duplicate event test")
-{
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                delegate void StringListEvent(Int32 sender);
-                interface i1
-                {
-                    event StringListEvent Changed;
-                    event StringListEvent Changed;
-                }
-            }
-        )" };
-        std::vector<std::string> paths = { "Foundation.xmeta" };
-        xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                delegate void StringListEvent(Int32 sender);
-                interface i1
-                {
-                    event StringListEvent Changed;
-                    event StringStackEvent Changed;
-                }
-                delegate void StringStackEvent(Int32 sender);
-            }
-        )" };
-        std::vector<std::string> paths = { "Foundation.xmeta" };
-        xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-}
-
-TEST_CASE("Interface event and property name collision test")
-{
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                delegate void StringListEvent(Int32 sender);
-                interface i1
-                {
-                    event StringListEvent Changed;
-                    Int32 Changed;
-                }
-            }
-        )" };
-        std::vector<std::string> paths = { "Foundation.xmeta" };
-        xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-}
-
-TEST_CASE("Interface event and method name test")
-{
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                delegate void StringListEvent(Int32 sender);
-                interface i1
-                {
-                    void remove_Changed();
-                    event StringListEvent Changed;
-                    void add_Changed();
-                }
-            }
-        )" };
-        std::vector<std::string> paths = { "Foundation.xmeta" };
-        xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 2);
-    }
-}
-
-TEST_CASE("Interface circular inheritance test")
-{
-    std::istringstream test_idl{ R"(
-        namespace N
-        {
-            interface i1 requires IListBox
-            {
-                void Paint();
-            }
-            interface ITextBox requires i1
-            {
-                void SetText(String text);
-            }
-            interface IListBox requires ITextBox
-            {
-               void SetItem(String items);
-            }
-        }
-    )" };
-
-    xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-    REQUIRE(reader.get_num_semantic_errors() > 0);
+
+    ExpectedEventModel e1{ "e1", static_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { e1.add_method, e1.remove_method },
+        {},
+        { e1 },
+        std::nullopt,
+        {}
+    };
+
+    ExpectedInterfaceModel syn_c1{ "Ic1Statics", "N.Ic1Statics",
+        { e1.add_method, e1.remove_method },
+        {},
+        { e1 },
+        {}
+    };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1 } };
+    N.VerifyType(find_namespace(reader, "N"));
 }
-
-TEST_CASE("Interface member declared in inheritance test")
-{
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1 requires IListBox
-                {
-                    void Paint();
-                }
-                interface IListBox requires ITextBox
-                {
-                    void Paint();
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() > 0);
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1 requires IListBox
-                {
-                    Int32 value;
-                }
-                interface IListBox
-                {
-                    void get_value();
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1 requires IListBox
-                {
-                    Int32 value;
-                }
-                interface IListBox
-                {
-                    void get_value();
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1 requires IListBox
-                {
-                    Int32 value;
-                }
-                interface IListBox
-                {
-                    Int32 value;
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                delegate void StringListEvent(Int32 sender);
-                interface i1 requires IListBox
-                {
-                    Int32 value;
-                }
-                interface IListBox
-                {
-                    event StringListEvent value;
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                delegate void StringListEvent(Int32 sender);
-                interface i1 requires IListBox
-                {
-                    Int32 value;
-                }
-                interface IListBox
-                {
-                    event StringListEvent value;
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                delegate void StringListEvent(Int32 sender);
-                delegate void StringListEvent2(Int32 sender);
-                interface i1 requires IListBox
-                {
-                    event StringListEvent value;
-                }
-                interface IListBox
-                {
-                    event StringListEvent2 value;
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-}
-
-
-TEST_CASE("Unresolved types interface test")
-{
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface i1 requires fakebase
-                {
-                    event StringListEvent Changed;
-                    FakeObject obj { get; set; };
-                    FakeObject doSomething2(FakeObject2 test);
-                }
-            }
-        )" };
-        std::vector<std::string> paths = { "Foundation.xmeta" };
-        xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 5);
-    }
-}
-*/
