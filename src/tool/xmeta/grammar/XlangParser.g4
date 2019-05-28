@@ -211,7 +211,7 @@ type_parameter_list // attributes on generic types? Something<[Attribute] K>
 
 // Semantically check for one class and multiple interfaces restriction
 class_base
-    : (COLON type_base)? REQUIRES interface_base
+    : (COLON type_base)? interface_base
     ;
 
 type_base

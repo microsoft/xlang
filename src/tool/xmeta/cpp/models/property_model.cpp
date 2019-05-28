@@ -8,8 +8,14 @@ namespace xlang::xmeta
     {
         assert(ref != nullptr);
         m_implemented_property_ref.resolve(ref);
-        m_get_method->set_overridden_method_ref(ref->get_get_method());
-        m_set_method->set_overridden_method_ref(ref->get_set_method());
+        if (ref->get_get_method())
+        {
+            m_get_method->set_overridden_method_ref(ref->get_get_method());
+        }
+        if (ref->get_set_method())
+        {
+            m_set_method->set_overridden_method_ref(ref->get_set_method());
+        }
     }
 
     compilation_error property_model::set_get_method(std::shared_ptr<method_model> const& m)

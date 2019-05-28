@@ -302,6 +302,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             return listener_error::failed;
         }
 
+        listener_error error = listener_error::passed;
         for (auto const& property_accessor : property_accessor_methods)
         {
             if (property_accessor->GET())
@@ -310,6 +311,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_id(), model->get_fully_qualified_id());
+                    error = listener_error::failed;
                 }
             }
             else if (property_accessor->SET())
@@ -320,8 +322,13 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_id(), model->get_fully_qualified_id());
+                    error = listener_error::failed;
                 }
             }
+        }
+        if (error == listener_error::failed)
+        {
+            return error;
         }
     }
     else // Implicity declaration
@@ -332,13 +339,20 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         parameter_semantics sem = parameter_semantics::in;
         set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
 
+        listener_error error = listener_error::passed;
         if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
         {
             error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_id(), model->get_fully_qualified_id());
+            error = listener_error::failed;
         }
         if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
         {
             error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_id(), model->get_fully_qualified_id());
+            error =  listener_error::failed;
+        }
+        if (error == listener_error::failed)
+        {
+            return error;
         }
     }
     if (model->property_id_exists(prop_model->get_id()))
@@ -399,15 +413,20 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     assert(event->set_add_method(add_method) == compilation_error::passed);
     assert(event->set_remove_method(remove_method) == compilation_error::passed);
 
+    listener_error error = listener_error::passed;
     if (model->add_member(add_method) == compilation_error::symbol_exists)
     {
         error_manager.write_type_member_exists_error(event->get_decl_line(), add_method->get_id(), model->get_fully_qualified_id());
-        return listener_error::failed;
+        error = listener_error::failed;
     }
     if (model->add_member(remove_method) == compilation_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), add_method->get_id(), model->get_fully_qualified_id());
-        return listener_error::failed;
+        error_manager.write_type_member_exists_error(event->get_decl_line(), remove_method->get_id(), model->get_fully_qualified_id());
+        error = listener_error::failed;
+    }
+    if (error == listener_error::failed)
+    {
+        return error;
     }
     if (model->add_member(event) == compilation_error::symbol_exists)
     {
@@ -570,8 +589,10 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     synthesized_interface->add_member(syn_met_model);
                 }
 
-
-                clss_model->add_member(met_model);
+                if (clss_model->add_member(met_model) == compilation_error::symbol_exists)
+                {
+                    error_manager.write_type_member_exists_error(decl_line, met_model->get_id(), clss_model->get_fully_qualified_id());
+                }
             }
             if (class_member->class_property_declaration())
             {
@@ -610,18 +631,20 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 }
 
                 auto prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, property_sem, std::move(tr));
-                auto syn_prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, property_sem, std::move(tr));
-                // Synthesizing constructors
-                if (property_sem.is_static)
+
+                if (extract_property_accessors(prop_model, class_property->property_accessors(), clss_model) == listener_error::passed)
                 {
-                    extract_property_accessors(syn_prop_model, class_property->property_accessors(), synthesized_interface_statics);
+                    auto syn_prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, property_sem, std::move(tr));
+                    if (property_sem.is_static)
+                    {
+                        extract_property_accessors(syn_prop_model, class_property->property_accessors(), synthesized_interface_statics);
+                    }
+                    else
+                    {
+                        extract_property_accessors(syn_prop_model, class_property->property_accessors(), synthesized_interface);
+                    }
+                    prop_model->set_overridden_property_ref(syn_prop_model);
                 }
-                else
-                {
-                    extract_property_accessors(syn_prop_model, class_property->property_accessors(), synthesized_interface);
-                }
-                extract_property_accessors(prop_model, class_property->property_accessors(), clss_model);
-                prop_model->set_overridden_property_ref(syn_prop_model);
             }
             if (class_member->class_event_declaration())
             {
@@ -652,18 +675,19 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 }
 
                 auto event = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, event_sem, std::move(tr));
-                auto syn_event_model = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, event_sem, std::move(tr));
-                // Synthesizing constructors
-                if (event_sem.is_static)
+                if (extract_event_accessors(event, clss_model) == listener_error::passed)
                 {
-                    extract_event_accessors(syn_event_model, synthesized_interface_statics);
+                    auto syn_event_model = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, event_sem, std::move(tr));
+                    if (event_sem.is_static)
+                    {
+                        extract_event_accessors(syn_event_model, synthesized_interface_statics);
+                    }
+                    else
+                    {
+                        extract_event_accessors(syn_event_model, synthesized_interface);
+                    }
+                    event->set_overridden_event_ref(syn_event_model);
                 }
-                else
-                {
-                    extract_event_accessors(syn_event_model, synthesized_interface);
-                }
-                extract_event_accessors(event, clss_model);
-                event->set_overridden_event_ref(syn_event_model);
             }
         }
     }

@@ -34,6 +34,18 @@ auto find_namespace_body(xmeta_idl_reader & reader, std::string name, int index)
     return ns_bodies[index];
 }
 
+struct ExpectedClassRef
+{
+    std::string fully_qualified_id;
+    ExpectedClassRef(std::string_view id) : fully_qualified_id{ id } {}
+};
+
+struct ExpectedInterfaceRef
+{
+    std::string fully_qualified_id;
+    ExpectedInterfaceRef(std::string_view id) : fully_qualified_id{ id } {}
+};
+
 struct ExpectedEnumRef
 {
     std::string fully_qualified_id;
@@ -54,11 +66,19 @@ struct ExpectedStructRef
 
 struct ExpectedTypeRefModel
 {
-   std::variant<ExpectedEnumRef,
+   std::variant<ExpectedClassRef,
+        ExpectedInterfaceRef,
+        ExpectedEnumRef,
         ExpectedDelegateRef,
         ExpectedStructRef,
         simple_type,
         object_type> type;
+
+   ExpectedTypeRefModel(ExpectedClassRef const& type)
+       : type{ type } {}
+
+   ExpectedTypeRefModel(ExpectedInterfaceRef const& type)
+       : type{ type } {}
 
     ExpectedTypeRefModel(ExpectedDelegateRef const& type)
         : type{ type } {}
@@ -84,6 +104,7 @@ struct ExpectedTypeRefModel
         {
             auto const& typedef_model = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
             std::string actual_fully_qualified_id = std::string(typedef_model->TypeNamespace()) + "." + std::string(typedef_model->TypeName());
+            //TODO: interface and runtimeclass checks
             if (typedef_model->is_delegate())
             {
                 REQUIRE(std::holds_alternative<ExpectedDelegateRef>(type));
@@ -103,12 +124,20 @@ struct ExpectedTypeRefModel
                 REQUIRE(actual_fully_qualified_id == model.fully_qualified_id);
             }
         }
-        //if (std::holds_alternative<std::shared_ptr<class_model>>(target))
-        //{
-        //    auto const& actual_model = std::get<std::shared_ptr<class_model>>(target);
-        //    REQUIRE(actual_model->get_fully_qualified_id() == fully_qualified_id_or_type);
-        //    REQUIRE(std::holds_alternative<object_type>(type));
-        //}
+        if (std::holds_alternative<std::shared_ptr<class_model>>(target))
+        {
+            REQUIRE(std::holds_alternative<ExpectedClassRef>(type));
+            auto const& model = std::get<ExpectedClassRef>(type);
+            auto const& actual_model = std::get<std::shared_ptr<class_model>>(target);
+            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+        }
+        if (std::holds_alternative<std::shared_ptr<interface_model>>(target))
+        {
+            REQUIRE(std::holds_alternative<ExpectedInterfaceRef>(type));
+            auto const& model = std::get<ExpectedInterfaceRef>(type);
+            auto const& actual_model = std::get<std::shared_ptr<interface_model>>(target);
+            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+        }
         if (std::holds_alternative<std::shared_ptr<delegate_model>>(target))
         {
             REQUIRE(std::holds_alternative<ExpectedDelegateRef>(type));
@@ -283,6 +312,68 @@ struct ExpectedEventModel
     }
 };
 
+struct ExpectedClassModel
+{
+    std::string id;
+    std::string fully_qualified_id;
+    std::vector<ExpectedMethodModel> methods;
+    std::vector<ExpectedPropertyModel> properties;
+    std::vector<ExpectedEventModel> events;
+    std::optional<ExpectedTypeRefModel> class_base;
+    std::vector<ExpectedTypeRefModel> interface_bases;
+
+    ExpectedClassModel(std::string const& id,
+        std::string const& fully_qualified_id,
+        std::vector<ExpectedMethodModel> const& methods,
+        std::vector<ExpectedPropertyModel> const& properties,
+        std::vector<ExpectedEventModel> const& events,
+        std::optional<ExpectedTypeRefModel> class_base,
+        std::vector<ExpectedTypeRefModel> const& interfaces_bases)
+        : id{ id }, fully_qualified_id{ fully_qualified_id }, methods{ methods }, properties{ properties }, events{ events }, class_base{ class_base }, interface_bases{ interfaces_bases } {}
+
+    void VerifyType(std::shared_ptr<class_model> const& actual)
+    {
+        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        auto const& actual_methods = actual->get_methods();
+        REQUIRE(actual_methods.size() == methods.size());
+        for (size_t i = 0; i < methods.size(); i++)
+        {
+            methods[i].VerifyType(actual_methods[i]);
+        }
+
+        auto const& actual_properties = actual->get_properties();
+        REQUIRE(actual_properties.size() == properties.size());
+        for (size_t i = 0; i < properties.size(); i++)
+        {
+            properties[i].VerifyType(actual_properties[i]);
+        }
+
+        auto const& actual_events = actual->get_events();
+        REQUIRE(actual_events.size() == events.size());
+        for (size_t i = 0; i < events.size(); i++)
+        {
+            events[i].VerifyType(actual_events[i]);
+        }
+
+        if (class_base == std::nullopt)
+        {
+            REQUIRE(actual->get_class_base_ref() == std::nullopt);
+        }
+        else
+        {
+            class_base->VerifyType(*actual->get_class_base_ref());
+        }
+        
+        auto const& actual_interface_bases = actual->get_interface_bases();
+        REQUIRE(actual_interface_bases.size() == interface_bases.size());
+        for (size_t i = 0; i < interface_bases.size(); i++)
+        {
+            interface_bases[i].VerifyType(actual_interface_bases[i]);
+        }
+    }
+};
+
 struct ExpectedInterfaceModel
 {
     std::string id;
@@ -290,15 +381,15 @@ struct ExpectedInterfaceModel
     std::vector<ExpectedMethodModel> methods;
     std::vector<ExpectedPropertyModel> properties;
     std::vector<ExpectedEventModel> events;
-    std::vector<ExpectedInterfaceModel> bases;
+    std::vector<ExpectedTypeRefModel> interface_bases;
 
     ExpectedInterfaceModel(std::string const& id, 
             std::string const& fully_qualified_id, 
             std::vector<ExpectedMethodModel> const& methods,
             std::vector<ExpectedPropertyModel> const& properties,
             std::vector<ExpectedEventModel> const& events,
-            std::vector<ExpectedInterfaceModel> const& bases)
-        : id{ id }, fully_qualified_id{ fully_qualified_id }, methods{ methods }, properties{ properties }, events{ events }, bases{ bases } {}
+            std::vector<ExpectedTypeRefModel> const& bases)
+        : id{ id }, fully_qualified_id{ fully_qualified_id }, methods{ methods }, properties{ properties }, events{ events }, interface_bases{ bases } {}
 
     void VerifyType(std::shared_ptr<interface_model> const& actual)
     {
@@ -323,6 +414,13 @@ struct ExpectedInterfaceModel
         for (size_t i = 0; i < events.size(); i++)
         {
             events[i].VerifyType(actual_events[i]);
+        }
+
+        auto const& actual_interface_bases = actual->get_interface_bases();
+        REQUIRE(actual_interface_bases.size() == interface_bases.size());
+        for (size_t i = 0; i < interface_bases.size(); i++)
+        {
+            interface_bases[i].VerifyType(actual_interface_bases[i]);
         }
     }
 };
@@ -416,6 +514,7 @@ struct ExpectedNamespaceModel
     std::string fully_qualified_id;
     std::vector<ExpectedNamespaceModel> children;
 
+    std::vector<ExpectedClassModel> classes;
     std::vector<ExpectedInterfaceModel> interfaces;
     std::vector<ExpectedStructModel> structs;
     std::vector<ExpectedEnumModel> enums;
@@ -424,11 +523,15 @@ struct ExpectedNamespaceModel
     ExpectedNamespaceModel(std::string const& id, 
             std::string const& fully_qualified_id, 
             std::vector<ExpectedNamespaceModel> namespaces, 
-            std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel, ExpectedDelegateModel, ExpectedInterfaceModel>> declarations)
+            std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel, ExpectedDelegateModel, ExpectedInterfaceModel, ExpectedClassModel>> declarations)
         : id{ id }, fully_qualified_id{ fully_qualified_id }, children { namespaces } 
     {
         for (auto & declaration : declarations)
         {
+            if (std::holds_alternative<ExpectedClassModel>(declaration))
+            {
+                classes.push_back(std::get<ExpectedClassModel>(declaration));
+            }
             if (std::holds_alternative<ExpectedStructModel>(declaration))
             {
                 structs.push_back(std::get<ExpectedStructModel>(declaration));
@@ -455,20 +558,21 @@ struct ExpectedNamespaceModel
 
         for (auto const& actual_bodies : actual->get_namespace_bodies())
         {
-            auto const& actual_interfaces = actual_bodies->get_interfaces();
-            
-            for (auto const& inter : actual_interfaces)
+            auto const& actual_class = actual_bodies->get_classes();
+            for (auto expected_class : classes)
             {
-                //std::cout << inter.second->get_id() << std::endl;
-            }
-            for (auto expected_interface : interfaces)
-            {
-                /*std::cout << "finding" << expected_interface.id << std::endl;*/
-                auto const& it = actual_interfaces.find(expected_interface.id);
-                REQUIRE(it != actual_interfaces.end());
-                expected_interface.VerifyType(it->second);
+                auto const& it = actual_class.find(expected_class.id);
+                REQUIRE(it != actual_class.end());
+                expected_class.VerifyType(it->second);
             }
 
+            auto const& actual_interface = actual_bodies->get_interfaces();
+            for (auto expected_interface : interfaces)
+            {
+                auto const& it = actual_interface.find(expected_interface.id);
+                REQUIRE(it != actual_interface.end());
+                expected_interface.VerifyType(it->second);
+            }
             auto const& actual_structs = actual_bodies->get_structs();
             for (auto expected_struct : structs)
             {
@@ -884,20 +988,20 @@ I didn't think xlang was supporting multiple interface inheritance. And multiple
 without some sort of attribute specifying which required interface becomes the base for inheritance purposes.
 This makes IComboBox.Paint() ambiguous.This should require some sort of disambiguation on the method.
 */
-TEST_CASE("Interface base test", "[!hide]")
+TEST_CASE("Interface base test 2", "[!hide]")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl
+            interface i1
             {
                 void Paint();
             }
-            interface ITextBox requires IControl
+            interface ITextBox requires i1
             {
                 void SetText(String text);
             }
-            interface IListBox requires IControl
+            interface IListBox requires i1
             {
                void SetItem(String items);
             }
@@ -922,39 +1026,83 @@ TEST_CASE("Interface base test", "[!hide]")
     REQUIRE(combo_bases.size() == 3);
     REQUIRE(combo_bases.find(interfaces.at("ITextBox")) != combo_bases.end());
     REQUIRE(combo_bases.find(interfaces.at("IListBox")) != combo_bases.end());
-    REQUIRE(combo_bases.find(interfaces.at("IControl")) != combo_bases.end());
+    REQUIRE(combo_bases.find(interfaces.at("i1")) != combo_bases.end());
     REQUIRE(combo->get_all_interface_bases().size() == 3);
 }
 
-TEST_CASE("Interface methods test")
+TEST_CASE("Interface base test")
 {
+    // This test case demonstrates that the interface bases of IComboBox does not contain ITest 
+    // and it is able to resolved interface references across namespaces.
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl
+            interface ITest
             {
-                void Paint();
-                Int32 Draw(Int32 i, Int32 d);
+            }
+            interface ITextBox requires ITest
+            {
+                void SetText(String text);
+            }
+            interface IComboBox requires ITextBox, M.IListBox {}
+        }
+        namespace M
+        {
+            interface IListBox
+            {
+               void SetItem(String items);
             }
         }
     )" };
-
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel Paint{ "Paint", default_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel Draw{ "Draw", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
-        ExpectedFormalParameterModel{ "i", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } },
-        ExpectedFormalParameterModel{ "d", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } }
-    } };
-
-    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", { Paint, Draw }, {}, {}, {} };
-    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    ExpectedInterfaceRef ITextBox{ "N.ITextBox" };
+    ExpectedInterfaceRef IListBox{ "M.IListBox" };
+    ExpectedInterfaceModel IComboBox{ "IComboBox", "N.IComboBox", {}, {}, {}, { ExpectedTypeRefModel{ ITextBox }, ExpectedTypeRefModel{ IListBox } } };
+    ExpectedNamespaceModel N{ "N", "N", {}, { IComboBox } };
     N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Resolving interface method type ref test")
+TEST_CASE("Method test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface i1
+                {
+                    void Paint();
+                    Int32 Draw(Int32 i, Int32 d);
+                }
+                runtimeclass c1
+                {
+                    void Paint();
+                    Int32 Draw(Int32 i, Int32 d);
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 0);
+
+        ExpectedMethodModel Paint{ "Paint", default_method_semantics, std::nullopt, {} };
+        ExpectedMethodModel Draw{ "Draw", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
+            ExpectedFormalParameterModel{ "i", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } },
+            ExpectedFormalParameterModel{ "d", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } }
+        } };
+        ExpectedInterfaceModel i1{ "i1", "N.i1", { Paint, Draw }, {}, {}, {} };
+        ExpectedClassModel c1{ "c1", "N.c1", { Paint, Draw }, {}, {}, std::nullopt, {} };
+
+        ExpectedNamespaceModel N{ "N", "N", {}, { c1, i1 } };
+        N.VerifyType(find_namespace(reader, "N"));
+    }
+}
+
+TEST_CASE("Resolving method type ref test")
 {
     std::istringstream test_idl{ R"(
         namespace N
@@ -963,7 +1111,12 @@ TEST_CASE("Resolving interface method type ref test")
             {
             };
 
-            interface IControl
+            interface i1
+            {
+                E1 Draw(S1 p1, M.S2 p2);
+            }
+
+            runtimeclass c1
             {
                 E1 Draw(S1 p1, M.S2 p2);
             }
@@ -988,18 +1141,25 @@ TEST_CASE("Resolving interface method type ref test")
         ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } } },
         ExpectedFormalParameterModel{ "p2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "M.S2" } } }
     } };
-
-    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", { Draw }, {}, {}, {} };
-    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    ExpectedClassModel c1{ "c1", "N.c1", { Draw }, {}, {}, std::nullopt, {} };
+    ExpectedInterfaceModel i1{ "i1", "N.i1", { Draw }, {}, {}, {} };
+    ExpectedNamespaceModel N{ "N", "N", {}, { i1, c1 } };
     N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Interface property method ordering test")
+TEST_CASE("Property method ordering test")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl
+            interface i1
+            {
+                Int32 property1 { get; set; };
+                Int32 property2 { get; };
+                Int32 property3 { set; get; };
+            }
+
+            runtimeclass c1
             {
                 Int32 property1 { get; set; };
                 Int32 property2 { get; };
@@ -1040,17 +1200,24 @@ TEST_CASE("Interface property method ordering test")
         set_property3
     };
 
-    ExpectedInterfaceModel IControl{ "IControl", "N.IControl", 
+    ExpectedInterfaceModel i1{ "i1", "N.i1", 
         { get_property1, set_property1, get_property2, set_property3, get_property3 },
         { property1, property2, property3 },
         {},
         {} };
 
-    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { get_property1, set_property1, get_property2, set_property3, get_property3 },
+        { property1, property2, property3 },
+        {},
+        std::nullopt,
+        {} };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { i1, c1 } };
     N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Interface property method ordering different line test")
+TEST_CASE("Property method ordering different line test")
 {
     ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {} };
     ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
@@ -1075,7 +1242,12 @@ TEST_CASE("Interface property method ordering different line test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
+                {
+                    Int32 property1 { get; };
+                    Int32 property1 { set; };
+                }
+                runtimeclass c1
                 {
                     Int32 property1 { get; };
                     Int32 property1 { set; };
@@ -1086,19 +1258,30 @@ TEST_CASE("Interface property method ordering different line test")
         xmeta_idl_reader reader{ "" };
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+        ExpectedInterfaceModel i1{ "i1", "N.i1",
             { get_property1, set_property1 },
             { property1 },
             {},
             {} };
-        ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { get_property1, set_property1 },
+            { property1 },
+            {},
+            std::nullopt,
+            {} };
+        ExpectedNamespaceModel N{ "N", "N", {}, { i1, c1 } };
         N.VerifyType(find_namespace(reader, "N"));
     }
     {
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
+                {
+                    Int32 property1 { set; };
+                    Int32 property1 { get; };
+                }
+                runtimeclass c1
                 {
                     Int32 property1 { set; };
                     Int32 property1 { get; };
@@ -1108,19 +1291,33 @@ TEST_CASE("Interface property method ordering different line test")
         xmeta_idl_reader reader{ "" };
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+        ExpectedInterfaceModel i1{ "i1", "N.i1",
             { set_property1, get_property1 },
             { property1 },
             {},
             {} };
-        ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { set_property1, get_property1 },
+            { property1 },
+            {},
+            std::nullopt,
+            {} };
+        ExpectedNamespaceModel N{ "N", "N", {}, { i1, c1 } };
         N.VerifyType(find_namespace(reader, "N"));
     }
     {
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
+                {
+                    Int32 property1 { get; };
+                    Int32 property2 { set; };
+                    void draw();
+                    Int32 property1 { set; };
+                    Int32 property2 { get; };
+                }
+                runtimeclass c1
                 {
                     Int32 property1 { get; };
                     Int32 property2 { set; };
@@ -1133,12 +1330,18 @@ TEST_CASE("Interface property method ordering different line test")
         xmeta_idl_reader reader{ "" };
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+        ExpectedInterfaceModel i1{ "i1", "N.i1",
             { get_property1, set_property2, draw, set_property1, get_property2 },
             { property1, property2 },
             {},
             {} };
-        ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { get_property1, set_property2, draw, set_property1, get_property2 },
+            { property1, property2 },
+            {},
+            std::nullopt,
+            {} };
+        ExpectedNamespaceModel N{ "N", "N", {}, { i1, c1 } };
         N.VerifyType(find_namespace(reader, "N"));
     }
     {
@@ -1146,7 +1349,16 @@ TEST_CASE("Interface property method ordering different line test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl
+                interface i1
+                {
+                    Int32 property1 { get; };
+                    Int32 property2 { set; };
+                    void draw();
+                    Int32 property1 { set; };
+                    event StringListEvent Changed;
+                    Int32 property2 { get; };
+                }
+                runtimeclass c1
                 {
                     Int32 property1 { get; };
                     Int32 property2 { set; };
@@ -1164,46 +1376,283 @@ TEST_CASE("Interface property method ordering different line test")
 
         ExpectedEventModel Changed{ "Changed", default_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
 
-        ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+        ExpectedInterfaceModel i1{ "i1", "N.i1",
             { get_property1, set_property2, draw, set_property1, Changed.get_add_method(), Changed.get_remove_method(), get_property2 },
             { property1, property2 },
             { Changed },
             {}
         };
+        ExpectedClassModel c1{ "c1", "N.c1",
+            { get_property1, set_property2, draw, set_property1, Changed.get_add_method(), Changed.get_remove_method(), get_property2 },
+            { property1, property2 },
+            { Changed },
+            std::nullopt,
+            {}
+        };
+        ExpectedNamespaceModel N{ "N", "N", {}, { i1, c1 } };
+        N.VerifyType(find_namespace(reader, "N"));
     }
 }
 
-TEST_CASE("Interface property method name collision test")
+TEST_CASE("Invalid property accessor test")
 {
     {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                interface IControl
+        {
+            std::istringstream test_set_only_idl{ R"(
+                namespace N
                 {
-                    void get_property1();
-                    Int32 property1 { get; set; };
-                    void put_property1();
+                    interface i1
+                    {
+                        Int32 property1 { set; };
+                    }
                 }
-            }
-        )" };
+            )" };
 
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 2);
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_set_only_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+        }
+        {
+            std::istringstream test_set_only_idl{ R"(
+                namespace N
+                {
+                    runtimeclass c1
+                    {
+                        Int32 property1 { set; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_set_only_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+        }
+    }
+
+    // multiple getters
+    {
+        {
+            std::istringstream test_double_get_idl{ R"(
+                namespace N
+                {
+                    interface i1
+                    {
+                        Int32 property1 { get; get; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_double_get_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+        }
+        {
+            std::istringstream test_double_get_idl{ R"(
+                namespace N
+                {
+                    interface i1
+                    {
+                        Int32 property1 { get; };
+                        Int32 property1 { get; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_double_get_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() >= 1);
+        }
+        {
+            std::istringstream test_double_get_idl{ R"(
+                namespace N
+                {
+                    runtimeclass c1
+                    {
+                        Int32 property1 { get; get; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_double_get_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+        }
+        {
+            std::istringstream test_double_get_idl{ R"(
+                namespace N
+                {
+                    runtimeclass c1
+                    {
+                        Int32 property1 { get; };
+                        Int32 property1 { get; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_double_get_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() >= 1);
+        }
+    }
+    // multiple setters
+    {
+        {
+            std::istringstream test_double_set_idl{ R"(
+                namespace N
+                {
+                    interface i1
+                    {
+                        Int32 property1 { set; set; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_double_set_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+        }
+        {
+            std::istringstream test_double_set_idl{ R"(
+                namespace N
+                {
+                    runtimeclass c1
+                    {
+                        Int32 property1 { set; set; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_double_set_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+        }
+    }
+    {
+        {
+            std::istringstream test_double_set_idl{ R"(
+                namespace N
+                {
+                    interface i1
+                    {
+                        Int32 property1 { set; };
+                        Int32 property1 { set; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_double_set_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() >= 1);
+        }
+        {
+            std::istringstream test_double_set_idl{ R"(
+                namespace N
+                {
+                    runtimeclass c1
+                    {
+                        Int32 property1 { set; };
+                        Int32 property1 { set; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_double_set_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() >= 1);
+        }
+    }
+    {
+        {
+            std::istringstream test_three_acessor_idl{ R"(
+                namespace N
+                {
+                    interface i1
+                    {
+                        Int32 property1 { set; get; get; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_three_acessor_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+        }
+        {
+            std::istringstream test_three_acessor_idl{ R"(
+                namespace N
+                {
+                    runtimeclass c1
+                    {
+                        Int32 property1 { set; get; get; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_three_acessor_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+        }
+    }
+    {
+        {
+            std::istringstream test_add_and_remove_idl{ R"(
+                namespace N
+                {
+                    interface i1
+                    {
+                        Int32 property1 { get; add; };
+                        Int32 property2 { get; remove; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_add_and_remove_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 2);
+            REQUIRE(reader.get_num_semantic_errors() == 0);
+        }
+        {
+            std::istringstream test_add_and_remove_idl{ R"(
+                namespace N
+                {
+                    runtimeclass c1
+                    {
+                        Int32 property1 { get; add; };
+                        Int32 property2 { get; remove; };
+                    }
+                }
+            )" };
+
+            xmeta_idl_reader reader{ "" };
+            reader.read(test_add_and_remove_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 2);
+            REQUIRE(reader.get_num_semantic_errors() == 0);
+        }
     }
 }
 
-TEST_CASE("Interface invalid property accessor test")
+TEST_CASE("Duplicate property id test")
 {
     {
         std::istringstream test_set_only_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
-                    Int32 property1 { set; };
+                    Int32 property1 { get; };
+                    Int64 property1 { get; };
                 }
             }
         )" };
@@ -1211,118 +1660,13 @@ TEST_CASE("Interface invalid property accessor test")
         xmeta_idl_reader reader{ "" };
         reader.read(test_set_only_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    // multiple getters
-    {
-        std::istringstream test_double_get_idl{ R"(
-            namespace N
-            {
-                interface IControl
-                {
-                    Int32 property1 { get; get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_double_get_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_double_get_idl{ R"(
-            namespace N
-            {
-                interface IControl
-                {
-                    Int32 property1 { get; };
-                    Int32 property1 { get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_double_get_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() >= 1);
     }
-    // multiple setters
-    {
-        std::istringstream test_double_set_idl{ R"(
-            namespace N
-            {
-                interface IControl
-                {
-                    Int32 property1 { set; set; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_double_set_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_double_set_idl{ R"(
-            namespace N
-            {
-                interface IControl
-                {
-                    Int32 property1 { set; };
-                    Int32 property1 { set; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_double_set_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() >= 1);
-    }
-    {
-        std::istringstream test_three_acessor_idl{ R"(
-            namespace N
-            {
-                interface IControl
-                {
-                    Int32 property1 { set; get; get; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_three_acessor_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-    {
-        std::istringstream test_add_and_remove_idl{ R"(
-            namespace N
-            {
-                interface IControl
-                {
-                    Int32 property1 { get; add; };
-                    Int32 property2 { get; remove; };
-                }
-            }
-        )" };
-
-        xmeta_idl_reader reader{ "" };
-        reader.read(test_add_and_remove_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 2);
-        REQUIRE(reader.get_num_semantic_errors() == 0);
-    }
-}
-
-TEST_CASE("Interface duplicate property id test")
-{
     {
         std::istringstream test_set_only_idl{ R"(
             namespace N
             {
-                interface IControl
+                runtimeclass c1
                 {
                     Int32 property1 { get; };
                     Int64 property1 { get; };
@@ -1337,12 +1681,16 @@ TEST_CASE("Interface duplicate property id test")
     }
 }
 
-TEST_CASE("Interface property implicit accessors test")
+TEST_CASE("Property implicit accessors test")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl
+            interface i1
+            {
+                Int32 property1;
+            }
+            runtimeclass c1
             {
                 Int32 property1;
             }
@@ -1363,18 +1711,26 @@ TEST_CASE("Interface property implicit accessors test")
         set_property1
     };
 
-    ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+    ExpectedInterfaceModel i1{ "i1", "N.i1",
         { get_property1, set_property1 },
         { property1 },
         {},
         {} 
     };
 
-    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { get_property1, set_property1 },
+        { property1 },
+        {},
+        std::nullopt,
+        {}
+    };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { i1, c1 } };
     N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Resolving Interface property type ref test")
+TEST_CASE("Resolving property type ref test")
 {
     std::istringstream test_idl{ R"(
         namespace N
@@ -1383,7 +1739,13 @@ TEST_CASE("Resolving Interface property type ref test")
             {
             };
 
-            interface IControl
+            interface i1
+            {
+                S1 property1;
+                M.E2 property2;
+            }
+
+            runtimeclass c1
             {
                 S1 property1;
                 M.E2 property2;
@@ -1421,24 +1783,37 @@ TEST_CASE("Resolving Interface property type ref test")
         set_property2
     };
 
-    ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+    ExpectedInterfaceModel i1{ "i1", "N.i1",
         { get_property1, set_property1, get_property2, set_property2 },
         { property1, property2 },
         {},
         {}
     };
 
-    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { get_property1, set_property1, get_property2, set_property2 },
+        { property1, property2 },
+        {},
+        std::nullopt,
+        {}
+    };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { i1, c1 } };
     N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Interface event test")
+TEST_CASE("Event test")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
             delegate void StringListEvent(Int32 sender);
-            interface IControl
+            interface i1
+            {
+                event StringListEvent Changed;
+            }
+
+            runtimeclass c1
             {
                 event StringListEvent Changed;
             }
@@ -1451,46 +1826,154 @@ TEST_CASE("Interface event test")
 
     ExpectedEventModel Changed{ "Changed", default_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
 
-    ExpectedInterfaceModel IControl{ "IControl", "N.IControl",
+    ExpectedInterfaceModel i1{ "i1", "N.i1",
         { Changed.get_add_method(), Changed.get_remove_method() },
         {},
         { Changed },
         {}
     };
 
-    ExpectedNamespaceModel N{ "N", "N", {}, { IControl } };
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { Changed.get_add_method(), Changed.get_remove_method() },
+        {},
+        { Changed },
+         std::nullopt,
+        {}
+    };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, i1 } };
     N.VerifyType(find_namespace(reader, "N"));
 }
 
-TEST_CASE("Interface event explicit accessor not allowed test")
+TEST_CASE("Event explicit accessor not allowed test")
 {
-    std::istringstream test_idl{ R"(
-        namespace N
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                interface i1
+                {
+                    event StringListEvent Changed { add; remove; };
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() > 0);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                runtimeclass c1
+                {
+                    event StringListEvent Changed { add; remove; };
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() > 0);
+    }
+}
+
+TEST_CASE("Duplicate event test")
+{
+    {
         {
-            delegate void StringListEvent(Int32 sender);
-            interface IControl
-            {
-                event StringListEvent Changed { add; remove; };
-            }
+            std::istringstream test_idl{ R"(
+                namespace N
+                {
+                    delegate void StringListEvent(Int32 sender);
+                    interface i1
+                    {
+                        event StringListEvent Changed;
+                        event StringListEvent Changed;
+                    }
+                }
+            )" };
+            std::vector<std::string> paths = { "Foundation.xmeta" };
+            xmeta_idl_reader reader{ "" , paths };
+            reader.read(test_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 2);
         }
-    )" };
-    std::vector<std::string> paths = { "Foundation.xmeta" };
-    xmeta_idl_reader reader{ "" , paths };
-    reader.read(test_idl);
-    REQUIRE(reader.get_num_syntax_errors() > 0);
+        {
+            std::istringstream test_idl{ R"(
+                namespace N
+                {
+                    delegate void StringListEvent(Int32 sender);
+                    runtimeclass c1
+                    {
+                        event StringListEvent Changed;
+                        event StringListEvent Changed;
+                    }
+                }
+            )" };
+            std::vector<std::string> paths = { "Foundation.xmeta" };
+            xmeta_idl_reader reader{ "" , paths };
+            reader.read(test_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 2);
+        }
+    }
+    {
+        {
+            std::istringstream test_idl{ R"(
+                namespace N
+                {
+                    delegate void StringListEvent(Int32 sender);
+                    interface i1
+                    {
+                        event StringListEvent Changed;
+                        event StringStackEvent Changed;
+                    }
+                    delegate void StringStackEvent(Int32 sender);
+                }
+            )" };
+            std::vector<std::string> paths = { "Foundation.xmeta" };
+            xmeta_idl_reader reader{ "" , paths };
+            reader.read(test_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 2);
+        }
+        {
+            std::istringstream test_idl{ R"(
+                namespace N
+                {
+                    delegate void StringListEvent(Int32 sender);
+                    runtimeclass c1
+                    {
+                        event StringListEvent Changed;
+                        event StringStackEvent Changed;
+                    }
+                    delegate void StringStackEvent(Int32 sender);
+                }
+            )" };
+            std::vector<std::string> paths = { "Foundation.xmeta" };
+            xmeta_idl_reader reader{ "" , paths };
+            reader.read(test_idl);
+            REQUIRE(reader.get_num_syntax_errors() == 0);
+            REQUIRE(reader.get_num_semantic_errors() == 2);
+        }
+    }
 }
 
-TEST_CASE("Interface duplicate event test")
+TEST_CASE("Event and property name collision test")
 {
     {
         std::istringstream test_idl{ R"(
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl
+                interface i1
                 {
                     event StringListEvent Changed;
-                    event StringListEvent Changed;
+                    Int32 Changed;
                 }
             }
         )" };
@@ -1505,30 +1988,7 @@ TEST_CASE("Interface duplicate event test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl
-                {
-                    event StringListEvent Changed;
-                    event StringStackEvent Changed;
-                }
-                delegate void StringStackEvent(Int32 sender);
-            }
-        )" };
-        std::vector<std::string> paths = { "Foundation.xmeta" };
-        xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
-        REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() == 1);
-    }
-}
-
-TEST_CASE("Interface event and property name collision test")
-{
-    {
-        std::istringstream test_idl{ R"(
-            namespace N
-            {
-                delegate void StringListEvent(Int32 sender);
-                interface IControl
+                runtimeclass c1
                 {
                     event StringListEvent Changed;
                     Int32 Changed;
@@ -1543,14 +2003,14 @@ TEST_CASE("Interface event and property name collision test")
     }
 }
 
-TEST_CASE("Interface event and method name test")
+TEST_CASE("Event and method name collision test")
 {
     {
         std::istringstream test_idl{ R"(
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl
+                interface i1
                 {
                     void remove_Changed();
                     event StringListEvent Changed;
@@ -1564,6 +2024,65 @@ TEST_CASE("Interface event and method name test")
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
     }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                delegate void StringListEvent(Int32 sender);
+                runtimeclass c1
+                {
+                    void add_Changed();
+                    event StringListEvent Changed;
+                    void remove_Changed();
+                }
+            }
+        )" };
+        std::vector<std::string> paths = { "Foundation.xmeta" };
+        xmeta_idl_reader reader{ "" , paths };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+}
+
+TEST_CASE("Property method name collision test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface i1
+                {
+                    void get_property1();
+                    Int32 property1 { get; set; };
+                    void put_property1();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                runtimeclass c1
+                {
+                    void get_property1();
+                    Int32 property1 { get; set; };
+                    void put_property1();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
 }
 
 TEST_CASE("Interface circular inheritance test")
@@ -1571,11 +2090,11 @@ TEST_CASE("Interface circular inheritance test")
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl requires IListBox
+            interface i1 requires IListBox
             {
                 void Paint();
             }
-            interface ITextBox requires IControl
+            interface ITextBox requires i1
             {
                 void SetText(String text);
             }
@@ -1598,11 +2117,11 @@ TEST_CASE("Interface member declared in inheritance test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     void Paint();
                 }
-                interface IListBox requires ITextBox
+                interface IListBox
                 {
                     void Paint();
                 }
@@ -1612,13 +2131,13 @@ TEST_CASE("Interface member declared in inheritance test")
         xmeta_idl_reader reader{ "" };
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
-        REQUIRE(reader.get_num_semantic_errors() > 0);
+        REQUIRE(reader.get_num_semantic_errors() == 1);
     }
     {
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -1638,7 +2157,7 @@ TEST_CASE("Interface member declared in inheritance test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -1658,7 +2177,7 @@ TEST_CASE("Interface member declared in inheritance test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -1679,7 +2198,7 @@ TEST_CASE("Interface member declared in inheritance test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -1700,7 +2219,7 @@ TEST_CASE("Interface member declared in inheritance test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -1722,7 +2241,7 @@ TEST_CASE("Interface member declared in inheritance test")
             {
                 delegate void StringListEvent(Int32 sender);
                 delegate void StringListEvent2(Int32 sender);
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     event StringListEvent value;
                 }
@@ -1740,14 +2259,13 @@ TEST_CASE("Interface member declared in inheritance test")
     }
 }
 
-
 TEST_CASE("Unresolved types interface test")
 {
     {
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires fakebase
+                interface i1 requires fakebase
                 {
                     event StringListEvent Changed;
                     FakeObject obj { get; set; };
@@ -1762,6 +2280,202 @@ TEST_CASE("Unresolved types interface test")
         REQUIRE(reader.get_num_semantic_errors() == 5);
     }
 }
+//
+//TEST_CASE("Runtimeclass circular inheritance test")
+//{
+//    std::istringstream test_idl{ R"(
+//        namespace N
+//        {
+//            runtimeclass c1 requires IListBox
+//            {
+//                void Paint();
+//            }
+//            interface ITextBox requires i1
+//            {
+//                void SetText(String text);
+//            }
+//            interface IListBox requires ITextBox
+//            {
+//               void SetItem(String items);
+//            }
+//        }
+//    )" };
+//
+//    xmeta_idl_reader reader{ "" };
+//    reader.read(test_idl);
+//    REQUIRE(reader.get_num_syntax_errors() == 0);
+//    REQUIRE(reader.get_num_semantic_errors() > 0);
+//}
+
+//TEST_CASE("Runtimeclass member declared in inheritance test")
+//{
+//    {
+//        std::istringstream test_idl{ R"(
+//            namespace N
+//            {
+//                runtimeclass c1 requires IListBox
+//                {
+//                    void Paint();
+//                }
+//                interface IListBox requires ITextBox
+//                {
+//                    void Paint();
+//                }
+//            }
+//        )" };
+//
+//        xmeta_idl_reader reader{ "" };
+//        reader.read(test_idl);
+//        REQUIRE(reader.get_num_syntax_errors() == 0);
+//        REQUIRE(reader.get_num_semantic_errors() > 0);
+//    }
+//    {
+//        std::istringstream test_idl{ R"(
+//            namespace N
+//            {
+//                runtimeclass c1 requires IListBox
+//                {
+//                    Int32 value;
+//                }
+//                interface IListBox
+//                {
+//                    void get_value();
+//                }
+//            }
+//        )" };
+//
+//        xmeta_idl_reader reader{ "" };
+//        reader.read(test_idl);
+//        REQUIRE(reader.get_num_syntax_errors() == 0);
+//        REQUIRE(reader.get_num_semantic_errors() == 1);
+//    }
+//    {
+//        std::istringstream test_idl{ R"(
+//            namespace N
+//            {
+//                runtimeclass c1 requires IListBox
+//                {
+//                    Int32 value;
+//                }
+//                interface IListBox
+//                {
+//                    void get_value();
+//                }
+//            }
+//        )" };
+//
+//        xmeta_idl_reader reader{ "" };
+//        reader.read(test_idl);
+//        REQUIRE(reader.get_num_syntax_errors() == 0);
+//        REQUIRE(reader.get_num_semantic_errors() == 1);
+//    }
+//    {
+//        std::istringstream test_idl{ R"(
+//            namespace N
+//            {
+//                runtimeclass c1 requires IListBox
+//                {
+//                    Int32 value;
+//                }
+//                interface IListBox
+//                {
+//                    Int32 value;
+//                }
+//            }
+//        )" };
+//
+//        xmeta_idl_reader reader{ "" };
+//        reader.read(test_idl);
+//        REQUIRE(reader.get_num_syntax_errors() == 0);
+//        REQUIRE(reader.get_num_semantic_errors() == 1);
+//    }
+//    {
+//        std::istringstream test_idl{ R"(
+//            namespace N
+//            {
+//                delegate void StringListEvent(Int32 sender);
+//                runtimeclass c1 requires IListBox
+//                {
+//                    Int32 value;
+//                }
+//                interface IListBox
+//                {
+//                    event StringListEvent value;
+//                }
+//            }
+//        )" };
+//
+//        xmeta_idl_reader reader{ "" };
+//        reader.read(test_idl);
+//        REQUIRE(reader.get_num_syntax_errors() == 0);
+//        REQUIRE(reader.get_num_semantic_errors() == 1);
+//    }
+//    {
+//        std::istringstream test_idl{ R"(
+//            namespace N
+//            {
+//                delegate void StringListEvent(Int32 sender);
+//                runtimeclass c1 requires IListBox
+//                {
+//                    Int32 value;
+//                }
+//                interface IListBox
+//                {
+//                    event StringListEvent value;
+//                }
+//            }
+//        )" };
+//
+//        xmeta_idl_reader reader{ "" };
+//        reader.read(test_idl);
+//        REQUIRE(reader.get_num_syntax_errors() == 0);
+//        REQUIRE(reader.get_num_semantic_errors() == 1);
+//    }
+//    {
+//        std::istringstream test_idl{ R"(
+//            namespace N
+//            {
+//                delegate void StringListEvent(Int32 sender);
+//                delegate void StringListEvent2(Int32 sender);
+//                runtimeclass c1 requires IListBox
+//                {
+//                    event StringListEvent value;
+//                }
+//                interface IListBox
+//                {
+//                    event StringListEvent2 value;
+//                }
+//            }
+//        )" };
+//
+//        xmeta_idl_reader reader{ "" };
+//        reader.read(test_idl);
+//        REQUIRE(reader.get_num_syntax_errors() == 0);
+//        REQUIRE(reader.get_num_semantic_errors() == 1);
+//    }
+//}
+
+//TEST_CASE("Unresolved types Runtimeclass test")
+//{
+//    {
+//        std::istringstream test_idl{ R"(
+//            namespace N
+//            {
+//                runtimeclass c1 requires fakebase
+//                {
+//                    event StringListEvent Changed;
+//                    FakeObject obj { get; set; };
+//                    FakeObject doSomething2(FakeObject2 test);
+//                }
+//            }
+//        )" };
+//        std::vector<std::string> paths = { "Foundation.xmeta" };
+//        xmeta_idl_reader reader{ "" , paths };
+//        reader.read(test_idl);
+//        REQUIRE(reader.get_num_syntax_errors() == 0);
+//        REQUIRE(reader.get_num_semantic_errors() == 5);
+//    }
+//}
 
 TEST_CASE("Class methods test")
 {
@@ -1791,32 +2505,23 @@ TEST_CASE("Class methods test")
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-    auto const& ns_body = find_namespace_body(reader, "N", 0);
-    auto const& classes = ns_body->get_classes();
-    REQUIRE(classes.size() == 1);
 
-    REQUIRE(classes.find("c1") != classes.end());
-    auto const& model = classes.at("c1");
-
-    auto const& methods = model->get_methods();
-    REQUIRE(methods.size() == 4); 
     ExpectedMethodModel m0{ "m0", in_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel m1{ "m1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, { 
+    ExpectedMethodModel m1{ "m1", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
         ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
-    m0.VerifyType(methods[0]);
-    m1.VerifyType(methods[1]);
+    ExpectedMethodModel m2{ "m2", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } }, {} };
+    ExpectedMethodModel m3{ "m3", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "M.S1" } }, {} };
+    ExpectedClassModel c1{ "c1", "N.c1",
+        { m0, m1, m2, m3 },
+        {},
+        {},
+        std::nullopt,
+        {}
+    };
 
-    auto const& method2 = methods[2];
-    REQUIRE(method2->get_id() == "m2");
-    REQUIRE(method2->get_return_type()->get_semantic().is_resolved());
-    REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(method2->get_return_type()->get_semantic().get_resolved_target()));
-    REQUIRE(std::get<std::shared_ptr<struct_model>>(method2->get_return_type()->get_semantic().get_resolved_target())->get_fully_qualified_id() == "N.S1");
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1 } };
+    N.VerifyType(find_namespace(reader, "N"));
 
-    auto const& method3 = methods[3];
-    REQUIRE(method3->get_id() == "m3");
-    REQUIRE(method3->get_return_type()->get_semantic().is_resolved());
-    REQUIRE(std::holds_alternative<std::shared_ptr<struct_model>>(method3->get_return_type()->get_semantic().get_resolved_target()));
-    REQUIRE(std::get<std::shared_ptr<struct_model>>(method3->get_return_type()->get_semantic().get_resolved_target())->get_fully_qualified_id() == "M.S1");
 }
 
 TEST_CASE("Class methods synthesized test")
@@ -1852,7 +2557,7 @@ TEST_CASE("Interface property method ordering test")
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl
+            interface i1
             {
                 Int32 property1 { get; set; };
                 Int32 property2 { get; };
@@ -1873,8 +2578,8 @@ TEST_CASE("Interface property method ordering test")
     auto const& interfaces = ns_bodies[0]->get_interfaces();
     REQUIRE(interfaces.size() == 1);
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
+    REQUIRE(interfaces.find("i1") != interfaces.end());
+    auto const& model = interfaces.at("i1");
 
     auto const& properties = model->get_properties();
     REQUIRE(properties[0]->get_id() == "property1");
@@ -1935,7 +2640,7 @@ TEST_CASE("Interface property method ordering different line test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { get; };
                     Int32 property1 { set; };
@@ -1955,8 +2660,8 @@ TEST_CASE("Interface property method ordering different line test")
         auto const& interfaces = ns_bodies[0]->get_interfaces();
         REQUIRE(interfaces.size() == 1);
 
-        REQUIRE(interfaces.find("IControl") != interfaces.end());
-        auto const& model = interfaces.at("IControl");
+        REQUIRE(interfaces.find("i1") != interfaces.end());
+        auto const& model = interfaces.at("i1");
 
         auto const& properties = model->get_properties();
         REQUIRE(properties.size() == 1);
@@ -1984,7 +2689,7 @@ TEST_CASE("Interface property method ordering different line test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { set; };
                     Int32 property1 { get; };
@@ -2004,8 +2709,8 @@ TEST_CASE("Interface property method ordering different line test")
         auto const& interfaces = ns_bodies[0]->get_interfaces();
         REQUIRE(interfaces.size() == 1);
 
-        REQUIRE(interfaces.find("IControl") != interfaces.end());
-        auto const& model = interfaces.at("IControl");
+        REQUIRE(interfaces.find("i1") != interfaces.end());
+        auto const& model = interfaces.at("i1");
 
         auto const& properties = model->get_properties();
         REQUIRE(properties.size() == 1);
@@ -2033,7 +2738,7 @@ TEST_CASE("Interface property method ordering different line test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { get; };
                     Int32 property2 { set; };
@@ -2051,8 +2756,8 @@ TEST_CASE("Interface property method ordering different line test")
         auto const& it = namespaces.find("N");
         auto const& ns_bodies = it->second->get_namespace_bodies();
         auto const& interfaces = ns_bodies[0]->get_interfaces();
-        REQUIRE(interfaces.find("IControl") != interfaces.end());
-        auto const& model = interfaces.at("IControl");
+        REQUIRE(interfaces.find("i1") != interfaces.end());
+        auto const& model = interfaces.at("i1");
         auto const& methods = model->get_methods();
         REQUIRE(methods.size() == 5);
         REQUIRE(methods[0]->get_id() == "get_property1");
@@ -2069,7 +2774,7 @@ TEST_CASE("Interface property method name collision test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     void get_property1();
                     Int32 property1 { get; set; };
@@ -2091,7 +2796,7 @@ TEST_CASE("Interface invalid property accessor test")
         std::istringstream test_set_only_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { set; };
                 }
@@ -2108,7 +2813,7 @@ TEST_CASE("Interface invalid property accessor test")
         std::istringstream test_double_get_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { get; get; };
                 }
@@ -2124,7 +2829,7 @@ TEST_CASE("Interface invalid property accessor test")
         std::istringstream test_double_get_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { get; };
                     Int32 property1 { get; };
@@ -2142,7 +2847,7 @@ TEST_CASE("Interface invalid property accessor test")
         std::istringstream test_double_set_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { set; set; };
                 }
@@ -2158,7 +2863,7 @@ TEST_CASE("Interface invalid property accessor test")
         std::istringstream test_double_set_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { set; };
                     Int32 property1 { set; };
@@ -2175,7 +2880,7 @@ TEST_CASE("Interface invalid property accessor test")
         std::istringstream test_three_acessor_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { set; get; get; };
                 }
@@ -2191,7 +2896,7 @@ TEST_CASE("Interface invalid property accessor test")
         std::istringstream test_add_and_remove_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { get; add; };
                     Int32 property2 { get; remove; };
@@ -2212,7 +2917,7 @@ TEST_CASE("Interface duplicate property id test")
         std::istringstream test_set_only_idl{ R"(
             namespace N
             {
-                interface IControl
+                interface i1
                 {
                     Int32 property1 { get; };
                     Int64 property1 { get; };
@@ -2232,7 +2937,7 @@ TEST_CASE("Interface property implicit accessors test")
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl
+            interface i1
             {
                 Int32 property1;
             }
@@ -2251,8 +2956,8 @@ TEST_CASE("Interface property implicit accessors test")
     auto const& interfaces = ns_bodies[0]->get_interfaces();
     REQUIRE(interfaces.size() == 1);
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
+    REQUIRE(interfaces.find("i1") != interfaces.end());
+    auto const& model = interfaces.at("i1");
 
     auto const& properties = model->get_properties();
     REQUIRE(properties[0]->get_id() == "property1");
@@ -2282,7 +2987,7 @@ TEST_CASE("Resolving Interface property type ref test")
             {
             };
 
-            interface IControl
+            interface i1
             {
                 S1 property1;
                 M.S2 property2;
@@ -2308,8 +3013,8 @@ TEST_CASE("Resolving Interface property type ref test")
     auto const& interfaces = ns_bodies[0]->get_interfaces();
     REQUIRE(interfaces.size() == 1);
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
+    REQUIRE(interfaces.find("i1") != interfaces.end());
+    auto const& model = interfaces.at("i1");
 
     auto const& properties = model->get_properties();
     {
@@ -2332,7 +3037,7 @@ TEST_CASE("Interface event test")
         namespace N
         {
             delegate void StringListEvent(Int32 sender);
-            interface IControl
+            interface i1
             {
                 event StringListEvent Changed;
             }
@@ -2351,8 +3056,8 @@ TEST_CASE("Interface event test")
     auto const& interfaces = ns_bodies[0]->get_interfaces();
     REQUIRE(interfaces.size() == 1);
 
-    REQUIRE(interfaces.find("IControl") != interfaces.end());
-    auto const& model = interfaces.at("IControl");
+    REQUIRE(interfaces.find("i1") != interfaces.end());
+    auto const& model = interfaces.at("i1");
 
     auto const& events = model->get_events();
     REQUIRE(events[0]->get_id() == "Changed");
@@ -2369,7 +3074,7 @@ TEST_CASE("Interface event explicit accessor not allowed test")
         namespace N
         {
             delegate void StringListEvent(Int32 sender);
-            interface IControl
+            interface i1
             {
                 event StringListEvent Changed { add; remove; };
             }
@@ -2388,7 +3093,7 @@ TEST_CASE("Interface duplicate event test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl
+                interface i1
                 {
                     event StringListEvent Changed;
                     event StringListEvent Changed;
@@ -2406,7 +3111,7 @@ TEST_CASE("Interface duplicate event test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl
+                interface i1
                 {
                     event StringListEvent Changed;
                     event StringStackEvent Changed;
@@ -2429,7 +3134,7 @@ TEST_CASE("Interface event and property name collision test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl
+                interface i1
                 {
                     event StringListEvent Changed;
                     Int32 Changed;
@@ -2451,7 +3156,7 @@ TEST_CASE("Interface event and method name test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl
+                interface i1
                 {
                     void remove_Changed();
                     event StringListEvent Changed;
@@ -2472,11 +3177,11 @@ TEST_CASE("Interface circular inheritance test")
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl requires IListBox
+            interface i1 requires IListBox
             {
                 void Paint();
             }
-            interface ITextBox requires IControl
+            interface ITextBox requires i1
             {
                 void SetText(String text);
             }
@@ -2499,7 +3204,7 @@ TEST_CASE("Interface member declared in inheritance test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     void Paint();
                 }
@@ -2519,7 +3224,7 @@ TEST_CASE("Interface member declared in inheritance test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -2539,7 +3244,7 @@ TEST_CASE("Interface member declared in inheritance test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -2559,7 +3264,7 @@ TEST_CASE("Interface member declared in inheritance test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -2580,7 +3285,7 @@ TEST_CASE("Interface member declared in inheritance test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -2601,7 +3306,7 @@ TEST_CASE("Interface member declared in inheritance test")
             namespace N
             {
                 delegate void StringListEvent(Int32 sender);
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     Int32 value;
                 }
@@ -2623,7 +3328,7 @@ TEST_CASE("Interface member declared in inheritance test")
             {
                 delegate void StringListEvent(Int32 sender);
                 delegate void StringListEvent2(Int32 sender);
-                interface IControl requires IListBox
+                interface i1 requires IListBox
                 {
                     event StringListEvent value;
                 }
@@ -2648,7 +3353,7 @@ TEST_CASE("Unresolved types interface test")
         std::istringstream test_idl{ R"(
             namespace N
             {
-                interface IControl requires fakebase
+                interface i1 requires fakebase
                 {
                     event StringListEvent Changed;
                     FakeObject obj { get; set; };

@@ -38,7 +38,7 @@ namespace xlang::xmeta
                 class_semantics const& sem) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
             m_semantic{ sem },
-            m_class_base_ref{ "" }
+            m_class_base_ref{ std::nullopt }
         { }
 
         auto const& get_class_base_ref() const noexcept
@@ -70,7 +70,7 @@ namespace xlang::xmeta
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager);
 
     private:
-        type_ref m_class_base_ref;
+        std::optional<type_ref> m_class_base_ref;
         class_semantics m_semantic;
         // TODO: Add type parameters (generic types)
 
