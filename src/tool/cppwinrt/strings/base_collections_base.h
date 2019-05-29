@@ -21,6 +21,8 @@ namespace winrt
             return make<iterator>(static_cast<D*>(this));
         }
 
+    protected:
+
         template<typename InputIt, typename Size, typename OutputIt>
         auto copy_n(InputIt first, Size count, OutputIt result) const
         {
