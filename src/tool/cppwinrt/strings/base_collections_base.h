@@ -309,14 +309,16 @@ namespace winrt
             call_changed(Windows::Foundation::Collections::CollectionChange::Reset, 0);
         }
 
-    private:
-
-        event<Windows::Foundation::Collections::VectorChangedEventHandler<T>> m_changed;
+    protected:
 
         void call_changed(Windows::Foundation::Collections::CollectionChange const change, uint32_t const index)
         {
             m_changed(static_cast<D const&>(*this), make<args>(change, index));
         }
+
+    private:
+
+        event<Windows::Foundation::Collections::VectorChangedEventHandler<T>> m_changed;
 
         struct args : implements<args, Windows::Foundation::Collections::IVectorChangedEventArgs>
         {
