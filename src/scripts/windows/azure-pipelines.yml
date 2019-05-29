@@ -1,13 +1,5 @@
-resources:
-  containers:
-  - container: build_container
-    image:   msftxlang.azurecr.io/xlang-windows-build
-    endpoint: msftxlang_acr
-
 pool:
-  vmImage: 'win1803'
-
-container: build_container
+  vmImage: 'windows-2019'
 
 steps:
 - script: C:\BuildTools\Common7\Tools\VsDevCmd.bat && cmake ./src -B_build\Windows\x86\Release -GNinja -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX=install && ninja -C _build\Windows\x86\Release install -v
