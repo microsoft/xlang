@@ -21,7 +21,6 @@ namespace xlang::xmeta
 
     compilation_error class_or_interface_model::add_member(std::shared_ptr<method_model> const& member)
     {
-        // TODO: the case with overloading
         if (event_or_property_id_exists(member->get_id()))
         {
             return compilation_error::symbol_exists;
@@ -48,24 +47,6 @@ namespace xlang::xmeta
                     }
                 }
             }
-  /*          if (overloading_method->get_id() == member->get_id())
-            {
-                if (*overloading_method->get_return_type() == *member->get_return_type())
-                {
-                    if (overloading_method->get_formal_parameters().size() == member->get_formal_parameters().size())
-                    {
-                        return compilation_error::method_cannot_be_overloaded;
-                    }
-                }
-                else
-                {
-                    return compilation_error::method_cannot_be_overloaded;
-                }
-            }*/
-        }
-        if (method_id_exists(member->get_id()))
-        {
-            auto const& overloaded_method = get_method_member(member->get_id());
         }
         m_methods.emplace_back(member);
         return compilation_error::passed;

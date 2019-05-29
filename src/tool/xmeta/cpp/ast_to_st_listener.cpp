@@ -506,6 +506,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
         {
             if (class_member->class_constructor_declaration())
             {
+                auto constexpr constructor_semantic_name = ".ctor";
                 auto class_constructor = class_member->class_constructor_declaration();
                 std::string constructor_id = class_constructor->IDENTIFIER()->getText();
 
@@ -520,7 +521,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     method_sem.is_protected = true;
                 }
                 
-                auto constructor_model = std::make_shared<method_model>(constructor_id, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
+                auto constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
                 if (class_constructor->formal_parameter_list())
                 {
                     extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), constructor_model);
@@ -530,7 +531,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 if (constructor_model->get_formal_parameters().size() > 0)
                 {
                     // this is a non-default constructor and we need to add it to the IFactory interface
-                    auto syn_constructor_model = std::make_shared<method_model>(constructor_id, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
+                    auto syn_constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
                     if (class_constructor->formal_parameter_list())
                     {
                         extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), syn_constructor_model);

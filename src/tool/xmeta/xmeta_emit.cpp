@@ -492,9 +492,10 @@ namespace xlang::xmeta
                 static constexpr DWORD method_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
                 define_method(val, method_flag, method_defs, token_interface_type_def);
             }
-            else
+            else if (val->get_method_association() == method_association::Constructor)
             {
-                assert(false);
+                static constexpr DWORD method_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/; //TODO: Figure out what mdInstance is
+                define_method(val, method_flag, method_defs, token_interface_type_def);
             }
         }
         for (auto const& val : model->get_properties())

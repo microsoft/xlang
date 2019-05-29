@@ -3194,48 +3194,44 @@ TEST_CASE("Runtime class synthensized static interface test")
 
 TEST_CASE("Runtime class constructor test")
 {
-    //std::istringstream test_idl{ R"(
-    //    namespace N
-    //    {
-    //        runtimeclass Area
-    //        {
-    //            Area(); // default constructor must use IActivationFactory
-    //            Area(Int32 width, Int32 height);
-    //        }
-    //    }
-    //)" };
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            runtimeclass Area
+            {
+                Area(); // default constructor must use IActivationFactory
+                Area(Int32 width, Int32 height);
+            }
+        }
+    )" };
 
-    //ExpectedMethodModel m0{ "m0", default_method_semantics, std::nullopt, {} };
-    //ExpectedMethodModel m1{ "m1", static_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
-    //    ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
+    std::vector<std::string> paths = { "Foundation.xmeta" };
+    xmeta_idl_reader reader{ "" , paths };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    //std::vector<std::string> paths = { "Foundation.xmeta" };
-    //xmeta_idl_reader reader{ "" , paths };
-    //reader.read(test_idl);
-    //REQUIRE(reader.get_num_syntax_errors() == 0);
-    //ExpectedClassModel c1{ "c1", "N.c1",
-    //    { m0, m1 },
-    //    {},
-    //    {},
-    //    std::nullopt,
-    //    {}
-    //};
+    ExpectedMethodModel Area{ ".ctor", default_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel Area2{ ".ctor", default_method_semantics, std::nullopt, {
+        ExpectedFormalParameterModel{ "width", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } },
+        ExpectedFormalParameterModel{ "height", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } }
+    } };
 
-    //ExpectedInterfaceModel syn_c1{ "Ic1", "N.Ic1",
-    //    { m0 },
-    //    {},
-    //    {},
-    //    {}
-    //};
+    ExpectedClassModel c1Area{ "Area", "N.Area",
+        { Area, Area2 },
+        {},
+        {},
+        std::nullopt,
+        {}
+    };
 
-    //ExpectedInterfaceModel syn_static_c1{ "Ic1Statics", "N.Ic1Statics",
-    //    { m1 },
-    //    {},
-    //    {},
-    //    {}
-    //};
+    ExpectedInterfaceModel syn_c1{ "IAreaFactory", "N.IAreaFactory",
+        { Area2 },
+        {},
+        {},
+        {}
+    };
 
-    //ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1, syn_static_c1 } };
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1Area, syn_c1 } };
 
-    //N.VerifyType(find_namespace(reader, "N"));
+    N.VerifyType(find_namespace(reader, "N"));
 }
