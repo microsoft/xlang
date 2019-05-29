@@ -1,4 +1,76 @@
 
+namespace winrt::impl
+{
+    template <typename D, typename T, typename Version = impl::no_collection_version>
+    struct iterator_base : Version::iterator_type, implements<iterator_base<D, T, Version>, Windows::Foundation::Collections::IIterator<T>>
+    {
+        void abi_enter()
+        {
+            m_owner->abi_enter();
+            this->check_version(*m_owner);
+        }
+
+        void abi_exit()
+        {
+            m_owner->abi_exit();
+        }
+
+        explicit iterator_base(D* const owner) noexcept :
+            Version::iterator_type(*owner),
+            m_current(owner->get_container().begin()),
+            m_end(owner->get_container().end())
+        {
+            m_owner.copy_from(owner);
+        }
+
+        T Current() const
+        {
+            if (m_current == m_end)
+            {
+                throw hresult_out_of_bounds();
+            }
+
+            if constexpr (!impl::is_key_value_pair<T>::value)
+            {
+                return m_owner->unwrap_value(*m_current);
+            }
+            else
+            {
+                return make<impl::key_value_pair<T>>(m_owner->unwrap_value(m_current->first), m_owner->unwrap_value(m_current->second));
+            }
+        }
+
+        bool HasCurrent() const noexcept
+        {
+            return m_current != m_end;
+        }
+
+        bool MoveNext() noexcept
+        {
+            if (m_current != m_end)
+            {
+                ++m_current;
+            }
+
+            return HasCurrent();
+        }
+
+        uint32_t GetMany(array_view<T> values)
+        {
+            uint32_t const actual = (std::min)(static_cast<uint32_t>(std::distance(m_current, m_end)), values.size());
+            m_owner->copy_n(m_current, actual, values.begin());
+            std::advance(m_current, actual);
+            return actual;
+        }
+
+    private:
+
+        com_ptr<D> m_owner;
+        decltype(m_owner->get_container().begin()) m_current;
+        decltype(m_owner->get_container().end()) const m_end;
+    };
+}
+
 namespace winrt
 {
     template <typename D, typename T, typename Version = impl::no_collection_version>
@@ -18,10 +90,13 @@ namespace winrt
 
         auto First()
         {
-            return make<iterator>(static_cast<D*>(this));
+            return make<impl::iterator_base<D, T, Version>>(static_cast<D*>(this));
         }
 
-    protected:
+    private:
+
+        template <typename D, typename T, typename Version>
+        struct iterator_base;
 
         template<typename InputIt, typename Size, typename OutputIt>
         auto copy_n(InputIt first, Size count, OutputIt result) const
@@ -45,76 +120,6 @@ namespace winrt
                 });
             }
         }
-
-    private:
-
-        struct iterator : Version::iterator_type, implements<iterator, Windows::Foundation::Collections::IIterator<T>>
-        {
-            void abi_enter()
-            {
-                m_owner->abi_enter();
-                this->check_version(*m_owner);
-            }
-
-            void abi_exit()
-            {
-                m_owner->abi_exit();
-            }
-
-            explicit iterator(D* const owner) noexcept :
-                Version::iterator_type(*owner),
-                m_current(owner->get_container().begin()),
-                m_end(owner->get_container().end())
-            {
-                m_owner.copy_from(owner);
-            }
-
-            T Current() const
-            {
-                if (m_current == m_end)
-                {
-                    throw hresult_out_of_bounds();
-                }
-
-                if constexpr (!impl::is_key_value_pair<T>::value)
-                {
-                    return m_owner->unwrap_value(*m_current);
-                }
-                else
-                {
-                    return make<impl::key_value_pair<T>>(m_owner->unwrap_value(m_current->first), m_owner->unwrap_value(m_current->second));
-                }
-            }
-
-            bool HasCurrent() const noexcept
-            {
-                return m_current != m_end;
-            }
-
-            bool MoveNext() noexcept
-            {
-                if (m_current != m_end)
-                {
-                    ++m_current;
-                }
-
-                return HasCurrent();
-            }
-
-            uint32_t GetMany(array_view<T> values)
-            {
-                uint32_t const actual = (std::min)(static_cast<uint32_t>(std::distance(m_current, m_end)), values.size());
-                m_owner->copy_n(m_current, actual, values.begin());
-                std::advance(m_current, actual);
-                return actual;
-            }
-
-        private:
-
-            com_ptr<D> m_owner;
-            decltype(m_owner->get_container().begin()) m_current;
-            decltype(m_owner->get_container().end()) const m_end;
-        };
     };
 
     template <typename D, typename T, typename Version = impl::no_collection_version>
