@@ -13,7 +13,7 @@ compilation_unit
 
 /* Basic Concepts */ //This could be namespace or type name
 type_name
-    : (IDENTIFIER .)* IDENTIFIER type_argument_list?
+    : IDENTIFIER type_argument_list?
     | qualified_alias_member
     ;
 
@@ -182,7 +182,7 @@ qualified_alias_member
     ;
 
 apicontract_declaration
-    : attributes? APICONTRACT IDENTIFIER OPEN_BRACE CLOSE_BRACE SEMICOLON?
+    : attributes? APICONTRACT_LXR IDENTIFIER OPEN_BRACE CLOSE_BRACE SEMICOLON?
     ;
 
 //* Class members *//
@@ -209,31 +209,13 @@ type_parameter_list // attributes on generic types? Something<[Attribute] K>
     : LESS_THAN attributes? IDENTIFIER (COMMA attributes? IDENTIFIER)* GREATER_THAN
     ;
 
+// Semantically check for one class and multiple interfaces restriction
 class_base
-    : COLON class_type_base
-    | COLON interface_type_list
-    | COLON class_type_base COMMA interface_type_list
+    : COLON type_base (COMMA type_base)*
     ;
 
-/* TODO: Determine whether class_type_base and interface_type_base should exist
- The only difference between class_type_base and interface_type_base is that
- class_type base can be Object or NULL which doesn't make sense in terms of inheritance.
-
- You can't really inherit from NULL. We can just remove this part of the grammar
- and have it referto just type_name.
- Let the semantic checking do the work of determining whether it is a class type or
- interface type.
-*/
-class_type_base
+type_base
     : attributes? class_type
-    ;
-
-interface_type_list
-    : interface_type_base (COMMA interface_type_base)*
-    ;
-
-interface_type_base
-    : attributes? type_name //class_type
     ;
 
 class_body
@@ -258,11 +240,10 @@ class_method_declaration //Do not need generics in method
 
 class_event_declaration // this has to be a delegate type aka class_type
     : attributes? event_modifier* EVENT type IDENTIFIER SEMICOLON
-    | attributes? event_modifier* EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
 
 class_property_declaration // Restrict property_identifier first ///TODO: Property accessors are optional
-    : attributes? property_modifier* type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : attributes? property_modifier* type IDENTIFIER property_accessors
     ;
 
 class_constructor_declaration
@@ -296,24 +277,6 @@ return_type
     | VOID_LXR
     ;
 
-property_identifier // more restrictive
-    : IDENTIFIER
-    | BOOLEAN
-    | STRING
-    | INT8
-    | INT16
-    | INT32
-    | INT64
-    | UINT8
-    | UINT16
-    | UINT32
-    | UINT64
-    | CHAR16
-    | SINGLE
-    | DOUBLE
-    | OBJECT
-    | NILL;
-
 property_modifier
     : PROTECTED
     | STATIC
@@ -321,9 +284,13 @@ property_modifier
     ;
 
 property_accessors
-    : attributes? GET SEMICOLON
-    | attributes? SET SEMICOLON
-    | attributes? GET SEMICOLON SET SEMICOLON // allow set and get
+    : OPEN_BRACE attributes? property_accessor_method+ CLOSE_BRACE SEMICOLON?
+    | SEMICOLON
+    ;
+
+property_accessor_method
+    : GET SEMICOLON
+    | SET SEMICOLON
     ;
 
 event_modifier
@@ -332,7 +299,8 @@ event_modifier
     ;
 
 event_accessors // add and remove implicit?
-    : attributes? ADD SEMICOLON attributes? REMOVE SEMICOLON
+    : OPEN_BRACE attributes? ADD SEMICOLON attributes? REMOVE SEMICOLON CLOSE_BRACE SEMICOLON?
+    | SEMICOLON
     ;
 
 class_constructor_modifier
@@ -360,7 +328,7 @@ interface_declaration
     ;
 
 interface_base
-    : REQUIRES interface_type_list
+    : REQUIRES type_base (COMMA type_base)*
     ;
 
 interface_body
@@ -378,12 +346,11 @@ interface_method_declaration
     ;
 
 interface_property_declaration
-    : attributes? type property_identifier OPEN_BRACE property_accessors CLOSE_BRACE SEMICOLON?
+    : attributes? type IDENTIFIER property_accessors
     ;
 
 interface_event_declaration
     : attributes? EVENT type IDENTIFIER SEMICOLON
-    | attributes? EVENT type IDENTIFIER OPEN_BRACE event_accessors CLOSE_BRACE
     ;
 
 /* Enums */

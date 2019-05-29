@@ -26,7 +26,7 @@ fragment Newline
 
 /* Keywords */
 ABSTRACT: 'abstract';
-APICONTRACT: 'apicontract';
+APICONTRACT_LXR: 'apicontract';
 ATTRIBUTE: 'attribute';
 CLASS: 'runtimeclass';
 CONST_LXR: 'const';
