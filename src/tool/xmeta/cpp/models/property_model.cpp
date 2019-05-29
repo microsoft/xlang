@@ -52,7 +52,7 @@ namespace xlang::xmeta
     {
         if (!m_get_method)
         {
-            error_manager.write_property_accessor_error(get_decl_line(), get_id());
+            error_manager.write_property_accessor_error(get_decl_line(), get_name());
         }
     }
 

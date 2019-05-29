@@ -44,7 +44,7 @@ namespace xlang::xmeta
 
         bool operator==(enum_member const& rhs) const
         {
-            return rhs.get_id() == get_id() && rhs.get_resolved_value() == get_resolved_value();
+            return rhs.get_name() == get_name() && rhs.get_resolved_value() == get_resolved_value();
         }
 
         auto const& get_value() const noexcept
@@ -133,7 +133,7 @@ namespace xlang::xmeta
             assert(member_exists(id));
             auto same_name = [&id](enum_member const& em)
             {
-                return em.get_id() == id;
+                return em.get_name() == id;
             };
             return *std::find_if(m_members.begin(), m_members.end(), same_name);
         }
@@ -145,7 +145,7 @@ namespace xlang::xmeta
 
         void add_member(enum_member&& e_member)
         {
-            assert(!member_exists(e_member.get_id()));
+            assert(!member_exists(e_member.get_name()));
             m_members.emplace_back(std::move(e_member));
         }
 
@@ -153,7 +153,7 @@ namespace xlang::xmeta
         {
             auto same_id = [&id](enum_member const& em)
             {
-                return em.get_id() == id;
+                return em.get_name() == id;
             };
             return std::find_if(m_members.begin(), m_members.end(), same_id) != m_members.end();
         }

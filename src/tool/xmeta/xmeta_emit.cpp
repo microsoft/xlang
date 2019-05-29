@@ -307,7 +307,7 @@ namespace xlang::xmeta
         //mdTypeDef token_class_type_def = mdTokenNil;
         //mdTypeRef token_local_type_ref = mdTokenNil;
 
-        //std::string class_name = model->get_id();
+        //std::string class_name = model->get_name();
         //DWORD type_flag = runtimeclass_type_flag;
         //// MIDL3 will disable certain flags depending on these conditions
         ////if (pRuntimeClass->IsComposable())
@@ -349,7 +349,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_method(std::shared_ptr<method_model> const& model, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
     {
-        std::wstring method_name = s2ws(model->get_id());
+        std::wstring method_name = s2ws(model->get_name());
 
         signature_blob method_sig = create_method_sig(model->get_return_type(), model->get_formal_parameters());
 
@@ -363,7 +363,7 @@ namespace xlang::xmeta
             0,
             0,
             &token_method_def);
-        method_defs.emplace(model->get_id(), token_method_def);
+        method_defs.emplace(model->get_name(), token_method_def);
         define_return(token_method_def);
 
         /* Define formal parameters */
@@ -377,7 +377,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, std::map<std::string_view, mdMethodDef> const& method_defs, mdTypeDef const& token_def)
     {
-        std::wstring property_name = s2ws(model->get_id());
+        std::wstring property_name = s2ws(model->get_name());
         mdMethodDef token_get_method = mdTokenNil;
         mdMethodDef token_set_method = mdTokenNil;
         mdTypeDef implements[] = { mdTokenNil };
@@ -385,7 +385,7 @@ namespace xlang::xmeta
         std::shared_ptr<method_model> get_method_model = model->get_get_method();
         assert(get_method_model != nullptr); //There must always be a get
         {
-            auto const& iter = method_defs.find(get_method_model->get_id());
+            auto const& iter = method_defs.find(get_method_model->get_name());
             assert(iter != method_defs.end());
             token_get_method = iter->second;
         }
@@ -393,7 +393,7 @@ namespace xlang::xmeta
         std::shared_ptr<method_model> set_method_model = model->get_set_method();
         if (set_method_model != nullptr)
         {
-            auto const& iter = method_defs.find(set_method_model->get_id());
+            auto const& iter = method_defs.find(set_method_model->get_name());
             assert(iter != method_defs.end());
             token_set_method = iter->second;
         }
@@ -420,7 +420,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_event(std::shared_ptr<event_model> const& model, std::map<std::string_view, mdMethodDef> const& method_defs, mdTypeDef const& token_def)
     {
-        std::wstring event_name = s2ws(model->get_id());
+        std::wstring event_name = s2ws(model->get_name());
         mdMethodDef token_add_method = mdTokenNil;
         mdMethodDef token_remove_method = mdTokenNil;
         mdTypeDef implements[] = { mdTokenNil };
@@ -428,7 +428,7 @@ namespace xlang::xmeta
         std::shared_ptr<method_model> const& add_method_model = model->get_add_method();
         assert(add_method_model != nullptr); //There must always be a add
         {
-            auto const& iter = method_defs.find(add_method_model->get_id());
+            auto const& iter = method_defs.find(add_method_model->get_name());
             assert(iter != method_defs.end());
             token_add_method = iter->second;
         }
@@ -436,7 +436,7 @@ namespace xlang::xmeta
         std::shared_ptr<method_model> const& remove_method_model = model->get_remove_method();
         assert(remove_method_model != nullptr); //There must always be a remove
         {
-            auto const& iter = method_defs.find(remove_method_model->get_id());
+            auto const& iter = method_defs.find(remove_method_model->get_name());
             assert(iter != method_defs.end());
             token_remove_method = iter->second;
         }
@@ -577,7 +577,7 @@ namespace xlang::xmeta
                 {
                     using val_type = std::decay_t<decltype(val)>;
                     static_assert(std::is_integral_v<val_type>);
-                    auto const& name = s2ws(enum_member.get_id());
+                    auto const& name = s2ws(enum_member.get_name());
                     check_hresult(m_metadata_emitter->DefineField(token_enum_type_def,
                         name.c_str(),
                         enumerator_flag,
@@ -690,7 +690,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method_def, uint16_t parameter_index)
     {
-        std::wstring param_name = s2ws(model.get_id());
+        std::wstring param_name = s2ws(model.get_name());
 
         DWORD param_flags = 0;
         if (parameter_index != 0)

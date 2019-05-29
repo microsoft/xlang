@@ -185,7 +185,7 @@ struct ExpectedFormalParameterModel
 
     void VerifyType(std::shared_ptr<formal_parameter_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_semantic() == sem);
         REQUIRE(actual->get_type().get_semantic().is_resolved());
         type.VerifyType(actual->get_type());
@@ -193,7 +193,7 @@ struct ExpectedFormalParameterModel
 
     void VerifyType(formal_parameter_model const& actual)
     {
-        REQUIRE(actual.get_id() == id);
+        REQUIRE(actual.get_name() == id);
         REQUIRE(actual.get_semantic() == sem);
         REQUIRE(actual.get_type().get_semantic().is_resolved());
         type.VerifyType(actual.get_type());
@@ -214,7 +214,7 @@ struct ExpectedMethodModel
 
     void VerifyType(std::shared_ptr<method_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_modifier().is_static == sem.is_static);
         REQUIRE(actual->get_return_type()->get_semantic().is_resolved());
 
@@ -255,7 +255,7 @@ struct ExpectedPropertyModel
 
     void VerifyType(std::shared_ptr<property_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_modifier().is_static == sem.is_static);
         REQUIRE(actual->get_type().get_semantic().is_resolved());
         type.VerifyType(actual->get_type());
@@ -302,7 +302,7 @@ struct ExpectedEventModel
 
     void VerifyType(std::shared_ptr<event_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_modifier().is_static == sem.is_static);
         REQUIRE(actual->get_type().get_semantic().is_resolved());
         type.VerifyType(actual->get_type());
@@ -345,7 +345,7 @@ struct ExpectedClassModel
 
     void VerifyType(std::shared_ptr<class_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
         auto const& actual_methods = actual->get_methods();
         REQUIRE(actual_methods.size() == methods.size());
@@ -405,7 +405,7 @@ struct ExpectedInterfaceModel
 
     void VerifyType(std::shared_ptr<interface_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
         auto const& actual_methods = actual->get_methods();
         REQUIRE(actual_methods.size() == methods.size());
@@ -449,7 +449,7 @@ struct ExpectedDelegateModel
 
     void VerifyType(std::shared_ptr<delegate_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
 
         if (return_type == std::nullopt)
@@ -483,7 +483,7 @@ struct ExpectedEnumModel
 
     void VerifyType(std::shared_ptr<enum_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
         REQUIRE(actual->get_type() == sem);
         auto & actual_members = actual->get_members();
@@ -506,7 +506,7 @@ struct ExpectedStructModel
 
     void VerifyType(std::shared_ptr<struct_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
 
         auto const& actual_fields = actual->get_fields();
@@ -565,7 +565,7 @@ struct ExpectedNamespaceModel
 
     void VerifyType(std::shared_ptr<namespace_model> const& actual)
     {
-        REQUIRE(actual->get_id() == id);
+        REQUIRE(actual->get_name() == id);
         REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
 
         for (auto const& actual_bodies : actual->get_namespace_bodies())

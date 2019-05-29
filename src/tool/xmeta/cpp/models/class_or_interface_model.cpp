@@ -11,7 +11,7 @@ namespace xlang::xmeta
 
     compilation_error class_or_interface_model::add_member(std::shared_ptr<property_model> const& member)
     {
-        if (member_id_exists(member->get_id()))
+        if (member_id_exists(member->get_name()))
         {
             return compilation_error::symbol_exists;
         }
@@ -21,14 +21,14 @@ namespace xlang::xmeta
 
     compilation_error class_or_interface_model::add_member(std::shared_ptr<method_model> const& member)
     {
-        if (event_or_property_id_exists(member->get_id()))
+        if (event_or_property_id_exists(member->get_name()))
         {
             return compilation_error::symbol_exists;
         }
 
         for (auto const& overloading_method : m_methods)
         {
-            if (overloading_method->get_id() == member->get_id())
+            if (overloading_method->get_name() == member->get_name())
             {
                 if (overloading_method->get_formal_parameters().size() == member->get_formal_parameters().size())
                 {
@@ -54,7 +54,7 @@ namespace xlang::xmeta
 
     compilation_error class_or_interface_model::add_member(std::shared_ptr<event_model> const& member)
     {
-        if (member_id_exists(member->get_id()))
+        if (member_id_exists(member->get_name()))
         {
             return compilation_error::symbol_exists;
         }
@@ -86,12 +86,12 @@ namespace xlang::xmeta
 
     std::shared_ptr<property_model> const& class_or_interface_model::get_property_member(std::string const& member_id)
     {
-        return *get_it(m_properties, member_id);
+        return *get_by_name(m_properties, member_id);
     }
 
     std::shared_ptr<method_model> const& class_or_interface_model::get_method_member(std::string const& member_id)
     {
-        return *get_it(m_methods, member_id);
+        return *get_by_name(m_methods, member_id);
     }
 
     void class_or_interface_model::validate(xlang_error_manager & error_manager)

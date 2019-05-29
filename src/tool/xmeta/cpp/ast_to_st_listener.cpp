@@ -165,7 +165,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
              error_manager.write_enum_member_name_error(
                  decl_line,
                  enum_member_id,
-                 new_enum->get_id(),
+                 new_enum->get_name(),
                  m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
              return listener_error::failed;
          }
@@ -209,12 +209,12 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
          {
              enum_member e_member{ enum_member_id, decl_line, "" };
              auto const& val = new_enum->get_members().back().get_value();
-             if (!val.is_resolved() && val.get_ref_name() == e_member.get_id())
+             if (!val.is_resolved() && val.get_ref_name() == e_member.get_name())
              {
                  error_manager.write_enum_circular_dependency(
                      e_member.get_decl_line(),
-                     e_member.get_id(),
-                     new_enum->get_id());
+                     e_member.get_name(),
+                     new_enum->get_name());
                  return listener_error::failed;
              }
              e_member.set_value(val);
@@ -249,19 +249,19 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     {
         return listener_error::passed;
     }
-    if (dependents.find(e_member.get_id()) != dependents.end())
+    if (dependents.find(e_member.get_name()) != dependents.end())
     {
         error_manager.write_enum_circular_dependency(
             e_member.get_decl_line(),
-            e_member.get_id(),
-            new_enum->get_id());
+            e_member.get_name(),
+            new_enum->get_name());
             return listener_error::failed;
     }
-    dependents.emplace(e_member.get_id());
+    dependents.emplace(e_member.get_name());
     auto const& ref_name = val.get_ref_name();
     if (!new_enum->member_exists(ref_name))
     {
-        error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_id(), 
+        error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_name(), 
             m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return listener_error::failed;
     }
@@ -298,14 +298,14 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 || (property_accessor_methods[0]->SET() && property_accessor_methods[1]->SET()))
             {
                 // WRITE SEMANTIC ERROR
-                error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_id());
+                error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
                 return listener_error::failed;
             }
         }
         else if (property_accessor_methods.size() > 2)
         {
             // THIS PARSER BE TRIPPING :O
-            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_id());
+            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
 
@@ -314,21 +314,21 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         {
             if (property_accessor->GET())
             {
-                get_method = std::make_shared<method_model>("get_" + prop_model->get_id(), property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
+                get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
                 if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_id(), model->get_fully_qualified_id());
+                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_fully_qualified_id());
                     error = listener_error::failed;
                 }
             }
             else if (property_accessor->SET())
             {
-                set_method = std::make_shared<method_model>("put_" + prop_model->get_id(), property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), property_method_semantics, method_association::Property);
+                set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), property_method_semantics, method_association::Property);
                 parameter_semantics sem = parameter_semantics::in;
                 set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_id(), model->get_fully_qualified_id());
+                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_fully_qualified_id());
                     error = listener_error::failed;
                 }
             }
@@ -340,21 +340,21 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     }
     else // Implicity declaration
     {
-        get_method = std::make_shared<method_model>("get_" + prop_model->get_id(), prop_model->get_decl_line(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
+        get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), prop_model->get_decl_line(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
 
-        set_method = std::make_shared<method_model>("put_" + prop_model->get_id(), prop_model->get_decl_line(), m_cur_assembly, std::move(std::nullopt), property_method_semantics, method_association::Property);
+        set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), prop_model->get_decl_line(), m_cur_assembly, std::move(std::nullopt), property_method_semantics, method_association::Property);
         parameter_semantics sem = parameter_semantics::in;
         set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
 
         listener_error error = listener_error::passed;
         if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_id(), model->get_fully_qualified_id());
+            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_fully_qualified_id());
             error = listener_error::failed;
         }
         if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_id(), model->get_fully_qualified_id());
+            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_fully_qualified_id());
             error =  listener_error::failed;
         }
         if (error == listener_error::failed)
@@ -362,21 +362,21 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             return error;
         }
     }
-    if (model->property_id_exists(prop_model->get_id()))
+    if (model->property_id_exists(prop_model->get_name()))
     {
-        auto const& existing_property = model->get_property_member(prop_model->get_id());
+        auto const& existing_property = model->get_property_member(prop_model->get_name());
 
         // Check that the type is the same
         if (existing_property->get_type().get_semantic().get_ref_name() != prop_model->get_type().get_semantic().get_ref_name())
         {
-            error_manager.write_duplicate_property_error(prop_model->get_decl_line(), prop_model->get_id());
+            error_manager.write_duplicate_property_error(prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
 
         // Set the get property if not declared
         if (existing_property->set_get_method(get_method) == compilation_error::accessor_exists)
         {
-            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_id());
+            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
         else
@@ -387,7 +387,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         // Set the set property if not declared
         if (existing_property->set_set_method(set_method) == compilation_error::accessor_exists)
         {
-            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_id());
+            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
         else
@@ -402,7 +402,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
 
         if (model->add_member(prop_model) == compilation_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), prop_model->get_id(), model->get_fully_qualified_id());
+            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), prop_model->get_name(), model->get_fully_qualified_id());
             return listener_error::failed;
         }
     }
@@ -425,10 +425,10 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
 
 
 
-    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_id(), event->get_decl_line(), m_cur_assembly, std::move(event_registration), event_method_semantics, method_association::Event);
+    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_name(), event->get_decl_line(), m_cur_assembly, std::move(event_registration), event_method_semantics, method_association::Event);
     add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), m_cur_assembly, param_sem, std::move(tr) });
 
-    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_id(), event->get_decl_line(), m_cur_assembly, std::move(std::nullopt), event_method_semantics, method_association::Event);
+    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_name(), event->get_decl_line(), m_cur_assembly, std::move(std::nullopt), event_method_semantics, method_association::Event);
     remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), m_cur_assembly, param_sem, std::move(event_registration) });
 
     assert(event->set_add_method(add_method) == compilation_error::passed);
@@ -437,12 +437,12 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     listener_error error = listener_error::passed;
     if (model->add_member(add_method) == compilation_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), add_method->get_id(), model->get_fully_qualified_id());
+        error_manager.write_type_member_exists_error(event->get_decl_line(), add_method->get_name(), model->get_fully_qualified_id());
         error = listener_error::failed;
     }
     if (model->add_member(remove_method) == compilation_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), remove_method->get_id(), model->get_fully_qualified_id());
+        error_manager.write_type_member_exists_error(event->get_decl_line(), remove_method->get_name(), model->get_fully_qualified_id());
         error = listener_error::failed;
     }
     if (error == listener_error::failed)
@@ -451,7 +451,7 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     }
     if (model->add_member(event) == compilation_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), event->get_id(), model->get_fully_qualified_id());
+        error_manager.write_type_member_exists_error(event->get_decl_line(), event->get_name(), model->get_fully_qualified_id());
         return listener_error::failed;
     }
     return listener_error::passed;
@@ -619,7 +619,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
 
                 if (clss_model->add_member(met_model) == compilation_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(decl_line, met_model->get_id(), clss_model->get_fully_qualified_id());
+                    error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), clss_model->get_fully_qualified_id());
                 }
             }
             if (class_member->class_property_declaration())
@@ -663,7 +663,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 if (class_sem.is_static && !property_sem.is_static)
                 {
                     // REPORT static class must only have static methods
-                    error_manager.write_static_member_only_error(prop_model->get_decl_line(), prop_model->get_id());
+                    error_manager.write_static_member_only_error(prop_model->get_decl_line(), prop_model->get_name());
                 }
 
                 if (extract_property_accessors(prop_model, class_property->property_accessors(), clss_model) == listener_error::passed)
@@ -713,7 +713,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 if (class_sem.is_static && !event_sem.is_static)
                 {
                     // REPORT static class must only have static methods
-                    error_manager.write_static_member_only_error(event->get_decl_line(), event->get_id());
+                    error_manager.write_static_member_only_error(event->get_decl_line(), event->get_name());
                 }
                 
                 if (extract_event_accessors(event, clss_model) == listener_error::passed)
@@ -790,7 +790,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             }
             if (model->add_member(met_model) == compilation_error::symbol_exists)
             {
-                error_manager.write_type_member_exists_error(decl_line, met_model->get_id(), model->get_fully_qualified_id());
+                error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), model->get_fully_qualified_id());
             }
         }
         if (interface_member->interface_property_declaration())
@@ -954,7 +954,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
 {
     auto setup_cur_ns_body = [&](std::shared_ptr<namespace_model> const& child_ns)
     {
-        assert(child_ns->get_id() == name);
+        assert(child_ns->get_name() == name);
         m_cur_namespace_body = std::make_shared<namespace_body_model>(child_ns);
         child_ns->add_namespace_body(m_cur_namespace_body);
     };
@@ -990,7 +990,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
         if (it1 != xlang_model.namespaces.end())
         {
             // Semantically invalid by check 4 for namespace members.
-            error_manager.write_namespace_name_error(decl_line, name, it1->second->get_id());
+            error_manager.write_namespace_name_error(decl_line, name, it1->second->get_name());
             return;
         }
 
@@ -998,7 +998,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
         if (it2 == xlang_model.namespaces.end())
         {
             auto new_ns = std::make_shared<namespace_model>(name, decl_line, m_cur_assembly, nullptr /* No parent */);
-            xlang_model.namespaces[new_ns->get_id()] = new_ns;
+            xlang_model.namespaces[new_ns->get_name()] = new_ns;
         }
         assert(xlang_model.namespaces.find(name) != xlang_model.namespaces.end());
         setup_cur_ns_body(xlang_model.namespaces.at(name));

@@ -7,8 +7,8 @@ namespace xlang::xmeta
     {
         if (containing_namespace_name)
         {
-            return containing_namespace_name.value() + "." + get_id();
+            return containing_namespace_name.value() + "." + get_name();
         }
-        return get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + get_id();
+        return get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + get_name();
     }
 }
