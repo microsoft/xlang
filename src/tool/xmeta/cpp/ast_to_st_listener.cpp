@@ -509,6 +509,11 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 auto class_constructor = class_member->class_constructor_declaration();
                 std::string constructor_id = class_constructor->IDENTIFIER()->getText();
 
+                if (constructor_id != class_name)
+                {
+                    // TODO: semantic check that constructor name must be the same as class name.
+                }
+
                 method_semantics method_sem;
                 if (class_constructor->class_constructor_modifier() && class_constructor->class_constructor_modifier()->PROTECTED())
                 {
@@ -742,9 +747,14 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
             clss_model->add_class_base_ref(cls_base->type_base()->class_type()->getText());
         }
     }
+    clss_model->add_instance_interface_ref(synthesized_interface);
+    clss_model->add_static_interface_ref(synthesized_interface_statics);
+    clss_model->add_factory_interface_ref(synthesized_interface_factory);
+
     m_cur_namespace_body->add_class(clss_model);
     m_cur_namespace_body->add_interface(synthesized_interface);
     m_cur_namespace_body->add_interface(synthesized_interface_statics);
+    m_cur_namespace_body->add_interface(synthesized_interface_factory);
 }
 
 void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_declarationContext *ctx)

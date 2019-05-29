@@ -45,16 +45,17 @@ namespace xlang::xmeta
 
         void add_interface_base_ref(std::string_view const& interface_base_ref);
 
-        compilation_error add_member(std::shared_ptr<property_model> const& member);
-
         compilation_error add_member(std::shared_ptr<method_model> const& member);
-
+        compilation_error add_member(std::shared_ptr<property_model> const& member);
         compilation_error add_member(std::shared_ptr<event_model> const& member);
 
+        std::shared_ptr<method_model> const& get_method_member(std::string const& member_id);
         std::shared_ptr<property_model> const& get_property_member(std::string const& member_id);
 
-        bool member_id_exists(std::string_view const& id);
 
+        bool member_id_exists(std::string_view const& id);
+        bool event_or_property_id_exists(std::string_view const& id);
+        bool method_id_exists(std::string_view const& id);
         bool property_id_exists(std::string_view const& id);
 
         void validate(xlang_error_manager & error_manager);

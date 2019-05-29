@@ -22,9 +22,50 @@ namespace xlang::xmeta
     compilation_error class_or_interface_model::add_member(std::shared_ptr<method_model> const& member)
     {
         // TODO: the case with overloading
-        if (member_id_exists(member->get_id()))
+        if (event_or_property_id_exists(member->get_id()))
         {
             return compilation_error::symbol_exists;
+        }
+
+        for (auto const& overloading_method : m_methods)
+        {
+            if (overloading_method->get_id() == member->get_id())
+            {
+                if (overloading_method->get_formal_parameters().size() == member->get_formal_parameters().size())
+                {
+                    return compilation_error::symbol_exists;
+                }
+                if ((overloading_method->get_return_type() == std::nullopt && member->get_return_type() != std::nullopt)
+                        || (overloading_method->get_return_type() != std::nullopt && member->get_return_type() == std::nullopt))
+                {
+                    return compilation_error::symbol_exists;
+                }
+                if (overloading_method->get_return_type() != std::nullopt && member->get_return_type() != std::nullopt)
+                {
+                    if (!(*overloading_method->get_return_type() == *member->get_return_type()))
+                    {
+                        return compilation_error::symbol_exists;
+                    }
+                }
+            }
+  /*          if (overloading_method->get_id() == member->get_id())
+            {
+                if (*overloading_method->get_return_type() == *member->get_return_type())
+                {
+                    if (overloading_method->get_formal_parameters().size() == member->get_formal_parameters().size())
+                    {
+                        return compilation_error::method_cannot_be_overloaded;
+                    }
+                }
+                else
+                {
+                    return compilation_error::method_cannot_be_overloaded;
+                }
+            }*/
+        }
+        if (method_id_exists(member->get_id()))
+        {
+            auto const& overloaded_method = get_method_member(member->get_id());
         }
         m_methods.emplace_back(member);
         return compilation_error::passed;
@@ -47,14 +88,29 @@ namespace xlang::xmeta
             contains_id(m_events, id);
     }
 
+    bool class_or_interface_model::event_or_property_id_exists(std::string_view const& id)
+    {
+        return contains_id(m_properties, id) || contains_id(m_events, id);
+    }
+
     bool class_or_interface_model::property_id_exists(std::string_view const& id)
     {
         return contains_id(m_properties, id);
     }
 
+    bool class_or_interface_model::method_id_exists(std::string_view const& id)
+    {
+        return contains_id(m_methods, id);
+    }
+
     std::shared_ptr<property_model> const& class_or_interface_model::get_property_member(std::string const& member_id)
     {
         return *get_it(m_properties, member_id);
+    }
+
+    std::shared_ptr<method_model> const& class_or_interface_model::get_method_member(std::string const& member_id)
+    {
+        return *get_it(m_methods, member_id);
     }
 
     void class_or_interface_model::validate(xlang_error_manager & error_manager)

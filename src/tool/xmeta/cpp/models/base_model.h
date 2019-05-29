@@ -40,7 +40,8 @@ namespace xlang::xmeta
     {
         passed = 0,
         symbol_exists,
-        accessor_exists
+        accessor_exists,
+        method_cannot_be_overloaded
     };
 
 

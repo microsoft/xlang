@@ -55,13 +55,13 @@ namespace xlang::xmeta
 
         void add_static_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref);
 
-        void add_protected_interface_ref(std::shared_ptr<interface_model> const& protected_interface_ref);
-
         void add_factory_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref);
 
-        void add_overrides_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref);
-
         void add_instance_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref);
+
+        //void add_protected_interface_ref(std::shared_ptr<interface_model> const& protected_interface_ref);
+
+        //void add_overrides_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref);
 
         void validate(xlang_error_manager & error_manager);
 
@@ -74,11 +74,13 @@ namespace xlang::xmeta
         class_semantics m_semantic;
         // TODO: Add type parameters (generic types)
 
+
         std::vector<std::shared_ptr<interface_model>> m_static_interfaces;
-        std::vector<std::shared_ptr<interface_model>> m_protected_interfaces;
         std::vector<std::shared_ptr<interface_model>> m_factory_interfaces;
-        std::vector<std::shared_ptr<interface_model>> m_overrides_interfaces;
         std::vector<std::shared_ptr<interface_model>> m_instance_interfaces;
+
+        //std::vector<std::shared_ptr<interface_model>> m_overrides_interfaces;
+        //std::vector<std::shared_ptr<interface_model>> m_protected_interfaces;
 
         std::set<std::shared_ptr<class_or_interface_model>> get_all_bases();
 

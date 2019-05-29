@@ -39,7 +39,11 @@ namespace xlang::xmeta
 
         auto const& get_resolved_target() const noexcept
         {
-            assert(std::holds_alternative<resolved_type>(m_ref));
+            if (!std::holds_alternative<resolved_type>(m_ref))
+            {
+                std::cout << ref_name << std::endl;
+                xlang::throw_invalid("Model Ref is not resolved");
+            }
             return std::get<resolved_type>(m_ref);
         }
 

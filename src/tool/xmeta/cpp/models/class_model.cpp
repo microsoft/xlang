@@ -12,9 +12,9 @@ namespace xlang::xmeta
         m_static_interfaces.emplace_back(static_interface_ref);
     }
 
-    void class_model::add_protected_interface_ref(std::shared_ptr<interface_model> const& protected_interface_ref)
+    void class_model::add_instance_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
     {
-        m_protected_interfaces.emplace_back(protected_interface_ref);
+        m_static_interfaces.emplace_back(static_interface_ref);
     }
 
     void class_model::add_factory_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
@@ -22,15 +22,15 @@ namespace xlang::xmeta
         m_static_interfaces.emplace_back(static_interface_ref);
     }
 
-    void class_model::add_overrides_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
-    {
-        m_static_interfaces.emplace_back(static_interface_ref);
-    }
-
-    void class_model::add_instance_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
-    {
-        m_static_interfaces.emplace_back(static_interface_ref);
-    }
+    //void class_model::add_overrides_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
+    //{
+    //    m_static_interfaces.emplace_back(static_interface_ref);
+    //}    
+    //
+    //void class_model::add_protected_interface_ref(std::shared_ptr<interface_model> const& protected_interface_ref)
+    //{
+    //    m_protected_interfaces.emplace_back(protected_interface_ref);
+    //}
 
     std::set<std::shared_ptr<class_or_interface_model>> class_model::get_all_bases()
     {

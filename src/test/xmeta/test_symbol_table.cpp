@@ -990,58 +990,6 @@ TEST_CASE("Resolving type ref across namespaces test")
     B.VerifyType(find_namespace(reader, "B"));
 }
 
-// Disabling and coming back later
-// TODO: fix base problem once we have attributes to specify which interface becomes the base
-/*
-DefaultRyan 20 hours ago  Member
-This case seems odd for two reasons :
-
-I didn't think xlang was supporting multiple interface inheritance. And multiple "requires" isn't supported 
-without some sort of attribute specifying which required interface becomes the base for inheritance purposes.
-This makes IComboBox.Paint() ambiguous.This should require some sort of disambiguation on the method.
-*/
-TEST_CASE("Interface base test 2", "[!hide]")
-{
-    std::istringstream test_idl{ R"(
-        namespace N
-        {
-            interface i1
-            {
-                void Paint();
-            }
-            interface ITextBox requires i1
-            {
-                void SetText(String text);
-            }
-            interface IListBox requires i1
-            {
-               void SetItem(String items);
-            }
-            interface IComboBox requires ITextBox, IListBox {}
-        }
-    )" };
-
-    xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
-    REQUIRE(reader.get_num_syntax_errors() == 0);
-
-    auto const& namespaces = reader.get_namespaces();
-    auto const& it = namespaces.find("N");
-    REQUIRE(it != namespaces.end());
-    auto const& ns_bodies = it->second->get_namespace_bodies();
-    REQUIRE(ns_bodies.size() == 1);
-    auto const& interfaces = ns_bodies[0]->get_interfaces();
-    REQUIRE(interfaces.size() == 4);
-
-    auto const& combo = interfaces.at("IComboBox");
-    //auto const& combo_bases = combo->get_all_interface_bases();
-    //REQUIRE(combo_bases.size() == 3);
-    //REQUIRE(combo_bases.find(interfaces.at("ITextBox")) != combo_bases.end());
-    //REQUIRE(combo_bases.find(interfaces.at("IListBox")) != combo_bases.end());
-    //REQUIRE(combo_bases.find(interfaces.at("i1")) != combo_bases.end());
-    //REQUIRE(combo->get_all_interface_bases().size() == 3);
-}
-
 TEST_CASE("Interface base test")
 {
     // This test case demonstrates that the interface bases of IComboBox does not contain ITest 
@@ -1112,6 +1060,238 @@ TEST_CASE("Method test")
         ExpectedNamespaceModel N{ "N", "N", {}, { c1, i1 } };
         N.VerifyType(find_namespace(reader, "N"));
     }
+}
+
+TEST_CASE("Method overloading test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface i1
+            {
+                void Paint();
+                void Paint(Int32 p1);
+            }
+            runtimeclass c1
+            {
+                void Paint();
+                void Paint(Int32 p1);
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 0);
+
+    ExpectedMethodModel Paint{ "Paint", default_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel Paint2{ "Paint", default_method_semantics, std::nullopt, {
+        ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } }
+    } };
+
+    ExpectedInterfaceModel i1{ "i1", "N.i1", { Paint, Paint2 }, {}, {}, {} };
+    ExpectedClassModel c1{ "c1", "N.c1", { Paint, Paint2 }, {}, {}, std::nullopt, {} };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, i1 } };
+    N.VerifyType(find_namespace(reader, "N"));
+}
+
+TEST_CASE("Method overloading test with simple types")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface i1
+            {
+                Int64 Paint();
+                Int64 Paint(Int32 p1);
+            }
+            runtimeclass c1
+            {
+                Int64 Paint();
+                Int64 Paint(Int32 p1);
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 0);
+
+    ExpectedMethodModel Paint{ "Paint", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int64 }, {} };
+    ExpectedMethodModel Paint2{ "Paint", default_method_semantics, ExpectedTypeRefModel{ simple_type::Int64 }, {
+        ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } }
+    } };
+
+    ExpectedInterfaceModel i1{ "i1", "N.i1", { Paint, Paint2 }, {}, {}, {} };
+    ExpectedClassModel c1{ "c1", "N.c1", { Paint, Paint2 }, {}, {}, std::nullopt, {} };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, i1 } };
+    N.VerifyType(find_namespace(reader, "N"));
+}
+
+TEST_CASE("Method overloading test with type refs")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct s1
+            {
+            }
+            interface i1
+            {
+                s1 Paint();
+                s1 Paint(Int32 p1);
+            }
+            runtimeclass c1
+            {
+                s1 Paint();
+                s1 Paint(Int32 p1);
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 0);
+
+    ExpectedMethodModel Paint{ "Paint", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {} };
+    ExpectedMethodModel Paint2{ "Paint", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {
+        ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::Int32 } }
+    } };
+
+    ExpectedInterfaceModel i1{ "i1", "N.i1", { Paint, Paint2 }, {}, {}, {} };
+    ExpectedClassModel c1{ "c1", "N.c1", { Paint, Paint2 }, {}, {}, std::nullopt, {} };
+
+    ExpectedNamespaceModel N{ "N", "N", {}, { c1, i1 } };
+    N.VerifyType(find_namespace(reader, "N"));
+}
+
+TEST_CASE("Method invalid overloading test")
+{
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface i1
+                {
+                    Int32 Paint();
+                    Int64 Paint();
+                }
+                runtimeclass c1
+                {
+                    Int32 Paint();
+                    Int64 Paint();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface i1
+                {
+                    Int32 Paint();
+                    Int32 Paint();
+                }
+                runtimeclass c1
+                {
+                    Int32 Paint();
+                    Int32 Paint();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                interface i1
+                {
+                    void Paint();
+                    Int32 Paint();
+                }
+                runtimeclass c1
+                {
+                    Int32 Paint();
+                    void Paint();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                struct s1
+                {
+                }
+
+                interface i1
+                {
+                    s1 Paint();
+                    Int32 Paint();
+                }
+                runtimeclass c1
+                {
+                    Int32 Paint();
+                    s1 Paint();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+    {
+        std::istringstream test_idl{ R"(
+            namespace N
+            {
+                struct s1
+                {
+                }
+
+                interface i1
+                {
+                    s1 Paint();
+                    void Paint();
+                }
+                runtimeclass c1
+                {
+                    void Paint();
+                    S1 Paint();
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() == 2);
+    }
+
+    // TODO: more examples testing arity on formal parameters
 }
 
 TEST_CASE("Resolving method type ref test")
@@ -2026,7 +2206,7 @@ TEST_CASE("Event and method name collision test")
                 delegate void StringListEvent(Int32 sender);
                 interface i1
                 {
-                    void remove_Changed();
+                    Int32 remove_Changed();
                     event StringListEvent Changed;
                     void add_Changed();
                 }
@@ -2047,7 +2227,7 @@ TEST_CASE("Event and method name collision test")
                 {
                     void add_Changed();
                     event StringListEvent Changed;
-                    void remove_Changed();
+                    Int32 remove_Changed();
                 }
             }
         )" };
@@ -2069,7 +2249,7 @@ TEST_CASE("Property method name collision test")
                 {
                     void get_property1();
                     Int32 property1 { get; set; };
-                    void put_property1();
+                    void put_property1(Int32 i);
                 }
             }
         )" };
@@ -2087,7 +2267,7 @@ TEST_CASE("Property method name collision test")
                 {
                     void get_property1();
                     Int32 property1 { get; set; };
-                    void put_property1();
+                    void put_property1(Int32 i);
                 }
             }
         )" };
@@ -2826,8 +3006,6 @@ TEST_CASE("Runtime class synthensized interfaces test")
     ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1, syn_static_c1 } };
 
     N.VerifyType(find_namespace(reader, "N"));
-    
-
 }
 
 TEST_CASE("Runtime class synthensized instance interface test")
@@ -3012,4 +3190,52 @@ TEST_CASE("Runtime class synthensized static interface test")
 
         N.VerifyType(find_namespace(reader, "N"));
     }
+}
+
+TEST_CASE("Runtime class constructor test")
+{
+    //std::istringstream test_idl{ R"(
+    //    namespace N
+    //    {
+    //        runtimeclass Area
+    //        {
+    //            Area(); // default constructor must use IActivationFactory
+    //            Area(Int32 width, Int32 height);
+    //        }
+    //    }
+    //)" };
+
+    //ExpectedMethodModel m0{ "m0", default_method_semantics, std::nullopt, {} };
+    //ExpectedMethodModel m1{ "m1", static_method_semantics, ExpectedTypeRefModel{ simple_type::Int32 }, {
+    //    ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ simple_type::String } } } };
+
+    //std::vector<std::string> paths = { "Foundation.xmeta" };
+    //xmeta_idl_reader reader{ "" , paths };
+    //reader.read(test_idl);
+    //REQUIRE(reader.get_num_syntax_errors() == 0);
+    //ExpectedClassModel c1{ "c1", "N.c1",
+    //    { m0, m1 },
+    //    {},
+    //    {},
+    //    std::nullopt,
+    //    {}
+    //};
+
+    //ExpectedInterfaceModel syn_c1{ "Ic1", "N.Ic1",
+    //    { m0 },
+    //    {},
+    //    {},
+    //    {}
+    //};
+
+    //ExpectedInterfaceModel syn_static_c1{ "Ic1Statics", "N.Ic1Statics",
+    //    { m1 },
+    //    {},
+    //    {},
+    //    {}
+    //};
+
+    //ExpectedNamespaceModel N{ "N", "N", {}, { c1, syn_c1, syn_static_c1 } };
+
+    //N.VerifyType(find_namespace(reader, "N"));
 }
