@@ -93,11 +93,6 @@ namespace winrt
             return make<impl::iterator_base<D, T, Version>>(static_cast<D*>(this));
         }
 
-    private:
-
-        template <typename D, typename T, typename Version>
-        struct iterator_base;
-
         template<typename InputIt, typename Size, typename OutputIt>
         auto copy_n(InputIt first, Size count, OutputIt result) const
         {
