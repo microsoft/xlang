@@ -29,23 +29,23 @@ namespace
         return iter->second;
     }
 
-    static const std::map<std::string, simple_type> str_to_simple_type_map = {
-        { "Boolean", simple_type::Boolean },
-        { "String", simple_type::String },
-        { "Int8", simple_type::Int8 },
-        { "Int16", simple_type::Int16 },
-        { "Int32", simple_type::Int32 },
-        { "Int64", simple_type::Int64 },
-        { "UInt8", simple_type::UInt8 },
-        { "UInt16", simple_type::UInt16 },
-        { "UInt32", simple_type::UInt32 },
-        { "UInt64", simple_type::UInt64 },
-        { "Char16", simple_type::Char16 },
-        { "Single", simple_type::Single },
-        { "Double", simple_type::Double },
+    static const std::map<std::string, fundamental_type> str_to_simple_type_map = {
+        { "Boolean", fundamental_type::Boolean },
+        { "String", fundamental_type::String },
+        { "Int8", fundamental_type::Int8 },
+        { "Int16", fundamental_type::Int16 },
+        { "Int32", fundamental_type::Int32 },
+        { "Int64", fundamental_type::Int64 },
+        { "UInt8", fundamental_type::UInt8 },
+        { "UInt16", fundamental_type::UInt16 },
+        { "UInt32", fundamental_type::UInt32 },
+        { "UInt64", fundamental_type::UInt64 },
+        { "Char16", fundamental_type::Char16 },
+        { "Single", fundamental_type::Single },
+        { "Double", fundamental_type::Double },
     };
 
-    simple_type str_to_simple_type(std::string const& val)
+    fundamental_type str_to_simple_type(std::string const& val)
     {
         auto const iter = str_to_simple_type_map.find(val);
         if (str_to_simple_type_map.find(val) == str_to_simple_type_map.end())

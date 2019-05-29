@@ -103,35 +103,35 @@ namespace
         }
     }
 
-    ElementType to_ElementType(simple_type arg)
+    ElementType to_ElementType(fundamental_type arg)
     {
         switch (arg)
         {
-        case simple_type::String:
+        case fundamental_type::String:
             return ElementType::String;
-        case simple_type::Int8:
+        case fundamental_type::Int8:
             return ElementType::I1;
-        case simple_type::UInt8:
+        case fundamental_type::UInt8:
             return ElementType::U1;
-        case simple_type::Int16:
+        case fundamental_type::Int16:
             return ElementType::I2;
-        case simple_type::UInt16:
+        case fundamental_type::UInt16:
             return ElementType::U2;
-        case simple_type::Int32:
+        case fundamental_type::Int32:
             return ElementType::I4;
-        case simple_type::UInt32:
+        case fundamental_type::UInt32:
             return ElementType::U4;
-        case simple_type::Int64:
+        case fundamental_type::Int64:
             return ElementType::I8;
-        case simple_type::UInt64:
+        case fundamental_type::UInt64:
             return ElementType::U8;
-        case simple_type::Char16:
+        case fundamental_type::Char16:
             return ElementType::Char;
-        case simple_type::Single:
+        case fundamental_type::Single:
             return ElementType::R4;
-        case simple_type::Double:
+        case fundamental_type::Double:
             return ElementType::R8;
-        case simple_type::Boolean:
+        case fundamental_type::Boolean:
             return ElementType::Boolean;
         default:
             XLANG_ASSERT(false);
@@ -139,7 +139,7 @@ namespace
         }
     }
 
-    std::variant<std::string, simple_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
+    std::variant<std::string, fundamental_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
     {
         assert(semantic_type.is_resolved());
         type_semantics const& ts = semantic_type.get_resolved_target();
@@ -168,9 +168,9 @@ namespace
         {
             return std::get<std::shared_ptr<struct_model>>(ts)->get_fully_qualified_id();
         }
-        if (std::holds_alternative<simple_type>(ts))
+        if (std::holds_alternative<fundamental_type>(ts))
         {
-            return std::get<simple_type>(ts);
+            return std::get<fundamental_type>(ts);
         }
         if (std::holds_alternative<object_type>(ts))
         {
@@ -763,7 +763,7 @@ namespace xlang::xmeta
     {
         if (ref) // Return type is not void
         {
-            std::variant<std::string, simple_type, object_type> semantic = to_simple_type_or_id(ref->get_semantic());
+            std::variant<std::string, fundamental_type, object_type> semantic = to_simple_type_or_id(ref->get_semantic());
             if (std::holds_alternative<std::string>(semantic))
             {
                 std::string return_name = std::get<std::string>(semantic);
@@ -787,7 +787,7 @@ namespace xlang::xmeta
             }
             else // holds simple type
             {
-                return TypeSig{ to_ElementType(std::get<simple_type>(semantic)) };
+                return TypeSig{ to_ElementType(std::get<fundamental_type>(semantic)) };
             }
         }
         return std::nullopt;

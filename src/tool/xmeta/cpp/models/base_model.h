@@ -53,7 +53,7 @@ namespace xlang::xmeta
         Constructor
     };
 
-    enum class simple_type
+    enum class fundamental_type
     {
         Boolean,
         String,
@@ -88,7 +88,7 @@ namespace xlang::xmeta
         std::shared_ptr<struct_model>,
         std::shared_ptr<delegate_model>,
         std::shared_ptr<xlang::meta::reader::TypeDef>,
-        simple_type,
+        fundamental_type,
         object_type>;
 
     struct base_model
