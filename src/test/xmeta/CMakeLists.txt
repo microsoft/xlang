@@ -45,6 +45,13 @@ if (MSVC)
     target_link_libraries(test_xmeta windowsapp ole32 WindowsApp.lib comsuppw.lib)
 endif()
 
+get_target_property(xmeta_path foundation_metadata Foundation_xmeta)
+add_custom_command(TARGET test_xmeta POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${xmeta_path}
+    ${CMAKE_CURRENT_BINARY_DIR}/Foundation.xmeta
+)
+
 target_sources(test_xmeta PUBLIC main.cpp)
 
 install(TARGETS test_xmeta DESTINATION "test/xmeta")
