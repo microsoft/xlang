@@ -12,12 +12,12 @@
 using namespace antlr4;
 using namespace xlang::xmeta;
 
-constexpr method_modifier default_method_semantics = { false, false, false };
-constexpr method_modifier static_method_semantics = { false, true, false };
-constexpr property_modifier default_property_semantics = { false, false };
-constexpr property_modifier static_property_semantics = { false, true };
-constexpr event_modifier default_event_semantics = { false, false };
-constexpr event_modifier static_event_semantics = { false, true };
+constexpr method_modifier default_method_modifier = { false, false, false };
+constexpr method_modifier static_method_modifier = { false, true, false };
+constexpr property_modifier default_property_modifier = { false, false };
+constexpr property_modifier static_property_modifier = { false, true };
+constexpr event_modifier default_event_modifier = { false, false };
+constexpr event_modifier static_event_modifier = { false, true };
 
 auto find_namespace(xmeta_idl_reader & reader, std::string name)
 {
@@ -100,7 +100,6 @@ struct ExpectedTypeRefModel
     void VerifyType(type_ref const& actual)
     {
         REQUIRE(actual.get_semantic().is_resolved());
-        //std::get<fundamental_type>(method1_return_type.get_resolved_target());
         auto const& target = actual.get_semantic().get_resolved_target();
         if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(target))
         {
@@ -1049,8 +1048,8 @@ TEST_CASE("Method test")
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 0);
 
-        ExpectedMethodModel Paint{ "Paint", default_method_semantics, std::nullopt, {} };
-        ExpectedMethodModel Draw{ "Draw", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
+        ExpectedMethodModel Paint{ "Paint", default_method_modifier, std::nullopt, {} };
+        ExpectedMethodModel Draw{ "Draw", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
             ExpectedFormalParameterModel{ "i", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } },
             ExpectedFormalParameterModel{ "d", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
         } };
@@ -1085,8 +1084,8 @@ TEST_CASE("Method overloading test")
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
 
-    ExpectedMethodModel Paint{ "Paint", default_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel Paint2{ "Paint", default_method_semantics, std::nullopt, {
+    ExpectedMethodModel Paint{ "Paint", default_method_modifier, std::nullopt, {} };
+    ExpectedMethodModel Paint2{ "Paint", default_method_modifier, std::nullopt, {
         ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
     } };
 
@@ -1120,8 +1119,8 @@ TEST_CASE("Method overloading test with simple types")
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
 
-    ExpectedMethodModel Paint{ "Paint", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int64 }, {} };
-    ExpectedMethodModel Paint2{ "Paint", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int64 }, {
+    ExpectedMethodModel Paint{ "Paint", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int64 }, {} };
+    ExpectedMethodModel Paint2{ "Paint", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int64 }, {
         ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
     } };
 
@@ -1158,8 +1157,8 @@ TEST_CASE("Method overloading test with type refs")
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
 
-    ExpectedMethodModel Paint{ "Paint", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {} };
-    ExpectedMethodModel Paint2{ "Paint", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {
+    ExpectedMethodModel Paint{ "Paint", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {} };
+    ExpectedMethodModel Paint2{ "Paint", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {
         ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
     } };
 
@@ -1329,7 +1328,7 @@ TEST_CASE("Resolving method type ref test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel Draw{ "Draw", default_method_semantics, ExpectedTypeRefModel{ ExpectedEnumRef{ "N.E1" } }, {
+    ExpectedMethodModel Draw{ "Draw", default_method_modifier, ExpectedTypeRefModel{ ExpectedEnumRef{ "N.E1" } }, {
         ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } } },
         ExpectedFormalParameterModel{ "p2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "M.S2" } } }
     } };
@@ -1364,29 +1363,29 @@ TEST_CASE("Property method ordering test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
-    ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
+    ExpectedMethodModel get_property1{ "get_property1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel set_property1{ "put_property1", default_method_modifier, std::nullopt,
         { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } } } };
     ExpectedPropertyModel property1{ "property1",
-        default_property_semantics,
+        default_property_modifier,
         ExpectedTypeRefModel{ fundamental_type::Int32 },
         get_property1,
         set_property1
     };
 
-    ExpectedMethodModel get_property2{ "get_property2", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel get_property2{ "get_property2", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
     ExpectedPropertyModel property2{ "property2",
-        default_property_semantics,
+        default_property_modifier,
         ExpectedTypeRefModel{ fundamental_type::Int32 },
         get_property2,
         std::nullopt
     };
 
-    ExpectedMethodModel get_property3{ "get_property3", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
-    ExpectedMethodModel set_property3{ "put_property3", default_method_semantics, std::nullopt,
+    ExpectedMethodModel get_property3{ "get_property3", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel set_property3{ "put_property3", default_method_modifier, std::nullopt,
         { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } } } };
     ExpectedPropertyModel property3{ "property3",
-        default_property_semantics,
+        default_property_modifier,
         ExpectedTypeRefModel{ fundamental_type::Int32 },
         get_property3,
         set_property3
@@ -1411,25 +1410,25 @@ TEST_CASE("Property method ordering test")
 
 TEST_CASE("Property method ordering different line test")
 {
-    ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
-    ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
+    ExpectedMethodModel get_property1{ "get_property1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel set_property1{ "put_property1", default_method_modifier, std::nullopt,
         { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } } } };
     ExpectedPropertyModel property1{ "property1",
-        default_property_semantics,
+        default_property_modifier,
         ExpectedTypeRefModel{ fundamental_type::Int32 },
         get_property1,
         set_property1
     };
-    ExpectedMethodModel get_property2{ "get_property2", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
-    ExpectedMethodModel set_property2{ "put_property2", default_method_semantics, std::nullopt,
+    ExpectedMethodModel get_property2{ "get_property2", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel set_property2{ "put_property2", default_method_modifier, std::nullopt,
         { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } } } };
     ExpectedPropertyModel property2{ "property2",
-        default_property_semantics,
+        default_property_modifier,
         ExpectedTypeRefModel{ fundamental_type::Int32 },
         get_property2,
         set_property2
     };
-    ExpectedMethodModel draw{ "draw", default_method_semantics, std::nullopt, {} };
+    ExpectedMethodModel draw{ "draw", default_method_modifier, std::nullopt, {} };
     {
         std::istringstream test_idl{ R"(
             namespace N
@@ -1566,7 +1565,7 @@ TEST_CASE("Property method ordering different line test")
         reader.read(test_idl, true);
         REQUIRE(reader.get_num_syntax_errors() == 0);
 
-        ExpectedEventModel Changed{ "Changed", default_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+        ExpectedEventModel Changed{ "Changed", default_event_modifier, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
 
         ExpectedInterfaceModel i1{ "i1", "N.i1",
             { get_property1, set_property2, draw, set_property1, Changed.get_add_method(), Changed.get_remove_method(), get_property2 },
@@ -1895,11 +1894,11 @@ TEST_CASE("Property implicit accessors test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
-    ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
+    ExpectedMethodModel get_property1{ "get_property1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel set_property1{ "put_property1", default_method_modifier, std::nullopt,
         { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } } } };
     ExpectedPropertyModel property1{ "property1",
-        default_property_semantics,
+        default_property_modifier,
         ExpectedTypeRefModel{ fundamental_type::Int32 },
         get_property1,
         set_property1
@@ -1957,21 +1956,21 @@ TEST_CASE("Resolving property type ref test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel get_property1{ "get_property1", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } }, {} };
-    ExpectedMethodModel set_property1{ "put_property1", default_method_semantics, std::nullopt,
+    ExpectedMethodModel get_property1{ "get_property1", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } }, {} };
+    ExpectedMethodModel set_property1{ "put_property1", default_method_modifier, std::nullopt,
         { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } } } } };
     ExpectedPropertyModel property1{ "property1",
-        default_property_semantics,
+        default_property_modifier,
         ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } },
         get_property1,
         set_property1
     };
 
-    ExpectedMethodModel get_property2{ "get_property2", default_method_semantics, ExpectedTypeRefModel{ ExpectedEnumRef{ "M.E2" } }, {} };
-    ExpectedMethodModel set_property2{ "put_property2", default_method_semantics, std::nullopt,
+    ExpectedMethodModel get_property2{ "get_property2", default_method_modifier, ExpectedTypeRefModel{ ExpectedEnumRef{ "M.E2" } }, {} };
+    ExpectedMethodModel set_property2{ "put_property2", default_method_modifier, std::nullopt,
         { ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ "M.E2" } } } } };
     ExpectedPropertyModel property2{ "property2",
-        default_property_semantics,
+        default_property_modifier,
         ExpectedTypeRefModel{ ExpectedEnumRef{ "M.E2" } },
         get_property2,
         set_property2
@@ -2018,7 +2017,7 @@ TEST_CASE("Event test")
     reader.read(test_idl, true);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedEventModel Changed{ "Changed", default_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+    ExpectedEventModel Changed{ "Changed", default_event_modifier, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
 
     ExpectedInterfaceModel i1{ "i1", "N.i1",
         { Changed.get_add_method(), Changed.get_remove_method() },
@@ -2698,10 +2697,10 @@ TEST_CASE("Class methods synthesized test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel m1{ "m1", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
+    ExpectedMethodModel m1{ "m1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
         ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::String } } } };
-    ExpectedMethodModel m2{ "m2", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } }, {} };
-    ExpectedMethodModel m3{ "m3", default_method_semantics, ExpectedTypeRefModel{ ExpectedStructRef{ "M.S1" } }, {} };
+    ExpectedMethodModel m2{ "m2", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } }, {} };
+    ExpectedMethodModel m3{ "m3", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "M.S1" } }, {} };
 
     ExpectedClassModel c1{ "c1", "N.c1",
         { m1, m2, m3 },
@@ -2738,8 +2737,8 @@ TEST_CASE("Class static method test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel m0s{ "m0s", static_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel m1s{ "m1s", static_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
+    ExpectedMethodModel m0s{ "m0s", static_method_modifier, std::nullopt, {} };
+    ExpectedMethodModel m1s{ "m1s", static_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
         ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::String } } } };
     ExpectedClassModel c1{ "c1", "N.c1",
         { m0s, m1s },
@@ -2763,11 +2762,11 @@ TEST_CASE("Class static method test")
 
 TEST_CASE("Class static property test")
 {
-    ExpectedMethodModel get_p1{ "get_p1", static_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
-    ExpectedMethodModel set_p1{ "put_p1", static_method_semantics, std::nullopt, {
+    ExpectedMethodModel get_p1{ "get_p1", static_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel set_p1{ "put_p1", static_method_modifier, std::nullopt, {
         ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } } } };
 
-    ExpectedPropertyModel p1{ "p1", static_property_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, set_p1 };
+    ExpectedPropertyModel p1{ "p1", static_property_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, set_p1 };
 
     {
         std::istringstream test_idl{ R"(
@@ -2880,7 +2879,7 @@ TEST_CASE("Class static property test")
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
 
-        ExpectedPropertyModel p1g{ "p1", static_property_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, std::nullopt };
+        ExpectedPropertyModel p1g{ "p1", static_property_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, std::nullopt };
 
         ExpectedClassModel c1{ "c1", "N.c1",
             { get_p1 },
@@ -2920,7 +2919,7 @@ TEST_CASE("Class static events test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedEventModel e1{ "e1", static_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+    ExpectedEventModel e1{ "e1", static_event_modifier, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
     ExpectedClassModel c1{ "c1", "N.c1",
         { e1.add_method, e1.remove_method },
         {},
@@ -2973,8 +2972,8 @@ TEST_CASE("Runtime class synthensized interfaces test")
         }
     )" };
     
-    ExpectedMethodModel m0{ "m0", default_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel m1{ "m1", static_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
+    ExpectedMethodModel m0{ "m0", default_method_modifier, std::nullopt, {} };
+    ExpectedMethodModel m1{ "m1", static_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
         ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::String } } } };
     
     std::vector<std::string> paths = { "Foundation.xmeta" };
@@ -3010,16 +3009,16 @@ TEST_CASE("Runtime class synthensized interfaces test")
 
 TEST_CASE("Runtime class synthensized instance interface test")
 {
-    ExpectedMethodModel m0{ "m0", default_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel m1{ "m1", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
+    ExpectedMethodModel m0{ "m0", default_method_modifier, std::nullopt, {} };
+    ExpectedMethodModel m1{ "m1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
         ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::String } } } };
 
-    ExpectedEventModel e1{ "e1", default_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+    ExpectedEventModel e1{ "e1", default_event_modifier, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
 
-    ExpectedMethodModel get_p1{ "get_p1", default_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
-    ExpectedMethodModel set_p1{ "put_p1", default_method_semantics, std::nullopt, {
+    ExpectedMethodModel get_p1{ "get_p1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel set_p1{ "put_p1", default_method_modifier, std::nullopt, {
         ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } } } };
-    ExpectedPropertyModel p1{ "p1", default_property_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, set_p1 };
+    ExpectedPropertyModel p1{ "p1", default_property_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, set_p1 };
     {
         std::istringstream test_idl{ R"(
             namespace N
@@ -3102,16 +3101,16 @@ TEST_CASE("Runtime class synthensized instance interface test")
 
 TEST_CASE("Runtime class synthensized static interface test")
 {
-    ExpectedMethodModel m0{ "m0", static_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel m1{ "m1", static_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
+    ExpectedMethodModel m0{ "m0", static_method_modifier, std::nullopt, {} };
+    ExpectedMethodModel m1{ "m1", static_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
         ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::String } } } };
 
-    ExpectedEventModel e1{ "e1", static_event_semantics, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
+    ExpectedEventModel e1{ "e1", static_event_modifier, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
 
-    ExpectedMethodModel get_p1{ "get_p1", static_method_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
-    ExpectedMethodModel set_p1{ "put_p1", static_method_semantics, std::nullopt, {
+    ExpectedMethodModel get_p1{ "get_p1", static_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
+    ExpectedMethodModel set_p1{ "put_p1", static_method_modifier, std::nullopt, {
         ExpectedFormalParameterModel{ "TODO:findname", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } } } };
-    ExpectedPropertyModel p1{ "p1", static_property_semantics, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, set_p1 };
+    ExpectedPropertyModel p1{ "p1", static_property_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, set_p1 };
     {
         std::istringstream test_idl{ R"(
             namespace N
@@ -3210,8 +3209,8 @@ TEST_CASE("Runtime class constructor test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedMethodModel Area{ ".ctor", default_method_semantics, std::nullopt, {} };
-    ExpectedMethodModel Area2{ ".ctor", default_method_semantics, std::nullopt, {
+    ExpectedMethodModel Area{ ".ctor", default_method_modifier, std::nullopt, {} };
+    ExpectedMethodModel Area2{ ".ctor", default_method_modifier, std::nullopt, {
         ExpectedFormalParameterModel{ "width", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } },
         ExpectedFormalParameterModel{ "height", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
     } };
