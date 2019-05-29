@@ -363,6 +363,7 @@ namespace xlang::xmeta
             0,
             0,
             &token_method_def);
+
         method_defs.emplace(model->get_name(), token_method_def);
         define_return(token_method_def);
 
