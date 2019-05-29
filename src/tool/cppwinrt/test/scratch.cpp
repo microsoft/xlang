@@ -12,6 +12,7 @@ namespace winrt::impl
         static_assert(!std::is_same_v<T, Windows::Foundation::IInspectable>);
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
 
+        using this_type = convertible_observable_vector<T, Container>;
         using base_type = observable_vector_base<convertible_observable_vector<T, Container>, T>;
 
         explicit convertible_observable_vector(Container&& values) : m_values(std::forward<Container>(values))
@@ -26,12 +27,6 @@ namespace winrt::impl
         auto& get_container() const noexcept
         {
             return m_values;
-        }
-
-        template <typename U>
-        static constexpr auto const& unwrap_value(U const& value) noexcept
-        {
-            return value;
         }
 
         auto First()
@@ -101,11 +96,11 @@ namespace winrt::impl
             return actual;
         }
 
-        auto const& GetView() const noexcept
+        auto GetView() const noexcept
         {
             struct result
             {
-                convertible_observable_vector const* owner;
+                this_type const* owner;
 
                 operator wfc::IVectorView<T>() const
                 {
