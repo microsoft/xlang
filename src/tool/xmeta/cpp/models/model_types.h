@@ -5,6 +5,7 @@
 #include <variant>
 
 #include "model_ref.h"
+#include "meta_reader.h"
 
 namespace xlang::xmeta
 {
@@ -33,6 +34,7 @@ namespace xlang::xmeta
         std::shared_ptr<interface_model>,
         std::shared_ptr<struct_model>,
         std::shared_ptr<delegate_model>,
+        std::shared_ptr<xlang::meta::reader::TypeDef>,
         simple_type,
         object_type>;
 
@@ -59,12 +61,7 @@ namespace xlang::xmeta
             m_semantic.resolve(sem);
         }
 
-        void set_semantic(std::variant<
-            std::shared_ptr<class_model>,
-            std::shared_ptr<enum_model>,
-            std::shared_ptr<interface_model>,
-            std::shared_ptr<struct_model>,
-            std::shared_ptr<delegate_model>> const& sem) noexcept
+        void set_semantic(class_type_semantics const& sem) noexcept
         {
             if (std::holds_alternative<std::shared_ptr<delegate_model>>(sem))
             {
@@ -85,6 +82,10 @@ namespace xlang::xmeta
             if (std::holds_alternative<std::shared_ptr<struct_model>>(sem))
             {
                 m_semantic.resolve(std::get<std::shared_ptr<struct_model>>(sem));
+            }
+            if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(sem))
+            {
+                m_semantic.resolve(std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(sem));
             }
         }
 

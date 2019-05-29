@@ -8,10 +8,14 @@
 #include <vector>
 #include <variant>
 
+#include "xlang_error.h"
+#include "meta_reader.h"
 namespace xlang::xmeta
 {
     struct namespace_body_model;
     struct namespace_model;
+
+    struct namespace_member_model;
 
     struct using_alias_directive_model;
     struct using_namespace_directive_model;
@@ -26,12 +30,26 @@ namespace xlang::xmeta
     struct method_model;
     struct event_model;
 
-    using class_type_semantics = std::variant<
+    struct symbol_table;
+    struct compilation_unit;
+
+    struct type_ref;
+
+    using class_type_semantics = std::variant<std::monostate,
         std::shared_ptr<class_model>,
         std::shared_ptr<enum_model>,
         std::shared_ptr<interface_model>,
         std::shared_ptr<struct_model>,
-        std::shared_ptr<delegate_model>>;
+        std::shared_ptr<delegate_model>, 
+        std::shared_ptr<xlang::meta::reader::TypeDef>, 
+        std::less<>>;
+
+    enum class method_association
+    {
+        None,
+        Property,
+        Event
+    };
 
     struct base_model
     {
