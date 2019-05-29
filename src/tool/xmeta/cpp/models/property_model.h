@@ -73,7 +73,7 @@ namespace xlang::xmeta
 
         void validate(xlang_error_manager & error_manager);
 
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id);
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name);
 
     private:
         property_modifier m_modifier;

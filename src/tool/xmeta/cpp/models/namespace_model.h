@@ -98,7 +98,7 @@ namespace xlang::xmeta
             std::shared_ptr<namespace_model> const& parent) :
             base_model{ id, decl_line, assembly_name },
             m_fully_qualified_id{ parent != nullptr
-                ? parent->get_fully_qualified_id() + "." + std::string(id)
+                ? parent->get_qualified_name() + "." + std::string(id)
                 : id },
             m_parent_namespace { parent }
         { }
@@ -118,7 +118,7 @@ namespace xlang::xmeta
             return m_parent_namespace;
         }
 
-        std::string const& get_fully_qualified_id() const noexcept
+        std::string const& get_qualified_name() const noexcept
         {
             return m_fully_qualified_id;
         }

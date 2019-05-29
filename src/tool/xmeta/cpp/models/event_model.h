@@ -83,7 +83,7 @@ namespace xlang::xmeta
 
         compilation_error set_remove_method(std::shared_ptr<method_model> const& m);
 
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id);
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name);
 
     private:
         event_modifier m_modifier;

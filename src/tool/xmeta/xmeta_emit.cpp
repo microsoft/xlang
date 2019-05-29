@@ -150,23 +150,23 @@ namespace
         }
         if (std::holds_alternative<std::shared_ptr<class_model>>(ts))
         {
-            return std::get<std::shared_ptr<class_model>>(ts)->get_fully_qualified_id();
+            return std::get<std::shared_ptr<class_model>>(ts)->get_qualified_name();
         }
         if (std::holds_alternative<std::shared_ptr<delegate_model>>(ts))
         {
-            return std::get<std::shared_ptr<delegate_model>>(ts)->get_fully_qualified_id();
+            return std::get<std::shared_ptr<delegate_model>>(ts)->get_qualified_name();
         }
         if (std::holds_alternative<std::shared_ptr<enum_model>>(ts))
         {
-            return std::get<std::shared_ptr<enum_model>>(ts)->get_fully_qualified_id();
+            return std::get<std::shared_ptr<enum_model>>(ts)->get_qualified_name();
         }
         if (std::holds_alternative<std::shared_ptr<interface_model>>(ts))
         {
-            return std::get<std::shared_ptr<interface_model>>(ts)->get_fully_qualified_id();
+            return std::get<std::shared_ptr<interface_model>>(ts)->get_qualified_name();
         }
         if (std::holds_alternative<std::shared_ptr<struct_model>>(ts))
         {
-            return std::get<std::shared_ptr<struct_model>>(ts)->get_fully_qualified_id();
+            return std::get<std::shared_ptr<struct_model>>(ts)->get_qualified_name();
         }
         if (std::holds_alternative<fundamental_type>(ts))
         {
@@ -444,7 +444,7 @@ namespace xlang::xmeta
         assert(std::holds_alternative<std::shared_ptr<delegate_model>>(target));
         auto const& dm = std::get<std::shared_ptr<delegate_model>>(target);
 
-        mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_fully_qualified_id(), xlang_model.m_assembly);
+        mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_qualified_name(), xlang_model.m_assembly);
         mdEvent token_event;
         m_metadata_emitter->DefineEvent(
             token_def,
@@ -460,13 +460,13 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model)
     {
-        auto const& interface_name = model->get_fully_qualified_id();
+        auto const& interface_name = model->get_qualified_name();
         
         std::vector<mdTypeRef> implements;
         for (auto const& interface_ref : model->get_interface_bases())
         {
             auto const& val = std::get<std::shared_ptr<interface_model>>(interface_ref.get_semantic().get_resolved_target());
-            implements.emplace_back(get_or_define_type_ref(val->get_fully_qualified_id(), xlang_model.m_assembly));
+            implements.emplace_back(get_or_define_type_ref(val->get_qualified_name(), xlang_model.m_assembly));
         }
         implements.emplace_back(mdTokenNil);
         
@@ -510,7 +510,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
     {
-        auto const& struct_name = model->get_fully_qualified_id();
+        auto const& struct_name = model->get_qualified_name();
         //NOTE: tdWindowsRuntime flag maybe removed later to indicate that this is not WinRT
         static constexpr DWORD struct_type_flag = tdPublic | tdSealed | tdClass | tdSequentialLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
@@ -539,7 +539,7 @@ namespace xlang::xmeta
 
     void xmeta_emit::listen_enum_model(std::shared_ptr<enum_model> const& model) 
     {
-        auto const& type_name = model->get_fully_qualified_id();
+        auto const& type_name = model->get_qualified_name();
         //NOTE: tdWindowsRuntime flag maybe removed later to indicate that this is not WinRT
         static constexpr DWORD enum_type_flag = tdPublic | tdSealed | tdClass | tdAutoLayout | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };
@@ -593,7 +593,7 @@ namespace xlang::xmeta
     
     void xmeta_emit::listen_delegate_model(std::shared_ptr<delegate_model> const& model)
     {
-        auto const& type_name = model->get_fully_qualified_id();
+        auto const& type_name = model->get_qualified_name();
         //NOTE: tdWindowsRuntime flag maybe removed later to indicate that this is not WinRT
         static constexpr DWORD delegate_type_flag = tdPublic | tdSealed | tdClass | tdWindowsRuntime;
         mdTypeDef implements[] = { mdTokenNil };

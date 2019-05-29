@@ -43,12 +43,12 @@ namespace xlang::xmeta
         return compilation_error::passed;
     }
 
-    void event_model::resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id)
+    void event_model::resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name)
     {
         assert(!m_type.get_semantic().is_resolved());
         std::string const& ref_name = m_type.get_semantic().get_ref_name();
         std::string symbol = ref_name.find(".") != std::string::npos
-            ? ref_name : fully_qualified_id + "." + ref_name;
+            ? ref_name : qualified_name + "." + ref_name;
         auto const& iter = symbols.get_symbol(symbol);
         if (std::holds_alternative<std::monostate>(iter))
         {

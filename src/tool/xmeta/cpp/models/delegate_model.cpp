@@ -15,7 +15,7 @@ namespace xlang::xmeta
             {
                 // TODO: Once we have using directives, we will need to go through many fully_qualified_ids here
                 std::string const& ref_name = m_return_type->get_semantic().get_ref_name();
-                std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id() + "." + ref_name;
+                std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : this->get_containing_namespace_body()->get_containing_namespace()->get_qualified_name() + "." + ref_name;
                 auto const& iter = symbols.get_symbol(symbol);
                 if (std::holds_alternative<std::monostate>(iter))
                 {
@@ -29,7 +29,7 @@ namespace xlang::xmeta
         }
         for (formal_parameter_model & param : m_formal_parameters)
         {
-            param.resolve(symbols, error_manager, this->get_containing_namespace_body()->get_containing_namespace()->get_fully_qualified_id());
+            param.resolve(symbols, error_manager, this->get_containing_namespace_body()->get_containing_namespace()->get_qualified_name());
         }
     }
 

@@ -166,7 +166,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
                  decl_line,
                  enum_member_id,
                  new_enum->get_name(),
-                 m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+                 m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
              return listener_error::failed;
          }
          std::string str_val = expr->getText();
@@ -232,7 +232,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
              decl_line,
              expr->getText(),
              enum_member_id,
-             m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+             m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
          return listener_error::failed;
      }
      else
@@ -262,7 +262,7 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     if (!new_enum->member_exists(ref_name))
     {
         error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_name(), 
-            m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+            m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
         return listener_error::failed;
     }
     auto ref_member = new_enum->get_member(ref_name);
@@ -317,7 +317,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
                 if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_fully_qualified_id());
+                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_qualified_name());
                     error = listener_error::failed;
                 }
             }
@@ -328,7 +328,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_fully_qualified_id());
+                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_qualified_name());
                     error = listener_error::failed;
                 }
             }
@@ -349,12 +349,12 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         listener_error error = listener_error::passed;
         if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_fully_qualified_id());
+            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_qualified_name());
             error = listener_error::failed;
         }
         if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_fully_qualified_id());
+            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_qualified_name());
             error =  listener_error::failed;
         }
         if (error == listener_error::failed)
@@ -402,7 +402,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
 
         if (model->add_member(prop_model) == compilation_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), prop_model->get_name(), model->get_fully_qualified_id());
+            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), prop_model->get_name(), model->get_qualified_name());
             return listener_error::failed;
         }
     }
@@ -437,12 +437,12 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     listener_error error = listener_error::passed;
     if (model->add_member(add_method) == compilation_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), add_method->get_name(), model->get_fully_qualified_id());
+        error_manager.write_type_member_exists_error(event->get_decl_line(), add_method->get_name(), model->get_qualified_name());
         error = listener_error::failed;
     }
     if (model->add_member(remove_method) == compilation_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), remove_method->get_name(), model->get_fully_qualified_id());
+        error_manager.write_type_member_exists_error(event->get_decl_line(), remove_method->get_name(), model->get_qualified_name());
         error = listener_error::failed;
     }
     if (error == listener_error::failed)
@@ -451,7 +451,7 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     }
     if (model->add_member(event) == compilation_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), event->get_name(), model->get_fully_qualified_id());
+        error_manager.write_type_member_exists_error(event->get_decl_line(), event->get_name(), model->get_qualified_name());
         return listener_error::failed;
     }
     return listener_error::passed;
@@ -463,7 +463,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
     std::string class_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
 
-    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + class_name;
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + class_name;
     class_modifier class_sem;
     for (auto const& class_mod : ctx->class_modifiers())
     {
@@ -495,7 +495,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
 
     if (xlang_model.symbols.set_symbol(symbol, clss_model) == compilation_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, class_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_namespace_member_name_error(decl_line, class_name, m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
         return;
     }
 
@@ -619,7 +619,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
 
                 if (clss_model->add_member(met_model) == compilation_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), clss_model->get_fully_qualified_id());
+                    error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), clss_model->get_qualified_name());
                 }
             }
             if (class_member->class_property_declaration())
@@ -764,12 +764,12 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
     std::string interface_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
 
-    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + interface_name;
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + interface_name;
     auto model = std::make_shared<interface_model>(interface_name, decl_line, m_cur_assembly, m_cur_namespace_body);
 
     if (xlang_model.symbols.set_symbol(symbol, model) == compilation_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, interface_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_namespace_member_name_error(decl_line, interface_name, m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
         return;
     }
     auto const& interface_body = ctx->interface_body();
@@ -790,7 +790,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             }
             if (model->add_member(met_model) == compilation_error::symbol_exists)
             {
-                error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), model->get_fully_qualified_id());
+                error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), model->get_qualified_name());
             }
         }
         if (interface_member->interface_property_declaration())
@@ -829,7 +829,7 @@ void ast_to_st_listener::enterDelegate_declaration(XlangParser::Delegate_declara
     auto id = ctx->IDENTIFIER();
     std::string delegate_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
-    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + delegate_name;
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + delegate_name;
 
     std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };
     extract_type(ctx->return_type(), tr);
@@ -842,7 +842,7 @@ void ast_to_st_listener::enterDelegate_declaration(XlangParser::Delegate_declara
     }
     if (xlang_model.symbols.set_symbol(symbol, dm) == compilation_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, delegate_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_namespace_member_name_error(decl_line, delegate_name, m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
         return;
     }
     m_cur_namespace_body->add_delegate(dm);
@@ -854,7 +854,7 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
     std::string enum_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
     enum_types type = enum_types::Int32;
-    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + enum_name;  
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + enum_name;  
     if (ctx->enum_base())
     {
         assert(ctx->enum_base()->enum_integral_type() != nullptr);
@@ -886,7 +886,7 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
     if (xlang_model.symbols.set_symbol(symbol, new_enum) == compilation_error::symbol_exists)
     {
         error_manager.write_namespace_member_name_error(decl_line, enum_name, 
-            m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+            m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
         return;
     }
     m_cur_namespace_body->add_enum(new_enum);
@@ -897,7 +897,7 @@ void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declaration
     auto id = ctx->IDENTIFIER();
     auto decl_line = id->getSymbol()->getLine();
     std::string struct_name{ id->getText() };
-    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + struct_name;
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + struct_name;
 
     auto new_struct = std::make_shared<struct_model>(struct_name, decl_line, m_cur_assembly, m_cur_namespace_body);
 
@@ -917,7 +917,7 @@ void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declaration
     }
     if (xlang_model.symbols.set_symbol(symbol, new_struct) == compilation_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, struct_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        error_manager.write_namespace_member_name_error(decl_line, struct_name, m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
         return;
     }
     m_cur_namespace_body->add_struct(new_struct);
@@ -971,7 +971,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
             else
             {
                 error_manager.write_namespace_member_name_error(decl_line, name, 
-                    m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+                    m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
                 return;
             }
         }

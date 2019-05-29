@@ -117,7 +117,7 @@ namespace xlang::xmeta
 
         void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept;
 
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id);
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name);
 
     private:
         method_modifier m_modifier;

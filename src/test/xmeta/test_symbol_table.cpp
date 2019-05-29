@@ -38,32 +38,32 @@ auto find_namespace_body(xmeta_idl_reader & reader, std::string name, int index)
 
 struct ExpectedClassRef
 {
-    std::string fully_qualified_id;
-    ExpectedClassRef(std::string_view id) : fully_qualified_id{ id } {}
+    std::string qualified_name;
+    ExpectedClassRef(std::string_view id) : qualified_name{ id } {}
 };
 
 struct ExpectedInterfaceRef
 {
-    std::string fully_qualified_id;
-    ExpectedInterfaceRef(std::string_view id) : fully_qualified_id{ id } {}
+    std::string qualified_name;
+    ExpectedInterfaceRef(std::string_view id) : qualified_name{ id } {}
 };
 
 struct ExpectedEnumRef
 {
-    std::string fully_qualified_id;
-    ExpectedEnumRef(std::string_view id) : fully_qualified_id{ id } {}
+    std::string qualified_name;
+    ExpectedEnumRef(std::string_view id) : qualified_name{ id } {}
 };
 
 struct ExpectedDelegateRef
 {
-    std::string fully_qualified_id;
-    ExpectedDelegateRef(std::string_view id) : fully_qualified_id{ id } {}
+    std::string qualified_name;
+    ExpectedDelegateRef(std::string_view id) : qualified_name{ id } {}
 };
 
 struct ExpectedStructRef
 {
-    std::string fully_qualified_id;
-    ExpectedStructRef(std::string_view id) : fully_qualified_id{ id } {}
+    std::string qualified_name;
+    ExpectedStructRef(std::string_view id) : qualified_name{ id } {}
 };
 
 struct ExpectedTypeRefModel
@@ -111,19 +111,19 @@ struct ExpectedTypeRefModel
             {
                 REQUIRE(std::holds_alternative<ExpectedDelegateRef>(type));
                 auto const& model = std::get<ExpectedDelegateRef>(type);
-                REQUIRE(actual_fully_qualified_id == model.fully_qualified_id);
+                REQUIRE(actual_fully_qualified_id == model.qualified_name);
             }
             if (typedef_model->is_enum())
             {
                 REQUIRE(std::holds_alternative<ExpectedEnumRef>(type));
                 auto const& model = std::get<ExpectedEnumRef>(type);
-                REQUIRE(actual_fully_qualified_id == model.fully_qualified_id);
+                REQUIRE(actual_fully_qualified_id == model.qualified_name);
             }
             if (typedef_model->is_struct())
             {
                 REQUIRE(std::holds_alternative<ExpectedStructRef>(type));
                 auto const& model = std::get<ExpectedStructRef>(type);
-                REQUIRE(actual_fully_qualified_id == model.fully_qualified_id);
+                REQUIRE(actual_fully_qualified_id == model.qualified_name);
             }
         }
         if (std::holds_alternative<std::shared_ptr<class_model>>(target))
@@ -131,35 +131,35 @@ struct ExpectedTypeRefModel
             REQUIRE(std::holds_alternative<ExpectedClassRef>(type));
             auto const& model = std::get<ExpectedClassRef>(type);
             auto const& actual_model = std::get<std::shared_ptr<class_model>>(target);
-            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+            REQUIRE(actual_model->get_qualified_name() == model.qualified_name);
         }
         if (std::holds_alternative<std::shared_ptr<interface_model>>(target))
         {
             REQUIRE(std::holds_alternative<ExpectedInterfaceRef>(type));
             auto const& model = std::get<ExpectedInterfaceRef>(type);
             auto const& actual_model = std::get<std::shared_ptr<interface_model>>(target);
-            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+            REQUIRE(actual_model->get_qualified_name() == model.qualified_name);
         }
         if (std::holds_alternative<std::shared_ptr<delegate_model>>(target))
         {
             REQUIRE(std::holds_alternative<ExpectedDelegateRef>(type));
             auto const& model = std::get<ExpectedDelegateRef>(type);
             auto const& actual_model = std::get<std::shared_ptr<delegate_model>>(target);
-            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+            REQUIRE(actual_model->get_qualified_name() == model.qualified_name);
         }
         if (std::holds_alternative<std::shared_ptr<struct_model>>(target))
         {
             REQUIRE(std::holds_alternative<ExpectedStructRef>(type));
             auto const& model = std::get<ExpectedStructRef>(type);
             auto const& actual_model = std::get<std::shared_ptr<struct_model>>(target);
-            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+            REQUIRE(actual_model->get_qualified_name() == model.qualified_name);
         }
         if (std::holds_alternative<std::shared_ptr<enum_model>>(target))
         {
             REQUIRE(std::holds_alternative<ExpectedEnumRef>(type));
             auto const& model = std::get<ExpectedEnumRef>(type);
             auto const& actual_model = std::get<std::shared_ptr<enum_model>>(target);
-            REQUIRE(actual_model->get_fully_qualified_id() == model.fully_qualified_id);
+            REQUIRE(actual_model->get_qualified_name() == model.qualified_name);
         }
         if (std::holds_alternative<fundamental_type>(target))
         {
@@ -327,7 +327,7 @@ struct ExpectedEventModel
 struct ExpectedClassModel
 {
     std::string id;
-    std::string fully_qualified_id;
+    std::string qualified_name;
     std::vector<ExpectedMethodModel> methods;
     std::vector<ExpectedPropertyModel> properties;
     std::vector<ExpectedEventModel> events;
@@ -335,18 +335,18 @@ struct ExpectedClassModel
     std::vector<ExpectedTypeRefModel> interface_bases;
 
     ExpectedClassModel(std::string const& id,
-        std::string const& fully_qualified_id,
+        std::string const& qualified_name,
         std::vector<ExpectedMethodModel> const& methods,
         std::vector<ExpectedPropertyModel> const& properties,
         std::vector<ExpectedEventModel> const& events,
         std::optional<ExpectedTypeRefModel> class_base,
         std::vector<ExpectedTypeRefModel> const& interfaces_bases)
-        : id{ id }, fully_qualified_id{ fully_qualified_id }, methods{ methods }, properties{ properties }, events{ events }, class_base{ class_base }, interface_bases{ interfaces_bases } {}
+        : id{ id }, qualified_name{ qualified_name }, methods{ methods }, properties{ properties }, events{ events }, class_base{ class_base }, interface_bases{ interfaces_bases } {}
 
     void VerifyType(std::shared_ptr<class_model> const& actual)
     {
         REQUIRE(actual->get_name() == id);
-        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        REQUIRE(actual->get_qualified_name() == qualified_name);
         auto const& actual_methods = actual->get_methods();
         REQUIRE(actual_methods.size() == methods.size());
         for (size_t i = 0; i < methods.size(); i++)
@@ -389,24 +389,24 @@ struct ExpectedClassModel
 struct ExpectedInterfaceModel
 {
     std::string id;
-    std::string fully_qualified_id;
+    std::string qualified_name;
     std::vector<ExpectedMethodModel> methods;
     std::vector<ExpectedPropertyModel> properties;
     std::vector<ExpectedEventModel> events;
     std::vector<ExpectedTypeRefModel> interface_bases;
 
     ExpectedInterfaceModel(std::string const& id, 
-            std::string const& fully_qualified_id, 
+            std::string const& qualified_name, 
             std::vector<ExpectedMethodModel> const& methods,
             std::vector<ExpectedPropertyModel> const& properties,
             std::vector<ExpectedEventModel> const& events,
             std::vector<ExpectedTypeRefModel> const& bases)
-        : id{ id }, fully_qualified_id{ fully_qualified_id }, methods{ methods }, properties{ properties }, events{ events }, interface_bases{ bases } {}
+        : id{ id }, qualified_name{ qualified_name }, methods{ methods }, properties{ properties }, events{ events }, interface_bases{ bases } {}
 
     void VerifyType(std::shared_ptr<interface_model> const& actual)
     {
         REQUIRE(actual->get_name() == id);
-        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        REQUIRE(actual->get_qualified_name() == qualified_name);
         auto const& actual_methods = actual->get_methods();
         REQUIRE(actual_methods.size() == methods.size());
         for (size_t i = 0; i < methods.size(); i++)
@@ -440,17 +440,17 @@ struct ExpectedInterfaceModel
 struct ExpectedDelegateModel
 {
     std::string id;
-    std::string fully_qualified_id;
+    std::string qualified_name;
     std::optional<ExpectedTypeRefModel> return_type;
     std::vector<ExpectedFormalParameterModel> params;
 
-    ExpectedDelegateModel(std::string const& id, std::string const& fully_qualified_id, std::optional<ExpectedTypeRefModel> const& return_type, std::vector<ExpectedFormalParameterModel> params)
-        : id{ id }, fully_qualified_id{ fully_qualified_id }, return_type{ return_type }, params{ params } {}
+    ExpectedDelegateModel(std::string const& id, std::string const& qualified_name, std::optional<ExpectedTypeRefModel> const& return_type, std::vector<ExpectedFormalParameterModel> params)
+        : id{ id }, qualified_name{ qualified_name }, return_type{ return_type }, params{ params } {}
 
     void VerifyType(std::shared_ptr<delegate_model> const& actual)
     {
         REQUIRE(actual->get_name() == id);
-        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        REQUIRE(actual->get_qualified_name() == qualified_name);
 
         if (return_type == std::nullopt)
         {
@@ -474,17 +474,17 @@ struct ExpectedDelegateModel
 struct ExpectedEnumModel
 {
     std::string id;
-    std::string fully_qualified_id;
+    std::string qualified_name;
     std::vector<enum_member> fields;
     enum_types sem;
 
-    ExpectedEnumModel(std::string const& id, std::string const& fully_qualified_id, enum_types sem, std::vector<enum_member> fields)
-        : id{ id }, fully_qualified_id{ fully_qualified_id }, fields{ fields }, sem{ sem } {}
+    ExpectedEnumModel(std::string const& id, std::string const& qualified_name, enum_types sem, std::vector<enum_member> fields)
+        : id{ id }, qualified_name{ qualified_name }, fields{ fields }, sem{ sem } {}
 
     void VerifyType(std::shared_ptr<enum_model> const& actual)
     {
         REQUIRE(actual->get_name() == id);
-        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        REQUIRE(actual->get_qualified_name() == qualified_name);
         REQUIRE(actual->get_type() == sem);
         auto & actual_members = actual->get_members();
         REQUIRE(actual_members.size() == fields.size());
@@ -498,16 +498,16 @@ struct ExpectedEnumModel
 struct ExpectedStructModel
 {
     std::string id;
-    std::string fully_qualified_id;
+    std::string qualified_name;
     std::vector<std::pair<ExpectedTypeRefModel, std::string>> fields;
 
-    ExpectedStructModel(std::string const& id, std::string const& fully_qualified_id, std::vector<std::pair<ExpectedTypeRefModel, std::string>> fields)
-        : id{ id }, fully_qualified_id { fully_qualified_id }, fields{ fields } {}
+    ExpectedStructModel(std::string const& id, std::string const& qualified_name, std::vector<std::pair<ExpectedTypeRefModel, std::string>> fields)
+        : id{ id }, qualified_name { qualified_name }, fields{ fields } {}
 
     void VerifyType(std::shared_ptr<struct_model> const& actual)
     {
         REQUIRE(actual->get_name() == id);
-        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        REQUIRE(actual->get_qualified_name() == qualified_name);
 
         auto const& actual_fields = actual->get_fields();
         REQUIRE(actual_fields.size() == fields.size());
@@ -523,7 +523,7 @@ struct ExpectedStructModel
 struct ExpectedNamespaceModel
 {
     std::string id;
-    std::string fully_qualified_id;
+    std::string qualified_name;
     std::vector<ExpectedNamespaceModel> children;
 
     std::vector<ExpectedClassModel> classes;
@@ -533,10 +533,10 @@ struct ExpectedNamespaceModel
     std::vector<ExpectedDelegateModel> delegates;
 
     ExpectedNamespaceModel(std::string const& id, 
-            std::string const& fully_qualified_id, 
+            std::string const& qualified_name, 
             std::vector<ExpectedNamespaceModel> namespaces, 
             std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel, ExpectedDelegateModel, ExpectedInterfaceModel, ExpectedClassModel>> declarations)
-        : id{ id }, fully_qualified_id{ fully_qualified_id }, children { namespaces } 
+        : id{ id }, qualified_name{ qualified_name }, children { namespaces } 
     {
         for (auto & declaration : declarations)
         {
@@ -566,7 +566,7 @@ struct ExpectedNamespaceModel
     void VerifyType(std::shared_ptr<namespace_model> const& actual)
     {
         REQUIRE(actual->get_name() == id);
-        REQUIRE(actual->get_fully_qualified_id() == fully_qualified_id);
+        REQUIRE(actual->get_qualified_name() == qualified_name);
 
         for (auto const& actual_bodies : actual->get_namespace_bodies())
         {
@@ -750,7 +750,7 @@ TEST_CASE("Delegate test")
     ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ fundamental_type::Int32 }, {
         ExpectedFormalParameterModel{ "i", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } },
         ExpectedFormalParameterModel{ "d", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Double } },
-        ExpectedFormalParameterModel{ "e", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef { E.fully_qualified_id } } },
+        ExpectedFormalParameterModel{ "e", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef { E.qualified_name } } },
     } };
     ExpectedDelegateModel D2{ "D2", "N.D2", std::nullopt, {} };
 
@@ -901,9 +901,9 @@ TEST_CASE("Resolving delegates type ref test")
     REQUIRE(reader.get_num_syntax_errors() == 0);
     ExpectedStructModel S1{ "S1", "N.S1", {} };
     ExpectedEnumModel E1{ "E1", "N.E1" , enum_types::Int32, {} };
-    ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id } }, {
-        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id } } },
-        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id }  } },
+    ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ ExpectedEnumRef{ E1.qualified_name } }, {
+        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ S1.qualified_name } } },
+        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ E1.qualified_name }  } },
     } };
     ExpectedNamespaceModel expected{ "N", "N", {}, { S1, E1, D1 } };
     expected.VerifyType(find_namespace(reader, "N"));
@@ -935,8 +935,8 @@ TEST_CASE("Resolving struct type ref test")
     ExpectedStructModel S1{ "S1", "N.S1", {} };
     ExpectedEnumModel E1{ "E1", "N.E1" , enum_types::Int32, {} };
     ExpectedStructModel S2{ "S2", "N.S2", {
-        { ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id }} , "field_1" },
-        { ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id } } , "field_2" },
+        { ExpectedTypeRefModel{ ExpectedStructRef{ S1.qualified_name }} , "field_1" },
+        { ExpectedTypeRefModel{ ExpectedEnumRef{ E1.qualified_name } } , "field_2" },
     } };
     ExpectedNamespaceModel expected{ "N", "N", {}, { S1, E1, S2 } };
     expected.VerifyType(find_namespace(reader, "N"));
@@ -975,8 +975,8 @@ TEST_CASE("Resolving type ref across namespaces test")
     ExpectedEnumModel E1{ "E1", "B.C.E1" , enum_types::Int32, {} };
 
     ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ fundamental_type::Boolean }, {
-        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id } } },
-        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id } } } }
+        ExpectedFormalParameterModel{ "param1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ S1.qualified_name } } },
+        ExpectedFormalParameterModel{ "param2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ E1.qualified_name } } } }
     };
 
     ExpectedNamespaceModel A{ "A", "A", {}, { S1 } };
