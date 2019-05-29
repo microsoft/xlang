@@ -12,12 +12,12 @@ namespace xlang::xmeta
     struct type_ref // TODO: needs to have decl
     {
         type_ref() = delete;
-        type_ref(std::string_view const& id) :
-            m_semantic{ std::string(id) }
+        type_ref(std::string_view const& name, bool is_array = false) :
+            m_semantic{ std::string(name) }, m_is_array{ is_array }
         { }
 
-        type_ref(type_semantics const& type) :
-            m_semantic{ std::string() }
+        type_ref(type_semantics const& type, bool is_array = false) :
+            m_semantic{ std::string() }, m_is_array{ is_array }
         {
             m_semantic.resolve(type);
         }
@@ -50,5 +50,7 @@ namespace xlang::xmeta
 
     private:
         model_ref<type_semantics> m_semantic;
+
+        bool m_is_array = false;
     };
 }

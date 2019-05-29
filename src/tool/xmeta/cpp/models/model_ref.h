@@ -8,7 +8,7 @@
 namespace xlang::xmeta
 {
     // model_ref is meant to hold unresolved and then resolved reference state. When unresolved,
-    // it holds a string representing the ID of the reference. Otherwise, it holds generic state,
+    // it holds a string representing the name of the reference. Otherwise, it holds generic state,
     // which is typically a smart pointer to the type or member being referenced.
     template <typename T, typename... Ts>
     struct model_ref

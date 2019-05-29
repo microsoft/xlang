@@ -19,14 +19,14 @@ namespace xlang::xmeta
     {
         property_model() = delete;
 
-        property_model(std::string_view const& id,
+        property_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 property_modifier const& sem,
                 type_ref&& type,
                 std::shared_ptr<method_model> const& get_method,
                 std::shared_ptr<method_model> const& set_method) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_modifier{ sem },
             m_type{ std::move(type) },
             m_get_method{ get_method },
@@ -34,12 +34,12 @@ namespace xlang::xmeta
             m_implemented_property_ref{ "" }
         { }
 
-        property_model(std::string_view const& id,
+        property_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 property_modifier const& sem,
                 type_ref&& type) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_type{ std::move(type) },
             m_modifier{ sem },
             m_implemented_property_ref{ "" }
@@ -67,9 +67,9 @@ namespace xlang::xmeta
 
         void set_overridden_property_ref(std::shared_ptr<property_model> const& ref) noexcept;
 
-        compilation_error set_get_method(std::shared_ptr<method_model> const& m);
+        semantic_error set_get_method(std::shared_ptr<method_model> const& m);
 
-        compilation_error set_set_method(std::shared_ptr<method_model> const& m);
+        semantic_error set_set_method(std::shared_ptr<method_model> const& m);
 
         void validate(xlang_error_manager & error_manager);
 
@@ -79,7 +79,6 @@ namespace xlang::xmeta
         property_modifier m_modifier;
         model_ref<std::shared_ptr<property_model>> m_implemented_property_ref;
         type_ref m_type;
-        bool m_is_array;
         std::shared_ptr<method_model> m_get_method;
         std::shared_ptr<method_model> m_set_method;
     };

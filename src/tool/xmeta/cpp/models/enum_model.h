@@ -30,14 +30,14 @@ namespace xlang::xmeta
     struct enum_member : base_model
     {
         enum_member() = delete;
-        enum_member(std::string_view const& id, size_t decl_line, std::string_view const& str_val) :
-            base_model{ id, decl_line, "" },
+        enum_member(std::string_view const& name, size_t decl_line, std::string_view const& str_val) :
+            base_model{ name, decl_line, "" },
             m_value{ str_val }
         {
         }
 
-        enum_member(std::string_view const& id, enum_value_semantics const& value) :
-            base_model{ id, 0, "" },
+        enum_member(std::string_view const& name, enum_value_semantics const& value) :
+            base_model{ name, 0, "" },
             m_value{ value }
         {
         }
@@ -105,21 +105,21 @@ namespace xlang::xmeta
     {
         enum_model() = delete;
 
-        enum_model(std::string_view const& id,
+        enum_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::shared_ptr<namespace_body_model> const& containing_ns_body,
                 enum_types t) :
-            namespace_member_model{ id, decl_line, assembly_name, containing_ns_body },
+            namespace_member_model{ name, decl_line, assembly_name, containing_ns_body },
             m_type{ t }
         { }
 
-        enum_model(std::string_view const& id,
+        enum_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::string_view const& containing_ns_name,
                 enum_types t) :
-            namespace_member_model{ id, decl_line, assembly_name, containing_ns_name },
+            namespace_member_model{ name, decl_line, assembly_name, containing_ns_name },
             m_type{ t }
         { }
 
@@ -128,12 +128,12 @@ namespace xlang::xmeta
             return m_members;
         }
 
-        auto const& get_member(std::string_view const& id)
+        auto const& get_member(std::string_view const& name)
         {
-            assert(member_exists(id));
-            auto same_name = [&id](enum_member const& em)
+            assert(member_exists(name));
+            auto same_name = [&name](enum_member const& em)
             {
-                return em.get_name() == id;
+                return em.get_name() == name;
             };
             return *std::find_if(m_members.begin(), m_members.end(), same_name);
         }
@@ -149,11 +149,11 @@ namespace xlang::xmeta
             m_members.emplace_back(std::move(e_member));
         }
 
-        bool member_exists(std::string_view const& id) const
+        bool member_exists(std::string_view const& name) const
         {
-            auto same_id = [&id](enum_member const& em)
+            auto same_id = [&name](enum_member const& em)
             {
-                return em.get_name() == id;
+                return em.get_name() == name;
             };
             return std::find_if(m_members.begin(), m_members.end(), same_id) != m_members.end();
         }

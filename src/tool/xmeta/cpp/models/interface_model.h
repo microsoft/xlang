@@ -12,11 +12,11 @@ namespace xlang::xmeta
     struct interface_model : class_or_interface_model
     {
         interface_model() = delete;
-        interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
-            class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body }
+        interface_model(std::string_view const& name, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
+            class_or_interface_model{ name, decl_line, assembly_name, containing_ns_body }
         { }
-        interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::string_view const& containing_ns_name) :
-            class_or_interface_model{ id, decl_line, assembly_name, containing_ns_name }
+        interface_model(std::string_view const& name, size_t decl_line, std::string_view const& assembly_name, std::string_view const& containing_ns_name) :
+            class_or_interface_model{ name, decl_line, assembly_name, containing_ns_name }
         { }
 
         void validate(xlang_error_manager & error_manager);

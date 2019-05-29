@@ -13,19 +13,19 @@ namespace xlang::xmeta
     {
         namespace_member_model() = delete;
 
-        namespace_member_model(std::string_view const& id, 
+        namespace_member_model(std::string_view const& name, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::shared_ptr<namespace_body_model> const& containing_ns_body) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_containing_namespace_body{ containing_ns_body }
         { }
 
-        namespace_member_model(std::string_view const& id, 
+        namespace_member_model(std::string_view const& name, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::string_view const& containing_namespace_name) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_containing_namespace_body{ nullptr },
             containing_namespace_name{ containing_namespace_name }
         { }

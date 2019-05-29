@@ -17,14 +17,14 @@ namespace xlang::xmeta
     {
         event_model() = delete;
 
-        event_model(std::string_view const& id, 
+        event_model(std::string_view const& name, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 event_modifier const& sem, 
                 std::shared_ptr<method_model> const& add_method, 
                 std::shared_ptr<method_model> const& remove_method,
                 type_ref&& t) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_modifier{ sem },
             m_add_method{ add_method },
             m_remove_method{ remove_method },
@@ -32,24 +32,24 @@ namespace xlang::xmeta
             m_implemented_event_ref{ "" }
         { }
 
-        event_model(std::string_view const& id,
+        event_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 event_modifier const& sem,
                 type_ref&& t) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_modifier{ sem },
             m_type{ std::move(t) },
             m_implemented_event_ref{ "" }
         { }
 
-        event_model(std::string_view const& id,
+        event_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::shared_ptr<method_model> const& add_method,
                 std::shared_ptr<method_model> const& remove_method,
                 type_ref&& t) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_add_method{ add_method },
             m_remove_method{ remove_method },
             m_type{ std::move(t) },
@@ -79,9 +79,9 @@ namespace xlang::xmeta
 
         void set_overridden_event_ref(std::shared_ptr<event_model> const& ref) noexcept;
 
-        compilation_error set_add_method(std::shared_ptr<method_model> const& m);
+        semantic_error set_add_method(std::shared_ptr<method_model> const& m);
 
-        compilation_error set_remove_method(std::shared_ptr<method_model> const& m);
+        semantic_error set_remove_method(std::shared_ptr<method_model> const& m);
 
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name);
 

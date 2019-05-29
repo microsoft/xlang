@@ -20,14 +20,14 @@ namespace xlang::xmeta
     struct formal_parameter_model : base_model
     {
         formal_parameter_model() = delete;
-        formal_parameter_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, parameter_semantics sem, type_ref&& type) :
-            base_model{ id, decl_line, assembly_name },
+        formal_parameter_model(std::string_view const& name, size_t decl_line, std::string_view const& assembly_name, parameter_semantics sem, type_ref&& type) :
+            base_model{ name, decl_line, assembly_name },
             m_semantic{ sem },
             m_type{ std::move(type) }
         { }
 
-        formal_parameter_model(std::string_view const& id, parameter_semantics sem, type_ref&& type) :
-            base_model{ id, 0, "test_only" },
+        formal_parameter_model(std::string_view const& name, parameter_semantics sem, type_ref&& type) :
+            base_model{ name, 0, "test_only" },
             m_semantic{ sem },
             m_type{ std::move(type) }
         { }

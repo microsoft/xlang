@@ -15,12 +15,12 @@ namespace xlang::xmeta
 
         class_or_interface_model() = delete;
 
-        class_or_interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
-            namespace_member_model{ id, decl_line, assembly_name, containing_ns_body }
+        class_or_interface_model(std::string_view const& name, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
+            namespace_member_model{ name, decl_line, assembly_name, containing_ns_body }
         { }
 
-        class_or_interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::string_view const& containing_namespace_name) :
-            namespace_member_model{ id, decl_line, assembly_name, containing_namespace_name }
+        class_or_interface_model(std::string_view const& name, size_t decl_line, std::string_view const& assembly_name, std::string_view const& containing_namespace_name) :
+            namespace_member_model{ name, decl_line, assembly_name, containing_namespace_name }
         { }
 
         auto const& get_interface_bases() const noexcept
@@ -45,18 +45,18 @@ namespace xlang::xmeta
 
         void add_interface_base_ref(std::string_view const& interface_base_ref);
 
-        compilation_error add_member(std::shared_ptr<method_model> const& member);
-        compilation_error add_member(std::shared_ptr<property_model> const& member);
-        compilation_error add_member(std::shared_ptr<event_model> const& member);
+        semantic_error add_member(std::shared_ptr<method_model> const& member);
+        semantic_error add_member(std::shared_ptr<property_model> const& member);
+        semantic_error add_member(std::shared_ptr<event_model> const& member);
 
         std::shared_ptr<method_model> const& get_method_member(std::string const& member_id);
         std::shared_ptr<property_model> const& get_property_member(std::string const& member_id);
 
 
-        bool member_id_exists(std::string_view const& id);
-        bool event_or_property_id_exists(std::string_view const& id);
-        bool method_id_exists(std::string_view const& id);
-        bool property_id_exists(std::string_view const& id);
+        bool member_exists(std::string_view const& name);
+        bool event_or_property_exists(std::string_view const& name);
+        bool method_exists(std::string_view const& name);
+        bool property_exists(std::string_view const& name);
 
         void validate(xlang_error_manager & error_manager);
 

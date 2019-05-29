@@ -9,21 +9,21 @@ namespace xlang::xmeta
         m_interface_base_refs.emplace_back(interface_base_ref);
     }
 
-    compilation_error class_or_interface_model::add_member(std::shared_ptr<property_model> const& member)
+    semantic_error class_or_interface_model::add_member(std::shared_ptr<property_model> const& member)
     {
-        if (member_id_exists(member->get_name()))
+        if (member_exists(member->get_name()))
         {
-            return compilation_error::symbol_exists;
+            return semantic_error::symbol_exists;
         }
         m_properties.emplace_back(member);
-        return compilation_error::passed;
+        return semantic_error::passed;
     }
 
-    compilation_error class_or_interface_model::add_member(std::shared_ptr<method_model> const& member)
+    semantic_error class_or_interface_model::add_member(std::shared_ptr<method_model> const& member)
     {
-        if (event_or_property_id_exists(member->get_name()))
+        if (event_or_property_exists(member->get_name()))
         {
-            return compilation_error::symbol_exists;
+            return semantic_error::symbol_exists;
         }
 
         for (auto const& overloading_method : m_methods)
@@ -32,56 +32,56 @@ namespace xlang::xmeta
             {
                 if (overloading_method->get_formal_parameters().size() == member->get_formal_parameters().size())
                 {
-                    return compilation_error::symbol_exists;
+                    return semantic_error::symbol_exists;
                 }
                 if ((overloading_method->get_return_type() == std::nullopt && member->get_return_type() != std::nullopt)
                         || (overloading_method->get_return_type() != std::nullopt && member->get_return_type() == std::nullopt))
                 {
-                    return compilation_error::symbol_exists;
+                    return semantic_error::symbol_exists;
                 }
                 if (overloading_method->get_return_type() != std::nullopt && member->get_return_type() != std::nullopt)
                 {
                     if (!(*overloading_method->get_return_type() == *member->get_return_type()))
                     {
-                        return compilation_error::symbol_exists;
+                        return semantic_error::symbol_exists;
                     }
                 }
             }
         }
         m_methods.emplace_back(member);
-        return compilation_error::passed;
+        return semantic_error::passed;
     }
 
-    compilation_error class_or_interface_model::add_member(std::shared_ptr<event_model> const& member)
+    semantic_error class_or_interface_model::add_member(std::shared_ptr<event_model> const& member)
     {
-        if (member_id_exists(member->get_name()))
+        if (member_exists(member->get_name()))
         {
-            return compilation_error::symbol_exists;
+            return semantic_error::symbol_exists;
         }
         m_events.emplace_back(member);
-        return compilation_error::passed;
+        return semantic_error::passed;
     }
 
-    bool class_or_interface_model::member_id_exists(std::string_view const& id)
+    bool class_or_interface_model::member_exists(std::string_view const& name)
     {
-        return contains_id(m_properties, id) ||
-            contains_id(m_methods, id) ||
-            contains_id(m_events, id);
+        return contains_id(m_properties, name) ||
+            contains_id(m_methods, name) ||
+            contains_id(m_events, name);
     }
 
-    bool class_or_interface_model::event_or_property_id_exists(std::string_view const& id)
+    bool class_or_interface_model::event_or_property_exists(std::string_view const& name)
     {
-        return contains_id(m_properties, id) || contains_id(m_events, id);
+        return contains_id(m_properties, name) || contains_id(m_events, name);
     }
 
-    bool class_or_interface_model::property_id_exists(std::string_view const& id)
+    bool class_or_interface_model::property_exists(std::string_view const& name)
     {
-        return contains_id(m_properties, id);
+        return contains_id(m_properties, name);
     }
 
-    bool class_or_interface_model::method_id_exists(std::string_view const& id)
+    bool class_or_interface_model::method_exists(std::string_view const& name)
     {
-        return contains_id(m_methods, id);
+        return contains_id(m_methods, name);
     }
 
     std::shared_ptr<property_model> const& class_or_interface_model::get_property_member(std::string const& member_id)

@@ -36,7 +36,7 @@ namespace xlang::xmeta
     struct compilation_unit;
     struct type_ref;
 
-    enum class compilation_error
+    enum class semantic_error
     {
         passed = 0,
         symbol_exists,
@@ -122,21 +122,21 @@ namespace xlang::xmeta
     };
 
     template<class T>
-    inline auto get_by_name(std::vector<std::shared_ptr<T>> const& v, std::string_view const& id)
+    inline auto get_by_name(std::vector<std::shared_ptr<T>> const& v, std::string_view const& name)
     {
-        auto same_id = [&](std::shared_ptr<T> const& t) { return t->get_name() == id; };
+        auto same_id = [&](std::shared_ptr<T> const& t) { return t->get_name() == name; };
         return std::find_if(v.begin(), v.end(), same_id);
     }
 
     template<class T>
-    inline auto get_by_name(std::map<std::string_view, std::shared_ptr<T>, std::less<>> const& m, std::string_view const& id)
+    inline auto get_by_name(std::map<std::string_view, std::shared_ptr<T>, std::less<>> const& m, std::string_view const& name)
     {
-        return m.find(id);
+        return m.find(name);
     }
 
     template<class T>
-    inline bool contains_id(T const& v, std::string_view const& id)
+    inline bool contains_id(T const& v, std::string_view const& name)
     {
-        return get_by_name(v, id) != v.end();
+        return get_by_name(v, name) != v.end();
     }
 }

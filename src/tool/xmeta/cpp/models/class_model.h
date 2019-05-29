@@ -20,23 +20,23 @@ namespace xlang::xmeta
     {
         class_model() = delete;
 
-        class_model(std::string_view const& id, 
+        class_model(std::string_view const& name, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::shared_ptr<namespace_body_model> const& containing_ns_body, 
                 class_modifier const& sem, 
                 std::string_view const& base_id) :
-            class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
+            class_or_interface_model{ name, decl_line, assembly_name, containing_ns_body },
             m_modifier{ sem },
             m_class_base_ref{ base_id }
         { }
         
-        class_model(std::string_view const& id, 
+        class_model(std::string_view const& name, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::shared_ptr<namespace_body_model> const& containing_ns_body, 
                 class_modifier const& sem) :
-            class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
+            class_or_interface_model{ name, decl_line, assembly_name, containing_ns_body },
             m_modifier{ sem },
             m_class_base_ref{ std::nullopt }
         { }
