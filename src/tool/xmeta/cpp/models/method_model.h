@@ -10,7 +10,7 @@
 
 namespace xlang::xmeta
 {
-    struct method_semantics
+    struct method_modifier
     {
         bool is_protected = false;
         bool is_static = false;
@@ -25,12 +25,12 @@ namespace xlang::xmeta
                 std::string_view const& assembly_name, 
                 std::optional<type_ref>&& return_type, 
                 std::vector<formal_parameter_model>&& formal_params,
-                method_semantics const& sem,
+                method_modifier const& sem,
                 method_association const& assoc) :
             base_model{ id, decl_line, assembly_name },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_association{ assoc },
             m_implemented_method_ref{ "" }
         { }
@@ -50,11 +50,11 @@ namespace xlang::xmeta
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::optional<type_ref>&& return_type,
-                method_semantics const& sem,
+                method_modifier const& sem,
                 method_association const& assoc) :
             base_model{ id, decl_line, assembly_name },
             m_return_type{ std::move(return_type) },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_association{ assoc },
             m_implemented_method_ref{ "" }
         { }
@@ -74,11 +74,11 @@ namespace xlang::xmeta
         { }
 
         method_model(std::string_view const& id,
-                method_semantics const& sem,
+                method_modifier const& sem,
                 std::optional<type_ref>&& return_type,
                 std::vector<formal_parameter_model>&& formal_params) : 
             base_model{ id, 0, "test only" },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
             m_implemented_method_ref{ "" }
@@ -105,9 +105,9 @@ namespace xlang::xmeta
             return m_return_type;
         }
 
-        auto const& get_semantic() const noexcept
+        auto const& get_modifier() const noexcept
         {
-            return m_semantic;
+            return m_modifier;
         }
 
         void add_formal_parameter(formal_parameter_model&& formal_param)
@@ -117,10 +117,10 @@ namespace xlang::xmeta
 
         void set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept;
 
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id);
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name);
 
     private:
-        method_semantics m_semantic;
+        method_modifier m_modifier;
         std::optional<type_ref> m_return_type;
         std::vector<formal_parameter_model> m_formal_parameters;
         model_ref<std::shared_ptr<method_model>> m_implemented_method_ref;

@@ -53,7 +53,7 @@ namespace xlang::xmeta
         Constructor
     };
 
-    enum class simple_type
+    enum class fundamental_type
     {
         Boolean,
         String,
@@ -72,7 +72,7 @@ namespace xlang::xmeta
 
     struct object_type {};
 
-    using class_type_semantics = std::variant<std::monostate,
+    using type_category = std::variant<std::monostate,
         std::shared_ptr<class_model>,
         std::shared_ptr<enum_model>,
         std::shared_ptr<interface_model>,
@@ -88,21 +88,21 @@ namespace xlang::xmeta
         std::shared_ptr<struct_model>,
         std::shared_ptr<delegate_model>,
         std::shared_ptr<xlang::meta::reader::TypeDef>,
-        simple_type,
+        fundamental_type,
         object_type>;
 
     struct base_model
     {
         base_model() = delete;
-        base_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name) :
-            m_id{ id },
+        base_model(std::string_view const& name, size_t decl_line, std::string_view const& assembly_name) :
+            m_name{ name },
             m_decl_line{ decl_line },
             m_assembly_name{ assembly_name }
         { }
 
-        auto const& get_id() const noexcept
+        auto const& get_name() const noexcept
         {
-            return m_id;
+            return m_name;
         }
 
         auto get_decl_line() const noexcept
@@ -116,20 +116,20 @@ namespace xlang::xmeta
         }
 
     private:
-        std::string m_id;
+        std::string m_name;
         size_t m_decl_line;
         std::string_view m_assembly_name;
     };
 
     template<class T>
-    inline auto get_it(std::vector<std::shared_ptr<T>> const& v, std::string_view const& id)
+    inline auto get_by_name(std::vector<std::shared_ptr<T>> const& v, std::string_view const& id)
     {
-        auto same_id = [&](std::shared_ptr<T> const& t) { return t->get_id() == id; };
+        auto same_id = [&](std::shared_ptr<T> const& t) { return t->get_name() == id; };
         return std::find_if(v.begin(), v.end(), same_id);
     }
 
     template<class T>
-    inline auto get_it(std::map<std::string_view, std::shared_ptr<T>, std::less<>> const& m, std::string_view const& id)
+    inline auto get_by_name(std::map<std::string_view, std::shared_ptr<T>, std::less<>> const& m, std::string_view const& id)
     {
         return m.find(id);
     }
@@ -137,6 +137,6 @@ namespace xlang::xmeta
     template<class T>
     inline bool contains_id(T const& v, std::string_view const& id)
     {
-        return get_it(v, id) != v.end();
+        return get_by_name(v, id) != v.end();
     }
 }

@@ -17,37 +17,37 @@ namespace xlang::xmeta
 {
     void namespace_body_model::add_class(std::shared_ptr<class_model> const& cm)
     {
-        auto [x, succeeded] = m_classes.insert(std::pair(std::string_view{ cm->get_id() }, cm));
+        auto [x, succeeded] = m_classes.insert(std::pair(std::string_view{ cm->get_name() }, cm));
         assert(succeeded);
     }
 
     void namespace_body_model::add_struct(std::shared_ptr<struct_model> const& sm)
     {
-        auto [x, succeeded] = m_structs.insert(std::pair(std::string_view{ sm->get_id() }, sm));
+        auto [x, succeeded] = m_structs.insert(std::pair(std::string_view{ sm->get_name() }, sm));
         assert(succeeded);
     }
 
     void namespace_body_model::add_interface(std::shared_ptr<interface_model> const& im)
     {
-        auto [x, succeeded] = m_interfaces.insert(std::pair(std::string_view{ im->get_id() }, im));
+        auto [x, succeeded] = m_interfaces.insert(std::pair(std::string_view{ im->get_name() }, im));
         assert(succeeded);
     }
 
     void namespace_body_model::add_enum(std::shared_ptr<enum_model> const& em)
     {
-        auto [x, succeeded] = m_enums.insert(std::pair(std::string_view{ em->get_id() }, em));
+        auto [x, succeeded] = m_enums.insert(std::pair(std::string_view{ em->get_name() }, em));
         assert(succeeded);
     }
 
     void namespace_body_model::add_delegate(std::shared_ptr<delegate_model> const& dm)
     {
-        auto [x, succeeded] = m_delegates.insert(std::pair(std::string_view{ dm->get_id() }, dm));
+        auto [x, succeeded] = m_delegates.insert(std::pair(std::string_view{ dm->get_name() }, dm));
         assert(succeeded);
     }
 
     void namespace_body_model::add_using_alias_directive(std::shared_ptr<using_alias_directive_model> const& uad)
     {
-        auto [x, succeeded] = m_using_alias_directives.insert(std::pair(std::string_view{ uad->get_id() }, uad));
+        auto [x, succeeded] = m_using_alias_directives.insert(std::pair(std::string_view{ uad->get_name() }, uad));
     }
 
     void namespace_body_model::add_using_namespace_directive(std::shared_ptr<using_namespace_directive_model> const& und)
@@ -84,8 +84,8 @@ namespace xlang::xmeta
 
     void namespace_model::add_child_namespace(std::shared_ptr<namespace_model> const& child)
     {
-        assert(m_child_namespaces.find(child->get_id()) == m_child_namespaces.end());
-        m_child_namespaces[child->get_id()] = child;
+        assert(m_child_namespaces.find(child->get_name()) == m_child_namespaces.end());
+        m_child_namespaces[child->get_name()] = child;
     }
 
     void namespace_model::add_namespace_body(std::shared_ptr<namespace_body_model> const& body)

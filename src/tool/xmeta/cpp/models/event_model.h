@@ -7,7 +7,7 @@
 
 namespace xlang::xmeta
 {
-    struct event_semantics
+    struct event_modifier
     {
         bool is_protected = false;
         bool is_static = false;
@@ -20,12 +20,12 @@ namespace xlang::xmeta
         event_model(std::string_view const& id, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
-                event_semantics const& sem, 
+                event_modifier const& sem, 
                 std::shared_ptr<method_model> const& add_method, 
                 std::shared_ptr<method_model> const& remove_method,
                 type_ref&& t) :
             base_model{ id, decl_line, assembly_name },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_add_method{ add_method },
             m_remove_method{ remove_method },
             m_type{ std::move(t) },
@@ -35,10 +35,10 @@ namespace xlang::xmeta
         event_model(std::string_view const& id,
                 size_t decl_line,
                 std::string_view const& assembly_name,
-                event_semantics const& sem,
+                event_modifier const& sem,
                 type_ref&& t) :
             base_model{ id, decl_line, assembly_name },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_type{ std::move(t) },
             m_implemented_event_ref{ "" }
         { }
@@ -67,9 +67,9 @@ namespace xlang::xmeta
             return m_remove_method;
         }
 
-        auto const& get_semantic() const noexcept
+        auto const& get_modifier() const noexcept
         {
-            return m_semantic;
+            return m_modifier;
         }
 
         auto const& get_type() const noexcept
@@ -83,10 +83,10 @@ namespace xlang::xmeta
 
         compilation_error set_remove_method(std::shared_ptr<method_model> const& m);
 
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id);
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name);
 
     private:
-        event_semantics m_semantic;
+        event_modifier m_modifier;
         model_ref<std::shared_ptr<event_model>> m_implemented_event_ref;
         type_ref m_type;
         std::shared_ptr<method_model> m_add_method = nullptr;

@@ -13,7 +13,7 @@
 
 namespace xlang::xmeta
 {
-    enum class enum_semantics
+    enum class enum_types
     {
         Int8,
         UInt8,
@@ -44,7 +44,7 @@ namespace xlang::xmeta
 
         bool operator==(enum_member const& rhs) const
         {
-            return rhs.get_id() == get_id() && rhs.get_resolved_value() == get_resolved_value();
+            return rhs.get_name() == get_name() && rhs.get_resolved_value() == get_resolved_value();
         }
 
         auto const& get_value() const noexcept
@@ -60,16 +60,16 @@ namespace xlang::xmeta
 
         enum_value_semantics get_resolved_value() const;
         
-        std::errc increment(enum_semantics type);
+        std::errc increment(enum_types type);
 
-        std::errc resolve_decimal_val(enum_semantics type);
+        std::errc resolve_decimal_val(enum_types type);
 
-        std::errc resolve_hexadecimal_val(enum_semantics type);
+        std::errc resolve_hexadecimal_val(enum_types type);
 
     private:
         model_ref<enum_value_semantics> m_value;
 
-        std::errc resolve_numeric_val(enum_semantics type, int base) noexcept;
+        std::errc resolve_numeric_val(enum_types type, int base) noexcept;
 
         // resolve_numeric_val resolves the m_value string to type T. It is required that T is one
         // of int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, or uint64_t.
@@ -109,7 +109,7 @@ namespace xlang::xmeta
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::shared_ptr<namespace_body_model> const& containing_ns_body,
-                enum_semantics t) :
+                enum_types t) :
             namespace_member_model{ id, decl_line, assembly_name, containing_ns_body },
             m_type{ t }
         { }
@@ -118,7 +118,7 @@ namespace xlang::xmeta
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::string_view const& containing_ns_name,
-                enum_semantics t) :
+                enum_types t) :
             namespace_member_model{ id, decl_line, assembly_name, containing_ns_name },
             m_type{ t }
         { }
@@ -133,7 +133,7 @@ namespace xlang::xmeta
             assert(member_exists(id));
             auto same_name = [&id](enum_member const& em)
             {
-                return em.get_id() == id;
+                return em.get_name() == id;
             };
             return *std::find_if(m_members.begin(), m_members.end(), same_name);
         }
@@ -145,7 +145,7 @@ namespace xlang::xmeta
 
         void add_member(enum_member&& e_member)
         {
-            assert(!member_exists(e_member.get_id()));
+            assert(!member_exists(e_member.get_name()));
             m_members.emplace_back(std::move(e_member));
         }
 
@@ -153,13 +153,13 @@ namespace xlang::xmeta
         {
             auto same_id = [&id](enum_member const& em)
             {
-                return em.get_id() == id;
+                return em.get_name() == id;
             };
             return std::find_if(m_members.begin(), m_members.end(), same_id) != m_members.end();
         }
 
     private:
         std::vector<enum_member> m_members;
-        enum_semantics m_type;
+        enum_types m_type;
     };
 }

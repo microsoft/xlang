@@ -16,6 +16,7 @@ namespace xlang::xmeta
         out
     };
 
+    //TODO: Reevaluate the name formal_parameter_model. Possibly change to just parameter_model. 
     struct formal_parameter_model : base_model
     {
         formal_parameter_model() = delete;
@@ -41,8 +42,8 @@ namespace xlang::xmeta
             return m_type;
         }
 
-        // TODO: fully_qualified_id will be a vector of strings once  we have using directives
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id, method_association m_association = method_association::None);
+        // TODO: qualified_name will be a vector of strings once  we have using directives
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name, method_association m_association = method_association::None);
 
     private:
         parameter_semantics m_semantic;

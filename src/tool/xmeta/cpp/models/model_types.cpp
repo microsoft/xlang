@@ -10,7 +10,7 @@ namespace xlang::xmeta
         m_semantic.resolve(sem);
     }
 
-    void type_ref::set_semantic(class_type_semantics const& sem) noexcept
+    void type_ref::set_semantic(type_category const& sem) noexcept
     {
         if (std::holds_alternative<std::shared_ptr<delegate_model>>(sem))
         {
@@ -63,7 +63,7 @@ namespace xlang::xmeta
         m_semantic.resolve(sem);
     }
 
-    void type_ref::set_semantic(simple_type st)
+    void type_ref::set_semantic(fundamental_type st)
     {
         m_semantic.resolve(st);
     }
@@ -83,9 +83,9 @@ namespace xlang::xmeta
         {
             type_semantics left_type = m_semantic.get_resolved_target();
             type_semantics right_type = right_ref.get_semantic().get_resolved_target();
-            if (std::holds_alternative<simple_type>(left_type) && std::holds_alternative<simple_type>(right_type))
+            if (std::holds_alternative<fundamental_type>(left_type) && std::holds_alternative<fundamental_type>(right_type))
             {
-                return std::get<simple_type>(left_type) == std::get<simple_type>(right_type);
+                return std::get<fundamental_type>(left_type) == std::get<fundamental_type>(right_type);
             }
             if (std::holds_alternative<object_type>(left_type) && std::holds_alternative<object_type>(right_type))
             {

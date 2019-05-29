@@ -35,7 +35,7 @@ namespace xlang::xmeta
             return m_containing_namespace_body;
         }
 
-        std::string const get_fully_qualified_id() const noexcept;
+        std::string const get_qualified_name() const noexcept;
 
     private:
         std::shared_ptr<namespace_body_model> m_containing_namespace_body;

@@ -9,7 +9,7 @@
 
 namespace xlang::xmeta
 {
-    struct property_semantics
+    struct property_modifier
     {
         bool is_protected = false;
         bool is_static = false;
@@ -22,12 +22,12 @@ namespace xlang::xmeta
         property_model(std::string_view const& id,
                 size_t decl_line,
                 std::string_view const& assembly_name,
-                property_semantics const& sem,
+                property_modifier const& sem,
                 type_ref&& type,
                 std::shared_ptr<method_model> const& get_method,
                 std::shared_ptr<method_model> const& set_method) :
             base_model{ id, decl_line, assembly_name },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_type{ std::move(type) },
             m_get_method{ get_method },
             m_set_method{ set_method },
@@ -37,17 +37,17 @@ namespace xlang::xmeta
         property_model(std::string_view const& id,
                 size_t decl_line,
                 std::string_view const& assembly_name,
-                property_semantics const& sem,
+                property_modifier const& sem,
                 type_ref&& type) :
             base_model{ id, decl_line, assembly_name },
             m_type{ std::move(type) },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_implemented_property_ref{ "" }
         { }
 
-        auto const& get_semantic() const noexcept
+        auto const& get_modifier() const noexcept
         {
-            return m_semantic;
+            return m_modifier;
         }
 
         auto const& get_type() const noexcept
@@ -73,10 +73,10 @@ namespace xlang::xmeta
 
         void validate(xlang_error_manager & error_manager);
 
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id);
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name);
 
     private:
-        property_semantics m_semantic;
+        property_modifier m_modifier;
         model_ref<std::shared_ptr<property_model>> m_implemented_property_ref;
         type_ref m_type;
         bool m_is_array;

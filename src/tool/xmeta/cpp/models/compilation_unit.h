@@ -13,12 +13,12 @@ namespace xlang::xmeta
         symbol_table(std::vector<std::string> const& path) : cache{ path }
         { }
 
-        compilation_error set_symbol(std::string_view symbol, class_type_semantics const& class_type);
+        compilation_error set_symbol(std::string_view symbol, type_category const& class_type);
 
-        class_type_semantics get_symbol(std::string const& symbol);
+        type_category get_symbol(std::string const& symbol);
 
     private:
-        std::map<std::string, class_type_semantics> table;
+        std::map<std::string, type_category> table;
         xlang::meta::reader::cache cache;
 
         void print_metadata(xlang::meta::reader::cache const& cache);

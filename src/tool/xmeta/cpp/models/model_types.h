@@ -29,7 +29,7 @@ namespace xlang::xmeta
 
         void set_semantic(type_semantics const& sem) noexcept;
 
-        void set_semantic(class_type_semantics const& sem) noexcept;
+        void set_semantic(type_category const& sem) noexcept;
 
         void set_semantic(std::shared_ptr<class_model> const& sem) noexcept;
 
@@ -41,7 +41,7 @@ namespace xlang::xmeta
 
         void set_semantic(std::shared_ptr<delegate_model> const& sem) noexcept;
 
-        void set_semantic(simple_type st);
+        void set_semantic(fundamental_type st);
 
         void set_semantic(object_type o);
 
