@@ -93,7 +93,7 @@ namespace xlang::xmeta
         m_namespace_bodies.emplace_back(body);
     }
 
-    bool namespace_model::member_id_exists(std::string_view const& member_id) const
+    bool namespace_model::member_exists(std::string_view const& member_id) const
     {
         for (auto ns_body : m_namespace_bodies)
         {

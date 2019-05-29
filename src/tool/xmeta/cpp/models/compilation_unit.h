@@ -13,7 +13,7 @@ namespace xlang::xmeta
         symbol_table(std::vector<std::string> const& path) : cache{ path }
         { }
 
-        compilation_error set_symbol(std::string_view symbol, type_category const& class_type);
+        semantic_error set_symbol(std::string_view symbol, type_category const& class_type);
 
         type_category get_symbol(std::string const& symbol);
 

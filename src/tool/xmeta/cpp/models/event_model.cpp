@@ -13,34 +13,34 @@ namespace xlang::xmeta
         m_remove_method->set_overridden_method_ref(ref->get_remove_method());
     }
 
-    compilation_error event_model::set_add_method(std::shared_ptr<method_model> const& m)
+    semantic_error event_model::set_add_method(std::shared_ptr<method_model> const& m)
     {
         if (!m)
         {
             // TODO: consider throwing an exception
-            return compilation_error::passed;
+            return semantic_error::passed;
         }
         if (m_add_method)
         {
-            return compilation_error::accessor_exists;
+            return semantic_error::accessor_exists;
         }
         m_add_method = m;
-        return compilation_error::passed;
+        return semantic_error::passed;
     }
 
-    compilation_error event_model::set_remove_method(std::shared_ptr<method_model> const& m)
+    semantic_error event_model::set_remove_method(std::shared_ptr<method_model> const& m)
     {
         if (!m)
         {
             // TODO: consider throwing an exception
-            return compilation_error::passed;
+            return semantic_error::passed;
         }
         if (m_remove_method)
         {
-            return compilation_error::accessor_exists;
+            return semantic_error::accessor_exists;
         }
         m_remove_method = m;
-        return compilation_error::passed;
+        return semantic_error::passed;
     }
 
     void event_model::resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name)

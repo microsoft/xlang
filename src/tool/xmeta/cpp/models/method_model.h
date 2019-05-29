@@ -20,14 +20,14 @@ namespace xlang::xmeta
     struct method_model : base_model
     {
         method_model() = delete;
-        method_model(std::string_view const& id, 
+        method_model(std::string_view const& name, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::optional<type_ref>&& return_type, 
                 std::vector<formal_parameter_model>&& formal_params,
                 method_modifier const& sem,
                 method_association const& assoc) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
             m_modifier{ sem },
@@ -35,49 +35,49 @@ namespace xlang::xmeta
             m_implemented_method_ref{ "" }
         { }
 
-        method_model(std::string_view const& id,
+        method_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::optional<type_ref>&& return_type,
                 method_association const& assoc) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_return_type{ std::move(return_type) },
             m_association{ assoc },
             m_implemented_method_ref{ "" }
         { }
 
-        method_model(std::string_view const& id,
+        method_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::optional<type_ref>&& return_type,
                 method_modifier const& sem,
                 method_association const& assoc) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_return_type{ std::move(return_type) },
             m_modifier{ sem },
             m_association{ assoc },
             m_implemented_method_ref{ "" }
         { }
 
-        method_model(std::string_view const& id, 
+        method_model(std::string_view const& name, 
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::optional<type_ref>&& return_type, 
                 std::vector<formal_parameter_model>&& formal_params,
                 std::string_view const& overridden_method_ref,
                 method_association const& assoc) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },
             m_association{ assoc },
             m_implemented_method_ref{ std::string(overridden_method_ref) }
         { }
 
-        method_model(std::string_view const& id,
+        method_model(std::string_view const& name,
                 method_modifier const& sem,
                 std::optional<type_ref>&& return_type,
                 std::vector<formal_parameter_model>&& formal_params) : 
-            base_model{ id, 0, "test only" },
+            base_model{ name, 0, "test only" },
             m_modifier{ sem },
             m_formal_parameters{ std::move(formal_params) },
             m_return_type{ std::move(return_type) },

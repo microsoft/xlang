@@ -18,34 +18,34 @@ namespace xlang::xmeta
         }
     }
 
-    compilation_error property_model::set_get_method(std::shared_ptr<method_model> const& m)
+    semantic_error property_model::set_get_method(std::shared_ptr<method_model> const& m)
     {
         if (!m)
         {
             // TODO: consider throwing an exception
-            return compilation_error::passed;
+            return semantic_error::passed;
         }
         if (m_get_method)
         {
-            return compilation_error::accessor_exists;
+            return semantic_error::accessor_exists;
         }
         m_get_method = m;
-        return compilation_error::passed;
+        return semantic_error::passed;
     }
 
-    compilation_error property_model::set_set_method(std::shared_ptr<method_model> const& m)
+    semantic_error property_model::set_set_method(std::shared_ptr<method_model> const& m)
     {
         if (!m)
         {
             // TODO: consider throwing an exception
-            return compilation_error::passed;
+            return semantic_error::passed;
         }
         if (m_set_method)
         {
-            return compilation_error::accessor_exists;
+            return semantic_error::accessor_exists;
         }
         m_set_method = m;
-        return compilation_error::passed;
+        return semantic_error::passed;
     }
 
     void property_model::validate(xlang_error_manager & error_manager)

@@ -17,7 +17,7 @@ namespace xlang::xmeta
         {
             for (auto const& base_event : base->get_events())
             {
-                if (member_id_exists(base_event->get_name()))
+                if (member_exists(base_event->get_name()))
                 {
                     error_manager.write_type_member_exists_error(get_decl_line(), base_event->get_name(), get_qualified_name());
                     return;
@@ -26,7 +26,7 @@ namespace xlang::xmeta
 
             for (auto const& base_properties : base->get_properties())
             {
-                if (member_id_exists(base_properties->get_name()))
+                if (member_exists(base_properties->get_name()))
                 {
                     error_manager.write_type_member_exists_error(get_decl_line(), base_properties->get_name(), get_qualified_name());
                     return;
@@ -35,7 +35,7 @@ namespace xlang::xmeta
 
             for (auto const& base_method : base->get_methods())
             {
-                if (member_id_exists(base_method->get_name()))
+                if (member_exists(base_method->get_name()))
                 {
                     error_manager.write_type_member_exists_error(get_decl_line(), base_method->get_name(), get_qualified_name());
                     return;
