@@ -68,7 +68,7 @@ struct ExpectedStructRef
 
 struct ExpectedTypeRefModel
 {
-    std::variant<ExpectedClassRef,
+   std::variant<ExpectedClassRef,
         ExpectedInterfaceRef,
         ExpectedEnumRef,
         ExpectedDelegateRef,
@@ -76,11 +76,11 @@ struct ExpectedTypeRefModel
         fundamental_type,
         object_type> type;
 
-    ExpectedTypeRefModel(ExpectedClassRef const& type)
-        : type{ type } {}
+   ExpectedTypeRefModel(ExpectedClassRef const& type)
+       : type{ type } {}
 
-    ExpectedTypeRefModel(ExpectedInterfaceRef const& type)
-        : type{ type } {}
+   ExpectedTypeRefModel(ExpectedInterfaceRef const& type)
+       : type{ type } {}
 
     ExpectedTypeRefModel(ExpectedDelegateRef const& type)
         : type{ type } {}
@@ -245,11 +245,11 @@ struct ExpectedPropertyModel
     ExpectedMethodModel get_method;
     std::optional<ExpectedMethodModel> set_method;
 
-    ExpectedPropertyModel(std::string const& name,
-        property_modifier const& sem,
-        ExpectedTypeRefModel const& type,
-        ExpectedMethodModel const& get_method,
-        std::optional<ExpectedMethodModel> const& set_method)
+    ExpectedPropertyModel(std::string const& name, 
+            property_modifier const& sem, 
+            ExpectedTypeRefModel const& type, 
+            ExpectedMethodModel const& get_method,
+            std::optional<ExpectedMethodModel> const& set_method)
         : id{ name }, sem{ sem }, type{ type }, get_method{ get_method }, set_method{ set_method } {}
 
     void VerifyType(std::shared_ptr<property_model> const& actual)
@@ -375,7 +375,7 @@ struct ExpectedClassModel
         {
             class_base->VerifyType(*actual->get_class_base_ref());
         }
-
+        
         auto const& actual_interface_bases = actual->get_interface_bases();
         REQUIRE(actual_interface_bases.size() == interface_bases.size());
         for (size_t i = 0; i < interface_bases.size(); i++)
@@ -394,12 +394,12 @@ struct ExpectedInterfaceModel
     std::vector<ExpectedEventModel> events;
     std::vector<ExpectedTypeRefModel> interface_bases;
 
-    ExpectedInterfaceModel(std::string const& id,
-        std::string const& qualified_name,
-        std::vector<ExpectedMethodModel> const& methods,
-        std::vector<ExpectedPropertyModel> const& properties,
-        std::vector<ExpectedEventModel> const& events,
-        std::vector<ExpectedTypeRefModel> const& bases)
+    ExpectedInterfaceModel(std::string const& id, 
+            std::string const& qualified_name, 
+            std::vector<ExpectedMethodModel> const& methods,
+            std::vector<ExpectedPropertyModel> const& properties,
+            std::vector<ExpectedEventModel> const& events,
+            std::vector<ExpectedTypeRefModel> const& bases)
         : id{ id }, qualified_name{ qualified_name }, methods{ methods }, properties{ properties }, events{ events }, interface_bases{ bases } {}
 
     void VerifyType(std::shared_ptr<interface_model> const& actual)
@@ -501,7 +501,7 @@ struct ExpectedStructModel
     std::vector<std::pair<ExpectedTypeRefModel, std::string>> fields;
 
     ExpectedStructModel(std::string const& id, std::string const& qualified_name, std::vector<std::pair<ExpectedTypeRefModel, std::string>> fields)
-        : id{ id }, qualified_name{ qualified_name }, fields{ fields } {}
+        : id{ id }, qualified_name { qualified_name }, fields{ fields } {}
 
     void VerifyType(std::shared_ptr<struct_model> const& actual)
     {
@@ -531,11 +531,11 @@ struct ExpectedNamespaceModel
     std::vector<ExpectedEnumModel> enums;
     std::vector<ExpectedDelegateModel> delegates;
 
-    ExpectedNamespaceModel(std::string const& id,
-        std::string const& qualified_name,
-        std::vector<ExpectedNamespaceModel> namespaces,
-        std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel, ExpectedDelegateModel, ExpectedInterfaceModel, ExpectedClassModel>> declarations)
-        : id{ id }, qualified_name{ qualified_name }, children{ namespaces }
+    ExpectedNamespaceModel(std::string const& id, 
+            std::string const& qualified_name, 
+            std::vector<ExpectedNamespaceModel> namespaces, 
+            std::vector<std::variant<ExpectedEnumModel, ExpectedStructModel, ExpectedDelegateModel, ExpectedInterfaceModel, ExpectedClassModel>> declarations)
+        : id{ id }, qualified_name{ qualified_name }, children { namespaces } 
     {
         for (auto & declaration : declarations)
         {
@@ -677,8 +677,8 @@ TEST_CASE("Enum test")
     xmeta_idl_reader reader{ "" };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-
-    ExpectedEnumModel expected_enum{ "E", "N.E" , enum_types::Int32, {
+    
+    ExpectedEnumModel expected_enum{ "E", "N.E" , enum_types::Int32, { 
         enum_member{ "e_member_1", 0 },
         enum_member{ "e_member_2", 3 },
         enum_member{ "e_member_3", 4 },
@@ -783,7 +783,7 @@ TEST_CASE("Struct test")
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedStructModel expected_struct{ "S", "N.S" , {
+    ExpectedStructModel expected_struct{ "S", "N.S" , { 
         { ExpectedTypeRefModel{ fundamental_type::Boolean } , "field_1" },
         { ExpectedTypeRefModel{ fundamental_type::String } , "field_2" },
         { ExpectedTypeRefModel{ fundamental_type::Int16 } , "field_3" },
@@ -1391,7 +1391,7 @@ TEST_CASE("Property method ordering test")
         set_property3
     };
 
-    ExpectedInterfaceModel i1{ "i1", "N.i1",
+    ExpectedInterfaceModel i1{ "i1", "N.i1", 
         { get_property1, set_property1, get_property2, set_property3, get_property3 },
         { property1, property2, property3 },
         {},
@@ -1620,7 +1620,7 @@ TEST_CASE("Invalid property accessor test")
             REQUIRE(reader.get_num_syntax_errors() == 0);
             //TODO: This is only reporting one error due to the synthesized interface
             // Make this only report 1
-            REQUIRE(reader.get_num_semantic_errors() == 2);
+            REQUIRE(reader.get_num_semantic_errors() == 2); 
         }
     }
 
@@ -1908,7 +1908,7 @@ TEST_CASE("Property implicit accessors test")
         { get_property1, set_property1 },
         { property1 },
         {},
-        {}
+        {} 
     };
 
     ExpectedClassModel c1{ "c1", "N.c1",
@@ -2013,7 +2013,7 @@ TEST_CASE("Event test")
         }
     )" };
     std::vector<std::string> paths = { "Foundation.xmeta" };
-    xmeta_idl_reader reader{ "" , paths };
+    xmeta_idl_reader reader{ "" , paths};
     reader.read(test_idl, true);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
@@ -2971,11 +2971,11 @@ TEST_CASE("Runtime class synthensized interfaces test")
             }
         }
     )" };
-
+    
     ExpectedMethodModel m0{ "m0", default_method_modifier, std::nullopt, {} };
     ExpectedMethodModel m1{ "m1", static_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
         ExpectedFormalParameterModel{ "s", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::String } } } };
-
+    
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths };
     reader.read(test_idl);
@@ -3084,7 +3084,7 @@ TEST_CASE("Runtime class synthensized instance interface test")
             { e1 },
             std::nullopt,
             {}
-        };
+                };
 
         ExpectedInterfaceModel syn_c1{ "Ic1", "N.Ic1",
             { m0, get_p1, m1, e1.add_method, e1.remove_method, set_p1 },

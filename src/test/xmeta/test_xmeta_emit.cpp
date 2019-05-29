@@ -22,6 +22,51 @@ constexpr int TYPE_DEF_OFFSET = 1; // Module
 constexpr int TYPE_REF_OFFSET = 3; // System: Enum, Delegate, ValueType
 
 // All the flags use in the metadata representation
+const TypeAttributes interface_type_attributes()
+{
+    TypeAttributes result{};
+    result.Visibility(TypeVisibility::Public);
+    result.Semantics(TypeSemantics::Interface);
+    result.Abstract(true);
+    result.WindowsRuntime(true);
+    return result;
+}
+
+const MethodAttributes interface_method_attributes()
+{
+    MethodAttributes result{};
+    result.Access(MemberAccess::Public);
+    result.Virtual(true);
+    result.HideBySig(true);
+    result.Abstract(true);
+    result.Layout(VtableLayout::NewSlot);
+    return result;
+}
+
+const MethodAttributes interface_method_property_attributes()
+{
+    MethodAttributes result{};
+    result.Access(MemberAccess::Public);
+    result.Virtual(true);
+    result.HideBySig(true);
+    result.Abstract(true);
+    result.Layout(VtableLayout::NewSlot);
+    result.SpecialName(true);
+    return result;
+}
+
+const MethodAttributes interface_method_event_attributes()
+{
+    MethodAttributes result{};
+    result.Access(MemberAccess::Public);
+    result.Final(true);
+    result.Virtual(true);
+    result.HideBySig(true);
+    result.Layout(VtableLayout::NewSlot);
+    result.SpecialName(true);
+    return result;
+}
+
 const TypeAttributes struct_type_attributes()
 {
     TypeAttributes result{};
@@ -78,6 +123,18 @@ const MethodAttributes delegate_invoke_attributes()
     return result;
 }
 
+const MethodAttributes method_attributes_no_flags()
+{
+    MethodAttributes result{};
+    return result;
+}
+
+const EventAttributes event_attributes_no_flags()
+{
+    EventAttributes result{};
+    return result;
+}
+
 const MethodImplAttributes delegate_method_impl_attribtes()
 {
     MethodImplAttributes result{};
@@ -122,6 +179,14 @@ const ParamAttributes param_attributes_out_flag()
     ParamAttributes result{};
     result.Out(true);
     return result;
+}
+
+// In-depth checking of type properties of structs
+void test_interface_type_properties(TypeDef const& interface_type)
+{
+    auto const& interface_flags = interface_type.Flags();
+    REQUIRE(interface_flags.value == interface_type_attributes().value);
+    REQUIRE(!interface_type.Extends());
 }
 
 // In-depth checking of type properties of structs
@@ -210,31 +275,34 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
 
 std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::string_view assembly_name)
 {
-    xmeta_idl_reader reader{ "" };
+    std::vector<std::string> paths = { "Foundation.xmeta" };
+    xmeta_idl_reader reader{ assembly_name, paths };
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
-    xlang::xmeta::xmeta_emit emitter(assembly_name);
-    xlang::xmeta::xlang_model_walker walker(reader.get_namespaces(), emitter);
+    REQUIRE(reader.get_num_semantic_errors() == 0);
+    return reader.save_to_memory();
+}
 
-    walker.register_listener(emitter);
-    walker.walk();
-
-    xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter.save_to_memory());
-
-    return writer.save_to_memory();
+template<typename T>
+auto find_type_by_name(table<T> const& type, std::string name, std::string namespace_name)
+{
+    auto const& ref = std::find_if(type.begin(), type.end(), [name, namespace_name](auto&& t)
+    {
+        return t.TypeName() == name && t.TypeNamespace() == namespace_name;
+    });
+    REQUIRE(ref.TypeName() == name);
+    REQUIRE(ref.TypeNamespace() == namespace_name);
+    return ref;
 }
 
 TEST_CASE("Assemblies metadata")
 {
-    constexpr char assembly_name[] = "testidl";
+    constexpr char assembly_name[] = "test_idl";
     constexpr char common_assembly_ref[] = "mscorlib";
-    xlang::xmeta::xmeta_emit emitter(assembly_name);
 
-    xlang::meta::writer::pe_writer writer;
-    writer.add_metadata(emitter.save_to_memory());
-
-    xlang::meta::reader::database db{ writer.save_to_memory() };
+    std::istringstream test_idl{ R"(
+    )" };
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
     REQUIRE(db.Assembly.size() == 1);
     REQUIRE(db.Assembly[0].Name() == assembly_name);
@@ -260,8 +328,7 @@ TEST_CASE("Enum metadata")
 
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
 
-    auto const& enum_type = db.TypeDef[1];
-    REQUIRE(enum_type.TypeNamespace() == "Windows.Test");
+    auto const& enum_type = find_type_by_name<TypeDef>(db.TypeDef, "Color", "Windows.Test");
     REQUIRE(enum_type.TypeName() == "Color");
     test_enum_type_properties(enum_type);
 
@@ -302,14 +369,11 @@ TEST_CASE("Delegate metadata")
     )" };
     std::string assembly_name = "testidl";
     xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
-    
-    auto const& delegate_type = db.TypeDef[1];
 
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
     REQUIRE(db.Param.size() == 5); // return type + two formal parameters + two from delegate constructor parameter
     REQUIRE(db.MethodDef.size() == 2); // One constructor and one invoke method
-    REQUIRE(delegate_type.TypeNamespace() == "Windows.Test");
-    REQUIRE(delegate_type.TypeName() == "testdelegate");
+    auto const& delegate_type = find_type_by_name<TypeDef>(db.TypeDef, "testdelegate", "Windows.Test");
     test_delegate_type_properties(delegate_type);
 
     
@@ -411,13 +475,11 @@ TEST_CASE("Parameter signature class reference type metadata across namespace")
     REQUIRE(db.MethodDef.size() == 2);
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
-    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 1].TypeName() == "e1");
-    REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "d1");
+    auto const& e1_ref = find_type_by_name<TypeRef>(db.TypeRef, "e1", "Windows.Test");
+    find_type_by_name<TypeRef>(db.TypeRef, "d1", "A");
 
-    auto const e1 = db.TypeDef[TYPE_DEF_OFFSET + 1];
-    auto const d1 = db.TypeDef[TYPE_DEF_OFFSET];
-    REQUIRE(e1.TypeName() == "e1");
-    REQUIRE(d1.TypeName() == "d1");
+    auto const& e1 = find_type_by_name<TypeDef>(db.TypeDef, "e1", "Windows.Test");
+    auto const& d1 = find_type_by_name<TypeDef>(db.TypeDef, "d1", "A");
     test_enum_type_properties(e1);
     test_delegate_type_properties(d1);
 
@@ -426,7 +488,7 @@ TEST_CASE("Parameter signature class reference type metadata across namespace")
         auto const& delegate_invoke = d1.MethodList().first[1];
         REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
         auto const& delegate_sig = delegate_invoke.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[4]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == e1_ref);
     }
 }
 
@@ -447,12 +509,11 @@ TEST_CASE("Parameter signature class reference type metadata")
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
     REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "e1");
-    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 1].TypeName() == "d1");
+    auto const& e1_ref = find_type_by_name<TypeRef>(db.TypeRef, "e1", "Windows.Test");
+    find_type_by_name<TypeRef>(db.TypeRef, "d1", "Windows.Test");
 
-    auto const e1 = db.TypeDef[TYPE_DEF_OFFSET];
-    auto const d1 = db.TypeDef[TYPE_DEF_OFFSET + 1];
-    REQUIRE(e1.TypeName() == "e1");
-    REQUIRE(d1.TypeName() == "d1");
+    auto const e1 = find_type_by_name<TypeDef>(db.TypeDef, "e1", "Windows.Test");
+    auto const d1 = find_type_by_name<TypeDef>(db.TypeDef, "d1", "Windows.Test");
     test_enum_type_properties(e1);
     test_delegate_type_properties(d1);
     // Check that type Ref is cottrect
@@ -460,7 +521,7 @@ TEST_CASE("Parameter signature class reference type metadata")
         auto const& delegate_invoke = d1.MethodList().first[1];
         REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
         auto const& delegate_sig = delegate_invoke.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == db.TypeRef[3]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == e1_ref);
     }
 }
 
@@ -497,10 +558,7 @@ TEST_CASE("Struct simple type metadata")
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
     REQUIRE(db.Field.size() == 11);
 
-    auto const struct0 = db.TypeDef[TYPE_DEF_OFFSET];
-    REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "S");
-    REQUIRE(struct0.TypeName() == "S");
-    REQUIRE(struct0.TypeNamespace() == "N");
+    auto const& struct0 = find_type_by_name<TypeDef>(db.TypeDef, "S", "N");
     test_struct_type_properties(struct0);
 
     for (size_t i = 0; i < size(struct0.FieldList()) ; i++)
@@ -543,29 +601,367 @@ TEST_CASE("Struct class type metadata")
 
     REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
     REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
+    
+    find_type_by_name<TypeRef>(db.TypeRef, "S0", "N");
+    auto const& s1 = find_type_by_name<TypeRef>(db.TypeRef, "S1", "N");
+    auto const& e0 = find_type_by_name<TypeRef>(db.TypeRef, "E0", "N");
 
-    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 0].TypeName() == "S0");
-    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 1].TypeName() == "S1");
-    REQUIRE(db.TypeRef[TYPE_REF_OFFSET + 2].TypeName() == "E0");
-
-    auto const& struct0 = db.TypeDef[TYPE_DEF_OFFSET];
-    REQUIRE(struct0.TypeName() == "S0");
-    REQUIRE(struct0.TypeNamespace() == "N");
+    auto const& struct0 = find_type_by_name<TypeDef>(db.TypeDef, "S0", "N");
     test_struct_type_properties(struct0);
 
     REQUIRE(db.Field.size() == 3);
     {
         auto const& struct_field = struct0.FieldList().first[0];
-        REQUIRE(struct_field.Parent().TypeName() == db.TypeDef[1].TypeName());
         auto const& struct_field_sig = struct_field.Signature();
         REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[4]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == s1);
     }
     {
         auto const& struct_field = struct0.FieldList().first[1];
-        REQUIRE(struct_field.Parent().TypeName() == db.TypeDef[1].TypeName());
         auto const& struct_field_sig = struct_field.Signature();
         REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == db.TypeRef[5]);
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == e0);
+    }
+}
+
+TEST_CASE("Interface method metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct S1 {}    
+            interface IComboBox 
+            {
+                S1 Draw(E1 param1);
+            }
+            enum E1 {}  
+        }
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
+    auto const& E1_ref = find_type_by_name<TypeRef>(db.TypeRef, "E1", "N");
+    auto const& ICombo_ref = find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    auto const& S1_ref = find_type_by_name<TypeRef>(db.TypeRef, "S1", "N");
+    REQUIRE(E1_ref.TypeName() == "E1");
+    REQUIRE(ICombo_ref.TypeName() == "IComboBox");
+    REQUIRE(S1_ref.TypeName() == "S1");
+
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
+    REQUIRE(db.TypeDef[TYPE_DEF_OFFSET + 1].TypeName() == "IComboBox");
+    auto const& combo = db.TypeDef[TYPE_DEF_OFFSET + 1];
+    test_interface_type_properties(combo);
+
+    REQUIRE(size(combo.MethodList()) == 1);
+    auto const& method_list = combo.MethodList();
+
+    REQUIRE(method_list.first[0].Name() == "Draw");
+    REQUIRE(method_list.first[0].Flags().value == interface_method_attributes().value);
+    {
+        auto const& Draw_sig = method_list.first[0].Signature();
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
+        auto const& Draw_param_sig = Draw_sig.Params().first[0];
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_param_sig.Type().Type()).TypeRef() == E1_ref);
+    }
+}
+
+TEST_CASE("Interface property metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct S1 {}    
+            interface IComboBox 
+            {
+                S1 property1;
+            }
+            enum E1 {}  
+        }
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    find_type_by_name<TypeRef>(db.TypeRef, "E1", "N");
+    auto const& S1_ref = find_type_by_name<TypeRef>(db.TypeRef, "S1", "N");
+
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
+    auto const& combo_def = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
+    test_interface_type_properties(combo_def);
+
+    REQUIRE(size(combo_def.PropertyList()) == 1);
+    auto const& property_list = combo_def.PropertyList();
+
+    auto const& property1 = property_list.first[0];
+    REQUIRE(property1.Name() == "property1");
+    REQUIRE(property1.Flags().value == method_attributes_no_flags().value);
+    
+    REQUIRE(db.MethodSemantics.size() == 2);
+    for (auto const& sem : property1.MethodSemantic())
+    {
+        REQUIRE(sem.Association().Property() == property1);
+        auto const& assoc = sem.Association().type();
+        REQUIRE(assoc == HasSemantics::Property);
+        auto const& property_sig = sem.Association().Property().Type();
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(property_sig.Type().Type()).TypeRef() == S1_ref);
+        REQUIRE(sem.Association().Property().Name() == property1.Name());
+    }
+    auto const& get_method = property1.MethodSemantic().first[0].Method();
+    REQUIRE(get_method.Name() == "get_property1");
+    {
+        auto const& sig = get_method.Signature();
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
+        REQUIRE(size(sig.Params()) == 0);
+        REQUIRE(get_method.Flags().value == interface_method_property_attributes().value);
+    }
+    auto const& set_method = property1.MethodSemantic().first[1].Method();
+    REQUIRE(set_method.Name() == "put_property1");
+    {
+        auto const& sig = set_method.Signature();
+        REQUIRE(!sig.ReturnType());
+        REQUIRE(size(sig.Params()) == 1);
+        auto const& param_sig = sig.Params().first[0];
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == S1_ref);
+        REQUIRE(set_method.Flags().value == interface_method_property_attributes().value);
+    }
+}
+
+TEST_CASE("Interface event metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(Int32 sender);
+            interface IComboBox 
+            {
+                event StringListEvent Changed;
+            }
+        }
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+    
+    REQUIRE(db.AssemblyRef.size() == 2);
+    auto const& iter = std::find_if(db.AssemblyRef.begin(), db.AssemblyRef.end(), [](auto&& assembly)
+    {
+        return assembly.Name() == "xlang_foundation";
+    });
+    REQUIRE(iter.Name() == "xlang_foundation");
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    auto const& event_registration_token_ref = find_type_by_name<TypeRef>(db.TypeRef, "EventRegistrationToken", "Foundation");
+    auto const& string_list_event_ref = find_type_by_name<TypeRef>(db.TypeRef, "StringListEvent", "N");
+
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
+    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
+    test_interface_type_properties(combo);
+
+    REQUIRE(size(combo.EventList()) == 1);
+    auto const& event_list = combo.EventList();
+
+
+    auto const& event1 = event_list.first[0];
+    REQUIRE(event1.Name() == "Changed");
+    REQUIRE(event1.EventFlags().value == event_attributes_no_flags().value);
+
+    REQUIRE(db.MethodSemantics.size() == 2);
+    for (auto const& sem : event1.MethodSemantic())
+    {
+        REQUIRE(sem.Association().Event() == event1);
+        auto const& assoc = sem.Association().type();
+        REQUIRE(assoc == HasSemantics::Event);
+        auto const& event_sig = sem.Association().Event().EventType();
+        REQUIRE(event_sig.TypeRef().TypeName() == string_list_event_ref.TypeName());
+        REQUIRE(sem.Association().Event().Name() == event1.Name());
+    }
+    auto const& add_method = event1.MethodSemantic().first[0].Method();
+    REQUIRE(add_method.Name() == "add_Changed");
+    {
+        auto const& sig = add_method.Signature();
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == event_registration_token_ref);
+        REQUIRE(size(sig.Params()) == 1);
+        auto const& param_sig = sig.Params().first[0];
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == string_list_event_ref);
+        REQUIRE(add_method.Flags().value == interface_method_event_attributes().value);
+    }
+    auto const& remove_method = event1.MethodSemantic().first[1].Method();
+    REQUIRE(remove_method.Name() == "remove_Changed");
+    {
+        auto const& sig = remove_method.Signature();
+        REQUIRE(!sig.ReturnType());
+        REQUIRE(size(sig.Params()) == 1);
+        auto const& param_sig = sig.Params().first[0];
+        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == event_registration_token_ref);
+        REQUIRE(remove_method.Flags().value == interface_method_event_attributes().value);
+    }
+}
+
+// Disabling and coming back later
+// TODO: fix base problem once we have attributes to specify which interface becomes the base
+/*
+DefaultRyan 20 hours ago  Member
+This case seems odd for two reasons :
+
+I didn't think xlang was supporting multiple interface inheritance. And multiple "requires" isn't supported
+without some sort of attribute specifying which required interface becomes the base for inheritance purposes.
+This makes IComboBox.Paint() ambiguous.This should require some sort of disambiguation on the method.
+*/
+TEST_CASE("Interface type metadata 2", "[!hide]")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl requires M.IControl3
+            {
+                void Paint();
+            }
+    
+            interface IComboBox requires IControl, IControl2
+            {
+                Int32 property1;
+            }
+
+            interface IControl2 requires M.IControl3
+            {
+                void Paint2();
+            }
+        }
+        namespace M
+        {
+            interface IControl3
+            {
+                void Paint3();
+            }
+        }
+
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 4);
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    auto const& control3_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl3", "M");
+    auto const& control2_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl2", "N");
+    auto const& control_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl", "N");
+
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 4);
+    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
+    auto const& c1 = find_type_by_name<TypeDef>(db.TypeDef, "IControl", "N");
+    auto const& c2 = find_type_by_name<TypeDef>(db.TypeDef, "IControl2", "N");
+
+    test_interface_type_properties(combo);
+
+    REQUIRE(db.InterfaceImpl.size() == 5);
+    auto const& impls =  combo.InterfaceImpl();
+    REQUIRE(size(impls) == 3);
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control2_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control2_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control2_ref);
+    }
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control_ref);
+    }
+
+    auto const& c1_impls = c1.InterfaceImpl();
+    {
+        REQUIRE(size(c1_impls) == 1);
+        auto const& iter = std::find_if(c1_impls.first, c1_impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+
+    auto const& c2_impls = c2.InterfaceImpl();
+    {
+        REQUIRE(size(c2_impls) == 1);
+        auto const& iter = std::find_if(c2_impls.first, c2_impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+}
+
+TEST_CASE("Interface type metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            interface IControl requires M.IControl3
+            {
+                void Paint();
+            }
+    
+            interface IComboBox requires IControl
+            {
+                Int32 property1;
+            }
+        }
+        namespace M
+        {
+            interface IControl3
+            {
+                void Paint3();
+            }
+        }
+
+    )" };
+    std::string assembly_name = "testidl";
+    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
+
+    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
+    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
+    auto const& control3_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl3", "M");
+    auto const& control_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl", "N");
+
+    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
+    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
+    auto const& c1 = find_type_by_name<TypeDef>(db.TypeDef, "IControl", "N");
+
+    test_interface_type_properties(combo);
+
+    REQUIRE(db.InterfaceImpl.size() == 3);
+    auto const& impls = combo.InterfaceImpl();
+    REQUIRE(size(impls) == 2);
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
+    }
+    {
+        auto const& iter = std::find_if(impls.first, impls.second, [control_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control_ref);
+    }
+    auto const& c1_impls = c1.InterfaceImpl();
+    {
+        REQUIRE(size(c1_impls) == 1);
+        auto const& iter = std::find_if(c1_impls.first, c1_impls.second, [control3_ref](auto&& type_ref)
+        {
+            return type_ref.Interface().TypeRef() == control3_ref;
+        });
+        REQUIRE(iter.Interface().TypeRef() == control3_ref);
     }
 }

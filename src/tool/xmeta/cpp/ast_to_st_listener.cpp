@@ -116,7 +116,7 @@ listener_error ast_to_st_listener::extract_type(XlangParser::TypeContext* tc, ty
     return listener_error::passed;
 }
 
-void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, std::shared_ptr<delegate_model> const& dm)
+void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_parameterContext*> const& ast_formal_params, std::variant<std::shared_ptr<xlang::xmeta::delegate_model>, std::shared_ptr<xlang::xmeta::method_model>> const& model)
 {
     for (auto fixed_param : ast_formal_params)
     {
@@ -141,7 +141,14 @@ void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_pa
                 sem = parameter_semantics::out;
             }
         }
-        dm->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_cur_assembly, sem, std::move(tr) });
+        if (std::holds_alternative<std::shared_ptr<delegate_model>>(model))
+        {
+            std::get<std::shared_ptr<delegate_model>>(model)->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_cur_assembly, sem, std::move(tr) });
+        }
+        else if (std::holds_alternative<std::shared_ptr<method_model>>(model))
+        {
+            std::get<std::shared_ptr<method_model>>(model)->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_cur_assembly, sem, std::move(tr) });
+        }
     }
 }
 
@@ -267,12 +274,210 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     return listener_error::passed;
 }
 
-void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarationContext* ctx)
+listener_error ast_to_st_listener::extract_property_accessors(XlangParser::Interface_property_declarationContext* interface_property, std::shared_ptr<class_or_interface_model> model)
+{
+    std::string property_id = interface_property->IDENTIFIER()->getText();
+    type_ref tr{ interface_property->type()->getText() };
+    extract_type(interface_property->type(), tr);
+    auto decl_line = interface_property->IDENTIFIER()->getSymbol()->getLine();
+
+    std::shared_ptr<method_model> get_method = nullptr;
+    std::shared_ptr<method_model> set_method = nullptr;
+    if (interface_property->property_accessors()->property_accessor_method().size() > 0)
+    {
+        auto const& property_accessor_methods = interface_property->property_accessors()->property_accessor_method();
+        if (property_accessor_methods.size() == 2)
+        {
+            if ((property_accessor_methods[0]->GET() && property_accessor_methods[1]->GET())
+                || (property_accessor_methods[0]->SET() && property_accessor_methods[1]->SET()))
+            {
+                // WRITE SEMANTIC ERROR
+                error_manager.write_property_accessor_error(decl_line, property_id);
+                return listener_error::failed;
+            }
+        }
+        else if (property_accessor_methods.size() > 2)
+        {
+            // THIS PARSER BE TRIPPING :O
+            error_manager.write_property_accessor_error(decl_line, property_id);
+            return listener_error::failed;
+        }
+
+        for (auto const& property_accessor : property_accessor_methods)
+        {
+            if (property_accessor->GET())
+            {
+                get_method = std::make_shared<method_model>("get_" + property_id, property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::Property);
+                if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
+                {
+                    error_manager.write_type_member_exists_error(decl_line, get_method->get_id(), model->get_fully_qualified_id());
+                }
+            }
+            else if (property_accessor->SET())
+            {
+                set_method = std::make_shared<method_model>("put_" + property_id, property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_association::Property);
+                parameter_semantics sem = parameter_semantics::in;
+                set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
+                if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
+                {
+                    error_manager.write_type_member_exists_error(decl_line, set_method->get_id(), model->get_fully_qualified_id());
+                }
+            }
+        }
+    }
+    else // Implicity declaration
+    {
+        get_method = std::make_shared<method_model>("get_" + property_id, decl_line, m_cur_assembly, std::move(tr), method_association::Property);
+
+        set_method = std::make_shared<method_model>("put_" + property_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Property);
+        parameter_semantics sem = parameter_semantics::in;
+        set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
+
+        if (get_method && model->add_member(get_method) == compilation_error::symbol_exists)
+        {
+            error_manager.write_type_member_exists_error(decl_line, get_method->get_id(), model->get_fully_qualified_id());
+        }
+        if (set_method && model->add_member(set_method) == compilation_error::symbol_exists)
+        {
+            error_manager.write_type_member_exists_error(decl_line, set_method->get_id(), model->get_fully_qualified_id());
+        }
+    }
+    auto prop_model = std::make_shared<property_model>(property_id, decl_line, m_cur_assembly, std::move(tr));
+    if (model->property_id_exists(property_id))
+    {
+        auto const& existing_property = model->get_property_member(property_id);
+        if (existing_property->get_type().get_semantic().get_ref_name() != tr.get_semantic().get_ref_name())
+        {
+            error_manager.write_duplicate_property_error(decl_line, property_id);
+            return listener_error::failed;
+        }
+        if (existing_property->set_get_method(get_method) == compilation_error::accessor_exists)
+        {
+            error_manager.write_property_accessor_error(decl_line, property_id);
+            return listener_error::failed;
+        }
+        else
+        {
+            prop_model->set_get_method(get_method);
+        }
+        if (existing_property->set_set_method(set_method) == compilation_error::accessor_exists)
+        {
+            error_manager.write_property_accessor_error(decl_line, property_id);
+            return listener_error::failed;
+        }
+        else
+        {
+            prop_model->set_set_method(set_method);
+        }
+    }
+    else
+    {
+        prop_model->set_get_method(get_method);
+        prop_model->set_set_method(set_method);
+    }
+
+    if (model->add_member(prop_model) == compilation_error::symbol_exists)
+    {
+        error_manager.write_type_member_exists_error(decl_line, property_id, model->get_fully_qualified_id());
+    }
+    return listener_error::passed;
+}
+
+listener_error ast_to_st_listener::extract_event_accessors(XlangParser::Interface_event_declarationContext* interface_event, std::shared_ptr<class_or_interface_model> model)
+{
+    std::string event_id = interface_event->IDENTIFIER()->getText();
+    type_ref event_registration{ "Foundation.EventRegistrationToken" };
+    type_ref tr{ interface_event->type()->getText() };
+    extract_type(interface_event->type(), tr);
+    auto decl_line = interface_event->IDENTIFIER()->getSymbol()->getLine();
+    parameter_semantics sem = parameter_semantics::in;
+
+    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event_id, decl_line, m_cur_assembly, std::move(event_registration), method_association::Event);
+    add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(tr) });
+
+    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event_id, decl_line, m_cur_assembly, std::move(std::nullopt), method_association::Event);
+    remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", decl_line, m_cur_assembly, sem, std::move(event_registration) });
+
+    if (model->add_member(add_method) == compilation_error::symbol_exists)
+    {
+        error_manager.write_type_member_exists_error(decl_line, add_method->get_id(), model->get_fully_qualified_id());
+        return listener_error::failed;
+    }
+    if (model->add_member(remove_method) == compilation_error::symbol_exists)
+    {
+        error_manager.write_type_member_exists_error(decl_line, add_method->get_id(), model->get_fully_qualified_id());
+        return listener_error::failed;
+    }
+    auto event = std::make_shared<event_model>(event_id, decl_line, m_cur_assembly, add_method, remove_method, std::move(tr));
+    if (model->add_member(event) == compilation_error::symbol_exists)
+    {
+        error_manager.write_type_member_exists_error(decl_line, event_id, model->get_fully_qualified_id());
+        return listener_error::failed;
+    }
+    return listener_error::passed;
+}
+
+void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_declarationContext *ctx)
+{
+    auto id = ctx->IDENTIFIER();
+    std::string interface_name{ id->getText() };
+    auto decl_line = id->getSymbol()->getLine();
+
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + interface_name;
+    auto model = std::make_shared<interface_model>(interface_name, decl_line, m_cur_assembly, m_cur_namespace_body);
+
+    if (xlang_model.symbols.set_symbol(symbol, model) == compilation_error::symbol_exists)
+    {
+        error_manager.write_namespace_member_name_error(decl_line, interface_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
+        return;
+    }
+    auto const& interface_body = ctx->interface_body();
+    for (auto const& interface_member : interface_body->interface_member_declaration())
+    {
+        if (interface_member->interface_method_declaration())
+        {
+            auto interface_method = interface_member->interface_method_declaration();
+            std::string method_id = interface_method->IDENTIFIER()->getText();
+
+            std::optional<type_ref> tr = type_ref{ interface_method->return_type()->getText() };
+            extract_type(interface_method->return_type(), tr);
+
+            auto met_model = std::make_shared<method_model>(method_id, interface_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::None);
+            if (interface_method->formal_parameter_list())
+            {
+                extract_formal_params(interface_method->formal_parameter_list()->fixed_parameter(), met_model);
+            }
+            if (model->add_member(met_model) == compilation_error::symbol_exists)
+            {
+                error_manager.write_type_member_exists_error(decl_line, met_model->get_id(), model->get_fully_qualified_id());
+            }
+        }
+        if (interface_member->interface_property_declaration())
+        {
+            extract_property_accessors(interface_member->interface_property_declaration(), model);
+        }
+        if (interface_member->interface_event_declaration())
+        {
+            extract_event_accessors(interface_member->interface_event_declaration(), model);
+        }
+    }
+    if (ctx->interface_base())
+    {
+        auto const& interface_bases = ctx->interface_base()->type_base();
+        for (auto const& interface_base : interface_bases)
+        {
+            model->add_interface_base_ref(interface_base->class_type()->getText());
+        }
+    }
+    m_cur_namespace_body->add_interface(model);
+}
+
+
+void ast_to_st_listener::enterDelegate_declaration(XlangParser::Delegate_declarationContext* ctx)
 {
     auto id = ctx->IDENTIFIER();
     std::string delegate_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
-
     std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + delegate_name;
 
     std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };
@@ -284,7 +489,7 @@ void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarat
     {
         extract_formal_params(formal_params->fixed_parameter(), dm);
     }
-    if (!xlang_model.set_symbol(symbol, dm))
+    if (xlang_model.symbols.set_symbol(symbol, dm) == compilation_error::symbol_exists)
     {
         error_manager.write_namespace_member_name_error(decl_line, delegate_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;
@@ -292,7 +497,7 @@ void ast_to_st_listener::exitDelegate_declaration(XlangParser::Delegate_declarat
     m_cur_namespace_body->add_delegate(dm);
 }
 
-void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationContext *ctx)
+void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationContext *ctx)
 {
     auto id = ctx->IDENTIFIER();
     std::string enum_name{ id->getText() };
@@ -327,7 +532,7 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
             return;
         }
     }
-    if (!xlang_model.set_symbol(symbol, new_enum))
+    if (xlang_model.symbols.set_symbol(symbol, new_enum) == compilation_error::symbol_exists)
     {
         error_manager.write_namespace_member_name_error(decl_line, enum_name, 
             m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
@@ -336,7 +541,7 @@ void ast_to_st_listener::exitEnum_declaration(XlangParser::Enum_declarationConte
     m_cur_namespace_body->add_enum(new_enum);
 }
 
-void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationContext *ctx)
+void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declarationContext *ctx)
 {
     auto id = ctx->IDENTIFIER();
     auto decl_line = id->getSymbol()->getLine();
@@ -359,7 +564,7 @@ void ast_to_st_listener::exitStruct_declaration(XlangParser::Struct_declarationC
             new_struct->add_field(std::pair(tr, field_name));
         }
     }
-    if (!xlang_model.set_symbol(symbol, new_struct))
+    if (xlang_model.symbols.set_symbol(symbol, new_struct) == compilation_error::symbol_exists)
     {
         error_manager.write_namespace_member_name_error(decl_line, struct_name, m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id());
         return;

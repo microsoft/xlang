@@ -41,17 +41,25 @@ namespace xlang::xmeta
 
         std::string const& get_ref_name() const noexcept
         {
-            assert(!is_resolved());
-            return std::get<std::string>(m_ref);
+            if (std::holds_alternative<std::string>(m_ref))
+            {
+                return std::get<std::string>(m_ref);
+            }
+            return ref_name;
         }
 
         template<typename R>
         void resolve(R const& value) noexcept
         {
+            if (std::holds_alternative<std::string>(m_ref))
+            {
+                ref_name = std::get<std::string>(m_ref);
+            }
             m_ref = value;
         }
 
     private:
         std::variant<std::string, resolved_type> m_ref;
+        std::string ref_name;
     };
 }

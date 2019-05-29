@@ -15,9 +15,15 @@ namespace xlang::xmeta
     public:
         void write_error(size_t decl_line, std::string_view const& msg);
 
-        void write_unresolved_type_error(size_t decl_line, std::string symbol);
+        void write_type_member_exists_error(size_t decl_line, std::string_view const& member, std::string_view const& declaration);
 
-        void write_struct_field_error(size_t decl_line, std::string symbol);
+        void write_unresolved_type_error(size_t decl_line, std::string_view const& symbol);
+
+        void write_struct_field_error(size_t decl_line, std::string_view const& symbol);
+
+        void write_not_an_interface_error(size_t decl_line, std::string_view const& symbol);
+
+        void write_not_a_delegate_error(size_t decl_line, std::string_view const& symbol);
 
         void write_struct_field_error(size_t decl_line, 
             std::string_view const& invalid_name, std::string_view const& struct_name);
@@ -40,6 +46,9 @@ namespace xlang::xmeta
         void write_namespace_member_name_error(size_t decl_line, 
             std::string_view const& invalid_name, std::string_view const& namespace_id);
 
+        void write_property_accessor_error(size_t decl_line, std::string_view const& member);
+
+        void write_duplicate_property_error(size_t decl_line, std::string_view const& member);
         
         size_t get_num_of_errors() const noexcept
         {
@@ -77,6 +86,7 @@ namespace xlang::xmeta
             
             struct error_model
             {
+                size error_level;
                 size_t error_code;
                 size_t decl_line;
                 std::string symbol;

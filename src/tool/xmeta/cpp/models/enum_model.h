@@ -169,6 +169,15 @@ namespace xlang::xmeta
             m_type{ t }
         { }
 
+        enum_model(std::string_view const& id,
+            size_t decl_line,
+            std::string_view const& assembly_name,
+            std::string_view const& containing_ns_name,
+            enum_semantics t) :
+            namespace_member_model{ id, decl_line, assembly_name, containing_ns_name },
+            m_type{ t }
+        { }
+
         auto& get_members() noexcept
         {
             return m_members;

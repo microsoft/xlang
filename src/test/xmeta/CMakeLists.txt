@@ -53,6 +53,5 @@ add_custom_command(TARGET test_xmeta POST_BUILD
 )
 
 target_sources(test_xmeta PUBLIC main.cpp)
-
 install(TARGETS test_xmeta DESTINATION "test/xmeta")
 install(FILES $<TARGET_PDB_FILE:test_xmeta> DESTINATION "test/xmeta" OPTIONAL)

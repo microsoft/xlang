@@ -8,14 +8,21 @@ namespace xlang::xmeta
         m_num_semantic_errors++;
     }
 
-    void xlang_error_manager::write_unresolved_type_error(size_t decl_line, std::string symbol)
+    void xlang_error_manager::write_type_member_exists_error(size_t decl_line, std::string_view const& member, std::string_view const& declaration)
+    {
+        std::ostringstream oss;
+        oss << "Member already exists: " << member << " in declaration: " << declaration;
+        write_error(decl_line, oss.str());
+    }
+
+    void xlang_error_manager::write_unresolved_type_error(size_t decl_line, std::string_view const&  symbol)
     {
         std::ostringstream oss;
         oss << "Unable to resolve type: " << symbol;
         write_error(decl_line, oss.str());
     }
 
-    void xlang_error_manager::write_struct_field_error(size_t decl_line, std::string symbol)
+    void xlang_error_manager::write_struct_field_error(size_t decl_line, std::string_view const& symbol)
     {
         std::ostringstream oss;
         oss << "Struct has circular fields: " << symbol;
@@ -76,6 +83,34 @@ namespace xlang::xmeta
     {
         std::ostringstream oss;
         oss << "Member name '" << invalid_name << "' already defined in namespace '" << namespace_id << "'";
+        write_error(decl_line, oss.str());
+    }
+
+    void xlang_error_manager::write_not_an_interface_error(size_t decl_line, std::string_view const& symbol)
+    {
+        std::ostringstream oss;
+        oss << "Member name '" << symbol << "' is not an interface.";
+        write_error(decl_line, oss.str());
+    }
+
+    void xlang_error_manager::write_not_a_delegate_error(size_t decl_line, std::string_view const& symbol)
+    {
+        std::ostringstream oss;
+        oss << "Member name '" << symbol << "' is not an delegate.";
+        write_error(decl_line, oss.str());
+    }
+    
+    void xlang_error_manager::write_property_accessor_error(size_t decl_line, std::string_view const& member)
+    {
+        std::ostringstream oss;
+        oss << "Invalid property setter and getter: " << member;
+        write_error(decl_line, oss.str());
+    }
+
+    void xlang_error_manager::write_duplicate_property_error(size_t decl_line, std::string_view const& member)
+    {
+        std::ostringstream oss;
+        oss << "Duplicate property: " << member;
         write_error(decl_line, oss.str());
     }
 }
