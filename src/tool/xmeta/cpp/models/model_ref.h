@@ -8,7 +8,7 @@
 namespace xlang::xmeta
 {
     // model_ref is meant to hold unresolved and then resolved reference state. When unresolved,
-    // it holds a string representing the ID of the reference. Otherwise, it holds generic state,
+    // it holds a string representing the name of the reference. Otherwise, it holds generic state,
     // which is typically a smart pointer to the type or member being referenced.
     template <typename T, typename... Ts>
     struct model_ref
@@ -20,6 +20,10 @@ namespace xlang::xmeta
 
         explicit model_ref(std::string_view const& name) :
             m_ref{ std::string(name) }
+        { }
+
+        explicit model_ref(resolved_type const& val) :
+            m_ref{ val }
         { }
 
         bool is_resolved() const noexcept
@@ -35,7 +39,11 @@ namespace xlang::xmeta
 
         auto const& get_resolved_target() const noexcept
         {
-            assert(std::holds_alternative<resolved_type>(m_ref));
+            if (!std::holds_alternative<resolved_type>(m_ref))
+            {
+                std::cout << ref_name << std::endl;
+                xlang::throw_invalid("Model Ref is not resolved");
+            }
             return std::get<resolved_type>(m_ref);
         }
 

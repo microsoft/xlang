@@ -5,7 +5,6 @@
 
 #include "base_model.h"
 #include "model_types.h"
-#include "compilation_unit.h"
 
 namespace xlang::xmeta
 {
@@ -17,11 +16,18 @@ namespace xlang::xmeta
         out
     };
 
+    //TODO: Reevaluate the name formal_parameter_model. Possibly change to just parameter_model. 
     struct formal_parameter_model : base_model
     {
         formal_parameter_model() = delete;
-        formal_parameter_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, parameter_semantics sem, type_ref&& type) :
-            base_model{ id, decl_line, assembly_name },
+        formal_parameter_model(std::string_view const& name, size_t decl_line, std::string_view const& assembly_name, parameter_semantics sem, type_ref&& type) :
+            base_model{ name, decl_line, assembly_name },
+            m_semantic{ sem },
+            m_type{ std::move(type) }
+        { }
+
+        formal_parameter_model(std::string_view const& name, parameter_semantics sem, type_ref&& type) :
+            base_model{ name, 0, "test_only" },
             m_semantic{ sem },
             m_type{ std::move(type) }
         { }
@@ -36,27 +42,8 @@ namespace xlang::xmeta
             return m_type;
         }
 
-        // TODO: fully_qualified_id will be a vector of strings once  we have using directives
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id, method_association m_association = method_association::None)
-        {
-            if (!m_type.get_semantic().is_resolved())
-            {
-                std::string const& ref_name = m_type.get_semantic().get_ref_name();
-                std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : fully_qualified_id + "." + ref_name;
-                auto const& iter = symbols.get_symbol(symbol);
-                if (std::holds_alternative<std::monostate>(iter))
-                {
-                    if (m_association == method_association::None)
-                    {
-                        error_manager.write_unresolved_type_error(get_decl_line(), symbol);
-                    }
-                }
-                else
-                {
-                    m_type.set_semantic(iter);
-                }
-            }
-        }
+        // TODO: qualified_name will be a vector of strings once  we have using directives
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name, method_association m_association = method_association::None);
 
     private:
         parameter_semantics m_semantic;

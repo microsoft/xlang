@@ -4,10 +4,12 @@
 
 #include "base_model.h"
 #include "compilation_unit.h"
+#include "method_model.h"
+#include "model_types.h"
 
 namespace xlang::xmeta
 {
-    struct property_semantics
+    struct property_modifier
     {
         bool is_protected = false;
         bool is_static = false;
@@ -16,31 +18,36 @@ namespace xlang::xmeta
     struct property_model : base_model
     {
         property_model() = delete;
-        property_model(std::string_view const& id, 
-                size_t decl_line, 
-                std::string_view const& assembly_name, 
-                property_semantics const& sem, 
-                type_ref&& type,
-                std::shared_ptr<method_model> const& get_method, 
-                std::shared_ptr<method_model> const& set_method) :
-            base_model{ id, decl_line, assembly_name },
-            m_semantic{ sem },
-            m_type{ std::move(type) },
-            m_get_method{ get_method },
-            m_set_method{ set_method }
-        { }
 
-        property_model(std::string_view const& id,
+        property_model(std::string_view const& name,
                 size_t decl_line,
                 std::string_view const& assembly_name,
-                type_ref&& type) :
-            base_model{ id, decl_line, assembly_name },
-            m_type{ std::move(type) }
+                property_modifier const& sem,
+                type_ref&& type,
+                std::shared_ptr<method_model> const& get_method,
+                std::shared_ptr<method_model> const& set_method) :
+            base_model{ name, decl_line, assembly_name },
+            m_modifier{ sem },
+            m_type{ std::move(type) },
+            m_get_method{ get_method },
+            m_set_method{ set_method },
+            m_implemented_property_ref{ "" }
         { }
 
-        auto const& get_semantic() const noexcept
+        property_model(std::string_view const& name,
+                size_t decl_line,
+                std::string_view const& assembly_name,
+                property_modifier const& sem,
+                type_ref&& type) :
+            base_model{ name, decl_line, assembly_name },
+            m_type{ std::move(type) },
+            m_modifier{ sem },
+            m_implemented_property_ref{ "" }
+        { }
+
+        auto const& get_modifier() const noexcept
         {
-            return m_semantic;
+            return m_modifier;
         }
 
         auto const& get_type() const noexcept
@@ -58,67 +65,20 @@ namespace xlang::xmeta
             return m_set_method;
         }
 
-        compilation_error set_get_method(std::shared_ptr<method_model> const& m)
-        {
-            if (!m)
-            {
-                // TODO: consider throwing an exception
-                return compilation_error::passed;
-            }
-            if (m_get_method)
-            {
-                return compilation_error::accessor_exists;
-            }
-            m_get_method = m;
-        }
+        void set_overridden_property_ref(std::shared_ptr<property_model> const& ref) noexcept;
 
-        compilation_error set_set_method(std::shared_ptr<method_model> const& m)
-        {
-            if (!m)
-            {
-                // TODO: consider throwing an exception
-                return compilation_error::passed;
-            }
-            if (m_set_method)
-            {
-                return compilation_error::accessor_exists;
-            }
-            m_set_method = m;
-        }
+        semantic_error set_get_method(std::shared_ptr<method_model> const& m);
 
-        void validate(xlang_error_manager & error_manager)
-        {
-            if (!m_get_method)
-            {
-                error_manager.write_property_accessor_error(get_decl_line(), get_id());
-            }
-        }
+        semantic_error set_set_method(std::shared_ptr<method_model> const& m);
 
-        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id)
-        {
-            if (!m_type.get_semantic().is_resolved())
-            {
-                /* Events should not have been resolved. If it was, it means it was not a
-                class type and not a delegate type */
-                std::string const& ref_name = m_type.get_semantic().get_ref_name();
-                std::string symbol = ref_name.find(".") != std::string::npos
-                    ? ref_name : fully_qualified_id + "." + ref_name;
-                auto const& iter = symbols.get_symbol(symbol);
-                if (std::holds_alternative<std::monostate>(iter))
-                {
-                    error_manager.write_unresolved_type_error(get_decl_line(), symbol);
-                }
-                else
-                {
-                    m_type.set_semantic(iter);
-                }
-            }
-        }
+        void validate(xlang_error_manager & error_manager);
+
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& qualified_name);
 
     private:
-        property_semantics m_semantic;
+        property_modifier m_modifier;
+        model_ref<std::shared_ptr<property_model>> m_implemented_property_ref;
         type_ref m_type;
-        bool m_is_array;
         std::shared_ptr<method_model> m_get_method;
         std::shared_ptr<method_model> m_set_method;
     };

@@ -92,14 +92,14 @@ namespace xlang::xmeta
     {
         namespace_model() = delete;
         namespace_model(
-            std::string_view const& id,
+            std::string_view const& name,
             size_t decl_line,
             std::string_view const& assembly_name,
             std::shared_ptr<namespace_model> const& parent) :
-            base_model{ id, decl_line, assembly_name },
+            base_model{ name, decl_line, assembly_name },
             m_fully_qualified_id{ parent != nullptr
-                ? parent->get_fully_qualified_id() + "." + std::string(id)
-                : id },
+                ? parent->get_qualified_name() + "." + std::string(name)
+                : name },
             m_parent_namespace { parent }
         { }
 
@@ -118,7 +118,7 @@ namespace xlang::xmeta
             return m_parent_namespace;
         }
 
-        std::string const& get_fully_qualified_id() const noexcept
+        std::string const& get_qualified_name() const noexcept
         {
             return m_fully_qualified_id;
         }
@@ -127,7 +127,7 @@ namespace xlang::xmeta
         void add_child_namespace(std::shared_ptr<namespace_model> const& child);
 
         // Used for semantic check #3 for namespace members
-        bool member_id_exists(std::string_view const& member_id) const;
+        bool member_exists(std::string_view const& member_id) const;
         bool child_namespace_exists(std::string_view const& member_id) const;
 
     private:
