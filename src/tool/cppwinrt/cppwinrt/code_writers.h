@@ -155,6 +155,51 @@ namespace xlang
         w.write(format, type.TypeName(), fields.first.Signature().Type(), bind_each<write_enum_field>(fields));
     }
 
+    static void write_enum_operators(writer& w, TypeDef const& type)
+    {
+        if (!has_attribute(type, "System", "FlagsAttribute"))
+        {
+            return;
+        }
+
+        auto name = type.TypeName();
+
+        auto format = R"(    constexpr auto operator|(% const left, % const right) noexcept
+    {
+        return static_cast<%>(impl::to_underlying_type(left) | impl::to_underlying_type(right));
+    }
+    constexpr auto operator|=(%& left, % const right) noexcept
+    {
+        left = left | right;
+        return left;
+    }
+    constexpr auto operator&(% const left, % const right) noexcept
+    {
+        return static_cast<%>(impl::to_underlying_type(left) & impl::to_underlying_type(right));
+    }
+    constexpr auto operator&=(%& left, % const right) noexcept
+    {
+        left = left & right;
+        return left;
+    }
+    constexpr auto operator~(% const value) noexcept
+    {
+        return static_cast<%>(~impl::to_underlying_type(value));
+    }
+    constexpr auto operator^^(% const left, % const right) noexcept
+    {
+        return static_cast<%>(impl::to_underlying_type(left) ^^ impl::to_underlying_type(right));
+    }
+    constexpr auto operator^^=(%& left, % const right) noexcept
+    {
+        left = left ^^ right;
+        return left;
+    }
+)";
+
+        w.write(format, name, name, name, name, name, name, name, name, name, name, name, name, name, name, name, name, name);
+    }
+
     static void write_generic_typenames(writer& w, std::pair<GenericParam, GenericParam> const& params)
     {
         separator s{ w };
@@ -245,21 +290,6 @@ namespace xlang
         w.write(format,
             bind<write_generic_typenames>(generics),
             remove_tick(type_name.name));
-    }
-
-    static void write_enum_flag(writer& w, TypeDef const& type)
-    {
-        if (!has_attribute(type, "System", "FlagsAttribute"))
-        {
-            return;
-        }
-
-        auto format = R"(    template<> struct is_enum_flag<%> : std::true_type
-    {
-    };
-)";
-
-        w.write(format, type);
     }
 
     static void write_guid_value(writer& w, std::vector<FixedArgSig> const& args)
