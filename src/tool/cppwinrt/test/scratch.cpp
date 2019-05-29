@@ -144,18 +144,18 @@ namespace winrt::impl
 
         using base_type::ReplaceAll;
 
-        void ReplaceAll(array_view<Windows::Foundation::IInspectable const> /*values*/)
+        void ReplaceAll(array_view<Windows::Foundation::IInspectable const> values)
         {
-            //this->increment_version();
-            //m_values.clear();
-            //m_values.reserve(values.size());
+            this->increment_version();
+            m_values.clear();
+            m_values.reserve(values.size());
 
-            //std::transform(values.begin(), values.end(), std::back_inserter(m_values), [&](auto&& value)
-            //    {
-            //        return unbox_value<T>(value);
-            //    });
+            std::transform(values.begin(), values.end(), std::back_inserter(m_values), [&](auto&& value)
+                {
+                    return unbox_value<T>(value);
+                });
 
-            //this->call_changed(Windows::Foundation::Collections::CollectionChange::Reset, 0);
+            this->call_changed(Windows::Foundation::Collections::CollectionChange::Reset, 0);
         }
 
         using base_type::VectorChanged;
