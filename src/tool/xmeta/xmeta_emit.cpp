@@ -77,25 +77,25 @@ namespace
         return { nullptr, RidFromToken(token) - 1 };
     }
 
-    ElementType to_ElementType(enum_semantics arg)
+    ElementType to_ElementType(enum_types arg)
     {
         switch (arg)
         {
-        case enum_semantics::Int8:
+        case enum_types::Int8:
             return ElementType::I1;
-        case enum_semantics::UInt8:
+        case enum_types::UInt8:
             return ElementType::U1;
-        case enum_semantics::Int16:
+        case enum_types::Int16:
             return ElementType::I2;
-        case enum_semantics::UInt16:
+        case enum_types::UInt16:
             return ElementType::U2;
-        case enum_semantics::Int32:
+        case enum_types::Int32:
             return ElementType::I4;
-        case enum_semantics::UInt32:
+        case enum_types::UInt32:
             return ElementType::U4;
-        case enum_semantics::Int64:
+        case enum_types::Int64:
             return ElementType::I8;
-        case enum_semantics::UInt64:
+        case enum_types::UInt64:
             return ElementType::U8;
         default:
             XLANG_ASSERT(false);

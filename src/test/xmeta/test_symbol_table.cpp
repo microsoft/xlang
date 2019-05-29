@@ -12,12 +12,12 @@
 using namespace antlr4;
 using namespace xlang::xmeta;
 
-constexpr method_semantics default_method_semantics = { false, false, false };
-constexpr method_semantics static_method_semantics = { false, true, false };
-constexpr property_semantics default_property_semantics = { false, false };
-constexpr property_semantics static_property_semantics = { false, true };
-constexpr event_semantics default_event_semantics = { false, false };
-constexpr event_semantics static_event_semantics = { false, true };
+constexpr method_modifier default_method_semantics = { false, false, false };
+constexpr method_modifier static_method_semantics = { false, true, false };
+constexpr property_modifier default_property_semantics = { false, false };
+constexpr property_modifier static_property_semantics = { false, true };
+constexpr event_modifier default_event_semantics = { false, false };
+constexpr event_modifier static_event_semantics = { false, true };
 
 auto find_namespace(xmeta_idl_reader & reader, std::string name)
 {
@@ -203,13 +203,13 @@ struct ExpectedFormalParameterModel
 struct ExpectedMethodModel
 {
     std::string id;
-    method_semantics sem;
+    method_modifier sem;
     std::optional<ExpectedTypeRefModel> return_type;
     std::vector<ExpectedFormalParameterModel> params;
 
     ExpectedMethodModel() {};
 
-    ExpectedMethodModel(std::string const& name, method_semantics const& sem, std::optional<ExpectedTypeRefModel> const& return_type, std::vector<ExpectedFormalParameterModel> params)
+    ExpectedMethodModel(std::string const& name, method_modifier const& sem, std::optional<ExpectedTypeRefModel> const& return_type, std::vector<ExpectedFormalParameterModel> params)
         : id{ name }, sem{ sem }, return_type{ return_type }, params{ params } {}
 
     void VerifyType(std::shared_ptr<method_model> const& actual)
@@ -240,14 +240,14 @@ struct ExpectedMethodModel
 struct ExpectedPropertyModel
 {
     std::string id;
-    property_semantics sem;
+    property_modifier sem;
     ExpectedTypeRefModel type;
 
     ExpectedMethodModel get_method;
     std::optional<ExpectedMethodModel> set_method;
 
     ExpectedPropertyModel(std::string const& name, 
-            property_semantics const& sem, 
+            property_modifier const& sem, 
             ExpectedTypeRefModel const& type, 
             ExpectedMethodModel const& get_method,
             std::optional<ExpectedMethodModel> const& set_method)
@@ -277,18 +277,18 @@ struct ExpectedPropertyModel
 struct ExpectedEventModel
 {
     std::string id;
-    event_semantics sem;
+    event_modifier sem;
     ExpectedTypeRefModel type;
 
     ExpectedMethodModel add_method;
     ExpectedMethodModel remove_method;
 
     ExpectedEventModel(std::string const& name,
-        event_semantics const& sem,
+        event_modifier const& sem,
         ExpectedTypeRefModel const& type)
         : id{ name }, sem{ sem }, type{ type }
     {
-        method_semantics method_sem;
+        method_modifier method_sem;
         if (sem.is_static)
         {
             method_sem.is_static = true;
@@ -476,9 +476,9 @@ struct ExpectedEnumModel
     std::string id;
     std::string fully_qualified_id;
     std::vector<enum_member> fields;
-    enum_semantics sem;
+    enum_types sem;
 
-    ExpectedEnumModel(std::string const& id, std::string const& fully_qualified_id, enum_semantics sem, std::vector<enum_member> fields)
+    ExpectedEnumModel(std::string const& id, std::string const& fully_qualified_id, enum_types sem, std::vector<enum_member> fields)
         : id{ id }, fully_qualified_id{ fully_qualified_id }, fields{ fields }, sem{ sem } {}
 
     void VerifyType(std::shared_ptr<enum_model> const& actual)
@@ -679,7 +679,7 @@ TEST_CASE("Enum test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     
-    ExpectedEnumModel expected_enum{ "E", "N.E" , enum_semantics::Int32, { 
+    ExpectedEnumModel expected_enum{ "E", "N.E" , enum_types::Int32, { 
         enum_member{ "e_member_1", 0 },
         enum_member{ "e_member_2", 3 },
         enum_member{ "e_member_3", 4 },
@@ -745,8 +745,8 @@ TEST_CASE("Delegate test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
-    ExpectedEnumModel E{ "E", "N.E" , enum_semantics::Int32, {} };
-    ExpectedEnumModel F{ "F", "N.F" , enum_semantics::Int32, {} };
+    ExpectedEnumModel E{ "E", "N.E" , enum_types::Int32, {} };
+    ExpectedEnumModel F{ "F", "N.F" , enum_types::Int32, {} };
     ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ fundamental_type::Int32 }, {
         ExpectedFormalParameterModel{ "i", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } },
         ExpectedFormalParameterModel{ "d", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Double } },
@@ -900,7 +900,7 @@ TEST_CASE("Resolving delegates type ref test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     ExpectedStructModel S1{ "S1", "N.S1", {} };
-    ExpectedEnumModel E1{ "E1", "N.E1" , enum_semantics::Int32, {} };
+    ExpectedEnumModel E1{ "E1", "N.E1" , enum_types::Int32, {} };
     ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id } }, {
         ExpectedFormalParameterModel{ "param1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id } } },
         ExpectedFormalParameterModel{ "param2", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id }  } },
@@ -933,7 +933,7 @@ TEST_CASE("Resolving struct type ref test")
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     ExpectedStructModel S1{ "S1", "N.S1", {} };
-    ExpectedEnumModel E1{ "E1", "N.E1" , enum_semantics::Int32, {} };
+    ExpectedEnumModel E1{ "E1", "N.E1" , enum_types::Int32, {} };
     ExpectedStructModel S2{ "S2", "N.S2", {
         { ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id }} , "field_1" },
         { ExpectedTypeRefModel{ ExpectedEnumRef{ E1.fully_qualified_id } } , "field_2" },
@@ -972,7 +972,7 @@ TEST_CASE("Resolving type ref across namespaces test")
 
     ExpectedStructModel S1{ "S1", "A.S1", {} };
 
-    ExpectedEnumModel E1{ "E1", "B.C.E1" , enum_semantics::Int32, {} };
+    ExpectedEnumModel E1{ "E1", "B.C.E1" , enum_types::Int32, {} };
 
     ExpectedDelegateModel D1{ "D1", "N.D1", ExpectedTypeRefModel{ fundamental_type::Boolean }, {
         ExpectedFormalParameterModel{ "param1", parameter_semantics::in, ExpectedTypeRefModel{ ExpectedStructRef{ S1.fully_qualified_id } } },

@@ -8,18 +8,18 @@ using namespace xlang::xmeta;
 
 namespace
 {
-    static const std::map<std::string, enum_semantics> str_to_enum_type_map = {
-        { "Int8", enum_semantics::Int8 },
-        { "Int16", enum_semantics::Int16 },
-        { "Int32", enum_semantics::Int32 },
-        { "Int64", enum_semantics::Int64 },
-        { "UInt8", enum_semantics::UInt8 },
-        { "UInt16", enum_semantics::UInt16 },
-        { "UInt32", enum_semantics::UInt32 },
-        { "UInt64", enum_semantics::UInt64 },
+    static const std::map<std::string, enum_types> str_to_enum_type_map = {
+        { "Int8", enum_types::Int8 },
+        { "Int16", enum_types::Int16 },
+        { "Int32", enum_types::Int32 },
+        { "Int64", enum_types::Int64 },
+        { "UInt8", enum_types::UInt8 },
+        { "UInt16", enum_types::UInt16 },
+        { "UInt32", enum_types::UInt32 },
+        { "UInt64", enum_types::UInt64 },
     };
 
-    enum_semantics str_to_enum_semantics(std::string const& val)
+    enum_types str_to_enum_semantics(std::string const& val)
     {
         auto const iter = str_to_enum_type_map.find(val);
         if (iter == str_to_enum_type_map.end())
@@ -282,7 +282,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     std::shared_ptr<method_model> set_method = nullptr;
     type_ref tr = prop_model->get_type();
 
-    method_semantics property_method_semantics;
+    method_modifier property_method_semantics;
     if (prop_model->get_semantic().is_static)
     {
         property_method_semantics.is_static = true;
@@ -417,7 +417,7 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     parameter_semantics param_sem = parameter_semantics::in;
     type_ref tr = event->get_type();
 
-    method_semantics event_method_semantics;
+    method_modifier event_method_semantics;
     if (event->get_semantic().is_static)
     {
         event_method_semantics.is_static = true;
@@ -515,7 +515,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     // TODO: semantic check that constructor name must be the same as class name.
                 }
 
-                method_semantics method_sem;
+                method_modifier method_sem;
                 if (class_constructor->class_constructor_modifier() && class_constructor->class_constructor_modifier()->PROTECTED())
                 {
                     method_sem.is_protected = true;
@@ -555,7 +555,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 extract_type(class_method->return_type(), tr);
 
                 // TODO: semantic checks
-                method_semantics method_sem;
+                method_modifier method_sem;
                 for (auto const& method_modifier : class_method->method_modifier())
                 {
                     if (method_modifier->OVERRIDABLE() || method_modifier->OVERRIDE())
@@ -629,7 +629,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 extract_type(class_property->type(), tr);
 
                 // TODO: semantic checks
-                property_semantics property_sem;
+                property_modifier property_sem;
                 for (auto const& property_modifier : class_property->property_modifier())
                 {
                     if (property_modifier->PROTECTED())
@@ -687,7 +687,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 extract_type(class_event->type(), tr);
 
                 // TODO: semantic checks
-                event_semantics event_sem;
+                event_modifier event_sem;
                 for (auto const& event_modifier : class_event->event_modifier())
                 {
                     if (event_modifier->PROTECTED())
@@ -798,7 +798,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             auto const& interface_property = interface_member->interface_property_declaration();
             type_ref tr{ interface_property->type()->getText() };
             extract_type(interface_property->type(), tr);
-            auto prop_model = std::make_shared<property_model>(interface_property->IDENTIFIER()->getText(), interface_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, xlang::xmeta::property_semantics(), std::move(tr));
+            auto prop_model = std::make_shared<property_model>(interface_property->IDENTIFIER()->getText(), interface_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, xlang::xmeta::property_modifier(), std::move(tr));
 
             extract_property_accessors(prop_model, interface_property->property_accessors(), model);
         }
@@ -808,7 +808,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             type_ref tr{ interface_event->type()->getText() };
             extract_type(interface_event->type(), tr);
 
-            auto event = std::make_shared<event_model>(interface_event->IDENTIFIER()->getText(), interface_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, xlang::xmeta::event_semantics(), std::move(tr));
+            auto event = std::make_shared<event_model>(interface_event->IDENTIFIER()->getText(), interface_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, xlang::xmeta::event_modifier(), std::move(tr));
             extract_event_accessors(event, model);
         }
     }
@@ -853,7 +853,7 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
     auto id = ctx->IDENTIFIER();
     std::string enum_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
-    enum_semantics type = enum_semantics::Int32;
+    enum_types type = enum_types::Int32;
     std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + enum_name;  
     if (ctx->enum_base())
     {

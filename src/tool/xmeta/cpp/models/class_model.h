@@ -27,7 +27,7 @@ namespace xlang::xmeta
                 class_modifier const& sem, 
                 std::string_view const& base_id) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_class_base_ref{ base_id }
         { }
         
@@ -37,7 +37,7 @@ namespace xlang::xmeta
                 std::shared_ptr<namespace_body_model> const& containing_ns_body, 
                 class_modifier const& sem) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
-            m_semantic{ sem },
+            m_modifier{ sem },
             m_class_base_ref{ std::nullopt }
         { }
 
@@ -48,7 +48,7 @@ namespace xlang::xmeta
 
         auto const& get_semantic() const noexcept
         {
-            return m_semantic;
+            return m_modifier;
         }
 
         void add_class_base_ref(std::string_view const& class_base_ref);
@@ -72,7 +72,7 @@ namespace xlang::xmeta
 
     private:
         std::optional<type_ref> m_class_base_ref;
-        class_modifier m_semantic;
+        class_modifier m_modifier;
         // TODO: Add type parameters (generic types)
 
 
