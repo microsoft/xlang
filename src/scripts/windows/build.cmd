@@ -38,9 +38,9 @@ goto :init
     if /i "%~1"=="-h"         call :usage "%~2" & goto :end
     if /i "%~1"=="--help"     call :usage "%~2" & goto :end
 
-    if /i "%~1"=="/v"         set "OPT_VERBOSE_NINJA=-v" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
-    if /i "%~1"=="-v"         set "OPT_VERBOSE_NINJA=-v" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
-    if /i "%~1"=="--verbose"  set "OPT_VERBOSE_NINJA=-v" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
+    if /i "%~1"=="/v"         set "OPT_VERBOSE_NINJA=-v -d explain" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
+    if /i "%~1"=="-v"         set "OPT_VERBOSE_NINJA=-v -d explain" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
+    if /i "%~1"=="--verbose"  set "OPT_VERBOSE_NINJA=-v -d explain" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
 
     if /i "%~1"=="/f"               set "OPT_FORCE_CMAKE=yes"  & shift & goto :parse
     if /i "%~1"=="-f"               set "OPT_FORCE_CMAKE=yes"  & shift & goto :parse

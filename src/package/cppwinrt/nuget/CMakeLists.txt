@@ -18,12 +18,13 @@ file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuge
 
 add_custom_command(OUTPUT ${cppwinrt_nupkg}
     COMMAND ${nuget_exe} pack ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.CppWinRT.nuspec -Properties cppwinrt_exe=${cppwinrt_exe} -Properties cppwinrt_fast_fwd_x86=${cppwinrt_fast_fwd_x86} -Properties cppwinrt_fast_fwd_x64=${cppwinrt_fast_fwd_x64} -Properties cppwinrt_fast_fwd_arm=${cppwinrt_fast_fwd_arm} -Properties cppwinrt_fast_fwd_arm64=${cppwinrt_fast_fwd_arm64};  -Version ${XLANG_BUILD_VERSION} -OutputDirectory ${CMAKE_CURRENT_BINARY_DIR} -NonInteractive -Verbosity Detailed
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.CppWinRT.nuspec
+    DEPENDS ${cppwinrt_exe} ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.CppWinRT.nuspec
 )
 
 add_custom_target(make_cppwinrt_nupkg ALL DEPENDS ${cppwinrt_nupkg} cppwinrt cppwinrt_fast_fwd)
 
 set_target_properties(make_cppwinrt_nupkg PROPERTIES "cppwinrt_nupkg_dir" ${cppwinrt_nupkg_dir})
+set_target_properties(make_cppwinrt_nupkg PROPERTIES "cppwinrt_nupkg" ${cppwinrt_nupkg})
 
 endif()
 
