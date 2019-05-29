@@ -1,7 +1,7 @@
 # The C++/WinRT VSIX package is only targeted at Visual Studio (on Windows)
 if (WIN32 AND ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86"))
 
-get_target_property(cppwinrt_natvis_dir_x86 cppwinrtvisualizer "cppwinrt_natvis_dir")
+get_target_property(cppwinrt_natvis_dir_x86 cppwinrtvisualizer "cppwinrt_natvis_dir_x86")
 string(REGEX REPLACE "x86" "x64" cppwinrt_natvis_dir_x64 ${cppwinrt_natvis_dir_x86})
 
 get_target_property(cppwinrt_nupkg_dir make_cppwinrt_nupkg "cppwinrt_nupkg_dir")
