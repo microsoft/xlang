@@ -543,8 +543,15 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 {
                     // TODO: Default constructor case: compiled with the metadata [Activatable] with a Type of null.
                 }
-
+                
+                /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods 
+                properties and events and the metadata emit can user the interfaces that are referenced in the class
+                 to emit metadata */
                 clss_model->add_member(constructor_model);
+                if (clss_model->add_member(constructor_model) == semantic_error::symbol_exists)
+                {
+                    error_manager.write_type_member_exists_error(decl_line, constructor_model->get_name(), clss_model->get_qualified_name());
+                }
             }
             if (class_member->class_method_declaration())
             {
@@ -617,6 +624,9 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     synthesized_interface->add_member(syn_met_model);
                 }
 
+                /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods
+                    properties and events and the metadata emit can user the interfaces that are referenced in the class
+                     to emit metadata */
                 if (clss_model->add_member(met_model) == semantic_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), clss_model->get_qualified_name());
@@ -666,6 +676,9 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     error_manager.write_static_member_only_error(prop_model->get_decl_line(), prop_model->get_name());
                 }
 
+                /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods
+                    properties and events and the metadata emit can user the interfaces that are referenced in the class
+                     to emit metadata */
                 if (extract_property_accessors(prop_model, class_property->property_accessors(), clss_model) == listener_error::passed)
                 {
                     auto syn_prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, property_sem, std::move(tr));
@@ -716,6 +729,9 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     error_manager.write_static_member_only_error(event->get_decl_line(), event->get_name());
                 }
                 
+                /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods
+                    properties and events and the metadata emit can user the interfaces that are referenced in the class
+                     to emit metadata */
                 if (extract_event_accessors(event, clss_model) == listener_error::passed)
                 {
                     auto syn_event_model = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, event_sem, std::move(tr));
