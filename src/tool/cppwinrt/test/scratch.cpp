@@ -12,7 +12,7 @@ namespace winrt::impl
         static_assert(!std::is_same_v<T, Windows::Foundation::IInspectable>);
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
 
-        using this_type = convertible_observable_vector<T, Container>;
+        using container_type = convertible_observable_vector<T, Container>;
         using base_type = observable_vector_base<convertible_observable_vector<T, Container>, T>;
 
         explicit convertible_observable_vector(Container&& values) : m_values(std::forward<Container>(values))
@@ -33,16 +33,16 @@ namespace winrt::impl
         {
             struct result
             {
-                base_type* owner;
+                container_type* owner;
 
                 operator wfc::IIterator<T>()
                 {
-                    return owner->First();
+                    return static_cast<base_type*>(owner)->First();
                 }
 
                 operator wfc::IIterator<Windows::Foundation::IInspectable>()
                 {
-                    return nullptr;
+                    return make<iterator>(owner);
                 }
             };
 
@@ -100,7 +100,7 @@ namespace winrt::impl
         {
             struct result
             {
-                this_type const* owner;
+                container_type const* owner;
 
                 operator wfc::IVectorView<T>() const
                 {
@@ -164,6 +164,72 @@ namespace winrt::impl
         }
 
     private:
+
+        struct iterator : impl::collection_version::iterator_type, implements<iterator, Windows::Foundation::Collections::IIterator<Windows::Foundation::IInspectable>>
+        {
+            void abi_enter()
+            {
+                m_owner->abi_enter();
+                check_version(*m_owner);
+            }
+
+            void abi_exit()
+            {
+                m_owner->abi_exit();
+            }
+
+            explicit iterator(container_type* const owner) noexcept :
+                impl::collection_version::iterator_type(*owner),
+                m_current(owner->get_container().begin()),
+                m_end(owner->get_container().end())
+            {
+                m_owner.copy_from(owner);
+            }
+
+            Windows::Foundation::IInspectable Current() const
+            {
+                if (m_current == m_end)
+                {
+                    throw hresult_out_of_bounds();
+                }
+
+                return box_value(*m_current);
+            }
+
+            bool HasCurrent() const noexcept
+            {
+                return m_current != m_end;
+            }
+
+            bool MoveNext() noexcept
+            {
+                if (m_current != m_end)
+                {
+                    ++m_current;
+                }
+
+                return HasCurrent();
+            }
+
+            uint32_t GetMany(array_view<Windows::Foundation::IInspectable> values)
+            {
+                uint32_t const actual = (std::min)(static_cast<uint32_t>(std::distance(m_current, m_end)), values.size());
+
+                std::transform(m_current, m_current + actual, values.begin(), [&](auto&& value)
+                    {
+                        return box_value(value);
+                    });
+
+                std::advance(m_current, actual);
+                return actual;
+            }
+
+        private:
+
+            com_ptr<container_type> m_owner;
+            decltype(m_owner->get_container().begin()) m_current;
+            decltype(m_owner->get_container().end()) const m_end;
+        };
 
         Container m_values;
     };
