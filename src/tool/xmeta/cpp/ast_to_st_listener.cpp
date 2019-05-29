@@ -283,7 +283,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     type_ref tr = prop_model->get_type();
 
     method_modifier property_method_semantics;
-    if (prop_model->get_semantic().is_static)
+    if (prop_model->get_modifier().is_static)
     {
         property_method_semantics.is_static = true;
     }
@@ -418,7 +418,7 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     type_ref tr = event->get_type();
 
     method_modifier event_method_semantics;
-    if (event->get_semantic().is_static)
+    if (event->get_modifier().is_static)
     {
         event_method_semantics.is_static = true;
     }

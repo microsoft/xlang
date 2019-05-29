@@ -45,7 +45,7 @@ namespace xlang::xmeta
             m_implemented_property_ref{ "" }
         { }
 
-        auto const& get_semantic() const noexcept
+        auto const& get_modifier() const noexcept
         {
             return m_modifier;
         }

@@ -105,7 +105,7 @@ namespace xlang::xmeta
             return m_return_type;
         }
 
-        auto const& get_semantic() const noexcept
+        auto const& get_modifier() const noexcept
         {
             return m_modifier;
         }

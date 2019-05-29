@@ -215,7 +215,7 @@ struct ExpectedMethodModel
     void VerifyType(std::shared_ptr<method_model> const& actual)
     {
         REQUIRE(actual->get_id() == id);
-        REQUIRE(actual->get_semantic().is_static == sem.is_static);
+        REQUIRE(actual->get_modifier().is_static == sem.is_static);
         REQUIRE(actual->get_return_type()->get_semantic().is_resolved());
 
         if (return_type == std::nullopt)
@@ -256,7 +256,7 @@ struct ExpectedPropertyModel
     void VerifyType(std::shared_ptr<property_model> const& actual)
     {
         REQUIRE(actual->get_id() == id);
-        REQUIRE(actual->get_semantic().is_static == sem.is_static);
+        REQUIRE(actual->get_modifier().is_static == sem.is_static);
         REQUIRE(actual->get_type().get_semantic().is_resolved());
         type.VerifyType(actual->get_type());
 
@@ -303,7 +303,7 @@ struct ExpectedEventModel
     void VerifyType(std::shared_ptr<event_model> const& actual)
     {
         REQUIRE(actual->get_id() == id);
-        REQUIRE(actual->get_semantic().is_static == sem.is_static);
+        REQUIRE(actual->get_modifier().is_static == sem.is_static);
         REQUIRE(actual->get_type().get_semantic().is_resolved());
         type.VerifyType(actual->get_type());
 

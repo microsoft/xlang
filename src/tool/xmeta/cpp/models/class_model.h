@@ -46,7 +46,7 @@ namespace xlang::xmeta
             return m_class_base_ref;
         }
 
-        auto const& get_semantic() const noexcept
+        auto const& get_modifier() const noexcept
         {
             return m_modifier;
         }
