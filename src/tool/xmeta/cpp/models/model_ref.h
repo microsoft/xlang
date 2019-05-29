@@ -22,6 +22,10 @@ namespace xlang::xmeta
             m_ref{ std::string(name) }
         { }
 
+        explicit model_ref(resolved_type const& val) :
+            m_ref{ val }
+        { }
+
         bool is_resolved() const noexcept
         {
             return m_ref.index() != 0;
@@ -35,23 +39,35 @@ namespace xlang::xmeta
 
         auto const& get_resolved_target() const noexcept
         {
-            assert(std::holds_alternative<resolved_type>(m_ref));
+            if (!std::holds_alternative<resolved_type>(m_ref))
+            {
+                std::cout << ref_name << std::endl;
+                xlang::throw_invalid("Model Ref is not resolved");
+            }
             return std::get<resolved_type>(m_ref);
         }
 
         std::string const& get_ref_name() const noexcept
         {
-            assert(!is_resolved());
-            return std::get<std::string>(m_ref);
+            if (std::holds_alternative<std::string>(m_ref))
+            {
+                return std::get<std::string>(m_ref);
+            }
+            return ref_name;
         }
 
         template<typename R>
         void resolve(R const& value) noexcept
         {
+            if (std::holds_alternative<std::string>(m_ref))
+            {
+                ref_name = std::get<std::string>(m_ref);
+            }
             m_ref = value;
         }
 
     private:
         std::variant<std::string, resolved_type> m_ref;
+        std::string ref_name;
     };
 }

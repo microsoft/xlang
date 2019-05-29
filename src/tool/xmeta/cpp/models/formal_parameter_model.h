@@ -25,6 +25,12 @@ namespace xlang::xmeta
             m_type{ std::move(type) }
         { }
 
+        formal_parameter_model(std::string_view const& id, parameter_semantics sem, type_ref&& type) :
+            base_model{ id, 0, "test_only" },
+            m_semantic{ sem },
+            m_type{ std::move(type) }
+        { }
+
         auto const& get_semantic() const noexcept
         {
             return m_semantic;
@@ -36,24 +42,7 @@ namespace xlang::xmeta
         }
 
         // TODO: fully_qualified_id will be a vector of strings once  we have using directives
-        void resolve(std::map<std::string, class_type_semantics> const& symbols, std::string fully_qualified_id)
-        {
-            if (!m_type.get_semantic().is_resolved())
-            {
-                std::string ref_name = m_type.get_semantic().get_ref_name();
-                std::string symbol = ref_name.find(".") != std::string::npos ? ref_name : fully_qualified_id + "." + ref_name;
-
-                auto iter = symbols.find(symbol);
-                if (iter == symbols.end())
-                {
-                    // TODO: Record the unresolved type and continue once we have a good error story for reporting errors in models
-                }
-                else
-                {
-                    m_type.set_semantic(iter->second);
-                }
-            }
-        }
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id, method_association m_association = method_association::None);
 
     private:
         parameter_semantics m_semantic;

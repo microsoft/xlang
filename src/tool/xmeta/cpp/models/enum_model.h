@@ -8,7 +8,7 @@
 #include <vector>
 #include <variant>
 
-#include "model_ref.h"
+#include "base_model.h"
 #include "namespace_member_model.h"
 
 namespace xlang::xmeta
@@ -36,9 +36,15 @@ namespace xlang::xmeta
         {
         }
 
-        bool operator==(enum_member const& rhs)
+        enum_member(std::string_view const& id, enum_value_semantics const& value) :
+            base_model{ id, 0, "" },
+            m_value{ value }
         {
-            return rhs.get_id() == get_id();
+        }
+
+        bool operator==(enum_member const& rhs) const
+        {
+            return rhs.get_id() == get_id() && rhs.get_resolved_value() == get_resolved_value();
         }
 
         auto const& get_value() const noexcept
@@ -52,80 +58,18 @@ namespace xlang::xmeta
             m_value = value;
         }
 
-        enum_value_semantics get_resolved_value() const
-        {
-            assert(m_value.is_resolved());
-            return std::visit(
-                [&](auto&& value) -> enum_value_semantics
-                {
-                    static_assert(std::is_integral_v<std::decay_t<decltype(value)>>);
-                    return value;
-                }, 
-                m_value.get_resolved_target());
-        }
+        enum_value_semantics get_resolved_value() const;
         
-        std::errc increment(enum_semantics type)
-        {
-            switch (type)
-            {
-            case enum_semantics::Int8:
-                return increment<int8_t>();
-            case enum_semantics::UInt8:
-                return increment<uint8_t>();
-            case enum_semantics::Int16:
-                return increment<int16_t>();
-            case enum_semantics::UInt16:
-                return increment<uint16_t>();
-            case enum_semantics::Int32:
-                return increment<int32_t>();
-            case enum_semantics::UInt32:
-                return increment<uint32_t>();
-            case enum_semantics::Int64:
-                return increment<int64_t>();
-            case enum_semantics::UInt64:
-                return increment<uint64_t>();
-            }
-            return std::errc::invalid_argument;
-        }
+        std::errc increment(enum_semantics type);
 
-        std::errc resolve_decimal_val(enum_semantics type)
-        {
-            assert(!m_value.is_resolved());
-            return resolve_numeric_val(type, 10);
-        }
+        std::errc resolve_decimal_val(enum_semantics type);
 
-        std::errc resolve_hexadecimal_val(enum_semantics type)
-        {
-            assert(!m_value.is_resolved());
-            return resolve_numeric_val(type, 16);
-        }
+        std::errc resolve_hexadecimal_val(enum_semantics type);
 
     private:
         model_ref<enum_value_semantics> m_value;
 
-        std::errc resolve_numeric_val(enum_semantics type, int base) noexcept
-        {
-            switch (type)
-            {
-            case enum_semantics::Int8:
-                return resolve_numeric_val<int8_t>(base);
-            case enum_semantics::UInt8:
-                return resolve_numeric_val<uint8_t>(base);
-            case enum_semantics::Int16:
-                return resolve_numeric_val<int16_t>(base);
-            case enum_semantics::UInt16:
-                return resolve_numeric_val<uint16_t>(base);
-            case enum_semantics::Int32:
-                return resolve_numeric_val<int32_t>(base);
-            case enum_semantics::UInt32:
-                return resolve_numeric_val<uint32_t>(base);
-            case enum_semantics::Int64:
-                return resolve_numeric_val<int64_t>(base);
-            case enum_semantics::UInt64:
-                return resolve_numeric_val<uint64_t>(base);
-            }
-            return std::errc::invalid_argument;
-        }
+        std::errc resolve_numeric_val(enum_semantics type, int base) noexcept;
 
         // resolve_numeric_val resolves the m_value string to type T. It is required that T is one
         // of int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, or uint64_t.
@@ -160,12 +104,22 @@ namespace xlang::xmeta
     struct enum_model : namespace_member_model
     {
         enum_model() = delete;
+
         enum_model(std::string_view const& id,
-                   size_t decl_line,
-                   std::string_view const& assembly_name,
-                   std::shared_ptr<namespace_body_model> const& containing_ns_body,
-                   enum_semantics t) :
+                size_t decl_line,
+                std::string_view const& assembly_name,
+                std::shared_ptr<namespace_body_model> const& containing_ns_body,
+                enum_semantics t) :
             namespace_member_model{ id, decl_line, assembly_name, containing_ns_body },
+            m_type{ t }
+        { }
+
+        enum_model(std::string_view const& id,
+                size_t decl_line,
+                std::string_view const& assembly_name,
+                std::string_view const& containing_ns_name,
+                enum_semantics t) :
+            namespace_member_model{ id, decl_line, assembly_name, containing_ns_name },
             m_type{ t }
         { }
 

@@ -10,10 +10,23 @@ endif ()
 
 if (WIN32)
     add_library(xmeta_model
+        cpp/models/class_model.cpp
+        cpp/models/class_or_interface_model.cpp
+        cpp/models/compilation_unit.cpp
+        cpp/models/delegate_model.cpp
+        cpp/models/enum_model.cpp
+        cpp/models/event_model.cpp
+        cpp/models/formal_parameter_model.cpp
+        cpp/models/interface_model.cpp
+        cpp/models/method_model.cpp
+        cpp/models/model_types.cpp
+        cpp/models/property_model.cpp
+        cpp/models/struct_model.cpp
+        cpp/models/namespace_model.cpp
+        cpp/models/namespace_member_model.cpp
         cpp/xlang_error.cpp
         cpp/xmeta_idl_reader.cpp
         cpp/ast_to_st_listener.cpp
-        cpp/models/namespace_model.cpp
         cpp/xlang_model_walker.cpp)
 endif ()
 

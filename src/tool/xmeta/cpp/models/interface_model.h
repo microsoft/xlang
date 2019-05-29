@@ -3,13 +3,9 @@
 #include <assert.h>
 #include <string_view>
 #include <vector>
+#include <unordered_set>
 
-#include "event_model.h"
-#include "interface_model.h"
-#include "method_model.h"
-#include "model_ref.h"
 #include "class_or_interface_model.h"
-#include "property_model.h"
 
 namespace xlang::xmeta
 {
@@ -19,5 +15,17 @@ namespace xlang::xmeta
         interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body }
         { }
+        interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::string_view const& containing_ns_name) :
+            class_or_interface_model{ id, decl_line, assembly_name, containing_ns_name }
+        { }
+
+        void validate(xlang_error_manager & error_manager);
+
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager);
+
+        bool has_circular_inheritance(xlang_error_manager & error_manager);
+
+    private:
+        bool has_circular_inheritance(std::set<std::string> & symbol_set, xlang_error_manager & error_manager);
     };
 }

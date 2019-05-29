@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "base_model.h"
+#include "compilation_unit.h"
 #include "method_model.h"
 #include "model_types.h"
 
@@ -14,27 +15,34 @@ namespace xlang::xmeta
         bool is_static = false;
     };
 
-    struct property_type_semantics
-    {
-        bool m_is_array;
-        type_ref m_type_id;
-    };
-
     struct property_model : base_model
     {
         property_model() = delete;
-        property_model(std::string_view const& id, 
-                size_t decl_line, 
-                std::string_view const& assembly_name, 
-                property_semantics const& sem, 
-                property_type_semantics&& type, 
-                std::shared_ptr<method_model> const& get_method, 
+
+        property_model(std::string_view const& id,
+                size_t decl_line,
+                std::string_view const& assembly_name,
+                property_semantics const& sem,
+                type_ref&& type,
+                std::shared_ptr<method_model> const& get_method,
                 std::shared_ptr<method_model> const& set_method) :
             base_model{ id, decl_line, assembly_name },
             m_semantic{ sem },
             m_type{ std::move(type) },
             m_get_method{ get_method },
-            m_set_method{ set_method }
+            m_set_method{ set_method },
+            m_implemented_property_ref{ "" }
+        { }
+
+        property_model(std::string_view const& id,
+                size_t decl_line,
+                std::string_view const& assembly_name,
+                property_semantics const& sem,
+                type_ref&& type) :
+            base_model{ id, decl_line, assembly_name },
+            m_type{ std::move(type) },
+            m_semantic{ sem },
+            m_implemented_property_ref{ "" }
         { }
 
         auto const& get_semantic() const noexcept
@@ -57,9 +65,21 @@ namespace xlang::xmeta
             return m_set_method;
         }
 
+        void set_overridden_property_ref(std::shared_ptr<property_model> const& ref) noexcept;
+
+        compilation_error set_get_method(std::shared_ptr<method_model> const& m);
+
+        compilation_error set_set_method(std::shared_ptr<method_model> const& m);
+
+        void validate(xlang_error_manager & error_manager);
+
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager, std::string const& fully_qualified_id);
+
     private:
         property_semantics m_semantic;
-        property_type_semantics m_type;
+        model_ref<std::shared_ptr<property_model>> m_implemented_property_ref;
+        type_ref m_type;
+        bool m_is_array;
         std::shared_ptr<method_model> m_get_method;
         std::shared_ptr<method_model> m_set_method;
     };

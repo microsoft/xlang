@@ -2,16 +2,25 @@
 
 #include <memory>
 #include <string_view>
-
+#include <set>
+#include "base_model.h"
 #include "namespace_member_model.h"
 
 namespace xlang::xmeta
 {
     struct class_or_interface_model : namespace_member_model
     {
+        friend interface_model;
+        friend class_model;
+
         class_or_interface_model() = delete;
+
         class_or_interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::shared_ptr<namespace_body_model> const& containing_ns_body) :
             namespace_member_model{ id, decl_line, assembly_name, containing_ns_body }
+        { }
+
+        class_or_interface_model(std::string_view const& id, size_t decl_line, std::string_view const& assembly_name, std::string_view const& containing_namespace_name) :
+            namespace_member_model{ id, decl_line, assembly_name, containing_namespace_name }
         { }
 
         auto const& get_interface_bases() const noexcept
@@ -34,46 +43,36 @@ namespace xlang::xmeta
             return m_events;
         }
 
-        void add_interface_base_ref(std::string_view const& interface_base_ref)
-        {
-            m_interface_base_refs.emplace_back(std::string(interface_base_ref));
-        }
+        void add_interface_base_ref(std::string_view const& interface_base_ref);
 
-        void add_interface_base_ref(size_t index, std::shared_ptr<interface_model> interface_base_ref)
-        {
-            assert(index < m_interface_base_refs.size());
-            m_interface_base_refs[index].resolve(interface_base_ref);
-        }
+        compilation_error add_member(std::shared_ptr<method_model> const& member);
+        compilation_error add_member(std::shared_ptr<property_model> const& member);
+        compilation_error add_member(std::shared_ptr<event_model> const& member);
 
-        void add_member(std::shared_ptr<property_model> const& member)
-        {
-            m_properties.emplace_back(member);
-        }
+        std::shared_ptr<method_model> const& get_method_member(std::string const& member_id);
+        std::shared_ptr<property_model> const& get_property_member(std::string const& member_id);
 
-        void add_member(std::shared_ptr<method_model> const& member)
-        {
-            m_methods.emplace_back(member);
-        }
 
-        void add_member(std::shared_ptr<event_model> const& member)
-        {
-            m_events.emplace_back(member);
-        }
+        bool member_id_exists(std::string_view const& id);
+        bool event_or_property_id_exists(std::string_view const& id);
+        bool method_id_exists(std::string_view const& id);
+        bool property_id_exists(std::string_view const& id);
 
-        bool member_id_exists(std::string_view const& id)
-        {
-            return contains_id(m_properties, id) ||
-                contains_id(m_methods, id) ||
-                contains_id(m_events, id);
-        }
+        void validate(xlang_error_manager & error_manager);
+
+        void resolve(symbol_table & symbols, xlang_error_manager & error_manager);
 
     private:
-        std::vector<model_ref<std::shared_ptr<interface_model>>> m_interface_base_refs;
+        std::vector<type_ref> m_interface_base_refs;
         // TODO: Add type parameters (generic types)
+
+        bool contains_itself = false;
 
         // Members
         std::vector<std::shared_ptr<property_model>> m_properties;
         std::vector<std::shared_ptr<method_model>> m_methods;
         std::vector<std::shared_ptr<event_model>> m_events;
+
+        std::set<std::shared_ptr<interface_model>> get_all_interface_bases();
     };
 }
