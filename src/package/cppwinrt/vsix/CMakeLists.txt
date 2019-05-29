@@ -1,14 +1,16 @@
+cmake_minimum_required(VERSION 3.9)
+
 # The C++/WinRT VSIX package is only targeted at Visual Studio (on Windows)
 if (WIN32 AND ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86"))
 
-get_target_property(cppwinrt_natvis_dir_x86 cppwinrtvisualizer "cppwinrt_natvis_dir")
+get_target_property(cppwinrt_natvis_dir_x86 cppwinrtvisualizer "cppwinrt_natvis_dir_x86")
 string(REGEX REPLACE "x86" "x64" cppwinrt_natvis_dir_x64 ${cppwinrt_natvis_dir_x86})
 
 get_target_property(cppwinrt_nupkg_dir make_cppwinrt_nupkg "cppwinrt_nupkg_dir")
+get_target_property(cppwinrt_nupkg make_cppwinrt_nupkg "cppwinrt_nupkg")
 
 file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/build_tools/nuget.exe" nuget_exe)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/Microsoft.Windows.CppWinRT.vsix cppwinrt_vsix)
-file(TO_NATIVE_PATH "${cppwinrt_nupkg_dir}/Microsoft.Windows.CppWinRT.${XLANG_BUILD_VERSION}.nupkg" cppwinrt_nupkg)
 
 file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuget_exe})
 
