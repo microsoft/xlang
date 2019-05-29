@@ -10,7 +10,7 @@
 
 namespace xlang::xmeta
 {
-    struct class_semantics
+    struct class_modifier
     {
         bool is_sealed = false;
         bool is_static = false;
@@ -24,7 +24,7 @@ namespace xlang::xmeta
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::shared_ptr<namespace_body_model> const& containing_ns_body, 
-                class_semantics const& sem, 
+                class_modifier const& sem, 
                 std::string_view const& base_id) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
             m_semantic{ sem },
@@ -35,7 +35,7 @@ namespace xlang::xmeta
                 size_t decl_line, 
                 std::string_view const& assembly_name, 
                 std::shared_ptr<namespace_body_model> const& containing_ns_body, 
-                class_semantics const& sem) :
+                class_modifier const& sem) :
             class_or_interface_model{ id, decl_line, assembly_name, containing_ns_body },
             m_semantic{ sem },
             m_class_base_ref{ std::nullopt }
@@ -59,6 +59,7 @@ namespace xlang::xmeta
 
         void add_instance_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref);
 
+        // TODO: Composition and inheritance is coming in a later update
         //void add_protected_interface_ref(std::shared_ptr<interface_model> const& protected_interface_ref);
 
         //void add_overrides_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref);
@@ -71,7 +72,7 @@ namespace xlang::xmeta
 
     private:
         std::optional<type_ref> m_class_base_ref;
-        class_semantics m_semantic;
+        class_modifier m_semantic;
         // TODO: Add type parameters (generic types)
 
 
@@ -79,6 +80,7 @@ namespace xlang::xmeta
         std::vector<std::shared_ptr<interface_model>> m_factory_interfaces;
         std::vector<std::shared_ptr<interface_model>> m_instance_interfaces;
 
+        // TODO: Composition and inheritance is coming in a later update
         //std::vector<std::shared_ptr<interface_model>> m_overrides_interfaces;
         //std::vector<std::shared_ptr<interface_model>> m_protected_interfaces;
 

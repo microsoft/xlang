@@ -464,7 +464,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
     auto decl_line = id->getSymbol()->getLine();
 
     std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_fully_qualified_id() + "." + class_name;
-    class_semantics class_sem;
+    class_modifier class_sem;
     for (auto const& class_mod : ctx->class_modifiers())
     {
         if (class_mod->SEALED())

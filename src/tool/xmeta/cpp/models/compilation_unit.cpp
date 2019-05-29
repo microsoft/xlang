@@ -2,16 +2,16 @@
 
 namespace xlang::xmeta
 {
-    compilation_error symbol_table::set_symbol(std::string_view symbol, class_type_semantics const& class_type)
+    compilation_error symbol_table::set_symbol(std::string_view symbol, type_category const& class_type)
     {
-        if (!table.insert(std::pair<std::string, class_type_semantics>(symbol, class_type)).second)
+        if (!table.insert(std::pair<std::string, type_category>(symbol, class_type)).second)
         {
             return compilation_error::symbol_exists;
         }
         return compilation_error::passed;
     }
 
-    class_type_semantics symbol_table::get_symbol(std::string const& symbol)
+    type_category symbol_table::get_symbol(std::string const& symbol)
     {
         auto iter = table.find(symbol);
         if (iter == table.end())

@@ -10,7 +10,7 @@ namespace xlang::xmeta
         m_semantic.resolve(sem);
     }
 
-    void type_ref::set_semantic(class_type_semantics const& sem) noexcept
+    void type_ref::set_semantic(type_category const& sem) noexcept
     {
         if (std::holds_alternative<std::shared_ptr<delegate_model>>(sem))
         {

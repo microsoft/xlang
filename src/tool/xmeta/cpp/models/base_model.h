@@ -72,7 +72,7 @@ namespace xlang::xmeta
 
     struct object_type {};
 
-    using class_type_semantics = std::variant<std::monostate,
+    using type_category = std::variant<std::monostate,
         std::shared_ptr<class_model>,
         std::shared_ptr<enum_model>,
         std::shared_ptr<interface_model>,
