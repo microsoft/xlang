@@ -283,7 +283,7 @@ std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::
     return reader.save_to_memory();
 }
 
-void VerifyTypeRefName(std::string expectedName, std::string_view currentNamespace, TypeRef const& typeRef)
+void VerifyTypeRefName(std::string const& expectedName, std::string_view currentNamespace, TypeRef const& typeRef)
 {
     std::string combineName("");
     if (currentNamespace != typeRef.TypeNamespace())
@@ -295,14 +295,13 @@ void VerifyTypeRefName(std::string expectedName, std::string_view currentNamespa
     REQUIRE(combineName == expectedName);
 }
 
-void VerifyReturnType(const ElementType &expectedType, const std::string &expectedTypeRef, const MethodDef &method, const TypeDef &parent)
+void VerifyReturnType(ElementType const& expectedType, std::string const& expectedTypeRef, MethodDef const& method, TypeDef const& parent)
 {
     auto const& methodSig = method.Signature();
     REQUIRE(method.ParamList().first[0].Name() == "returnVal");
     switch (expectedType)
     {
     case ElementType::Void:
-
         REQUIRE(!methodSig.ReturnType());
         break;
     case ElementType::End:
@@ -316,11 +315,12 @@ void VerifyReturnType(const ElementType &expectedType, const std::string &expect
     }
 }
 
-struct ExpectedType {
+struct ExpectedType
+{
     std::string name;
 
     ExpectedType() {}
-    ExpectedType(const std::string &typeName) : name(typeName) {}
+    ExpectedType(std::string const& typeName) : name(typeName) {}
 
     virtual void VerifyType(TypeDef const& /*typeDef*/) const {}
     virtual void VerifyType(MethodDef const& /*field*/) const {}
@@ -330,13 +330,14 @@ struct ExpectedType {
     virtual void VerifyType(Param const& /*param*/, ParamSig const& /*paramSig*/, std::string_view const& /*parentNamespace*/) const {}
 };
 
-struct ExpectedStructField : ExpectedType {
+struct ExpectedStructField : ExpectedType
+{
     ElementType type;
     std::string typeRef;
 
-    ExpectedStructField(const std::string &expectedName, const ElementType expectedType)
+    ExpectedStructField(std::string const& expectedName, ElementType const& expectedType)
         : ExpectedType(expectedName), type(expectedType), typeRef("") {}
-    ExpectedStructField(const std::string &expectedName, const std::string &expectedType)
+    ExpectedStructField(std::string const& expectedName, std::string const& expectedType)
         : ExpectedType(expectedName), type(ElementType::End), typeRef(expectedType) {}
 
     void VerifyType(Field const& field) const override
@@ -355,10 +356,11 @@ struct ExpectedStructField : ExpectedType {
     }
 };
 
-struct ExpectedStruct : ExpectedType {
+struct ExpectedStruct : ExpectedType
+{
     std::vector<ExpectedStructField> fields;
 
-    ExpectedStruct(const std::string &expectedName, std::vector<ExpectedStructField> &&expectedFields) : ExpectedType(expectedName), fields(expectedFields) {}
+    ExpectedStruct(std::string const& expectedName, std::vector<ExpectedStructField> expectedFields) : ExpectedType(expectedName), fields(expectedFields) {}
 
     void VerifyType(TypeDef const& typeDef) const override
     {
@@ -375,10 +377,11 @@ struct ExpectedStruct : ExpectedType {
     }
 };
 
-struct ExpectedEnumField : ExpectedType {
+struct ExpectedEnumField : ExpectedType
+{
     int32_t value;
 
-    ExpectedEnumField(const std::string &expectedName, const int32_t expectedValue) : ExpectedType(expectedName), value(expectedValue) {}
+    ExpectedEnumField(std::string const& expectedName, int32_t const& expectedValue) : ExpectedType(expectedName), value(expectedValue) {}
 
     void VerifyType(Field const& field) const override
     {
@@ -388,10 +391,11 @@ struct ExpectedEnumField : ExpectedType {
     }
 };
 
-struct ExpectedEnum : ExpectedType {
+struct ExpectedEnum : ExpectedType
+{
     std::vector<ExpectedEnumField> fields;
 
-    ExpectedEnum(const std::string &expectedName, std::vector<ExpectedEnumField> &&expectedFields) : ExpectedType(expectedName), fields(expectedFields) {}
+    ExpectedEnum(std::string const& expectedName, std::vector<ExpectedEnumField> expectedFields) : ExpectedType(expectedName), fields(expectedFields) {}
 
     void VerifyType(TypeDef const& typeDef) const override
     {
@@ -408,13 +412,14 @@ struct ExpectedEnum : ExpectedType {
     }
 };
 
-struct ExpectedParam : ExpectedType {
+struct ExpectedParam : ExpectedType
+{
     ElementType type;
     std::string typeRef;
 
-    ExpectedParam(const std::string &expectedName, const ElementType expectedType)
+    ExpectedParam(std::string const& expectedName, ElementType const& expectedType)
         : ExpectedType(expectedName), type(expectedType), typeRef("") {}
-    ExpectedParam(const std::string &expectedName, const std::string &expectedType)
+    ExpectedParam(std::string const& expectedName, std::string const& expectedType)
         : ExpectedType(expectedName), type(ElementType::End), typeRef(expectedType) {}
 
     void VerifyType(Param const& param, ParamSig const& paramSig, std::string_view const& parentNamespace) const override
@@ -431,14 +436,15 @@ struct ExpectedParam : ExpectedType {
     }
 };
 
-struct ExpectedDelegate : ExpectedType {
+struct ExpectedDelegate : ExpectedType
+{
     ElementType returnType;
     std::string returnTypeRef;
     std::vector<ExpectedParam> params;
 
-    ExpectedDelegate(const std::string &expectedName, const ElementType expectedReturnType, std::vector<ExpectedParam> &&expectedParams)
+    ExpectedDelegate(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
         : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams) {}
-    ExpectedDelegate(const std::string &expectedName, const std::string expectedReturnType, std::vector<ExpectedParam> &&expectedParams)
+    ExpectedDelegate(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
         : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams) {}
 
     void VerifyType(TypeDef const& typeDef) const override
@@ -459,14 +465,15 @@ struct ExpectedDelegate : ExpectedType {
     }
 };
 
-struct ExpectedMethod : ExpectedType {
+struct ExpectedMethod : ExpectedType
+{
     ElementType returnType;
     std::string returnTypeRef;
     std::vector<ExpectedParam> params;
 
-    ExpectedMethod(const std::string &expectedName, const ElementType expectedReturnType, std::vector<ExpectedParam> &&expectedParams)
+    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
         : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams) {}
-    ExpectedMethod(const std::string &expectedName, const std::string &expectedReturnType, std::vector<ExpectedParam> &&expectedParams)
+    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
         : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams) {}
 
     void VerifyType(MethodDef const& method) const override
@@ -484,13 +491,14 @@ struct ExpectedMethod : ExpectedType {
     }
 };
 
-struct ExpectedProperty : ExpectedType {
+struct ExpectedProperty : ExpectedType
+{
     ElementType type;
     std::string typeRef;
 
-    ExpectedProperty(const std::string &expectedName, const ElementType expectedType)
+    ExpectedProperty(std::string const& expectedName, ElementType const& expectedType)
         : ExpectedType(expectedName), type(expectedType), typeRef("") {}
-    ExpectedProperty(const std::string &expectedName, const std::string &expectedType)
+    ExpectedProperty(std::string const& expectedName, std::string const& expectedType)
         : ExpectedType(expectedName), type(ElementType::End), typeRef(expectedType) {}
 
     void VerifyType(Property const& prop) const override
@@ -520,11 +528,24 @@ struct ExpectedProperty : ExpectedType {
                 if (getMethodName == method.Name())
                 {
                     foundGetMethod = true;
+                    REQUIRE(size(method.Signature().Params()) == 0);
+                    REQUIRE(method.Flags().value == interface_method_property_attributes().value);
+                    VerifyReturnType(type, typeRef, method, prop.Parent());
                 }
                 else if (setMethodName == method.Name())
                 {
                     foundSetMethod = true;
                     REQUIRE(!method.Signature().ReturnType());
+                    REQUIRE(size(method.Signature().Params()) == 1);
+                    REQUIRE(method.Flags().value == interface_method_property_attributes().value);
+                    if (type == ElementType::End)
+                    {
+                        VerifyTypeRefName(typeRef, method.Parent().TypeNamespace(), std::get<coded_index<TypeDefOrRef>>(method.Signature().Params().first[0].Type().Type()).TypeRef());
+                    }
+                    else
+                    {
+                        REQUIRE(method.Signature().Params().first[0].Type().element_type() == type);
+                    }
                 }
             }
         }
@@ -533,10 +554,11 @@ struct ExpectedProperty : ExpectedType {
     }
 };
 
-struct ExpectedEvent : ExpectedType {
+struct ExpectedEvent : ExpectedType
+{
     std::string typeRef;
 
-    ExpectedEvent(const std::string &expectedName, const std::string &expectedType)
+    ExpectedEvent(std::string const& expectedName, std::string const& expectedType)
         : ExpectedType(expectedName), typeRef(expectedType) {}
 
     void VerifyType(Event const& event) const override
@@ -560,10 +582,10 @@ struct ExpectedEvent : ExpectedType {
                 {
                     foundAddMethod = true;
                     REQUIRE(size(method.Signature().Params()) == 1);
-
                     std::string expectedTypeName(std::get<coded_index<TypeDefOrRef>>(method.Signature().Params().first[0].Type().Type()).TypeRef().TypeName());
                     VerifyTypeRefName(expectedTypeName, event.Parent().TypeNamespace(), event.EventType().TypeRef());
                     REQUIRE(method.Flags().value == interface_method_event_attributes().value);
+                    VerifyReturnType(ElementType::End, "Foundation.EventRegistrationToken", method, event.Parent());
                 }
                 else if (removeMethodName == method.Name())
                 {
@@ -571,6 +593,7 @@ struct ExpectedEvent : ExpectedType {
                     REQUIRE(size(method.Signature().Params()) == 1);
                     REQUIRE(!method.Signature().ReturnType());
                     REQUIRE(method.Flags().value == interface_method_event_attributes().value);
+                    VerifyTypeRefName("Foundation.EventRegistrationToken", event.Parent().TypeNamespace(), std::get<coded_index<TypeDefOrRef>>(method.Signature().Params().first[0].Type().Type()).TypeRef());
                 }
             }
         }
@@ -579,40 +602,41 @@ struct ExpectedEvent : ExpectedType {
     }
 };
 
-struct ExpectedInterface : ExpectedType {
+struct ExpectedInterface : ExpectedType
+{
     std::vector<ExpectedMethod> methods;
     std::vector<ExpectedProperty> properties;
     std::vector<ExpectedEvent> events;
     std::vector<std::string> requires;
 
-    ExpectedInterface(const std::string &expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> &&expectedProperties, std::vector<ExpectedEvent> &&expectedEvents, std::vector<ExpectedMethod> &&expectedMethods)
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
         : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods(expectedMethods) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> &&expectedProperties, std::vector<ExpectedEvent> &&expectedEvents)
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents)
         : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods({}) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> &&expectedProperties, std::vector<ExpectedMethod> &&expectedMethods)
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedMethod> expectedMethods)
         : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events({}), methods(expectedMethods) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedEvent> &&expectedEvents, std::vector<ExpectedMethod> &&expectedMethods)
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
         : ExpectedType(expectedName), requires(expectedRequires), properties({}), events(expectedEvents), methods(expectedMethods) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> &&expectedProperties)
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties)
         : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events({}), methods({}) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedEvent> &&expectedEvents)
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedEvent> expectedEvents)
         : ExpectedType(expectedName), requires(expectedRequires), properties({}), events(expectedEvents), methods({}) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedMethod> &&expectedMethods)
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedMethod> expectedMethods)
         : ExpectedType(expectedName), requires(expectedRequires), properties({}), events({}), methods(expectedMethods) {}
 
-    ExpectedInterface(const std::string &expectedName, std::vector<ExpectedProperty> &&expectedProperties, std::vector<ExpectedEvent> &&expectedEvents, std::vector<ExpectedMethod> &&expectedMethods)
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
         : ExpectedType(expectedName), requires({}), properties(expectedProperties), events(expectedEvents), methods(expectedMethods) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<ExpectedProperty> &&expectedProperties, std::vector<ExpectedEvent> &&expectedEvents)
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents)
         : ExpectedType(expectedName), requires({}), properties(expectedProperties), events(expectedEvents), methods({}) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<ExpectedProperty> &&expectedProperties, std::vector<ExpectedMethod> &&expectedMethods)
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedMethod> expectedMethods)
         : ExpectedType(expectedName), requires({}), properties(expectedProperties), events({}), methods(expectedMethods) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<ExpectedEvent> &&expectedEvents, std::vector<ExpectedMethod> &&expectedMethods)
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
         : ExpectedType(expectedName), requires({}), properties({}), events(expectedEvents), methods(expectedMethods) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<ExpectedProperty> &&expectedProperties)
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties)
         : ExpectedType(expectedName), requires({}), properties(expectedProperties), events({}), methods({}) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<ExpectedEvent> &&expectedEvents)
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedEvent> expectedEvents)
         : ExpectedType(expectedName), requires({}), properties({}), events(expectedEvents), methods({}) {}
-    ExpectedInterface(const std::string &expectedName, std::vector<ExpectedMethod> &&expectedMethods)
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedMethod> expectedMethods)
         : ExpectedType(expectedName), requires({}), properties({}), events({}), methods(expectedMethods) {}
 
     void VerifyType(TypeDef const& typeDef) const override
@@ -668,7 +692,7 @@ struct ExpectedInterface : ExpectedType {
     }
 };
 
-void ValidateTypesInMetadata(std::istringstream & testIdl, const std::vector<std::shared_ptr<ExpectedType>> &fileTypes)
+void ValidateTypesInMetadata(std::istringstream & testIdl, std::vector<std::shared_ptr<ExpectedType>> const& fileTypes)
 {
     xlang::meta::reader::database db{ run_and_save_to_memory(testIdl, "testidl") };
 
@@ -1109,7 +1133,7 @@ TEST_CASE("Interface type metadata")
     ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
-TEST_CASE("Put breakpoint here")
+TEST_CASE("Put breakpoint here to see test output before closing")
 {
     return;
 }
