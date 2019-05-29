@@ -237,6 +237,7 @@
     </ClCompile>
     <ClCompile Include="custom_error.cpp" />
     <ClCompile Include="delegates.cpp" />
+    <ClCompile Include="disconnected.cpp" />
     <ClCompile Include="enum.cpp" />
     <ClCompile Include="final_release.cpp" />
     <ClCompile Include="GetMany.cpp" />

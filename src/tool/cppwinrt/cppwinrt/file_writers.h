@@ -75,7 +75,6 @@ namespace xlang
         w.write_each<write_forward>(members.delegates);
         write_close_namespace(w);
         write_impl_namespace(w);
-        w.write_each<write_enum_flag>(members.enums);
         w.write_each<write_category>(members.interfaces, "interface_category");
         w.write_each<write_category>(members.classes, "class_category");
         w.write_each<write_category>(members.enums, "enum_category");
@@ -173,6 +172,7 @@ namespace xlang
         w.write_each<write_dispatch_overridable>(members.classes);
         write_close_namespace(w);
         write_type_namespace(w, ns);
+        w.write_each<write_enum_operators>(members.enums);
         w.write_each<write_class_definitions>(members.classes);
         w.write_each<write_fast_class_base_definitions>(members.classes);
 

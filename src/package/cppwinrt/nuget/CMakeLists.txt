@@ -21,7 +21,7 @@ add_custom_command(OUTPUT ${cppwinrt_nupkg}
     DEPENDS ${cppwinrt_exe} ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.CppWinRT.nuspec
 )
 
-add_custom_target(make_cppwinrt_nupkg ALL DEPENDS ${cppwinrt_nupkg} cppwinrt cppwinrt_fast_fwd)
+add_custom_target(make_cppwinrt_nupkg ALL DEPENDS cppwinrt ${cppwinrt_nupkg} cppwinrt_fast_fwd)
 
 set_target_properties(make_cppwinrt_nupkg PROPERTIES "cppwinrt_nupkg_dir" ${cppwinrt_nupkg_dir})
 set_target_properties(make_cppwinrt_nupkg PROPERTIES "cppwinrt_nupkg" ${cppwinrt_nupkg})

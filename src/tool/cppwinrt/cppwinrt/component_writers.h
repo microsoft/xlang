@@ -255,7 +255,7 @@ catch (...) { return winrt::to_hresult(); }
 
     static void write_component_composable_forwarder(writer& w, MethodDef const& method)
     {
-        auto format = R"(        auto %(%)
+        auto format = R"(        % %(%)
         {
             return impl::composable_factory<T>::template CreateInstance<%>(%);
         }
@@ -268,6 +268,7 @@ catch (...) { return winrt::to_hresult(); }
         w.param_names = true;
 
         w.write(format,
+            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             signature.return_signature(),
@@ -276,7 +277,7 @@ catch (...) { return winrt::to_hresult(); }
 
     static void write_component_constructor_forwarder(writer& w, MethodDef const& method)
     {
-        auto format = R"(        auto %(%)
+        auto format = R"(        % %(%)
         {
             return make<T>(%);
         }
@@ -286,6 +287,7 @@ catch (...) { return winrt::to_hresult(); }
         w.param_names = true;
 
         w.write(format,
+            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             bind<write_consume_args>(signature));
@@ -293,7 +295,7 @@ catch (...) { return winrt::to_hresult(); }
 
     void write_component_static_forwarder(writer& w, MethodDef const& method)
     {
-        auto format = R"(        auto %(%)
+        auto format = R"(        % %(%)
         {
             return T::%(%);
         }
@@ -303,6 +305,7 @@ catch (...) { return winrt::to_hresult(); }
         w.param_names = true;
 
         w.write(format,
+            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             get_name(method),
@@ -478,7 +481,7 @@ catch (...) { return winrt::to_hresult(); }
 
                     if (is_add_overload(method) || is_remove_overload(method))
                     {
-                        auto format = R"(    auto %::%(%)
+                        auto format = R"(    % %::%(%)
     {
         auto f = make<winrt::@::factory_implementation::%>().as<%>();
         return f.%(%);
@@ -487,6 +490,7 @@ catch (...) { return winrt::to_hresult(); }
 
 
                         w.write(format,
+                            signature.return_signature(),
                             type_name,
                             method_name,
                             bind<write_consume_params>(signature),
@@ -498,7 +502,7 @@ catch (...) { return winrt::to_hresult(); }
                     }
                     else
                     {
-                        auto format = R"(    auto %::%(%)
+                        auto format = R"(    % %::%(%)
     {
         return @::implementation::%::%(%);
     }
@@ -506,6 +510,7 @@ catch (...) { return winrt::to_hresult(); }
 
 
                         w.write(format,
+                            signature.return_signature(),
                             type_name,
                             method_name,
                             bind<write_consume_params>(signature),
