@@ -100,7 +100,6 @@ struct ExpectedTypeRefModel
     void VerifyType(type_ref const& actual)
     {
         REQUIRE(actual.get_semantic().is_resolved());
-        //std::get<simple_type>(method1_return_type.get_resolved_target());
         auto const& target = actual.get_semantic().get_resolved_target();
         if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(target))
         {
