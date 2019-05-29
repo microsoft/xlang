@@ -8,18 +8,18 @@ using namespace xlang::xmeta;
 
 namespace
 {
-    static const std::map<std::string, enum_types> str_to_enum_type_map = {
-        { "Int8", enum_types::Int8 },
-        { "Int16", enum_types::Int16 },
-        { "Int32", enum_types::Int32 },
-        { "Int64", enum_types::Int64 },
-        { "UInt8", enum_types::UInt8 },
-        { "UInt16", enum_types::UInt16 },
-        { "UInt32", enum_types::UInt32 },
-        { "UInt64", enum_types::UInt64 },
+    static const std::map<std::string, enum_type> str_to_enum_type_map = {
+        { "Int8", enum_type::Int8 },
+        { "Int16", enum_type::Int16 },
+        { "Int32", enum_type::Int32 },
+        { "Int64", enum_type::Int64 },
+        { "UInt8", enum_type::UInt8 },
+        { "UInt16", enum_type::UInt16 },
+        { "UInt32", enum_type::UInt32 },
+        { "UInt64", enum_type::UInt64 },
     };
 
-    enum_types str_to_enum_semantics(std::string const& val)
+    enum_type str_to_enum_semantics(std::string const& val)
     {
         auto const iter = str_to_enum_type_map.find(val);
         if (iter == str_to_enum_type_map.end())
@@ -853,7 +853,7 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
     auto id = ctx->IDENTIFIER();
     std::string enum_name{ id->getText() };
     auto decl_line = id->getSymbol()->getLine();
-    enum_types type = enum_types::Int32;
+    enum_type type = enum_type::Int32;
     std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + enum_name;  
     if (ctx->enum_base())
     {
