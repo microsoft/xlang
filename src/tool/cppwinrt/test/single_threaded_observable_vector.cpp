@@ -59,6 +59,46 @@ TEST_CASE("single_threaded_observable_vector")
         REQUIRE(changed_o);
     }
     {
+        // VectorChanged forwards underlying token.
+
+        IObservableVector<int> vector_i = single_threaded_observable_vector<int>();
+        IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
+        int changed_i{};
+        int changed_o{};
+
+        auto token_i = vector_i.VectorChanged([&](IObservableVector<int> const&, IVectorChangedEventArgs const&)
+            {
+                ++changed_i;
+            });
+
+        auto token_o = vector_o.VectorChanged([&](IObservableVector<IInspectable> const&, IVectorChangedEventArgs const&)
+            {
+                ++changed_o;
+            });
+
+        REQUIRE(changed_i == 0);
+        REQUIRE(changed_o == 0);
+
+        vector_i.Append(1);
+
+        REQUIRE(changed_i == 1);
+        REQUIRE(changed_o == 1);
+
+        vector_i.VectorChanged(token_i);
+
+        vector_i.Append(1);
+
+        REQUIRE(changed_i == 1);
+        REQUIRE(changed_o == 2);
+
+        vector_o.VectorChanged(token_o);
+
+        vector_i.Append(1);
+
+        REQUIRE(changed_i == 1);
+        REQUIRE(changed_o == 2);
+    }
+    {
         // Confirming the underlying container is shared and remains in sync.
 
         IObservableVector<int> vector_i = single_threaded_observable_vector<int>();
