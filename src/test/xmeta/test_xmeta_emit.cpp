@@ -283,16 +283,427 @@ std::vector<uint8_t> run_and_save_to_memory(std::istringstream & test_idl, std::
     return reader.save_to_memory();
 }
 
-template<typename T>
-auto find_type_by_name(table<T> const& type, std::string name, std::string namespace_name)
+void VerifyTypeRefName(std::string const& expectedName, std::string_view currentNamespace, TypeRef const& typeRef)
 {
-    auto const& ref = std::find_if(type.begin(), type.end(), [name, namespace_name](auto&& t)
+    std::string combineName("");
+    if (currentNamespace != typeRef.TypeNamespace())
     {
-        return t.TypeName() == name && t.TypeNamespace() == namespace_name;
-    });
-    REQUIRE(ref.TypeName() == name);
-    REQUIRE(ref.TypeNamespace() == namespace_name);
-    return ref;
+        combineName += typeRef.TypeNamespace();
+        combineName += ".";
+    }
+    combineName += typeRef.TypeName();
+    REQUIRE(combineName == expectedName);
+}
+
+void VerifyReturnType(ElementType const& expectedType, std::string const& expectedTypeRef, MethodDef const& method, TypeDef const& parent)
+{
+    auto const& methodSig = method.Signature();
+    REQUIRE(method.ParamList().first[0].Name() == "returnVal");
+    switch (expectedType)
+    {
+    case ElementType::Void:
+        REQUIRE(!methodSig.ReturnType());
+        break;
+    case ElementType::End:
+    {
+        VerifyTypeRefName(expectedTypeRef, parent.TypeNamespace(), std::get<coded_index<TypeDefOrRef>>(methodSig.ReturnType().Type().Type()).TypeRef());
+        break;
+    }
+    default:
+        REQUIRE(std::get<ElementType>(methodSig.ReturnType().Type().Type()) == expectedType);
+        break;
+    }
+}
+
+struct ExpectedType
+{
+    std::string name;
+
+    ExpectedType() {}
+    ExpectedType(std::string const& typeName) : name(typeName) {}
+
+    virtual void VerifyType(TypeDef const& /*typeDef*/) const {}
+    virtual void VerifyType(MethodDef const& /*field*/) const {}
+    virtual void VerifyType(Field const& /*field*/) const {}
+    virtual void VerifyType(Property const& /*property*/) const {}
+    virtual void VerifyType(Event const& /*event*/) const {}
+    virtual void VerifyType(Param const& /*param*/, ParamSig const& /*paramSig*/, std::string_view const& /*parentNamespace*/) const {}
+};
+
+struct ExpectedStructField : ExpectedType
+{
+    ElementType type;
+    std::string typeRef;
+
+    ExpectedStructField(std::string const& expectedName, ElementType const& expectedType)
+        : ExpectedType(expectedName), type(expectedType), typeRef("") {}
+    ExpectedStructField(std::string const& expectedName, std::string const& expectedType)
+        : ExpectedType(expectedName), type(ElementType::End), typeRef(expectedType) {}
+
+    void VerifyType(Field const& field) const override
+    {
+        REQUIRE(field.Name() == name);
+        REQUIRE(field.Flags().value == struct_field_attributes().value);
+
+        if (type == ElementType::End)
+        {
+            VerifyTypeRefName(typeRef, field.Parent().TypeNamespace(), std::get<coded_index<TypeDefOrRef>>(field.Signature().Type().Type()).TypeRef());
+        }
+        else
+        {
+            REQUIRE(field.Signature().Type().element_type() == type);
+        }
+    }
+};
+
+struct ExpectedStruct : ExpectedType
+{
+    std::vector<ExpectedStructField> fields;
+
+    ExpectedStruct(std::string const& expectedName, std::vector<ExpectedStructField> expectedFields) : ExpectedType(expectedName), fields(expectedFields) {}
+
+    void VerifyType(TypeDef const& typeDef) const override
+    {
+        REQUIRE(typeDef.TypeName() == name);
+
+        test_struct_type_properties(typeDef);
+
+        auto structField(fields.begin());
+        for (auto &&field : typeDef.FieldList())
+        {
+            structField->VerifyType(field);
+            ++structField;
+        }
+    }
+};
+
+struct ExpectedEnumField : ExpectedType
+{
+    int32_t value;
+
+    ExpectedEnumField(std::string const& expectedName, int32_t const& expectedValue) : ExpectedType(expectedName), value(expectedValue) {}
+
+    void VerifyType(Field const& field) const override
+    {
+        REQUIRE(field.Name() == name);
+        REQUIRE(field.Constant().ValueInt32() == value);
+        REQUIRE(field.Flags().value == enum_fields_attributes().value);
+    }
+};
+
+struct ExpectedEnum : ExpectedType
+{
+    std::vector<ExpectedEnumField> fields;
+
+    ExpectedEnum(std::string const& expectedName, std::vector<ExpectedEnumField> expectedFields) : ExpectedType(expectedName), fields(expectedFields) {}
+
+    void VerifyType(TypeDef const& typeDef) const override
+    {
+        REQUIRE(typeDef.TypeName() == name);
+
+        test_enum_type_properties(typeDef);
+
+        auto enumField(fields.begin());
+        for (size_t i = 1; i < size(typeDef.FieldList()); i++)
+        {
+            enumField->VerifyType(typeDef.FieldList().first[i]);
+            ++enumField;
+        }
+    }
+};
+
+struct ExpectedParam : ExpectedType
+{
+    ElementType type;
+    std::string typeRef;
+
+    ExpectedParam(std::string const& expectedName, ElementType const& expectedType)
+        : ExpectedType(expectedName), type(expectedType), typeRef("") {}
+    ExpectedParam(std::string const& expectedName, std::string const& expectedType)
+        : ExpectedType(expectedName), type(ElementType::End), typeRef(expectedType) {}
+
+    void VerifyType(Param const& param, ParamSig const& paramSig, std::string_view const& parentNamespace) const override
+    {
+        REQUIRE(param.Name() == name);
+        if (type == ElementType::End)
+        {
+            VerifyTypeRefName(typeRef, parentNamespace, std::get<coded_index<TypeDefOrRef>>(paramSig.Type().Type()).TypeRef());
+        }
+        else
+        {
+            REQUIRE(std::get<ElementType>(paramSig.Type().Type()) == type);
+        }
+    }
+};
+
+struct ExpectedDelegate : ExpectedType
+{
+    ElementType returnType;
+    std::string returnTypeRef;
+    std::vector<ExpectedParam> params;
+
+    ExpectedDelegate(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
+        : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams) {}
+    ExpectedDelegate(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
+        : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams) {}
+
+    void VerifyType(TypeDef const& typeDef) const override
+    {
+        REQUIRE(typeDef.TypeName() == name);
+
+        test_delegate_type_properties(typeDef);
+
+        auto const& invokeMethod = typeDef.MethodList().first[1];
+        VerifyReturnType(returnType, returnTypeRef, invokeMethod, typeDef);
+
+        auto param(params.begin());
+        for (size_t i = 1; i < size(invokeMethod.ParamList()); i++)
+        {
+            param->VerifyType(invokeMethod.ParamList().first[i], invokeMethod.Signature().Params().first[i - 1], typeDef.TypeNamespace());
+            ++param;
+        }
+    }
+};
+
+struct ExpectedMethod : ExpectedType
+{
+    ElementType returnType;
+    std::string returnTypeRef;
+    std::vector<ExpectedParam> params;
+
+    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
+        : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams) {}
+    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
+        : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams) {}
+
+    void VerifyType(MethodDef const& method) const override
+    {
+        REQUIRE(method.Name() == name);
+
+        VerifyReturnType(returnType, returnTypeRef, method, method.Parent());
+
+        auto param(params.begin());
+        for (size_t i = 1; i < size(method.ParamList()); i++)
+        {
+            param->VerifyType(method.ParamList().first[i], method.Signature().Params().first[i - 1], method.Parent().TypeNamespace());
+            ++param;
+        }
+    }
+};
+
+struct ExpectedProperty : ExpectedType
+{
+    ElementType type;
+    std::string typeRef;
+
+    ExpectedProperty(std::string const& expectedName, ElementType const& expectedType)
+        : ExpectedType(expectedName), type(expectedType), typeRef("") {}
+    ExpectedProperty(std::string const& expectedName, std::string const& expectedType)
+        : ExpectedType(expectedName), type(ElementType::End), typeRef(expectedType) {}
+
+    void VerifyType(Property const& prop) const override
+    {
+        REQUIRE(prop.Name() == name);
+        REQUIRE(prop.Flags().value == method_attributes_no_flags().value);
+
+        if (type == ElementType::End)
+        {
+            VerifyTypeRefName(typeRef, prop.Parent().TypeNamespace(), std::get<coded_index<TypeDefOrRef>>(prop.Type().Type().Type()).TypeRef());
+        }
+        else
+        {
+            REQUIRE(prop.Type().Type().element_type() == type);
+        }
+
+        bool foundGetMethod = false;
+        bool foundSetMethod = false;
+        std::string getMethodName = "get_";
+        std::string setMethodName = "put_";
+        getMethodName += prop.Name();
+        setMethodName += prop.Name();
+        for (auto &&method : prop.Parent().MethodList())
+        {
+            if (method.Flags().SpecialName() == true)
+            {
+                if (getMethodName == method.Name())
+                {
+                    foundGetMethod = true;
+                    REQUIRE(size(method.Signature().Params()) == 0);
+                    REQUIRE(method.Flags().value == interface_method_property_attributes().value);
+                    VerifyReturnType(type, typeRef, method, prop.Parent());
+                }
+                else if (setMethodName == method.Name())
+                {
+                    foundSetMethod = true;
+                    REQUIRE(!method.Signature().ReturnType());
+                    REQUIRE(size(method.Signature().Params()) == 1);
+                    REQUIRE(method.Flags().value == interface_method_property_attributes().value);
+                    if (type == ElementType::End)
+                    {
+                        VerifyTypeRefName(typeRef, method.Parent().TypeNamespace(), std::get<coded_index<TypeDefOrRef>>(method.Signature().Params().first[0].Type().Type()).TypeRef());
+                    }
+                    else
+                    {
+                        REQUIRE(method.Signature().Params().first[0].Type().element_type() == type);
+                    }
+                }
+            }
+        }
+        REQUIRE(foundGetMethod == true);
+        REQUIRE(foundSetMethod == true);
+    }
+};
+
+struct ExpectedEvent : ExpectedType
+{
+    std::string typeRef;
+
+    ExpectedEvent(std::string const& expectedName, std::string const& expectedType)
+        : ExpectedType(expectedName), typeRef(expectedType) {}
+
+    void VerifyType(Event const& event) const override
+    {
+        REQUIRE(event.Name() == name);
+        REQUIRE(event.EventFlags().value == event_attributes_no_flags().value);
+
+        VerifyTypeRefName(typeRef, event.Parent().TypeNamespace(), event.EventType().TypeRef());
+
+        bool foundAddMethod = false;
+        bool foundRemoveMethod = false;
+        std::string addMethodName = "add_";
+        std::string removeMethodName = "remove_";
+        addMethodName += event.Name();
+        removeMethodName += event.Name();
+        for (auto &&method : event.Parent().MethodList())
+        {
+            if (method.Flags().SpecialName() == true)
+            {
+                if (addMethodName == method.Name())
+                {
+                    foundAddMethod = true;
+                    REQUIRE(size(method.Signature().Params()) == 1);
+                    std::string expectedTypeName(std::get<coded_index<TypeDefOrRef>>(method.Signature().Params().first[0].Type().Type()).TypeRef().TypeName());
+                    VerifyTypeRefName(expectedTypeName, event.Parent().TypeNamespace(), event.EventType().TypeRef());
+                    REQUIRE(method.Flags().value == interface_method_event_attributes().value);
+                    VerifyReturnType(ElementType::End, "Foundation.EventRegistrationToken", method, event.Parent());
+                }
+                else if (removeMethodName == method.Name())
+                {
+                    foundRemoveMethod = true;
+                    REQUIRE(size(method.Signature().Params()) == 1);
+                    REQUIRE(!method.Signature().ReturnType());
+                    REQUIRE(method.Flags().value == interface_method_event_attributes().value);
+                    VerifyTypeRefName("Foundation.EventRegistrationToken", event.Parent().TypeNamespace(), std::get<coded_index<TypeDefOrRef>>(method.Signature().Params().first[0].Type().Type()).TypeRef());
+                }
+            }
+        }
+        REQUIRE(foundAddMethod == true);
+        REQUIRE(foundRemoveMethod == true);
+    }
+};
+
+struct ExpectedInterface : ExpectedType
+{
+    std::vector<ExpectedMethod> methods;
+    std::vector<ExpectedProperty> properties;
+    std::vector<ExpectedEvent> events;
+    std::vector<std::string> requires;
+
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
+        : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods(expectedMethods) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents)
+        : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods({}) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedMethod> expectedMethods)
+        : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events({}), methods(expectedMethods) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
+        : ExpectedType(expectedName), requires(expectedRequires), properties({}), events(expectedEvents), methods(expectedMethods) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties)
+        : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events({}), methods({}) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedEvent> expectedEvents)
+        : ExpectedType(expectedName), requires(expectedRequires), properties({}), events(expectedEvents), methods({}) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedMethod> expectedMethods)
+        : ExpectedType(expectedName), requires(expectedRequires), properties({}), events({}), methods(expectedMethods) {}
+
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
+        : ExpectedType(expectedName), requires({}), properties(expectedProperties), events(expectedEvents), methods(expectedMethods) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents)
+        : ExpectedType(expectedName), requires({}), properties(expectedProperties), events(expectedEvents), methods({}) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedMethod> expectedMethods)
+        : ExpectedType(expectedName), requires({}), properties(expectedProperties), events({}), methods(expectedMethods) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
+        : ExpectedType(expectedName), requires({}), properties({}), events(expectedEvents), methods(expectedMethods) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties)
+        : ExpectedType(expectedName), requires({}), properties(expectedProperties), events({}), methods({}) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedEvent> expectedEvents)
+        : ExpectedType(expectedName), requires({}), properties({}), events(expectedEvents), methods({}) {}
+    ExpectedInterface(std::string const& expectedName, std::vector<ExpectedMethod> expectedMethods)
+        : ExpectedType(expectedName), requires({}), properties({}), events({}), methods(expectedMethods) {}
+
+    void VerifyType(TypeDef const& typeDef) const override
+    {
+        REQUIRE(typeDef.TypeName() == name);
+
+        test_interface_type_properties(typeDef);
+
+        if (!methods.empty())
+        {
+            auto expectedMethod(methods.begin());
+            for (auto &&method : typeDef.MethodList())
+            {
+                if (method.Flags().SpecialName() == false)
+                {
+                    expectedMethod->VerifyType(method);
+                }
+                ++expectedMethod;
+            }
+        }
+
+        if (!properties.empty())
+        {
+            auto expectedProperty(properties.begin());
+            for (auto &&prop : typeDef.PropertyList())
+            {
+                expectedProperty->VerifyType(prop);
+                ++expectedProperty;
+            }
+        }
+
+        if (!events.empty())
+        {
+            auto expectedEvent(events.begin());
+            for (auto &&event : typeDef.EventList())
+            {
+                expectedEvent->VerifyType(event);
+                ++expectedEvent;
+            }
+        }
+
+        if (!requires.empty())
+        {
+            auto expectedRequire(requires.begin());
+            for (auto &&require : typeDef.InterfaceImpl())
+            {
+                VerifyTypeRefName(*expectedRequire, typeDef.TypeNamespace(), require.Interface().TypeRef());
+                ++expectedRequire;
+            }
+        }
+
+        return;
+    }
+};
+
+void ValidateTypesInMetadata(std::istringstream & testIdl, std::vector<std::shared_ptr<ExpectedType>> const& fileTypes)
+{
+    xlang::meta::reader::database db{ run_and_save_to_memory(testIdl, "testidl") };
+
+    auto expectedType(fileTypes.begin());
+    // Start at 1 to skip over <Module> element
+    for (size_t i = 1; i < db.TypeDef.size(); i++)
+    {
+        (*expectedType)->VerifyType(db.TypeDef[i]);
+        ++expectedType;
+    }
+    REQUIRE(expectedType == fileTypes.end());
 }
 
 TEST_CASE("Assemblies metadata")
@@ -323,40 +734,19 @@ TEST_CASE("Enum metadata")
             }
         }
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
-
-    auto const& enum_type = find_type_by_name<TypeDef>(db.TypeDef, "Color", "Windows.Test");
-    REQUIRE(enum_type.TypeName() == "Color");
-    test_enum_type_properties(enum_type);
-
-    auto const& fields = enum_type.FieldList();
-    REQUIRE(size(fields) == 4); // # of enumerators plus one for the value
-
-    const std::string_view enum_names[3] = { "Red", "Green", "Blue" };
-    const int32_t enum_values[3] = { 0, 1, 2 };
-    for (size_t i = 1; i < size(fields); i++)
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        auto const& enum_field = fields.first[i];
-        REQUIRE(enum_field.Flags().value == enum_fields_attributes().value);
-        REQUIRE(enum_field.Name() == enum_names[i - 1]);
-        REQUIRE(enum_field.Constant().ValueInt32() == enum_values[i - 1]);
+        std::make_unique<ExpectedEnum>("Color",
+            std::vector<ExpectedEnumField> {
+                ExpectedEnumField("Red", 0),
+                ExpectedEnumField("Green", 1),
+                ExpectedEnumField("Blue", 2)
+            }
+        )
+    };
 
-        auto const& field_sig = enum_field.Signature();
-        REQUIRE(empty(field_sig.CustomMod()));
-        REQUIRE(field_sig.get_CallingConvention() == CallingConvention::Field);
-        REQUIRE(!field_sig.Type().is_szarray());
-
-        auto const& coded_type = std::get<coded_index<TypeDefOrRef>>(field_sig.Type().Type());
-        REQUIRE(coded_type.type() == TypeDefOrRef::TypeRef);
-
-        auto const& type_ref = coded_type.TypeRef();
-        REQUIRE(type_ref.TypeName() == "Color");
-        REQUIRE(type_ref.TypeNamespace() == "Windows.Test");
-        REQUIRE(type_ref.ResolutionScope().type() == ResolutionScope::Module);
-    }
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Delegate metadata")
@@ -367,49 +757,18 @@ TEST_CASE("Delegate metadata")
             delegate Int16 testdelegate(Int32 c, out Int64 d);
         }
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
-    REQUIRE(db.Param.size() == 5); // return type + two formal parameters + two from delegate constructor parameter
-    REQUIRE(db.MethodDef.size() == 2); // One constructor and one invoke method
-    auto const& delegate_type = find_type_by_name<TypeDef>(db.TypeDef, "testdelegate", "Windows.Test");
-    test_delegate_type_properties(delegate_type);
-
-    
-    // Testing invoke method
-    auto const& delegate_invoke = delegate_type.MethodList().first[1];
-    // Checking return type
-    auto const& delegate_sig = delegate_invoke.Signature();
-    REQUIRE(std::holds_alternative<ElementType>(delegate_sig.ReturnType().Type().Type()));
-    REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == ElementType::I2);
-    REQUIRE(delegate_invoke.ParamList().first[0].Name() == "returnVal");
-    REQUIRE(delegate_invoke.ParamList().first[0].Sequence() == 0);
-
-    // Checking params
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        REQUIRE(delegate_invoke.ParamList().first[1].Name() == "c");
-        REQUIRE(delegate_invoke.ParamList().first[1].Sequence() == 1);
-        REQUIRE(delegate_invoke.ParamList().first[1].Flags().value == param_attributes_in_flag().value);
-        auto const& delegate_param_sig = delegate_sig.Params().first[0];
-        REQUIRE(std::holds_alternative<ElementType>(delegate_param_sig.Type().Type()));
-        REQUIRE(std::get<ElementType>(delegate_param_sig.Type().Type()) == ElementType::I4);
-    }
-    {
-        REQUIRE(delegate_invoke.ParamList().first[2].Name() == "d");
-        REQUIRE(delegate_invoke.ParamList().first[2].Sequence() == 2);
-        REQUIRE(delegate_invoke.ParamList().first[2].Flags().value == param_attributes_out_flag().value);
-        auto const& delegate_param_sig = delegate_sig.Params().first[1];
-        REQUIRE(std::holds_alternative<ElementType>(delegate_param_sig.Type().Type()));
-        REQUIRE(std::get<ElementType>(delegate_param_sig.Type().Type()) == ElementType::I8);
-    }
-}
+        std::make_unique<ExpectedDelegate>("testdelegate", ElementType::I2,
+            std::vector<ExpectedParam> {
+                ExpectedParam("c", ElementType::I4),
+                ExpectedParam("d", ElementType::I8)
+            }
+        )
+    };
 
-void check_simple_types(MethodDef method, std::string name, ElementType type)
-{
-    REQUIRE(method.Parent().TypeName() == name);
-    auto const& delegate_sig = method.Signature();
-    REQUIRE(std::get<ElementType>(delegate_sig.ReturnType().Type().Type()) == type);
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Parameter signature simple type metadata")
@@ -433,27 +792,26 @@ TEST_CASE("Parameter signature simple type metadata")
             delegate void e5();
         }
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
-    REQUIRE(db.MethodDef.size() == 28); // Each delegate defines two method defs
 
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 0].MethodList().first[1], "d1", ElementType::String);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 1].MethodList().first[1], "d2", ElementType::I1);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 2].MethodList().first[1], "d3", ElementType::I2);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 3].MethodList().first[1], "d4", ElementType::I4);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 4].MethodList().first[1], "d5", ElementType::I8);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 5].MethodList().first[1], "d6", ElementType::U1);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 6].MethodList().first[1], "d7", ElementType::U2);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 7].MethodList().first[1], "d8", ElementType::U4);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 8].MethodList().first[1], "d9", ElementType::U8);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 9].MethodList().first[1], "e1", ElementType::R4);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 10].MethodList().first[1], "e2", ElementType::R8);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 11].MethodList().first[1], "e3", ElementType::Char);
-    check_simple_types(db.TypeDef[TYPE_DEF_OFFSET + 12].MethodList().first[1], "e4", ElementType::Boolean);
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
+    {
+        std::make_unique<ExpectedDelegate>("d1", ElementType::String, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("d2", ElementType::I1, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("d3", ElementType::I2, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("d4", ElementType::I4, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("d5", ElementType::I8, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("d6", ElementType::U1, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("d7", ElementType::U2, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("d8", ElementType::U4, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("d9", ElementType::U8, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("e1", ElementType::R4, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("e2", ElementType::R8, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("e3", ElementType::Char, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("e4", ElementType::Boolean, std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedDelegate>("e5", ElementType::Void, std::vector<ExpectedParam> {})
+    };
 
-    auto const& void_return_method = db.TypeDef[TYPE_DEF_OFFSET + 13].MethodList().first[1];
-    REQUIRE(void_return_method.Parent().TypeName() == "e5");
-    REQUIRE(!void_return_method.Signature().ReturnType());
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Parameter signature class reference type metadata across namespace")
@@ -470,26 +828,14 @@ TEST_CASE("Parameter signature class reference type metadata across namespace")
             delegate Windows.Test.e1 d1();
         }
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
-    REQUIRE(db.MethodDef.size() == 2);
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
-    auto const& e1_ref = find_type_by_name<TypeRef>(db.TypeRef, "e1", "Windows.Test");
-    find_type_by_name<TypeRef>(db.TypeRef, "d1", "A");
 
-    auto const& e1 = find_type_by_name<TypeDef>(db.TypeDef, "e1", "Windows.Test");
-    auto const& d1 = find_type_by_name<TypeDef>(db.TypeDef, "d1", "A");
-    test_enum_type_properties(e1);
-    test_delegate_type_properties(d1);
-
-    // Check that type Ref is cottrect
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        auto const& delegate_invoke = d1.MethodList().first[1];
-        REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
-        auto const& delegate_sig = delegate_invoke.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == e1_ref);
-    }
+        std::make_unique<ExpectedDelegate>("d1", "Windows.Test.e1", std::vector<ExpectedParam> {}),
+        std::make_unique<ExpectedEnum>("e1", std::vector<ExpectedEnumField> {})
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Parameter signature class reference type metadata")
@@ -503,31 +849,19 @@ TEST_CASE("Parameter signature class reference type metadata")
             delegate e1 d1();
         }
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
-    REQUIRE(db.MethodDef.size() == 2);
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 2);
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
-    REQUIRE(db.TypeRef[TYPE_REF_OFFSET].TypeName() == "e1");
-    auto const& e1_ref = find_type_by_name<TypeRef>(db.TypeRef, "e1", "Windows.Test");
-    find_type_by_name<TypeRef>(db.TypeRef, "d1", "Windows.Test");
 
-    auto const e1 = find_type_by_name<TypeDef>(db.TypeDef, "e1", "Windows.Test");
-    auto const d1 = find_type_by_name<TypeDef>(db.TypeDef, "d1", "Windows.Test");
-    test_enum_type_properties(e1);
-    test_delegate_type_properties(d1);
-    // Check that type Ref is cottrect
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        auto const& delegate_invoke = d1.MethodList().first[1];
-        REQUIRE(delegate_invoke.Parent().TypeName() == "d1");
-        auto const& delegate_sig = delegate_invoke.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(delegate_sig.ReturnType().Type().Type()).TypeRef() == e1_ref);
-    }
+        std::make_unique<ExpectedEnum>("e1", std::vector<ExpectedEnumField> {}),
+        std::make_unique<ExpectedDelegate>("d1", "e1", std::vector<ExpectedParam> {})
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Struct simple type metadata")
 {
-    std::istringstream struct_test_idl{ R"(
+    std::istringstream test_idl{ R"(
         namespace N
         {
             struct S
@@ -547,33 +881,31 @@ TEST_CASE("Struct simple type metadata")
         }
     )" };
 
-    const std::vector<ElementType> elements_to_check 
-        = { ElementType::Boolean, ElementType::String, ElementType::I2, 
-        ElementType::I4, ElementType::I8, ElementType::U1, ElementType::U2, 
-        ElementType::U4, ElementType::Char, ElementType::R4, ElementType::R8};
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(struct_test_idl, assembly_name) };
-    
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 1);
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 1);
-    REQUIRE(db.Field.size() == 11);
-
-    auto const& struct0 = find_type_by_name<TypeDef>(db.TypeDef, "S", "N");
-    test_struct_type_properties(struct0);
-
-    for (size_t i = 0; i < size(struct0.FieldList()) ; i++)
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        auto const& struct_field = struct0.FieldList().first[i];
-        REQUIRE(struct_field.Parent().TypeName() == "S");
-        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
-        auto const& struct_field_sig = struct_field.Signature();
-        REQUIRE(struct_field_sig.Type().element_type() == elements_to_check[i]);
-    }
+        std::make_unique<ExpectedStruct>("S",
+            std::vector<ExpectedStructField> {
+                ExpectedStructField("field_1", ElementType::Boolean),
+                ExpectedStructField("field_2", ElementType::String),
+                ExpectedStructField("field_3", ElementType::I2),
+                ExpectedStructField("field_4", ElementType::I4),
+                ExpectedStructField("field_5", ElementType::I8),
+                ExpectedStructField("field_6", ElementType::U1),
+                ExpectedStructField("field_7", ElementType::U2),
+                ExpectedStructField("field_8", ElementType::U4),
+                ExpectedStructField("field_9", ElementType::Char),
+                ExpectedStructField("field_10", ElementType::R4),
+                ExpectedStructField("field_11", ElementType::R8)
+            }
+        )
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Struct class type metadata")
 {
-    std::istringstream struct_test_idl{ R"(
+    std::istringstream test_idl{ R"(
         namespace N
         {
             enum E0
@@ -592,36 +924,19 @@ TEST_CASE("Struct class type metadata")
         }
     )" };
 
-    const std::vector<ElementType> elements_to_check
-        = { ElementType::Boolean, ElementType::String, ElementType::I2,
-        ElementType::I4, ElementType::I8, ElementType::U1, ElementType::U2,
-        ElementType::U4, ElementType::Char, ElementType::R4, ElementType::R8 };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(struct_test_idl, assembly_name) };
-
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
-    
-    find_type_by_name<TypeRef>(db.TypeRef, "S0", "N");
-    auto const& s1 = find_type_by_name<TypeRef>(db.TypeRef, "S1", "N");
-    auto const& e0 = find_type_by_name<TypeRef>(db.TypeRef, "E0", "N");
-
-    auto const& struct0 = find_type_by_name<TypeDef>(db.TypeDef, "S0", "N");
-    test_struct_type_properties(struct0);
-
-    REQUIRE(db.Field.size() == 3);
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        auto const& struct_field = struct0.FieldList().first[0];
-        auto const& struct_field_sig = struct_field.Signature();
-        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == s1);
-    }
-    {
-        auto const& struct_field = struct0.FieldList().first[1];
-        auto const& struct_field_sig = struct_field.Signature();
-        REQUIRE(struct_field.Flags().value == struct_field_attributes().value);
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(struct_field_sig.Type().Type()).TypeRef() == e0);
-    }
+        std::make_unique<ExpectedStruct>("S0",
+            std::vector<ExpectedStructField> {
+                ExpectedStructField("field_1", "S1"),
+                ExpectedStructField("field_2", "E0")
+            }
+        ),
+        std::make_unique<ExpectedStruct>("S1", std::vector<ExpectedStructField> {}),
+        std::make_unique<ExpectedEnum>("E0", std::vector<ExpectedEnumField>{})
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Interface method metadata")
@@ -637,33 +952,23 @@ TEST_CASE("Interface method metadata")
             enum E1 {}  
         }
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
-    auto const& E1_ref = find_type_by_name<TypeRef>(db.TypeRef, "E1", "N");
-    auto const& ICombo_ref = find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
-    auto const& S1_ref = find_type_by_name<TypeRef>(db.TypeRef, "S1", "N");
-    REQUIRE(E1_ref.TypeName() == "E1");
-    REQUIRE(ICombo_ref.TypeName() == "IComboBox");
-    REQUIRE(S1_ref.TypeName() == "S1");
-
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
-    REQUIRE(db.TypeDef[TYPE_DEF_OFFSET + 1].TypeName() == "IComboBox");
-    auto const& combo = db.TypeDef[TYPE_DEF_OFFSET + 1];
-    test_interface_type_properties(combo);
-
-    REQUIRE(size(combo.MethodList()) == 1);
-    auto const& method_list = combo.MethodList();
-
-    REQUIRE(method_list.first[0].Name() == "Draw");
-    REQUIRE(method_list.first[0].Flags().value == interface_method_attributes().value);
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        auto const& Draw_sig = method_list.first[0].Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
-        auto const& Draw_param_sig = Draw_sig.Params().first[0];
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(Draw_param_sig.Type().Type()).TypeRef() == E1_ref);
-    }
+        std::make_unique<ExpectedStruct>("S1", std::vector<ExpectedStructField> {}),
+        std::make_unique<ExpectedInterface>("IComboBox",
+            std::vector<ExpectedMethod> {
+                ExpectedMethod("Draw", "S1",
+                    std::vector<ExpectedParam> {
+                        ExpectedParam("param1", "E1")
+                    }
+                )
+            }
+        ),
+        std::make_unique<ExpectedEnum>("E1", std::vector<ExpectedEnumField>{})
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Interface property metadata")
@@ -679,53 +984,19 @@ TEST_CASE("Interface property metadata")
             enum E1 {}  
         }
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
-    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
-    find_type_by_name<TypeRef>(db.TypeRef, "E1", "N");
-    auto const& S1_ref = find_type_by_name<TypeRef>(db.TypeRef, "S1", "N");
-
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
-    auto const& combo_def = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
-    test_interface_type_properties(combo_def);
-
-    REQUIRE(size(combo_def.PropertyList()) == 1);
-    auto const& property_list = combo_def.PropertyList();
-
-    auto const& property1 = property_list.first[0];
-    REQUIRE(property1.Name() == "property1");
-    REQUIRE(property1.Flags().value == method_attributes_no_flags().value);
-    
-    REQUIRE(db.MethodSemantics.size() == 2);
-    for (auto const& sem : property1.MethodSemantic())
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        REQUIRE(sem.Association().Property() == property1);
-        auto const& assoc = sem.Association().type();
-        REQUIRE(assoc == HasSemantics::Property);
-        auto const& property_sig = sem.Association().Property().Type();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(property_sig.Type().Type()).TypeRef() == S1_ref);
-        REQUIRE(sem.Association().Property().Name() == property1.Name());
-    }
-    auto const& get_method = property1.MethodSemantic().first[0].Method();
-    REQUIRE(get_method.Name() == "get_property1");
-    {
-        auto const& sig = get_method.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == S1_ref);
-        REQUIRE(size(sig.Params()) == 0);
-        REQUIRE(get_method.Flags().value == interface_method_property_attributes().value);
-    }
-    auto const& set_method = property1.MethodSemantic().first[1].Method();
-    REQUIRE(set_method.Name() == "put_property1");
-    {
-        auto const& sig = set_method.Signature();
-        REQUIRE(!sig.ReturnType());
-        REQUIRE(size(sig.Params()) == 1);
-        auto const& param_sig = sig.Params().first[0];
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == S1_ref);
-        REQUIRE(set_method.Flags().value == interface_method_property_attributes().value);
-    }
+        std::make_unique<ExpectedStruct>("S1", std::vector<ExpectedStructField> {}),
+        std::make_unique<ExpectedInterface>("IComboBox",
+            std::vector<ExpectedProperty> {
+                ExpectedProperty("property1", "S1")
+            }
+        ),
+        std::make_unique<ExpectedEnum>("E1", std::vector<ExpectedEnumField>{})
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Interface event metadata")
@@ -740,75 +1011,24 @@ TEST_CASE("Interface event metadata")
             }
         }
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
-    
-    REQUIRE(db.AssemblyRef.size() == 2);
-    auto const& iter = std::find_if(db.AssemblyRef.begin(), db.AssemblyRef.end(), [](auto&& assembly)
+
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        return assembly.Name() == "xlang_foundation";
-    });
-    REQUIRE(iter.Name() == "xlang_foundation");
+        std::make_unique<ExpectedInterface>("IComboBox",
+            std::vector<ExpectedEvent> {
+                ExpectedEvent("Changed", "StringListEvent")
+            }
+        ),
+        std::make_unique<ExpectedDelegate>("StringListEvent", ElementType::Void,
+            std::vector<ExpectedParam> {
+                ExpectedParam("sender", ElementType::I4)
+            }
+        )
+    };
 
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
-    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
-    auto const& event_registration_token_ref = find_type_by_name<TypeRef>(db.TypeRef, "EventRegistrationToken", "Foundation");
-    auto const& string_list_event_ref = find_type_by_name<TypeRef>(db.TypeRef, "StringListEvent", "N");
-
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 2);
-    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
-    test_interface_type_properties(combo);
-
-    REQUIRE(size(combo.EventList()) == 1);
-    auto const& event_list = combo.EventList();
-
-
-    auto const& event1 = event_list.first[0];
-    REQUIRE(event1.Name() == "Changed");
-    REQUIRE(event1.EventFlags().value == event_attributes_no_flags().value);
-
-    REQUIRE(db.MethodSemantics.size() == 2);
-    for (auto const& sem : event1.MethodSemantic())
-    {
-        REQUIRE(sem.Association().Event() == event1);
-        auto const& assoc = sem.Association().type();
-        REQUIRE(assoc == HasSemantics::Event);
-        auto const& event_sig = sem.Association().Event().EventType();
-        REQUIRE(event_sig.TypeRef().TypeName() == string_list_event_ref.TypeName());
-        REQUIRE(sem.Association().Event().Name() == event1.Name());
-    }
-    auto const& add_method = event1.MethodSemantic().first[0].Method();
-    REQUIRE(add_method.Name() == "add_Changed");
-    {
-        auto const& sig = add_method.Signature();
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(sig.ReturnType().Type().Type()).TypeRef() == event_registration_token_ref);
-        REQUIRE(size(sig.Params()) == 1);
-        auto const& param_sig = sig.Params().first[0];
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == string_list_event_ref);
-        REQUIRE(add_method.Flags().value == interface_method_event_attributes().value);
-    }
-    auto const& remove_method = event1.MethodSemantic().first[1].Method();
-    REQUIRE(remove_method.Name() == "remove_Changed");
-    {
-        auto const& sig = remove_method.Signature();
-        REQUIRE(!sig.ReturnType());
-        REQUIRE(size(sig.Params()) == 1);
-        auto const& param_sig = sig.Params().first[0];
-        REQUIRE(std::get<coded_index<TypeDefOrRef>>(param_sig.Type().Type()).TypeRef() == event_registration_token_ref);
-        REQUIRE(remove_method.Flags().value == interface_method_event_attributes().value);
-    }
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
-// Disabling and coming back later
-// TODO: fix base problem once we have attributes to specify which interface becomes the base
-/*
-DefaultRyan 20 hours ago  Member
-This case seems odd for two reasons :
-
-I didn't think xlang was supporting multiple interface inheritance. And multiple "requires" isn't supported
-without some sort of attribute specifying which required interface becomes the base for inheritance purposes.
-This makes IComboBox.Paint() ambiguous.This should require some sort of disambiguation on the method.
-*/
 TEST_CASE("Interface type metadata 2", "[!hide]")
 {
     std::istringstream test_idl{ R"(
@@ -838,66 +1058,32 @@ TEST_CASE("Interface type metadata 2", "[!hide]")
         }
 
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 4);
-    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
-    auto const& control3_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl3", "M");
-    auto const& control2_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl2", "N");
-    auto const& control_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl", "N");
-
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 4);
-    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
-    auto const& c1 = find_type_by_name<TypeDef>(db.TypeDef, "IControl", "N");
-    auto const& c2 = find_type_by_name<TypeDef>(db.TypeDef, "IControl2", "N");
-
-    test_interface_type_properties(combo);
-
-    REQUIRE(db.InterfaceImpl.size() == 5);
-    auto const& impls =  combo.InterfaceImpl();
-    REQUIRE(size(impls) == 3);
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        auto const& iter = std::find_if(impls.first, impls.second, [control3_ref](auto&& type_ref)
-        {
-            return type_ref.Interface().TypeRef() == control3_ref;
-        });
-        REQUIRE(iter.Interface().TypeRef() == control3_ref);
-    }
-    {
-        auto const& iter = std::find_if(impls.first, impls.second, [control2_ref](auto&& type_ref)
-        {
-            return type_ref.Interface().TypeRef() == control2_ref;
-        });
-        REQUIRE(iter.Interface().TypeRef() == control2_ref);
-    }
-    {
-        auto const& iter = std::find_if(impls.first, impls.second, [control_ref](auto&& type_ref)
-        {
-            return type_ref.Interface().TypeRef() == control_ref;
-        });
-        REQUIRE(iter.Interface().TypeRef() == control_ref);
-    }
+        std::make_unique<ExpectedInterface>("IControl3",
+            std::vector<ExpectedMethod> {
+                ExpectedMethod("Paint3", ElementType::Void, {})
+            }
+        ),
+        std::make_unique<ExpectedInterface>("IComboBox", std::vector<std::string> {"M.IControl3", "IControl", "IControl2"},
+            std::vector<ExpectedProperty> {
+                ExpectedProperty("property1", ElementType::I4)
+            }
+        ),
+        std::make_unique<ExpectedInterface>("IControl", std::vector<std::string> {"M.IControl3"},
+            std::vector<ExpectedMethod> {
+                ExpectedMethod("Paint", ElementType::Void, {})
+            }
+        ),
+        std::make_unique<ExpectedInterface>("IControl2", std::vector<std::string> {"M.IControl3"},
+            std::vector<ExpectedMethod> {
+                ExpectedMethod("Paint2", ElementType::Void, {})
+            }
+        )
+    };
 
-    auto const& c1_impls = c1.InterfaceImpl();
-    {
-        REQUIRE(size(c1_impls) == 1);
-        auto const& iter = std::find_if(c1_impls.first, c1_impls.second, [control3_ref](auto&& type_ref)
-        {
-            return type_ref.Interface().TypeRef() == control3_ref;
-        });
-        REQUIRE(iter.Interface().TypeRef() == control3_ref);
-    }
-
-    auto const& c2_impls = c2.InterfaceImpl();
-    {
-        REQUIRE(size(c2_impls) == 1);
-        auto const& iter = std::find_if(c2_impls.first, c2_impls.second, [control3_ref](auto&& type_ref)
-        {
-            return type_ref.Interface().TypeRef() == control3_ref;
-        });
-        REQUIRE(iter.Interface().TypeRef() == control3_ref);
-    }
+    ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
 TEST_CASE("Interface type metadata", "[!hide]")
@@ -924,44 +1110,30 @@ TEST_CASE("Interface type metadata", "[!hide]")
         }
 
     )" };
-    std::string assembly_name = "testidl";
-    xlang::meta::reader::database db{ run_and_save_to_memory(test_idl, assembly_name) };
 
-    REQUIRE(db.TypeRef.size() == TYPE_REF_OFFSET + 3);
-    find_type_by_name<TypeRef>(db.TypeRef, "IComboBox", "N");
-    auto const& control3_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl3", "M");
-    auto const& control_ref = find_type_by_name<TypeRef>(db.TypeRef, "IControl", "N");
-
-    REQUIRE(db.TypeDef.size() == TYPE_DEF_OFFSET + 3);
-    auto const& combo = find_type_by_name<TypeDef>(db.TypeDef, "IComboBox", "N");
-    auto const& c1 = find_type_by_name<TypeDef>(db.TypeDef, "IControl", "N");
-
-    test_interface_type_properties(combo);
-
-    REQUIRE(db.InterfaceImpl.size() == 3);
-    auto const& impls = combo.InterfaceImpl();
-    REQUIRE(size(impls) == 2);
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
-        auto const& iter = std::find_if(impls.first, impls.second, [control3_ref](auto&& type_ref)
-        {
-            return type_ref.Interface().TypeRef() == control3_ref;
-        });
-        REQUIRE(iter.Interface().TypeRef() == control3_ref);
-    }
-    {
-        auto const& iter = std::find_if(impls.first, impls.second, [control_ref](auto&& type_ref)
-        {
-            return type_ref.Interface().TypeRef() == control_ref;
-        });
-        REQUIRE(iter.Interface().TypeRef() == control_ref);
-    }
-    auto const& c1_impls = c1.InterfaceImpl();
-    {
-        REQUIRE(size(c1_impls) == 1);
-        auto const& iter = std::find_if(c1_impls.first, c1_impls.second, [control3_ref](auto&& type_ref)
-        {
-            return type_ref.Interface().TypeRef() == control3_ref;
-        });
-        REQUIRE(iter.Interface().TypeRef() == control3_ref);
-    }
+        std::make_unique<ExpectedInterface>("IControl3",
+            std::vector<ExpectedMethod> {
+                ExpectedMethod("Paint3", ElementType::Void, {})
+            }
+        ),
+        std::make_unique<ExpectedInterface>("IComboBox", std::vector<std::string> {"M.IControl3", "IControl"},
+            std::vector<ExpectedProperty> {
+                ExpectedProperty("property1", ElementType::I4)
+            }
+        ),
+        std::make_unique<ExpectedInterface>("IControl", std::vector<std::string> {"M.IControl3"},
+            std::vector<ExpectedMethod> {
+                ExpectedMethod("Paint", ElementType::Void, {})
+            }
+        )
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
+}
+
+TEST_CASE("Put breakpoint here to see test output before closing")
+{
+    return;
 }
