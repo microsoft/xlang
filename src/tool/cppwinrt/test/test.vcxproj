@@ -273,6 +273,7 @@
     <ClCompile Include="return_params.cpp" />
     <ClCompile Include="return_params_abi.cpp" />
     <ClCompile Include="scratch.cpp" />
+    <ClCompile Include="single_threaded_observable_vector.cpp" />
     <ClCompile Include="structs.cpp" />
     <ClCompile Include="tearoff.cpp" />
     <ClCompile Include="thread_pool.cpp" />
