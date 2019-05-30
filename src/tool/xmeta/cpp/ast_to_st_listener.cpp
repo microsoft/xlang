@@ -531,20 +531,21 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 }
 
                 // Synthesizing constructors
+                auto syn_constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
+                if (class_constructor->formal_parameter_list())
+                {
+                    extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), syn_constructor_model);
+                }
+
+                // this is a non-default constructor and we need to add it to the IFactory interface
                 if (constructor_model->get_formal_parameters().size() > 0)
                 {
-                    // this is a non-default constructor and we need to add it to the IFactory interface
-                    auto syn_constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
-                    if (class_constructor->formal_parameter_list())
-                    {
-                        extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), syn_constructor_model);
-                    }
-                    constructor_model->set_overridden_method_ref(syn_constructor_model);
                     synthesized_interface_factory->add_member(syn_constructor_model);
                 }
                 else
                 {
                     // TODO: Default constructor case: compiled with the metadata [Activatable] with a Type of null.
+                    synthesized_interface->add_member(syn_constructor_model);
                 }
                 
                 /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods 
@@ -615,7 +616,6 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 {
                     extract_formal_params(class_method->formal_parameter_list()->fixed_parameter(), syn_met_model);
                 }
-                met_model->set_overridden_method_ref(syn_met_model);
 
                 // Synthesizing constructors
                 if (method_sem.is_static)
@@ -693,7 +693,6 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     {
                         extract_property_accessors(syn_prop_model, class_property->property_accessors(), synthesized_interface);
                     }
-                    prop_model->set_overridden_property_ref(syn_prop_model);
                 }
             }
             if (class_member->class_event_declaration())
@@ -746,7 +745,6 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     {
                         extract_event_accessors(syn_event_model, synthesized_interface);
                     }
-                    event->set_overridden_event_ref(syn_event_model);
                 }
             }
         }
