@@ -1,13 +1,12 @@
 resources:
   containers:
-  - container: build_container
-    image: msftxlang.azurecr.io/xlang-ubuntu-build
-    endpoint: msftxlang_acr
+  - container: ubuntu-18.04
+    image: ubuntu:18.04
 
 pool:
   vmImage: 'ubuntu-16.04'
 
-container: build_container
+container: ubuntu-18.04
 
 steps:
 - script: cmake ./src -B_build -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_INSTALL_PREFIX=install
