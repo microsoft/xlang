@@ -235,9 +235,121 @@ TEST_CASE("single_threaded_observable_vector")
         REQUIRE(vector_i.GetAt(1) == 2);
     }
     {
-        // GetMany
+        // GetMany boxing.
+
+        IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2,3,4,5 });
+        IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
+
+        {
+            std::array<int, 3> array_i{};
+            REQUIRE(0 == vector_i.GetMany(5, array_i));
+        }
+        {
+            std::array<int, 3> array_i{};
+            REQUIRE(3 == vector_i.GetMany(0, array_i));
+            REQUIRE(array_i[0] == 1);
+            REQUIRE(array_i[1] == 2);
+            REQUIRE(array_i[2] == 3);
+        }
+        {
+            std::array<int, 3> array_i{};
+            REQUIRE(2 == vector_i.GetMany(3, array_i));
+            REQUIRE(array_i[0] == 4);
+            REQUIRE(array_i[1] == 5);
+            REQUIRE(array_i[2] == 0);
+        }
+
+        {
+            std::array<IInspectable, 3> array_o{};
+            REQUIRE(0 == vector_o.GetMany(5, array_o));
+        }
+        {
+            std::array<IInspectable, 3> array_o{};
+            REQUIRE(3 == vector_o.GetMany(0, array_o));
+            REQUIRE(unbox_value<int>(array_o[0]) == 1);
+            REQUIRE(unbox_value<int>(array_o[1]) == 2);
+            REQUIRE(unbox_value<int>(array_o[2]) == 3);
+        }
+        {
+            std::array<IInspectable, 3> array_o{};
+            REQUIRE(2 == vector_o.GetMany(3, array_o));
+            REQUIRE(unbox_value<int>(array_o[0]) == 4);
+            REQUIRE(unbox_value<int>(array_o[1]) == 5);
+            REQUIRE(array_o[2] == nullptr);
+        }
     }
     {
-        // ReplaceAll
+        // ReplaceAll boxing.
+
+        IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2,3,4,5 });
+        IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
+
+        {
+            IIterator<int> iterator_i = vector_i.First();
+            IIterator<IInspectable> iterator_o = vector_o.First();
+
+            iterator_i.HasCurrent();
+            iterator_o.HasCurrent();
+
+            bool changed_i{};
+            bool changed_o{};
+
+            vector_i.VectorChanged([&](IObservableVector<int> const& sender, IVectorChangedEventArgs const&)
+                {
+                    changed_i = sender.GetAt(0) == 123;
+                    REQUIRE(sender == vector_i);
+                });
+
+            vector_o.VectorChanged([&](IObservableVector<IInspectable> const& sender, IVectorChangedEventArgs const&)
+                {
+                    changed_o = unbox_value<int>(sender.GetAt(0)) == 123;
+                    REQUIRE(sender == vector_o);
+                });
+
+            vector_i.ReplaceAll({ 123 });
+
+            REQUIRE(changed_i);
+            REQUIRE(changed_o);
+
+            REQUIRE_THROWS_AS(iterator_i.HasCurrent(), hresult_changed_state);
+            REQUIRE_THROWS_AS(iterator_o.HasCurrent(), hresult_changed_state);
+
+            REQUIRE(vector_i.Size() == 1);
+            REQUIRE(vector_i.GetAt(0) == 123);
+        }
+
+        {
+            IIterator<int> iterator_i = vector_i.First();
+            IIterator<IInspectable> iterator_o = vector_o.First();
+
+            iterator_i.HasCurrent();
+            iterator_o.HasCurrent();
+
+            bool changed_i{};
+            bool changed_o{};
+
+            vector_i.VectorChanged([&](IObservableVector<int> const& sender, IVectorChangedEventArgs const&)
+                {
+                    changed_i = sender.GetAt(0) == 123;
+                    REQUIRE(sender == vector_i);
+                });
+
+            vector_o.VectorChanged([&](IObservableVector<IInspectable> const& sender, IVectorChangedEventArgs const&)
+                {
+                    changed_o = unbox_value<int>(sender.GetAt(0)) == 123;
+                    REQUIRE(sender == vector_o);
+                });
+
+            vector_o.ReplaceAll({ box_value(123) });
+
+            REQUIRE(changed_i);
+            REQUIRE(changed_o);
+
+            REQUIRE_THROWS_AS(iterator_i.HasCurrent(), hresult_changed_state);
+            REQUIRE_THROWS_AS(iterator_o.HasCurrent(), hresult_changed_state);
+
+            REQUIRE(vector_i.Size() == 1);
+            REQUIRE(vector_i.GetAt(0) == 123);
+        }
     }
 }
