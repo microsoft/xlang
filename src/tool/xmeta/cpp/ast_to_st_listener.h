@@ -40,8 +40,6 @@ private:
     xlang::xmeta::compilation_unit & xlang_model;
     xlang::xmeta::xlang_error_manager & error_manager;
 
-    std::string_view m_cur_assembly;
-
     listener_error extract_enum_member(XlangParser::Enum_member_declarationContext *ast_enum_member, std::shared_ptr<xlang::xmeta::enum_model> const& new_enum);
     listener_error resolve_enum_val(xlang::xmeta::enum_member & member, std::shared_ptr<xlang::xmeta::enum_model> const& new_enum, std::set<std::string_view>& depentents);
   

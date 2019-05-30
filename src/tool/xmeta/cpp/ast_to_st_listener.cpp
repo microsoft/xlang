@@ -68,7 +68,7 @@ namespace
     };
 }
 
-ast_to_st_listener::ast_to_st_listener(compilation_unit & xlang_model, xlang_error_manager & error_manager) 
+ast_to_st_listener::ast_to_st_listener(compilation_unit & xlang_model, xlang_error_manager & error_manager)
     : xlang_model{ xlang_model }, error_manager{ error_manager }
 { }
 
@@ -143,11 +143,11 @@ void ast_to_st_listener::extract_formal_params(std::vector<XlangParser::Fixed_pa
         }
         if (std::holds_alternative<std::shared_ptr<delegate_model>>(model))
         {
-            std::get<std::shared_ptr<delegate_model>>(model)->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_cur_assembly, sem, std::move(tr) });
+            std::get<std::shared_ptr<delegate_model>>(model)->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, xlang_model.m_assembly, sem, std::move(tr) });
         }
         else if (std::holds_alternative<std::shared_ptr<method_model>>(model))
         {
-            std::get<std::shared_ptr<method_model>>(model)->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, m_cur_assembly, sem, std::move(tr) });
+            std::get<std::shared_ptr<method_model>>(model)->add_formal_parameter(formal_parameter_model{ formal_param_name, decl_line, xlang_model.m_assembly, sem, std::move(tr) });
         }
     }
 }
@@ -314,7 +314,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         {
             if (property_accessor->GET())
             {
-                get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(prop_model->get_type()), property_method_modifier, method_association::Property);
+                get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), property_accessor->GET()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(prop_model->get_type()), property_method_modifier, method_association::Property);
                 if (get_method && model->add_member(get_method) == semantic_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_qualified_name());
@@ -323,9 +323,9 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             }
             else if (property_accessor->SET())
             {
-                set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), property_method_modifier, method_association::Property);
+                set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), property_accessor->SET()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(std::nullopt), property_method_modifier, method_association::Property);
                 parameter_semantics sem = parameter_semantics::in;
-                set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
+                set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == semantic_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_qualified_name());
@@ -340,11 +340,11 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     }
     else // Implicit declaration
     {
-        get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), prop_model->get_decl_line(), m_cur_assembly, std::move(prop_model->get_type()), property_method_modifier, method_association::Property);
+        get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), prop_model->get_decl_line(), xlang_model.m_assembly, std::move(prop_model->get_type()), property_method_modifier, method_association::Property);
 
-        set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), prop_model->get_decl_line(), m_cur_assembly, std::move(std::nullopt), property_method_modifier, method_association::Property);
+        set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), prop_model->get_decl_line(), xlang_model.m_assembly, std::move(std::nullopt), property_method_modifier, method_association::Property);
         parameter_semantics sem = parameter_semantics::in;
-        set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
+        set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
 
         // Adding property methods to the model
         listener_error error = listener_error::passed;
@@ -426,11 +426,11 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
         event_method_modifier.is_static = true;
     }
 
-    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_name(), event->get_decl_line(), m_cur_assembly, std::move(event_registration), event_method_modifier, method_association::Event);
-    add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), m_cur_assembly, param_sem, std::move(tr) });
+    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_name(), event->get_decl_line(), xlang_model.m_assembly, std::move(event_registration), event_method_modifier, method_association::Event);
+    add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), xlang_model.m_assembly, param_sem, std::move(tr) });
 
-    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_name(), event->get_decl_line(), m_cur_assembly, std::move(std::nullopt), event_method_modifier, method_association::Event);
-    remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), m_cur_assembly, param_sem, std::move(event_registration) });
+    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_name(), event->get_decl_line(), xlang_model.m_assembly, std::move(std::nullopt), event_method_modifier, method_association::Event);
+    remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), xlang_model.m_assembly, param_sem, std::move(event_registration) });
 
     assert(event->set_add_method(add_method) == semantic_error::passed);
     assert(event->set_remove_method(remove_method) == semantic_error::passed);
@@ -486,15 +486,15 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
         }
     }
 
-    auto clss_model = std::make_shared<class_model>(class_name, decl_line, m_cur_assembly, m_cur_namespace_body, class_sem);
+    auto clss_model = std::make_shared<class_model>(class_name, decl_line, xlang_model.m_assembly, m_cur_namespace_body, class_sem);
 
-    auto synthesized_interface = std::make_shared<interface_model>("I" + class_name, decl_line, m_cur_assembly, m_cur_namespace_body);
-    auto synthesized_interface_factory = std::make_shared<interface_model>("I" + class_name + "Factory", decl_line, m_cur_assembly, m_cur_namespace_body);
-    auto synthesized_interface_statics = std::make_shared<interface_model>("I" + class_name + "Statics", decl_line, m_cur_assembly, m_cur_namespace_body);
+    auto synthesized_interface = std::make_shared<interface_model>("I" + class_name, decl_line, xlang_model.m_assembly, m_cur_namespace_body, true);
+    auto synthesized_interface_factory = std::make_shared<interface_model>("I" + class_name + "Factory", decl_line, xlang_model.m_assembly, m_cur_namespace_body, true);
+    auto synthesized_interface_statics = std::make_shared<interface_model>("I" + class_name + "Statics", decl_line, xlang_model.m_assembly, m_cur_namespace_body, true);
     
     // TODO: protected, override and composable are coming in a later update
-    //auto synthesized_interface_protected = std::make_shared<interface_model>("I" + class_name + "Protected", decl_line, m_cur_assembly, m_cur_namespace_body);
-    //auto synthesized_interface_overrides = std::make_shared<interface_model>("I" + class_name + "Overrides", decl_line, m_cur_assembly, m_cur_namespace_body);
+    //auto synthesized_interface_protected = std::make_shared<interface_model>("I" + class_name + "Protected", decl_line, xlang_model.m_assembly, m_cur_namespace_body);
+    //auto synthesized_interface_overrides = std::make_shared<interface_model>("I" + class_name + "Overrides", decl_line, xlang_model.m_assembly, m_cur_namespace_body);
 
     if (xlang_model.symbols.set_symbol(symbol, clss_model) == semantic_error::symbol_exists)
     {
@@ -524,14 +524,14 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     method_sem.is_protected = true;
                 }
                 
-                auto constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
+                auto constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
                 if (class_constructor->formal_parameter_list())
                 {
                     extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), constructor_model);
                 }
 
                 // Synthesizing constructors
-                auto syn_constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
+                auto syn_constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
                 if (class_constructor->formal_parameter_list())
                 {
                     extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), syn_constructor_model);
@@ -605,13 +605,13 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     error_manager.write_static_member_only_error(class_method->IDENTIFIER()->getSymbol()->getLine(),  method_id);
                 }
 
-                auto met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_sem, method_association::None);
+                auto met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(tr), method_sem, method_association::None);
                 if (class_method->formal_parameter_list())
                 {
                     extract_formal_params(class_method->formal_parameter_list()->fixed_parameter(), met_model);
                 }
 
-                auto syn_met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_sem, method_association::None);
+                auto syn_met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(tr), method_sem, method_association::None);
                 if (class_method->formal_parameter_list())
                 {
                     extract_formal_params(class_method->formal_parameter_list()->fixed_parameter(), syn_met_model);
@@ -671,7 +671,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     }
                 }
 
-                auto prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, property_sem, std::move(tr));
+                auto prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, property_sem, std::move(tr));
 
                 if (class_sem.is_static && !property_sem.is_static)
                 {
@@ -684,7 +684,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                      to emit metadata */
                 if (extract_property_accessors(prop_model, class_property->property_accessors(), clss_model) == listener_error::passed)
                 {
-                    auto syn_prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, property_sem, std::move(tr));
+                    auto syn_prop_model = std::make_shared<property_model>(class_property->IDENTIFIER()->getText(), class_property->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, property_sem, std::move(tr));
                     if (property_sem.is_static)
                     {
                         extract_property_accessors(syn_prop_model, class_property->property_accessors(), synthesized_interface_statics);
@@ -723,7 +723,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     }
                 }
 
-                auto event = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, event_sem, std::move(tr));
+                auto event = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, event_sem, std::move(tr));
                 
                 if (class_sem.is_static && !event_sem.is_static)
                 {
@@ -736,7 +736,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                      to emit metadata */
                 if (extract_event_accessors(event, clss_model) == listener_error::passed)
                 {
-                    auto syn_event_model = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, event_sem, std::move(tr));
+                    auto syn_event_model = std::make_shared<event_model>(class_event->IDENTIFIER()->getText(), class_event->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, event_sem, std::move(tr));
                     if (event_sem.is_static)
                     {
                         extract_event_accessors(syn_event_model, synthesized_interface_statics);
@@ -782,7 +782,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
     auto decl_line = id->getSymbol()->getLine();
 
     std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + interface_name;
-    auto model = std::make_shared<interface_model>(interface_name, decl_line, m_cur_assembly, m_cur_namespace_body);
+    auto model = std::make_shared<interface_model>(interface_name, decl_line, xlang_model.m_assembly, m_cur_namespace_body);
 
     if (xlang_model.symbols.set_symbol(symbol, model) == semantic_error::symbol_exists)
     {
@@ -800,7 +800,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             std::optional<type_ref> tr = type_ref{ interface_method->return_type()->getText() };
             extract_type(interface_method->return_type(), tr);
 
-            auto met_model = std::make_shared<method_model>(method_id, interface_method->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, std::move(tr), method_association::None);
+            auto met_model = std::make_shared<method_model>(method_id, interface_method->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(tr), method_association::None);
             if (interface_method->formal_parameter_list())
             {
                 extract_formal_params(interface_method->formal_parameter_list()->fixed_parameter(), met_model);
@@ -815,7 +815,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             auto const& interface_property = interface_member->interface_property_declaration();
             type_ref tr{ interface_property->type()->getText() };
             extract_type(interface_property->type(), tr);
-            auto prop_model = std::make_shared<property_model>(interface_property->IDENTIFIER()->getText(), interface_property->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, xlang::xmeta::property_modifier(), std::move(tr));
+            auto prop_model = std::make_shared<property_model>(interface_property->IDENTIFIER()->getText(), interface_property->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, xlang::xmeta::property_modifier(), std::move(tr));
 
             extract_property_accessors(prop_model, interface_property->property_accessors(), model);
         }
@@ -825,7 +825,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             type_ref tr{ interface_event->type()->getText() };
             extract_type(interface_event->type(), tr);
 
-            auto event = std::make_shared<event_model>(interface_event->IDENTIFIER()->getText(), interface_event->IDENTIFIER()->getSymbol()->getLine(), m_cur_assembly, xlang::xmeta::event_modifier(), std::move(tr));
+            auto event = std::make_shared<event_model>(interface_event->IDENTIFIER()->getText(), interface_event->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, xlang::xmeta::event_modifier(), std::move(tr));
             extract_event_accessors(event, model);
         }
     }
@@ -850,7 +850,7 @@ void ast_to_st_listener::enterDelegate_declaration(XlangParser::Delegate_declara
 
     std::optional<type_ref> tr = type_ref{ ctx->return_type()->getText() };
     extract_type(ctx->return_type(), tr);
-    auto dm = std::make_shared<delegate_model>(delegate_name, decl_line, m_cur_assembly, m_cur_namespace_body, std::move(tr));
+    auto dm = std::make_shared<delegate_model>(delegate_name, decl_line, xlang_model.m_assembly, m_cur_namespace_body, std::move(tr));
 
     auto formal_params = ctx->formal_parameter_list();
     if (formal_params)
@@ -878,7 +878,7 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
         type = str_to_enum_semantics(ctx->enum_base()->enum_integral_type()->getText());
     }
 
-    auto new_enum = std::make_shared<enum_model>(enum_name, decl_line, m_cur_assembly, m_cur_namespace_body, type);
+    auto new_enum = std::make_shared<enum_model>(enum_name, decl_line, xlang_model.m_assembly, m_cur_namespace_body, type);
 
     for (auto field : ctx->enum_body()->enum_member_declaration())
     {
@@ -916,7 +916,7 @@ void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declaration
     std::string struct_name{ id->getText() };
     std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + struct_name;
 
-    auto new_struct = std::make_shared<struct_model>(struct_name, decl_line, m_cur_assembly, m_cur_namespace_body);
+    auto new_struct = std::make_shared<struct_model>(struct_name, decl_line, xlang_model.m_assembly, m_cur_namespace_body);
 
     for (auto field : ctx->struct_body()->field_declaration())
     {
@@ -996,7 +996,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
         {
             if (!cur_ns->child_namespace_exists(name))
             {
-                cur_ns->add_child_namespace(std::make_shared<namespace_model>(name, decl_line, m_cur_assembly, cur_ns));
+                cur_ns->add_child_namespace(std::make_shared<namespace_model>(name, decl_line, xlang_model.m_assembly, cur_ns));
             }
             setup_cur_ns_body(cur_ns->get_child_namespaces().at(name));
         }
@@ -1014,7 +1014,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
         auto it2 = xlang_model.namespaces.find(name);
         if (it2 == xlang_model.namespaces.end())
         {
-            auto new_ns = std::make_shared<namespace_model>(name, decl_line, m_cur_assembly, nullptr /* No parent */);
+            auto new_ns = std::make_shared<namespace_model>(name, decl_line, xlang_model.m_assembly, nullptr /* No parent */);
             xlang_model.namespaces[new_ns->get_name()] = new_ns;
         }
         assert(xlang_model.namespaces.find(name) != xlang_model.namespaces.end());

@@ -81,6 +81,8 @@ namespace xlang::meta::reader
         auto EventList() const;
         auto MethodImplList() const;
 
+        bool is_runtime_class() const;
+        bool is_interface() const;
         bool is_enum() const;
         bool is_delegate() const;
         bool is_struct() const;

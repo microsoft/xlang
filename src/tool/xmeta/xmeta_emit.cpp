@@ -277,7 +277,10 @@ namespace xlang::xmeta
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.Enum", &token_enum));
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.ValueType", &token_value_type));
         check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.MulticastDelegate", &token_delegate));
+        check_hresult(m_metadata_emitter->DefineTypeRefByName(token_mscorlib, L"System.Object", &token_object));
     }
+
+    void xmeta_emit::listen_namespace_model(std::shared_ptr<namespace_model> const& /*model*/) {};
 
     mdTypeDef xmeta_emit::define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[])
     {
@@ -300,54 +303,7 @@ namespace xlang::xmeta
         return token_typedef;
     }
 
-    void xmeta_emit::listen_namespace_model(std::shared_ptr<namespace_model> const& /*model*/) {};
-    
-    void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& /*model*/) 
-    {
-        //mdTypeDef token_class_type_def = mdTokenNil;
-        //mdTypeRef token_local_type_ref = mdTokenNil;
-
-        //std::string class_name = model->get_name();
-        //DWORD type_flag = runtimeclass_type_flag;
-        //// MIDL3 will disable certain flags depending on these conditions
-        ////if (pRuntimeClass->IsComposable())
-        ////{
-        ////    // Turn off the sealed flag
-        ////    type_flag = dwTypeFlag & (~tdSealed);
-        ////}
-
-        //////  Empty runtime classes should appear with the abstract flag.
-        ////if (pRuntimeClass->IsEmpty())
-        ////{
-        ////    type_flag = dwTypeFlag | tdAbstract;
-        ////}
-
-        //mdTypeDef implements[] = { mdTokenNil };
-
-        //auto class_type_def = define_type_def(
-        //    class_name,
-        //    type_flag,
-        //    mdTypeRefNil, // Extends (Going to be null until we find out if it is base class)
-        //    implements // Implements (Going to be null until we find out if it is base class));
-        //);
-
-        //// TODO: Class base and interface implements
-
-        //for (auto const& val : model->get_methods())
-        //{
-        //    define_method(val, token_class_type_def);
-        //}
-        //for (auto const& val : model->get_properties())
-        //{
-        //    define_property(val, token_class_type_def);
-        //}
-        //for (auto const& val : model->get_events())
-        //{
-        //    define_event(val, token_class_type_def);
-        //}
-    }
-
-    void xmeta_emit::define_method(std::shared_ptr<method_model> const& model, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
+    mdMethodDef xmeta_emit::define_method(std::shared_ptr<method_model> const& model, std::string const& qualified_interface_name, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
     {
         std::wstring method_name = s2ws(model->get_name());
 
@@ -374,6 +330,31 @@ namespace xlang::xmeta
             define_parameters(val, token_method_def, index);
             index++;
         }
+
+        // Check if member ref is defined in our method references map, if so return the token
+        auto iter = method_references.find(qualified_interface_name);
+        if (iter != method_references.end())
+        {
+            auto const& member_ref_list = iter->second;
+            auto iter2 = member_ref_list.find(model->get_name());
+            if (iter2 != member_ref_list.end())
+            {
+                return token_method_def;
+            }
+        }
+
+        // If it is not defined, define member ref and return
+        mdMemberRef token_member_ref;
+        m_metadata_emitter->DefineMemberRef(
+            get_or_define_type_ref(qualified_interface_name, model->get_assembly_name()),
+            method_name.c_str(),
+            method_sig.data(),
+            method_sig.size(),
+            &token_member_ref);
+
+        method_references[qualified_interface_name][model->get_name()] = token_member_ref;
+
+        return token_method_def;
     }
 
     void xmeta_emit::define_property(std::shared_ptr<property_model> const& model, std::map<std::string_view, mdMethodDef> const& method_defs, mdTypeDef const& token_def)
@@ -445,7 +426,7 @@ namespace xlang::xmeta
         assert(std::holds_alternative<std::shared_ptr<delegate_model>>(target));
         auto const& dm = std::get<std::shared_ptr<delegate_model>>(target);
 
-        mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_qualified_name(), xlang_model.m_assembly);
+        mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_qualified_name(), dm->get_assembly_name());
         mdEvent token_event;
         m_metadata_emitter->DefineEvent(
             token_def,
@@ -459,6 +440,163 @@ namespace xlang::xmeta
             &token_event);
     }
     
+    void xmeta_emit::define_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& token_def)
+    {
+        std::map<std::string_view, mdMethodDef> method_defs;
+        for (auto const& val : model->get_methods())
+        {
+            if (val->get_method_association() == method_association::None)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot /*| mdInstance*/;
+                define_method(val, model->get_qualified_name(), method_flag, method_defs, token_def);
+            }
+            else if (val->get_method_association() == method_association::Property)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot | mdAbstract | mdSpecialName;
+                define_method(val, model->get_qualified_name(), method_flag, method_defs, token_def);
+            }
+            else if (val->get_method_association() == method_association::Event)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
+                define_method(val, model->get_qualified_name(), method_flag, method_defs, token_def);
+            }
+            else if (val->get_method_association() == method_association::Constructor)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/; //TODO: Figure out what mdInstance is
+                define_method(val, model->get_qualified_name(), method_flag, method_defs, token_def);
+            }
+        }
+        for (auto const& val : model->get_properties())
+        {
+            define_property(val, method_defs, token_def);
+        }
+        for (auto const& val : model->get_events())
+        {
+            define_event(val, method_defs, token_def);
+        }
+    }
+
+    void xmeta_emit::define_required_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& class_token_def)
+    {
+        std::map<std::string_view, mdMethodDef> method_defs;
+        for (auto const& val : model->get_methods())
+        {
+            mdMethodDef method_def;
+            if (val->get_method_association() == method_association::None)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot /*| mdInstance*/;
+                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
+            }
+            else if (val->get_method_association() == method_association::Property)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot | mdAbstract | mdSpecialName;
+                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
+            }
+            else if (val->get_method_association() == method_association::Event)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
+                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
+            }
+            else if (val->get_method_association() == method_association::Constructor)
+            {
+                static constexpr DWORD method_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/; //TODO: Figure out what mdInstance is
+                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
+            }
+        
+            // Defining method impl table, find the member ref token from the method_references map
+            auto iter = method_references.find(model->get_qualified_name());
+            assert(iter != method_references.end());
+            auto const& member_ref_list = iter->second;
+            auto iter2 = member_ref_list.find(val->get_name());
+            assert(iter2 != member_ref_list.end());
+            m_metadata_emitter->DefineMethodImpl(class_token_def, method_def, iter2->second);
+        }
+        for (auto const& val : model->get_properties())
+        {
+            define_property(val, method_defs, class_token_def);
+        }
+        for (auto const& val : model->get_events())
+        {
+            define_event(val, method_defs, class_token_def);
+        }
+    }
+
+    void xmeta_emit::listen_class_model(std::shared_ptr<class_model> const& model)
+    {
+        auto const& class_qualified_name = model->get_qualified_name();
+        static DWORD class_type_flag = tdPublic | tdAutoLayout | tdClass | tdWindowsRuntime;
+
+        if (model->get_modifier().is_static)
+        {
+            class_type_flag |= tdAbstract;
+        }
+        //TODO: Composable classes
+        {
+            // Non-composable classes carry the sealed flag. Composable classes do not carry the sealed flag
+            class_type_flag |= tdSealed;
+        }
+
+        mdToken extends;
+        if (model->get_class_base_ref() != std::nullopt)
+        {
+            auto const& target = model->get_class_base_ref()->get_semantic().get_resolved_target();
+            if (std::holds_alternative<std::shared_ptr<class_model>>(target))
+            {
+                auto const& val = std::get<std::shared_ptr<class_model>>(model->get_class_base_ref()->get_semantic().get_resolved_target());
+                extends = get_or_define_type_ref(val->get_qualified_name(), val->get_assembly_name());
+            }
+            else if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(target))
+            {
+                auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
+                assert(type_def->is_interface());
+                extends =  get_or_define_type_ref(type_def->FullyQualifiedName(), type_def->get_database().Assembly[0].Name());
+            }
+        }
+        else
+        {
+            extends = token_object; //mscorlib System.Object
+        }
+
+        std::vector<mdTypeRef> implements;
+        for (auto const& interface_ref : model->get_interface_bases())
+        {
+            auto const& target = interface_ref.get_semantic().get_resolved_target();
+            if (std::holds_alternative<std::shared_ptr<interface_model>>(target))
+            {
+                auto const& val = std::get<std::shared_ptr<interface_model>>(target);
+                implements.emplace_back(get_or_define_type_ref(val->get_qualified_name(), val->get_assembly_name()));
+            }
+            else if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(target))
+            {
+                auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
+                assert(type_def->is_interface());
+                implements.emplace_back(get_or_define_type_ref(type_def->FullyQualifiedName(), type_def->get_database().Assembly[0].Name()));
+            }
+        }
+        implements.emplace_back(mdTokenNil);
+
+        auto token_class_type_def = define_type_def(class_qualified_name, class_type_flag, extends, implements.data());
+        // Method list for first contiguous run of methods owned by this type
+        auto const& instance_interface = model->get_synthesized_instance_interface();
+        define_required_interface_members(instance_interface, token_class_type_def);
+
+        for (auto const& interface_ref : model->get_interface_bases())
+        {
+            auto const& target = interface_ref.get_semantic().get_resolved_target();
+            if (std::holds_alternative<std::shared_ptr<interface_model>>(target))
+            {
+                auto const& required_interface = std::get<std::shared_ptr<interface_model>>(interface_ref.get_semantic().get_resolved_target());
+                define_required_interface_members(required_interface, token_class_type_def);
+            }
+            else if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(target))
+            {
+                auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
+                assert(type_def->is_interface());
+                // TODO: think of a way to emit interface members from TypeDef
+            }
+        }
+    }
+
     void xmeta_emit::listen_interface_model(std::shared_ptr<interface_model> const& model)
     {
         auto const& interface_name = model->get_qualified_name();
@@ -466,8 +604,18 @@ namespace xlang::xmeta
         std::vector<mdTypeRef> implements;
         for (auto const& interface_ref : model->get_interface_bases())
         {
-            auto const& val = std::get<std::shared_ptr<interface_model>>(interface_ref.get_semantic().get_resolved_target());
-            implements.emplace_back(get_or_define_type_ref(val->get_qualified_name(), xlang_model.m_assembly));
+            auto const& target = interface_ref.get_semantic().get_resolved_target();
+            if (std::holds_alternative<std::shared_ptr<interface_model>>(target))
+            {
+                auto const& val = std::get<std::shared_ptr<interface_model>>(target);
+                implements.emplace_back(get_or_define_type_ref(val->get_qualified_name(), val->get_assembly_name()));
+            }
+            else if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(target))
+            {
+                auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
+                assert(type_def->is_interface());
+                implements.emplace_back(get_or_define_type_ref(type_def->FullyQualifiedName(), type_def->get_database().Assembly[0].Name()));
+            }
         }
         implements.emplace_back(mdTokenNil);
         
@@ -475,38 +623,7 @@ namespace xlang::xmeta
         //NOTE: tdWindowsRuntime flag maybe removed later to indicate that this is not WinRT
         static constexpr DWORD interface_type_flag = tdInterface | tdPublic | tdAbstract | tdWindowsRuntime;
         auto token_interface_type_def = define_type_def(interface_name, interface_type_flag, mdTokenNil, implements.data());
-        std::map<std::string_view, mdMethodDef> method_defs;
-        for (auto const& val : model->get_methods())
-        {
-            if (val->get_method_association() == method_association::None)
-            {
-                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot /*| mdInstance*/;
-                define_method(val, method_flag, method_defs, token_interface_type_def);
-            }
-            else if (val->get_method_association() == method_association::Property)
-            {
-                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot | mdAbstract | mdSpecialName;
-                define_method(val, method_flag, method_defs, token_interface_type_def);
-            }
-            else if (val->get_method_association() == method_association::Event)
-            {
-                static constexpr DWORD method_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
-                define_method(val, method_flag, method_defs, token_interface_type_def);
-            }
-            else if (val->get_method_association() == method_association::Constructor)
-            {
-                static constexpr DWORD method_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/; //TODO: Figure out what mdInstance is
-                define_method(val, method_flag, method_defs, token_interface_type_def);
-            }
-        }
-        for (auto const& val : model->get_properties())
-        {
-            define_property(val, method_defs, token_interface_type_def);
-        }
-        for (auto const& val : model->get_events())
-        {
-            define_event(val, method_defs, token_interface_type_def);
-        }
+        define_interface_members(model, token_interface_type_def);
     }
 
     void xmeta_emit::listen_struct_model(std::shared_ptr<struct_model> const& model) 
@@ -717,20 +834,20 @@ namespace xlang::xmeta
             &token_param_def));
     }
 
-    mdTypeRef xmeta_emit::get_or_define_type_ref(std::string const& ref_name, std::string const& assembly_ref)
+    mdTypeRef xmeta_emit::get_or_define_type_ref(std::string const& ref_name, std::string_view const& assembly_ref)
     {
         mdToken token_assembly_ref;
 
         // Defining assembly ref if we haven't define one. If assembly ref is us, we don't need to do it.
         if (assembly_ref != xlang_model.m_assembly)
         {
-            auto const& ref = assembly_references.find(assembly_ref);
+            auto const& ref = assembly_references.find(std::string(assembly_ref));
             if (ref == assembly_references.end())
             {
                 check_hresult(m_metadata_assembly_emitter->DefineAssemblyRef(
                     nullptr,
                     0,
-                    s2ws(assembly_ref).c_str(),
+                    s2ws(std::string(assembly_ref)).c_str(),
                     &s_genericMetadata,
                     nullptr,
                     0,
@@ -767,18 +884,18 @@ namespace xlang::xmeta
             std::variant<std::string, fundamental_type, object_type> semantic = to_simple_type_or_id(ref->get_semantic());
             if (std::holds_alternative<std::string>(semantic))
             {
-                std::string return_name = std::get<std::string>(semantic);
+                std::string name = std::get<std::string>(semantic);
                 TypeRef type_ref;
 
                 // if it holds a meta reader type def, this must be coming from another assembly. 
                 if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(ref->get_semantic().get_resolved_target()))
                 {
                     auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(ref->get_semantic().get_resolved_target());
-                    type_ref = to_TypeRef(get_or_define_type_ref(return_name, std::string(type_def->get_database().Assembly[0].Name())));
+                    type_ref = to_TypeRef(get_or_define_type_ref(name, type_def->get_database().Assembly[0].Name()));
                 }
                 else
                 {
-                    type_ref = to_TypeRef(get_or_define_type_ref(return_name, xlang_model.m_assembly));
+                    type_ref = to_TypeRef(get_or_define_type_ref(name, xlang_model.m_assembly));
                 }
                 return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
             }

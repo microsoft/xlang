@@ -89,6 +89,18 @@ namespace xlang::xmeta
                 {
                     m_class_base_ref->set_semantic(iter);
                 }
+                else if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(iter))
+                {
+                    auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(iter);
+                    if (type_def->is_runtime_class())
+                    {
+                        m_class_base_ref->set_semantic(iter);
+                    }
+                    else
+                    {
+                        error_manager.write_not_an_interface_error(get_decl_line(), symbol);
+                    }
+                }
                 else
                 {
                     error_manager.write_not_a_class_error(get_decl_line(), symbol);
