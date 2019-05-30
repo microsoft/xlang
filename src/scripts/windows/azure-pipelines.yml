@@ -32,12 +32,12 @@ steps:
   displayName: 'Generate xlang build files via cmake'
   inputs:
     cwd: '.'
-    cmakeArgs: -S src -B_build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX=install
+    cmakeArgs: -S src -B_build\Windows\x86\Release -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX=install
 - task: CMake@1
   displayName: 'build xlang'
   inputs:
     cwd: '.'
-    cmakeArgs: --build .\_build -- -v install
+    cmakeArgs: --build .\_build\Windows\x86\Release -- -v install
 - script: .\install\test\library\test_library.exe -r junit -o TEST-test_library.xml
   displayName: 'test_library'
   continueOnError: true
