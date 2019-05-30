@@ -9,6 +9,8 @@
 
 namespace xlang::xmeta
 {
+    std::shared_ptr<interface_model> create_interface_from(std::shared_ptr<xlang::meta::reader::TypeDef> type_def);
+
     struct interface_model : class_or_interface_model
     {
         interface_model() = delete;

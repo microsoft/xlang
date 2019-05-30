@@ -13,18 +13,6 @@
 
 namespace xlang::xmeta
 {
-    enum class enum_type
-    {
-        Int8,
-        UInt8,
-        Int16,
-        UInt16,
-        Int32,
-        UInt32,
-        Int64,
-        UInt64
-    };
-
     using enum_value_semantics = std::variant<int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t>;
 
     struct enum_member : base_model

@@ -489,8 +489,14 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
     auto clss_model = std::make_shared<class_model>(class_name, decl_line, xlang_model.m_assembly, m_cur_namespace_body, class_sem);
 
     auto synthesized_interface = std::make_shared<interface_model>("I" + class_name, decl_line, xlang_model.m_assembly, m_cur_namespace_body, true);
+    bool has_instance = false;
+
     auto synthesized_interface_factory = std::make_shared<interface_model>("I" + class_name + "Factory", decl_line, xlang_model.m_assembly, m_cur_namespace_body, true);
+    bool has_factory = false;
+    
     auto synthesized_interface_statics = std::make_shared<interface_model>("I" + class_name + "Statics", decl_line, xlang_model.m_assembly, m_cur_namespace_body, true);
+    bool has_statics = false;
+
     
     // TODO: protected, override and composable are coming in a later update
     //auto synthesized_interface_protected = std::make_shared<interface_model>("I" + class_name + "Protected", decl_line, xlang_model.m_assembly, m_cur_namespace_body);
@@ -541,11 +547,13 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 if (constructor_model->get_formal_parameters().size() > 0)
                 {
                     synthesized_interface_factory->add_member(syn_constructor_model);
+                    has_factory = true;
                 }
                 else
                 {
                     // TODO: Default constructor case: compiled with the metadata [Activatable] with a Type of null.
                     synthesized_interface->add_member(syn_constructor_model);
+                    has_instance = true;
                 }
                 
                 /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods 
@@ -617,14 +625,15 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     extract_formal_params(class_method->formal_parameter_list()->fixed_parameter(), syn_met_model);
                 }
 
-                // Synthesizing constructors
                 if (method_sem.is_static)
                 {
                     synthesized_interface_statics->add_member(syn_met_model);
+                    has_statics = true;
                 }
                 else
                 {
                     synthesized_interface->add_member(syn_met_model);
+                    has_instance = true;
                 }
 
                 /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods
@@ -688,10 +697,12 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     if (property_sem.is_static)
                     {
                         extract_property_accessors(syn_prop_model, class_property->property_accessors(), synthesized_interface_statics);
+                        has_statics = true;
                     }
                     else
                     {
                         extract_property_accessors(syn_prop_model, class_property->property_accessors(), synthesized_interface);
+                        has_instance = true;
                     }
                 }
             }
@@ -740,10 +751,12 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     if (event_sem.is_static)
                     {
                         extract_event_accessors(syn_event_model, synthesized_interface_statics);
+                        has_statics = true;
                     }
                     else
                     {
                         extract_event_accessors(syn_event_model, synthesized_interface);
+                        has_instance = true;
                     }
                 }
             }
@@ -765,14 +778,23 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
             clss_model->add_class_base_ref(cls_base->type_base()->class_type()->getText());
         }
     }
-    clss_model->add_instance_interface_ref(synthesized_interface);
-    clss_model->add_static_interface_ref(synthesized_interface_statics);
-    clss_model->add_factory_interface_ref(synthesized_interface_factory);
+    if (has_instance)
+    {
+        clss_model->add_instance_interface_ref(synthesized_interface);
+        m_cur_namespace_body->add_interface(synthesized_interface);
+    }
+    if (has_statics)
+    {
+        clss_model->add_static_interface_ref(synthesized_interface_statics);
+        m_cur_namespace_body->add_interface(synthesized_interface_statics);
+    }
+    if (has_factory)
+    {
+        clss_model->add_factory_interface_ref(synthesized_interface_factory);
+        m_cur_namespace_body->add_interface(synthesized_interface_factory);
+    }
 
     m_cur_namespace_body->add_class(clss_model);
-    m_cur_namespace_body->add_interface(synthesized_interface);
-    m_cur_namespace_body->add_interface(synthesized_interface_statics);
-    m_cur_namespace_body->add_interface(synthesized_interface_factory);
 }
 
 void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_declarationContext *ctx)

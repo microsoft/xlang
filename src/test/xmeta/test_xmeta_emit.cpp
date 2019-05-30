@@ -22,6 +22,18 @@ constexpr int TYPE_DEF_OFFSET = 1; // Module
 constexpr int TYPE_REF_OFFSET = 4; // System: Enum, Delegate, ValueType
 
 // All the flags use in the metadata representation
+const TypeAttributes class_type_attributes()
+{
+    TypeAttributes result{};
+    result.Visibility(TypeVisibility::Public);
+    result.Semantics(TypeSemantics::Class);
+    result.Sealed(true);
+    result.Layout(TypeLayout::AutoLayout);
+    result.WindowsRuntime(true);
+    return result;
+}
+
+
 const TypeAttributes interface_type_attributes()
 {
     TypeAttributes result{};
@@ -187,6 +199,14 @@ void test_interface_type_properties(TypeDef const& interface_type)
     auto const& interface_flags = interface_type.Flags();
     REQUIRE(interface_flags.value == interface_type_attributes().value);
     REQUIRE(!interface_type.Extends());
+}
+
+// In-depth checking of type properties of structs
+void test_class_type_properties(TypeDef const& class_type)
+{
+    auto const& class_flags = class_type.Flags();
+    REQUIRE(class_flags.value == class_type_attributes().value);
+    REQUIRE(empty(class_type.FieldList()));
 }
 
 // In-depth checking of type properties of structs
@@ -692,6 +712,112 @@ struct ExpectedInterface : ExpectedType
     }
 };
 
+struct ExpectedClass : ExpectedType
+{
+    std::vector<std::pair<ExpectedMethod, std::string>> methods_and_implements;
+
+    std::vector<ExpectedProperty> properties;
+    std::vector<ExpectedEvent> events;
+    std::vector<std::string> requires;
+
+    ExpectedClass(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents, std::vector<std::pair<ExpectedMethod, std::string>> expected_methods_and_implements)
+        : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods_and_implements(expected_methods_and_implements) {}
+
+    //ExpectedClass(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
+    //    : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods(expectedMethods) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents)
+    //    : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods({}) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedMethod> expectedMethods)
+    //    : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events({}), methods(expectedMethods) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
+    //    : ExpectedType(expectedName), requires(expectedRequires), properties({}), events(expectedEvents), methods(expectedMethods) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedProperty> expectedProperties)
+    //    : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events({}), methods({}) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedEvent> expectedEvents)
+    //    : ExpectedType(expectedName), requires(expectedRequires), properties({}), events(expectedEvents), methods({}) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<std::string> expectedRequires, std::vector<ExpectedMethod> expectedMethods)
+    //    : ExpectedType(expectedName), requires(expectedRequires), properties({}), events({}), methods(expectedMethods) {}
+
+    //ExpectedClass(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
+    //    : ExpectedType(expectedName), requires({}), properties(expectedProperties), events(expectedEvents), methods(expectedMethods) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedEvent> expectedEvents)
+    //    : ExpectedType(expectedName), requires({}), properties(expectedProperties), events(expectedEvents), methods({}) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties, std::vector<ExpectedMethod> expectedMethods)
+    //    : ExpectedType(expectedName), requires({}), properties(expectedProperties), events({}), methods(expectedMethods) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<ExpectedEvent> expectedEvents, std::vector<ExpectedMethod> expectedMethods)
+    //    : ExpectedType(expectedName), requires({}), properties({}), events(expectedEvents), methods(expectedMethods) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<ExpectedProperty> expectedProperties)
+    //    : ExpectedType(expectedName), requires({}), properties(expectedProperties), events({}), methods({}) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<ExpectedEvent> expectedEvents)
+    //    : ExpectedType(expectedName), requires({}), properties({}), events(expectedEvents), methods({}) {}
+    //ExpectedClass(std::string const& expectedName, std::vector<ExpectedMethod> expectedMethods)
+    //    : ExpectedType(expectedName), requires({}), properties({}), events({}), methods(expectedMethods) {}
+
+    void VerifyType(TypeDef const& typeDef) const override
+    {
+        REQUIRE(typeDef.TypeName() == name);
+
+        test_class_type_properties(typeDef);
+        if (!methods_and_implements.empty())
+        {
+            {
+                auto expectedMethod(methods_and_implements.begin());
+                for (auto &&method : typeDef.MethodList())
+                {
+                    if (method.Flags().SpecialName() == false)
+                    {
+                        ExpectedMethod m = expectedMethod->first;
+                        m.VerifyType(method);
+                    }
+                    ++expectedMethod;
+                }
+            }
+            {
+                auto expectedMethod(methods_and_implements.begin());
+                for (auto &&method_impl : typeDef.MethodImplList())
+                {
+                    std::string expected_impl = expectedMethod->second;
+                    std::string actual = std::string(method_impl.MethodDeclaration().MemberRef().Class().TypeRef().TypeName()) 
+                        + "." + std::string(method_impl.MethodDeclaration().MemberRef().Name());
+                    REQUIRE(actual == expected_impl);
+                }
+            }
+        }
+
+        if (!properties.empty())
+        {
+            auto expectedProperty(properties.begin());
+            for (auto &&prop : typeDef.PropertyList())
+            {
+                expectedProperty->VerifyType(prop);
+                ++expectedProperty;
+            }
+        }
+
+        if (!events.empty())
+        {
+            auto expectedEvent(events.begin());
+            for (auto &&event : typeDef.EventList())
+            {
+                expectedEvent->VerifyType(event);
+                ++expectedEvent;
+            }
+        }
+
+        if (!requires.empty())
+        {
+            auto expectedRequire(requires.begin());
+            for (auto &&require : typeDef.InterfaceImpl())
+            {
+                VerifyTypeRefName(*expectedRequire, typeDef.TypeNamespace(), require.Interface().TypeRef());
+                ++expectedRequire;
+            }
+        }
+
+        return;
+    }
+};
+
 void ValidateTypesInMetadata(std::istringstream & testIdl, std::vector<std::shared_ptr<ExpectedType>> const& fileTypes)
 {
     xlang::meta::reader::database db{ run_and_save_to_memory(testIdl, "testidl") };
@@ -1086,17 +1212,17 @@ TEST_CASE("Interface type metadata 2", "[!hide]")
     ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
-TEST_CASE("Interface type metadata", "[!hide]")
+TEST_CASE("Interface type metadata")
 {
     std::istringstream test_idl{ R"(
         namespace N
         {
-            interface IControl requires M.IControl3
+            interface IControl
             {
                 void Paint();
             }
     
-            interface IComboBox requires IControl
+            interface IComboBox requires M.IControl3, IControl
             {
                 Int32 property1;
             }
@@ -1123,7 +1249,7 @@ TEST_CASE("Interface type metadata", "[!hide]")
                 ExpectedProperty("property1", ElementType::I4)
             }
         ),
-        std::make_unique<ExpectedInterface>("IControl", std::vector<std::string> {"M.IControl3"},
+        std::make_unique<ExpectedInterface>("IControl",
             std::vector<ExpectedMethod> {
                 ExpectedMethod("Paint", ElementType::Void, {})
             }
@@ -1132,6 +1258,210 @@ TEST_CASE("Interface type metadata", "[!hide]")
 
     ValidateTypesInMetadata(test_idl, fileTypes);
 }
+
+TEST_CASE("Runtimeclass method metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct S1 {}    
+            runtimeclass C1 
+            {
+                S1 Draw(E1 param1);
+                static S1 DrawStatic(E1 param1);
+            }
+            enum E1 {}  
+        }
+    )" };
+
+    ExpectedClass c1{ "C1", {}, {}, {}, {
+        { ExpectedMethod("Draw", "S1", { ExpectedParam("param1", "E1") }), "IC1.Draw" }
+    } };
+
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
+    {
+        std::make_unique<ExpectedClass>(c1),
+        std::make_unique<ExpectedStruct>("S1", std::vector<ExpectedStructField> {}),
+        std::make_unique<ExpectedInterface>("IC1",
+            std::vector<ExpectedMethod> {
+                ExpectedMethod("Draw", "S1",
+                    std::vector<ExpectedParam> {
+                        ExpectedParam("param1", "E1")
+                    }
+                )
+            }
+        ),
+        std::make_unique<ExpectedInterface>("IC1Statics",
+            std::vector<ExpectedMethod> {
+                ExpectedMethod("DrawStatic", "S1",
+                    std::vector<ExpectedParam> {
+                        ExpectedParam("param1", "E1")
+                    }
+                )
+            }
+        ),
+        std::make_unique<ExpectedEnum>("E1", std::vector<ExpectedEnumField>{})
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
+}
+
+TEST_CASE("Runtimeclass property metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct S1 {}    
+            runtimeclass C1 
+            {
+                S1 property1;
+                static S1 property2;
+            }
+            enum E1 {}  
+        }
+    )" };
+
+    ExpectedClass c1{ "C1", 
+        {}, 
+        { ExpectedProperty{"property1", "S1"} },
+        {}, 
+        {
+            { ExpectedMethod("get_property1", "S1", {}), "IC1.get_property1" },
+            { ExpectedMethod("set_property1", ElementType::Void, { ExpectedParam{"TODO:findname", "S1"} }), "IC1.set_property1" }
+        } 
+    };
+
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
+    {
+        std::make_unique<ExpectedClass>(c1),
+        std::make_unique<ExpectedStruct>("S1", std::vector<ExpectedStructField> {}),
+        std::make_unique<ExpectedInterface>("IC1",
+            std::vector<ExpectedProperty> {
+                ExpectedProperty("property1", "S1")
+            }
+        ),
+        std::make_unique<ExpectedInterface>("IC1Statics",
+            std::vector<ExpectedProperty> {
+                ExpectedProperty("property2", "S1")
+            }
+        ),
+        std::make_unique<ExpectedEnum>("E1", std::vector<ExpectedEnumField>{})
+    };
+
+    ValidateTypesInMetadata(test_idl, fileTypes);
+}
+
+TEST_CASE("Runtimeclass event metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            delegate void StringListEvent(Int32 sender);
+            runtimeclass C1 
+            {
+                event StringListEvent Changed;
+                static event StringListEvent Changed2;
+            }
+        }
+    )" };
+
+    ExpectedClass c1{ "C1",
+        {},
+        {},
+        { ExpectedEvent{ "Changed", "StringListEvent" } },
+        {
+            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "S1"} }), "IC1.add_Changed" },
+            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }), "IC1.remove_Changed" }
+        }
+    };
+
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
+    {
+        std::make_unique<ExpectedClass>(c1),
+        std::make_unique<ExpectedInterface>("IC1",
+            std::vector<ExpectedEvent> {
+                ExpectedEvent("Changed", "StringListEvent")
+            }
+        ),
+        std::make_unique<ExpectedInterface>("IC1Statics",
+            std::vector<ExpectedEvent> {
+                ExpectedEvent("Changed2", "StringListEvent")
+            }
+        ),
+        std::make_unique<ExpectedDelegate>("StringListEvent", ElementType::Void,
+            std::vector<ExpectedParam> {
+                ExpectedParam("sender", ElementType::I4)
+            }
+        )
+    };
+    ValidateTypesInMetadata(test_idl, fileTypes);
+}
+
+//TEST_CASE("Runtimeclass implements interface metadata")
+//{
+//    std::istringstream test_idl{ R"(
+//        namespace N
+//        {
+//            interface I1
+//            {
+//                S1 Erase(E1 param1);
+//            }
+//
+//            struct S1 {}    
+//            runtimeclass C1 requires I1
+//            {
+//                S1 Draw(E1 param1);
+//                static S1 DrawStatic(E1 param1);
+//            }
+//            enum E1 {}  
+//        }
+//    )" };
+//
+//    ExpectedClass c1{ "C1",
+//        {},
+//        {},
+//        { ExpectedEvent{ "Changed", "StringListEvent" } },
+//        {
+//            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "S1"} }), "IC1.add_Changed" },
+//            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }), "IC1.remove_Changed" }
+//        }
+//    };
+//
+//    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
+//    {
+//        std::make_unique<ExpectedClass>(c1),
+//        std::make_unique<ExpectedStruct>("S1", std::vector<ExpectedStructField> {}),
+//        std::make_unique<ExpectedInterface>("I1",
+//            std::vector<ExpectedMethod> {
+//                ExpectedMethod("Erase", "S1",
+//                    std::vector<ExpectedParam> {
+//                        ExpectedParam("param1", "E1")
+//                    }
+//                )
+//            }
+//        ),
+//        std::make_unique<ExpectedInterface>("IC1",
+//            std::vector<ExpectedMethod> {
+//                ExpectedMethod("Draw", "S1",
+//                    std::vector<ExpectedParam> {
+//                        ExpectedParam("param1", "E1")
+//                    }
+//                )
+//            }
+//        ),
+//        std::make_unique<ExpectedInterface>("IC1Statics",
+//            std::vector<ExpectedMethod> {
+//                ExpectedMethod("DrawStatic", "S1",
+//                    std::vector<ExpectedParam> {
+//                        ExpectedParam("param1", "E1")
+//                    }
+//                )
+//            }
+//        ),
+//        std::make_unique<ExpectedEnum>("E1", std::vector<ExpectedEnumField>{})
+//    };
+//    ValidateTypesInMetadata(test_idl, fileTypes);
+//}
 
 TEST_CASE("Put breakpoint here to see test output before closing")
 {

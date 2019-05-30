@@ -41,7 +41,6 @@ namespace xlang::xmeta
         {
             if (!std::holds_alternative<resolved_type>(m_ref))
             {
-                std::cout << ref_name << std::endl;
                 xlang::throw_invalid("Model Ref is not resolved");
             }
             return std::get<resolved_type>(m_ref);

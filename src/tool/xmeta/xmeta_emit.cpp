@@ -77,66 +77,10 @@ namespace
         return { nullptr, RidFromToken(token) - 1 };
     }
 
-    ElementType to_ElementType(enum_type arg)
-    {
-        switch (arg)
-        {
-        case enum_type::Int8:
-            return ElementType::I1;
-        case enum_type::UInt8:
-            return ElementType::U1;
-        case enum_type::Int16:
-            return ElementType::I2;
-        case enum_type::UInt16:
-            return ElementType::U2;
-        case enum_type::Int32:
-            return ElementType::I4;
-        case enum_type::UInt32:
-            return ElementType::U4;
-        case enum_type::Int64:
-            return ElementType::I8;
-        case enum_type::UInt64:
-            return ElementType::U8;
-        default:
-            XLANG_ASSERT(false);
-            return ElementType::Void;
-        }
-    }
-
-    ElementType to_ElementType(fundamental_type arg)
-    {
-        switch (arg)
-        {
-        case fundamental_type::String:
-            return ElementType::String;
-        case fundamental_type::Int8:
-            return ElementType::I1;
-        case fundamental_type::UInt8:
-            return ElementType::U1;
-        case fundamental_type::Int16:
-            return ElementType::I2;
-        case fundamental_type::UInt16:
-            return ElementType::U2;
-        case fundamental_type::Int32:
-            return ElementType::I4;
-        case fundamental_type::UInt32:
-            return ElementType::U4;
-        case fundamental_type::Int64:
-            return ElementType::I8;
-        case fundamental_type::UInt64:
-            return ElementType::U8;
-        case fundamental_type::Char16:
-            return ElementType::Char;
-        case fundamental_type::Single:
-            return ElementType::R4;
-        case fundamental_type::Double:
-            return ElementType::R8;
-        case fundamental_type::Boolean:
-            return ElementType::Boolean;
-        default:
-            XLANG_ASSERT(false);
-            return ElementType::Void;
-        }
+    std::string remove_extension(const std::string& filename) {
+        size_t lastdot = filename.find_last_of(".");
+        if (lastdot == std::string::npos) return filename;
+        return filename.substr(0, lastdot);
     }
 
     std::variant<std::string, fundamental_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
@@ -179,13 +123,6 @@ namespace
         assert(false);
         return "";
     }
-
-    std::string remove_extension(const std::string& filename) {
-        size_t lastdot = filename.find_last_of(".");
-        if (lastdot == std::string::npos) return filename;
-        return filename.substr(0, lastdot);
-    }
-
 }
 
 namespace xlang::xmeta
@@ -576,9 +513,13 @@ namespace xlang::xmeta
         implements.emplace_back(mdTokenNil);
 
         auto token_class_type_def = define_type_def(class_qualified_name, class_type_flag, extends, implements.data());
+
         // Method list for first contiguous run of methods owned by this type
-        auto const& instance_interface = model->get_synthesized_instance_interface();
-        define_required_interface_members(instance_interface, token_class_type_def);
+        if (model->get_synthesized_instance_interface())
+        {
+            auto const& instance_interface = model->get_synthesized_instance_interface();
+            define_required_interface_members(instance_interface, token_class_type_def);
+        }
 
         for (auto const& interface_ref : model->get_interface_bases())
         {
@@ -592,7 +533,7 @@ namespace xlang::xmeta
             {
                 auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
                 assert(type_def->is_interface());
-                // TODO: think of a way to emit interface members from TypeDef
+                // TODO: think of a way to emit interface members from TypeDef. Initial Idea. Create interface model from typedef and use define_required_interface_members
             }
         }
     }

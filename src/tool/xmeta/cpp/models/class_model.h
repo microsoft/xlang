@@ -103,9 +103,9 @@ namespace xlang::xmeta
         // TODO: Add type parameters (generic types)
 
 
-        std::shared_ptr<interface_model> m_synthesized_static_interface;
-        std::shared_ptr<interface_model> m_synthesized_factory_interface;
-        std::shared_ptr<interface_model> m_synthesized_instance_interface;
+        std::shared_ptr<interface_model> m_synthesized_static_interface = nullptr;
+        std::shared_ptr<interface_model> m_synthesized_factory_interface = nullptr;
+        std::shared_ptr<interface_model> m_synthesized_instance_interface = nullptr;
 
         // TODO: Composition and inheritance is coming in a later update
         // std::shared_ptr<interface_model> m_overrides_interfaces;
