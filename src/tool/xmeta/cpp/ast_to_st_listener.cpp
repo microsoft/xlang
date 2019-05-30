@@ -282,29 +282,29 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     std::shared_ptr<method_model> set_method = nullptr;
     type_ref tr = prop_model->get_type();
 
-    method_modifier property_method_semantics;
+    method_modifier property_method_modifier;
     if (prop_model->get_modifier().is_static)
     {
-        property_method_semantics.is_static = true;
+        property_method_modifier.is_static = true;
     }
 
 
-    if (property_accessors->property_accessor_method().size() > 0)
+    if (property_accessors->property_accessor_method().size() > 0) // Explicit declaration
     {
         auto const& property_accessor_methods = property_accessors->property_accessor_method();
         if (property_accessor_methods.size() == 2)
         {
+            // Can't have two of the same
             if ((property_accessor_methods[0]->GET() && property_accessor_methods[1]->GET())
                 || (property_accessor_methods[0]->SET() && property_accessor_methods[1]->SET()))
             {
-                // WRITE SEMANTIC ERROR
                 error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
                 return listener_error::failed;
             }
         }
         else if (property_accessor_methods.size() > 2)
         {
-            // THIS PARSER BE TRIPPING :O
+            // Can't have more than two
             error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
@@ -314,7 +314,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         {
             if (property_accessor->GET())
             {
-                get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
+                get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), property_accessor->GET()->getSymbol()->getLine(), m_cur_assembly, std::move(prop_model->get_type()), property_method_modifier, method_association::Property);
                 if (get_method && model->add_member(get_method) == semantic_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_qualified_name());
@@ -323,7 +323,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             }
             else if (property_accessor->SET())
             {
-                set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), property_method_semantics, method_association::Property);
+                set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), property_accessor->SET()->getSymbol()->getLine(), m_cur_assembly, std::move(std::nullopt), property_method_modifier, method_association::Property);
                 parameter_semantics sem = parameter_semantics::in;
                 set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == semantic_error::symbol_exists)
@@ -338,14 +338,15 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             return error;
         }
     }
-    else // Implicity declaration
+    else // Implicit declaration
     {
-        get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), prop_model->get_decl_line(), m_cur_assembly, std::move(prop_model->get_type()), property_method_semantics, method_association::Property);
+        get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), prop_model->get_decl_line(), m_cur_assembly, std::move(prop_model->get_type()), property_method_modifier, method_association::Property);
 
-        set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), prop_model->get_decl_line(), m_cur_assembly, std::move(std::nullopt), property_method_semantics, method_association::Property);
+        set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), prop_model->get_decl_line(), m_cur_assembly, std::move(std::nullopt), property_method_modifier, method_association::Property);
         parameter_semantics sem = parameter_semantics::in;
         set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), m_cur_assembly, sem, std::move(tr) });
 
+        // Adding property methods to the model
         listener_error error = listener_error::passed;
         if (get_method && model->add_member(get_method) == semantic_error::symbol_exists)
         {
@@ -362,6 +363,8 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             return error;
         }
     }
+    
+    // This enables declaration of the property's get and set on two different lines. 
     if (model->property_exists(prop_model->get_name()))
     {
         auto const& existing_property = model->get_property_member(prop_model->get_name());
@@ -417,18 +420,16 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     parameter_semantics param_sem = parameter_semantics::in;
     type_ref tr = event->get_type();
 
-    method_modifier event_method_semantics;
+    method_modifier event_method_modifier;
     if (event->get_modifier().is_static)
     {
-        event_method_semantics.is_static = true;
+        event_method_modifier.is_static = true;
     }
 
-
-
-    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_name(), event->get_decl_line(), m_cur_assembly, std::move(event_registration), event_method_semantics, method_association::Event);
+    std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_name(), event->get_decl_line(), m_cur_assembly, std::move(event_registration), event_method_modifier, method_association::Event);
     add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), m_cur_assembly, param_sem, std::move(tr) });
 
-    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_name(), event->get_decl_line(), m_cur_assembly, std::move(std::nullopt), event_method_semantics, method_association::Event);
+    std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_name(), event->get_decl_line(), m_cur_assembly, std::move(std::nullopt), event_method_modifier, method_association::Event);
     remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), m_cur_assembly, param_sem, std::move(event_registration) });
 
     assert(event->set_add_method(add_method) == semantic_error::passed);
@@ -490,6 +491,8 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
     auto synthesized_interface = std::make_shared<interface_model>("I" + class_name, decl_line, m_cur_assembly, m_cur_namespace_body);
     auto synthesized_interface_factory = std::make_shared<interface_model>("I" + class_name + "Factory", decl_line, m_cur_assembly, m_cur_namespace_body);
     auto synthesized_interface_statics = std::make_shared<interface_model>("I" + class_name + "Statics", decl_line, m_cur_assembly, m_cur_namespace_body);
+    
+    // TODO: protected, override and composable are coming in a later update
     //auto synthesized_interface_protected = std::make_shared<interface_model>("I" + class_name + "Protected", decl_line, m_cur_assembly, m_cur_namespace_body);
     //auto synthesized_interface_overrides = std::make_shared<interface_model>("I" + class_name + "Overrides", decl_line, m_cur_assembly, m_cur_namespace_body);
 
