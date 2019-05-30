@@ -35,6 +35,8 @@ TEST_CASE("single_threaded_observable_vector")
         REQUIRE(changed);
     }
     {
+        // VectorChanged is raised on both interface types.
+
         IObservableVector<int> vector_i = single_threaded_observable_vector<int>();
         IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
         bool changed_i{};
@@ -57,6 +59,8 @@ TEST_CASE("single_threaded_observable_vector")
         REQUIRE(changed_o);
     }
     {
+        // Confirming the underlying container is shared and remains in sync.
+
         IObservableVector<int> vector_i = single_threaded_observable_vector<int>();
         IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
 
@@ -73,6 +77,8 @@ TEST_CASE("single_threaded_observable_vector")
         REQUIRE(unbox_value<int>(vector_o.GetAt(1)) == 1);
     }
     {
+        // Different iterator types over the same container.
+
         IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2 });
         IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
 
@@ -104,6 +110,8 @@ TEST_CASE("single_threaded_observable_vector")
         REQUIRE_THROWS_AS(iterator_o.Current(), hresult_out_of_bounds);
     }
     {
+        // GetMany always needs a bit of extra testing.
+
         IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2 });
         IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
 
@@ -126,6 +134,8 @@ TEST_CASE("single_threaded_observable_vector")
         REQUIRE(0 == iterator_o.GetMany(array_o));
     }
     {
+        // GetMany always needs a bit of extra testing (again).
+
         IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2 });
         IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
 
@@ -140,8 +150,9 @@ TEST_CASE("single_threaded_observable_vector")
         REQUIRE(1 == iterator_o.GetMany(array_o));
         REQUIRE(unbox_value<int>(array_o[0]) == 1);
     }
-
     {
+        // Iterator invalidation works across types.
+
         IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2 });
         IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
 
@@ -155,5 +166,78 @@ TEST_CASE("single_threaded_observable_vector")
 
         REQUIRE_THROWS_AS(iterator_i.HasCurrent(), hresult_changed_state);
         REQUIRE_THROWS_AS(iterator_o.HasCurrent(), hresult_changed_state);
+    }
+    {
+        // IndexOf forwarding.
+
+        IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2 });
+        IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
+
+        uint32_t index{};
+        REQUIRE((vector_i.IndexOf(2, index) && index == 1));
+        index = 0;
+        REQUIRE((vector_o.IndexOf(box_value(2), index) && index == 1));
+    }
+    {
+        // GetView forwarding.
+
+        IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2 });
+        IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
+
+        REQUIRE(vector_i.GetView().GetAt(1) == 2);
+        REQUIRE(unbox_value<int>(vector_o.GetView().GetAt(1)) == 2);
+    }
+    {
+        // SetAt forwarding.
+
+        IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,2 });
+        IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
+
+        REQUIRE(vector_i.GetAt(0) == 1);
+        REQUIRE(vector_i.GetAt(1) == 2);
+
+        vector_i.SetAt(0, 10);
+        vector_o.SetAt(1, box_value(20));
+
+        REQUIRE(vector_i.GetAt(0) == 10);
+        REQUIRE(vector_i.GetAt(1) == 20);
+    }
+    {
+        // InsertAt forwarding.
+
+        IObservableVector<int> vector_i = single_threaded_observable_vector<int>({ 1,4 });
+        IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
+
+        REQUIRE(vector_i.Size() == 2);
+
+        vector_i.InsertAt(1, 2);
+        vector_o.InsertAt(2, box_value(3));
+
+        REQUIRE(vector_i.Size() == 4);
+        REQUIRE(vector_i.GetAt(0) == 1);
+        REQUIRE(vector_i.GetAt(1) == 2);
+        REQUIRE(vector_i.GetAt(2) == 3);
+        REQUIRE(vector_i.GetAt(3) == 4);
+    }
+    {
+        // Append forwarding.
+
+        IObservableVector<int> vector_i = single_threaded_observable_vector<int>();
+        IObservableVector<IInspectable> vector_o = vector_i.as<IObservableVector<IInspectable>>();
+
+        REQUIRE(vector_i.Size() == 0);
+
+        vector_i.Append(1);
+        vector_o.Append(box_value(2));
+
+        REQUIRE(vector_i.Size() == 2);
+        REQUIRE(vector_i.GetAt(0) == 1);
+        REQUIRE(vector_i.GetAt(1) == 2);
+    }
+    {
+        // GetMany
+    }
+    {
+        // ReplaceAll
     }
 }
