@@ -33,6 +33,15 @@ const TypeAttributes class_type_attributes()
     return result;
 }
 
+const MethodAttributes class_method_attributes()
+{
+    MethodAttributes result{};
+    result.Access(MemberAccess::Public);
+    result.Virtual(true);
+    result.HideBySig(true);
+    result.Layout(VtableLayout::NewSlot);
+    return result;
+}
 
 const TypeAttributes interface_type_attributes()
 {
@@ -497,16 +506,18 @@ struct ExpectedMethod : ExpectedType
     ElementType returnType;
     std::string returnTypeRef;
     std::vector<ExpectedParam> params;
-
-    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
-        : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams) {}
-    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams)
-        : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams) {}
+    MethodAttributes flag;
+    
+        
+    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag)
+        : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams), flag(flag) {}
+    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag)
+        : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams), flag(flag) {}
 
     void VerifyType(MethodDef const& method) const override
     {
         REQUIRE(method.Name() == name);
-
+        REQUIRE(method.Flags().value == flag.value);
         VerifyReturnType(returnType, returnTypeRef, method, method.Parent());
 
         auto param(params.begin());
@@ -826,6 +837,16 @@ struct ExpectedClass : ExpectedType
 void ValidateTypesInMetadata(std::istringstream & testIdl, std::vector<std::shared_ptr<ExpectedType>> const& fileTypes)
 {
     xlang::meta::reader::database db{ run_and_save_to_memory(testIdl, "testidl") };
+   
+    //std::cout << "NAME " << db.TypeDef[1].TypeName() << std::endl;
+    //std::cout << "size " << size(db.TypeDef[1].MethodImplList()) << std::endl;
+    //for (auto const& tb : db.MethodImpl)
+    //{
+    //    std::cout << tb.Class().TypeName() <<  std::endl;
+    //    std::cout << tb.MethodBody().MethodDef().Name() << std::endl;
+    //    std::cout << tb.MethodDeclaration().MethodDef().Name() << std::endl;
+    //    std::cout << std::endl;
+    //}
 
     auto expectedType(fileTypes.begin());
     //REQUIRE(fileTypes.size() == db.TypeDef.size());
@@ -1095,7 +1116,8 @@ TEST_CASE("Interface method metadata")
                 ExpectedMethod("Draw", "S1",
                     std::vector<ExpectedParam> {
                         ExpectedParam("param1", "E1")
-                    }
+                    }, 
+                    interface_method_attributes()
                 )
             }
         ),
@@ -1127,8 +1149,8 @@ TEST_CASE("Interface property metadata")
                 ExpectedProperty("property1", "S1")
             },
             std::vector<ExpectedMethod> {
-                ExpectedMethod("get_property1", "S1", {}),
-                ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", "S1"} })
+                ExpectedMethod("get_property1", "S1", {}, interface_method_property_attributes()),
+                ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", "S1"} }, interface_method_property_attributes())
             }
         ),
         std::make_unique<ExpectedEnum>("E1", std::vector<ExpectedEnumField>{})
@@ -1157,8 +1179,8 @@ TEST_CASE("Interface event metadata")
                 ExpectedEvent("Changed", "StringListEvent")
             },
             std::vector<ExpectedMethod> {
-                ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }),
-                ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} })
+                ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }, interface_method_event_attributes()),
+                ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes())
             }
         ),
         std::make_unique<ExpectedDelegate>("StringListEvent", ElementType::Void,
@@ -1205,7 +1227,7 @@ TEST_CASE("Interface type metadata 2", "[!hide]")
     {
         std::make_unique<ExpectedInterface>("IControl3",
             std::vector<ExpectedMethod> {
-                ExpectedMethod("Paint3", ElementType::Void, {})
+                ExpectedMethod("Paint3", ElementType::Void, {}, interface_method_attributes())
             }
         ),
         std::make_unique<ExpectedInterface>("IComboBox", std::vector<std::string> {"M.IControl3", "IControl", "IControl2"},
@@ -1215,12 +1237,12 @@ TEST_CASE("Interface type metadata 2", "[!hide]")
         ),
         std::make_unique<ExpectedInterface>("IControl", std::vector<std::string> {"M.IControl3"},
             std::vector<ExpectedMethod> {
-                ExpectedMethod("Paint", ElementType::Void, {})
+                ExpectedMethod("Paint", ElementType::Void, {}, interface_method_attributes())
             }
         ),
         std::make_unique<ExpectedInterface>("IControl2", std::vector<std::string> {"M.IControl3"},
             std::vector<ExpectedMethod> {
-                ExpectedMethod("Paint2", ElementType::Void, {})
+                ExpectedMethod("Paint2", ElementType::Void, {}, interface_method_attributes())
             }
         )
     };
@@ -1257,7 +1279,7 @@ TEST_CASE("Interface type metadata")
     {
         std::make_unique<ExpectedInterface>("IControl3",
             std::vector<ExpectedMethod> {
-                ExpectedMethod("Paint3", ElementType::Void, {})
+                ExpectedMethod("Paint3", ElementType::Void, {}, interface_method_attributes())
             }
         ),
         std::make_unique<ExpectedInterface>("IComboBox", std::vector<std::string> {"M.IControl3", "IControl"},
@@ -1267,7 +1289,7 @@ TEST_CASE("Interface type metadata")
         ),
         std::make_unique<ExpectedInterface>("IControl",
             std::vector<ExpectedMethod> {
-                ExpectedMethod("Paint", ElementType::Void, {})
+                ExpectedMethod("Paint", ElementType::Void, {}, interface_method_attributes())
             }
         )
     };
@@ -1291,7 +1313,7 @@ TEST_CASE("Runtimeclass method metadata")
     )" };
 
     ExpectedClass c1{ "C1", {}, {}, {}, {
-        { ExpectedMethod("Draw", "S1", { ExpectedParam("param1", "E1") }), "IC1.Draw" }
+        { ExpectedMethod("Draw", "S1", { ExpectedParam("param1", "E1") }, class_method_attributes()), "IC1.Draw" }
     } };
 
     std::vector<std::shared_ptr<ExpectedType>> fileTypes =
@@ -1303,7 +1325,8 @@ TEST_CASE("Runtimeclass method metadata")
                 ExpectedMethod("Draw", "S1",
                     std::vector<ExpectedParam> {
                         ExpectedParam("param1", "E1")
-                    }
+                    },
+                    interface_method_attributes()
                 )
             }
         ),
@@ -1312,7 +1335,8 @@ TEST_CASE("Runtimeclass method metadata")
                 ExpectedMethod("DrawStatic", "S1",
                     std::vector<ExpectedParam> {
                         ExpectedParam("param1", "E1")
-                    }
+                    },
+                    interface_method_attributes()
                 )
             }
         ),
@@ -1342,8 +1366,8 @@ TEST_CASE("Runtimeclass property metadata")
         { ExpectedProperty{"property1", "S1"} },
         {}, 
         {
-            { ExpectedMethod("get_property1", "S1", {}), "IC1.get_property1" },
-            { ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", "S1"} }), "IC1.put_property1" }
+            { ExpectedMethod("get_property1", "S1", {}, interface_method_property_attributes()), "IC1.get_property1" },
+            { ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", "S1"} }, interface_method_property_attributes()), "IC1.put_property1" }
         } 
     };
 
@@ -1386,8 +1410,8 @@ TEST_CASE("Runtimeclass event metadata")
         {},
         { ExpectedEvent{ "Changed", "StringListEvent" } },
         {
-            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }), "IC1.add_Changed" },
-            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }), "IC1.remove_Changed" }
+            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }, interface_method_event_attributes()), "IC1.add_Changed" },
+            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()), "IC1.remove_Changed" }
         }
     };
 
@@ -1437,11 +1461,11 @@ TEST_CASE("Runtimeclass requires interfacebase metadata")
         { ExpectedProperty{ "property1" , ElementType::I4 } },
         { ExpectedEvent{ "Changed", "StringListEvent" } },
         {
-            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }), "I1.add_Changed" },
-            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }), "I1.remove_Changed" },
-            { ExpectedMethod("m0", ElementType::Void, {}), "I1.m0" },
-            { ExpectedMethod("get_property1", ElementType::I4, {}), "I1.get_property1" },
-            { ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", ElementType::I4} }), "I1.put_property1" }
+            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }, interface_method_event_attributes()), "I1.add_Changed" },
+            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()), "I1.remove_Changed" },
+            { ExpectedMethod("m0", ElementType::Void, {}, class_method_attributes()), "I1.m0" },
+            { ExpectedMethod("get_property1", ElementType::I4, {}, interface_method_property_attributes()), "I1.get_property1" },
+            { ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", ElementType::I4} }, interface_method_property_attributes()), "I1.put_property1" }
         }
     };
 
@@ -1456,11 +1480,11 @@ TEST_CASE("Runtimeclass requires interfacebase metadata")
                 ExpectedEvent("Changed", "StringListEvent")
             },
             std::vector<ExpectedMethod> {
-                ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }),
-                ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }),
-                ExpectedMethod("m0", ElementType::Void, {}),
-                ExpectedMethod("get_property1", ElementType::I4, {}),
-                ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", ElementType::I4} }),
+                ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }, interface_method_event_attributes()),
+                ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()),
+                ExpectedMethod("m0", ElementType::Void, {}, interface_method_attributes()),
+                ExpectedMethod("get_property1", ElementType::I4, {}, interface_method_property_attributes()),
+                ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", ElementType::I4} }, interface_method_property_attributes()),
             }
         ),
         std::make_unique<ExpectedDelegate>("StringListEvent", ElementType::Void,

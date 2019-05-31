@@ -421,7 +421,7 @@ namespace xlang::xmeta
             mdMethodDef method_def;
             if (val->get_method_association() == method_association::None)
             {
-                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot /*| mdInstance*/;
+                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot /*| mdInstance*/;
                 method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
             }
             else if (val->get_method_association() == method_association::Property)
