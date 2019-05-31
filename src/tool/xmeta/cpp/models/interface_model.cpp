@@ -12,16 +12,8 @@ namespace xlang::xmeta
 {
     std::shared_ptr<interface_model> create_interface_from(std::shared_ptr<xlang::meta::reader::TypeDef> type_def)
     {
-        if (!type_def->is_interface())
-        {
-            xlang::throw_invalid("Type def is not an interface");
-        }
-        auto model = std::make_shared<interface_model>(type_def->TypeName(), 0, type_def->get_database().Assembly[0].Name(), type_def->TypeNamespace());
-
-        for (auto const& methods : type_def->MethodList())
-        {
-
-        }
+        // TODO: this method may be required to import interfaces that are required by the runtime class. 
+        return nullptr;
     }
 
     void interface_model::validate(xlang_error_manager & error_manager)
