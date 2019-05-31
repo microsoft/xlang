@@ -675,23 +675,20 @@ namespace xlang
         if (method_signature.return_signature())
         {
             s();
-            auto const& type = method_signature.return_signature().Type();
             auto param_name = method_signature.return_param_name();
+            auto category = get_category(method_signature.return_signature().Type());
 
-            if (type.is_szarray())
+            if (category == param_category::array_type)
             {
                 w.write("&%_impl_size, &%", param_name, param_name);
             }
+            else if (category == param_category::struct_type || category == param_category::enum_type || category == param_category::generic_type)
+            {
+                w.write("put_abi(%)", param_name);
+            }
             else
             {
-                if (!can_take_ownership_of_return_type(method_signature) && wrap_abi(type))
-                {
-                    w.write("put_abi(%)", param_name);
-                }
-                else
-                {
-                    w.write("&%", param_name);
-                }
+                w.write("&%", param_name);
             }
         }
     }
