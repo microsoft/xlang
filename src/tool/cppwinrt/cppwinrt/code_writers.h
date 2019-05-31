@@ -1073,19 +1073,25 @@ namespace xlang
             return;
         }
 
-        if (signature.return_signature().Type().is_szarray())
+        auto category = get_category(signature.return_signature().Type());
+
+        switch (category)
         {
+        case param_category::array_type:
             w.write("\n        return { %, %_impl_size, take_ownership_from_abi };",
                 signature.return_param_name(),
                 signature.return_param_name());
-        }
-        else if (can_take_ownership_of_return_type(signature))
-        {
+            break;
+        case param_category::object_type:
+        case param_category::string_type:
             w.write("\n        return { %, take_ownership_from_abi };", signature.return_param_name());
-        }
-        else
-        {
+            break;
+        case param_category::enum_type:
+        case param_category::fundamental_type:
+        case param_category::generic_type:
+        case param_category::struct_type:
             w.write("\n        return %;", signature.return_param_name());
+            break;
         }
     }
 
