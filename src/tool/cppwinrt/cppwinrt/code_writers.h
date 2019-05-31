@@ -565,46 +565,6 @@ namespace xlang
         }
     }
 
-    bool can_take_ownership_of_return_type(method_signature const& signature)
-    {
-        TypeSig const& return_signature = signature.return_signature().Type();
-
-        if (std::holds_alternative<GenericTypeInstSig>(return_signature.Type()))
-        {
-            return true;
-        }
-
-        if (auto type_def = std::get_if<coded_index<TypeDefOrRef>>(&return_signature.Type()))
-        {
-            auto category = category::interface_type;
-
-            if (type_def->type() == TypeDefOrRef::TypeRef)
-            {
-                auto type_ref = type_def->TypeRef();
-
-                if (type_name(type_ref) == "System.Guid")
-                {
-                    return false;
-                }
-
-                category = get_category(find_required(type_ref));
-            }
-            else if (type_def->type() == TypeDefOrRef::TypeDef)
-            {
-                category = get_category(type_def->TypeDef());
-            }
-
-            return category == category::class_type || category == category::interface_type || category == category::delegate_type;
-        }
-
-        if (auto element_type = std::get_if<ElementType>(&return_signature.Type()))
-        {
-            return *element_type == ElementType::String || *element_type == ElementType::Object;
-        }
-
-        return false;
-    }
-
     static void write_abi_args(writer& w, method_signature const& method_signature)
     {
         separator s{ w };
@@ -1702,9 +1662,11 @@ namespace xlang
             }
             else
             {
+                auto category = get_category(param_signature->Type());
+
                 if (param.Flags().In())
                 {
-                    if (wrap_abi(param_signature->Type()))
+                    if (category != param_category::fundamental_type)
                     {
                         w.write("*reinterpret_cast<% const*>(&%)",
                             param_type,
@@ -1721,7 +1683,7 @@ namespace xlang
                     {
                         w.write("winrt_impl_%", param_name);
                     }
-                    else if (wrap_abi(param_signature->Type()))
+                    else if (category != param_category::fundamental_type)
                     {
                         w.write("*reinterpret_cast<@*>(%)",
                             param_type,
