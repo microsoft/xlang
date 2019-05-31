@@ -602,7 +602,6 @@ struct ExpectedProperty : ExpectedType
                 {
                     foundGetMethod = true;
                     REQUIRE(size(method.Signature().Params()) == 0);
-                    REQUIRE(method.Flags().value == interface_method_property_attributes().value);
                     VerifyReturnType(type, typeRef, method, prop.Parent());
                 }
                 else if (setMethodName == method.Name())
@@ -610,7 +609,6 @@ struct ExpectedProperty : ExpectedType
                     foundSetMethod = true;
                     REQUIRE(!method.Signature().ReturnType());
                     REQUIRE(size(method.Signature().Params()) == 1);
-                    REQUIRE(method.Flags().value == interface_method_property_attributes().value);
                     if (type == ElementType::End)
                     {
                         VerifyTypeRefName(typeRef, method.Parent().TypeNamespace(), std::get<coded_index<TypeDefOrRef>>(method.Signature().Params().first[0].Type().Type()).TypeRef());

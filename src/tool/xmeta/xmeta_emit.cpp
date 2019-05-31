@@ -551,6 +551,7 @@ namespace xlang::xmeta
                 auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
                 assert(type_def->is_interface());
                 // TODO: think of a way to emit interface members from TypeDef. Initial Idea. Create interface model from typedef and use define_required_interface_members
+                xlang::throw_invalid("Currently not supporting imported interface base types for runtime class");
             }
         }
     }
