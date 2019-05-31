@@ -510,6 +510,8 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
         return;
     }
 
+    std::string create_instance = "CreateInstance";
+    size_t create_instance_index = 1;
     auto const& class_body = ctx->class_body();
     for (auto const& class_member_declarations : class_body->class_member_declarations())
     {
@@ -517,7 +519,6 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
         {
             if (class_member->class_constructor_declaration())
             {
-                auto constexpr constructor_semantic_name = ".ctor";
                 auto class_constructor = class_member->class_constructor_declaration();
                 std::string constructor_id = class_constructor->IDENTIFIER()->getText();
 
@@ -531,33 +532,51 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 {
                     method_sem.is_protected = true;
                 }
-                
+
+                auto constexpr constructor_semantic_name = ".ctor";
                 auto constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
                 if (class_constructor->formal_parameter_list())
                 {
                     extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), constructor_model);
                 }
 
-                // Synthesizing constructors
-                auto syn_constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
-                if (class_constructor->formal_parameter_list())
+                if (class_constructor->formal_parameter_list() && class_constructor->formal_parameter_list()->fixed_parameter().size() > 0) // Non default constructor
                 {
-                    extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), syn_constructor_model);
-                }
+                    std::string factory_name;
+                    // Synthesizing constructors
+                    if (create_instance_index != 1)
+                    {
+                        char number[256] = ""; /* In fact not necessary as snprintf() adds the
+                                               0-terminator. */
 
-                // this is a non-default constructor and we need to add it to the IFactory interface
-                if (constructor_model->get_formal_parameters().size() > 0)
-                {
+                        snprintf(number, sizeof number, "%zu", create_instance_index);
+                        factory_name = create_instance + number;
+                    }
+                    else
+                    {
+                        factory_name = create_instance;
+                    }
+                    type_ref tr = type_ref{ class_name };
+                    auto syn_constructor_model = std::make_shared<method_model>(factory_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(tr), method_sem, method_association::Constructor);
+                    if (class_constructor->formal_parameter_list())
+                    {
+                        extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), syn_constructor_model);
+                    }
                     synthesized_interface_factory->add_member(syn_constructor_model);
                     has_factory = true;
+                    create_instance_index++;
                 }
                 else
                 {
-                    // TODO: Default constructor case: compiled with the metadata [Activatable] with a Type of null.
+                    auto syn_constructor_model = std::make_shared<method_model>(constructor_semantic_name, class_constructor->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(std::nullopt), method_sem, method_association::Constructor);
+                    if (class_constructor->formal_parameter_list())
+                    {
+                        extract_formal_params(class_constructor->formal_parameter_list()->fixed_parameter(), syn_constructor_model);
+                    }
                     synthesized_interface->add_member(syn_constructor_model);
                     has_instance = true;
                 }
-                
+
                 /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods 
                 properties and events and the metadata emit can user the interfaces that are referenced in the class
                  to emit metadata */

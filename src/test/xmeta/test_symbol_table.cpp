@@ -3201,6 +3201,7 @@ TEST_CASE("Runtime class constructor test")
             runtimeclass Area
             {
                 Area(); // default constructor must use IActivationFactory
+                Area(Int32 width);
                 Area(Int32 width, Int32 height);
             }
         }
@@ -3213,12 +3214,24 @@ TEST_CASE("Runtime class constructor test")
 
     ExpectedMethodModel Area{ ".ctor", default_method_modifier, std::nullopt, {} };
     ExpectedMethodModel Area2{ ".ctor", default_method_modifier, std::nullopt, {
+        ExpectedFormalParameterModel{ "width", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
+    } };
+    ExpectedMethodModel Area3{ ".ctor", default_method_modifier, std::nullopt, {
+        ExpectedFormalParameterModel{ "width", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } },
+        ExpectedFormalParameterModel{ "height", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
+    } };
+
+
+    ExpectedMethodModel Areaf{ "CreateInstance", default_method_modifier, ExpectedTypeRefModel{ ExpectedClassRef{ "N.Area" } }, {
+        ExpectedFormalParameterModel{ "width", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
+    } };
+    ExpectedMethodModel Areaf2{ "CreateInstance2", default_method_modifier, ExpectedTypeRefModel{ ExpectedClassRef{ "N.Area" } }, {
         ExpectedFormalParameterModel{ "width", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } },
         ExpectedFormalParameterModel{ "height", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
     } };
 
     ExpectedClassModel c1Area{ "Area", "N.Area",
-        { Area, Area2 },
+        { Area, Area2, Area3 },
         {},
         {},
         std::nullopt,
@@ -3226,7 +3239,7 @@ TEST_CASE("Runtime class constructor test")
     };
 
     ExpectedInterfaceModel syn_c1{ "IAreaFactory", "N.IAreaFactory",
-        { Area2 },
+        { Areaf, Areaf2 },
         {},
         {},
         {}

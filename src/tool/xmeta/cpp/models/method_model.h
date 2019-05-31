@@ -96,6 +96,11 @@ namespace xlang::xmeta
             return m_formal_parameters;
         }
 
+        auto get_formal_parameter_copy() const noexcept
+        {
+            return m_formal_parameters;
+        }
+
         auto const& get_overridden_method_ref() const noexcept
         {
             return m_implemented_method_ref;

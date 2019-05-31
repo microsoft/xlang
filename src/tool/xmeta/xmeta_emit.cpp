@@ -442,17 +442,20 @@ namespace xlang::xmeta
             }
             else if (val->get_method_association() == method_association::Constructor)
             {
+                auto constructor = std::make_shared<method_model>(".ctor", val->get_decl_line(), val->get_assembly_name(), std::nullopt, val->get_formal_parameter_copy(), val->get_modifier(), val->get_method_association());
                 static constexpr DWORD method_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/; //TODO: Figure out what mdInstance is
-                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def, miRuntime);
+                method_def = define_method(constructor, ".ctor", method_flag, method_defs, class_token_def, miRuntime);
             }
-        
-            // Defining method impl table, find the member ref token from the method_references map
-            auto iter = method_references.find(model->get_qualified_name());
-            assert(iter != method_references.end());
-            auto const& member_ref_list = iter->second;
-            auto iter2 = member_ref_list.find(val->get_name());
-            assert(iter2 != member_ref_list.end());
-            check_hresult(m_metadata_emitter->DefineMethodImpl(class_token_def, method_def, iter2->second));
+            if (val->get_method_association() != method_association::Constructor)
+            {
+                // Defining method impl table, find the member ref token from the method_references map
+                auto iter = method_references.find(model->get_qualified_name());
+                assert(iter != method_references.end());
+                auto const& member_ref_list = iter->second;
+                auto iter2 = member_ref_list.find(val->get_name());
+                assert(iter2 != member_ref_list.end());
+                check_hresult(m_metadata_emitter->DefineMethodImpl(class_token_def, method_def, iter2->second));
+            }
         }
         for (auto const& val : model->get_properties())
         {
@@ -521,11 +524,18 @@ namespace xlang::xmeta
         auto token_class_type_def = define_type_def(class_qualified_name, class_type_flag, extends, implements.data());
 
         // Method list for first contiguous run of methods owned by this type
+        if (model->has_synthesized_factory_interface())
+        {
+            auto const& factory_interface = model->get_synthesized_factory_interface();
+            define_required_interface_members(factory_interface, token_class_type_def);
+        }
         if (model->has_synthesized_instance_interface())
         {
             auto const& instance_interface = model->get_synthesized_instance_interface();
             define_required_interface_members(instance_interface, token_class_type_def);
         }
+
+
 
         for (auto const& interface_ref : model->get_interface_bases())
         {
