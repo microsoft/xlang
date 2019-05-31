@@ -51,19 +51,34 @@ namespace xlang::xmeta
             return m_modifier;
         }
 
-        auto const& get_synthesized_static_interface(size_t index = 0) const noexcept
+        bool const& has_synthesized_static_interface(size_t version = 0)
         {
-            return m_synthesized_static_interface[0];
+            return m_synthesized_static_interface.size() > version;
         }
 
-        auto const& get_synthesized_factory_interface(size_t index = 0) const noexcept
+        bool const& has_synthesized_factory_interface(size_t version = 0)
         {
-            return m_synthesized_factory_interface[0];
+            return m_synthesized_factory_interface.size() > version;
         }
 
-        auto const& get_synthesized_instance_interface(size_t index = 0) const noexcept
+        bool const& has_synthesized_instance_interface(size_t version = 0)
         {
-            return m_synthesized_instance_interface[0];
+            return m_synthesized_instance_interface.size() > version;
+        }
+
+        auto const& get_synthesized_static_interface(size_t version = 0) const noexcept
+        {
+            return m_synthesized_static_interface[version];
+        }
+
+        auto const& get_synthesized_factory_interface(size_t version = 0) const noexcept
+        {
+            return m_synthesized_factory_interface[version];
+        }
+
+        auto const& get_synthesized_instance_interface(size_t version = 0) const noexcept
+        {
+            return m_synthesized_instance_interface[version];
         }
 
         void add_class_base_ref(std::string_view const& class_base_ref)
