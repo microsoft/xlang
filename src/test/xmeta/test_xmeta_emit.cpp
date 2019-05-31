@@ -178,7 +178,7 @@ const EventAttributes event_attributes_no_flags()
     return result;
 }
 
-const MethodImplAttributes delegate_method_impl_attribtes()
+const MethodImplAttributes method_impl_runtime_attributes()
 {
     MethodImplAttributes result{};
     result.CodeType(CodeType::Runtime);
@@ -296,7 +296,7 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
     REQUIRE(!delegate_constructor.Signature().ReturnType());
     REQUIRE(size(delegate_constructor.Signature().Params()) == 2);
     REQUIRE(size(delegate_constructor.ParamList()) == 2);
-    REQUIRE(delegate_constructor.ImplFlags().value == delegate_method_impl_attribtes().value);
+    REQUIRE(delegate_constructor.ImplFlags().value == method_impl_runtime_attributes().value);
     REQUIRE(delegate_constructor.Flags().value == delegate_constructor_attributes().value);
     auto const& delegate_constructor_sig = delegate_constructor.Signature();
 
@@ -522,18 +522,26 @@ struct ExpectedMethod : ExpectedType
     std::string returnTypeRef;
     std::vector<ExpectedParam> params;
     MethodAttributes flag;
-    
+    MethodImplAttributes implFlag{};
         
     ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag)
         : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams), flag(flag) {}
     ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag)
         : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams), flag(flag) {}
 
+    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag, MethodImplAttributes const implFlag)
+        : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams), flag(flag), implFlag{ implFlag } {}
+    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag, MethodImplAttributes const implFlag)
+        : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams), flag(flag), implFlag{ implFlag } {}
+
     void VerifyType(MethodDef const& method) const override
     {
         REQUIRE(method.Name() == name);
         REQUIRE(method.Flags().value == flag.value);
         VerifyReturnType(returnType, returnTypeRef, method, method.Parent());
+
+        REQUIRE(method.ImplFlags().value == implFlag.value);
+        
 
         auto param(params.begin());
         for (size_t i = 1; i < size(method.ParamList()); i++)
@@ -1327,7 +1335,7 @@ TEST_CASE("Runtime class constructor metadata")
     )" };
 
     ExpectedClass c1{ "C1", {}, {}, {},
-        { { ExpectedMethod{ ".ctor", ElementType::Void, {}, constructor_method_attributes() }, "IC1.C1" } },
+        { { ExpectedMethod{ ".ctor", ElementType::Void, {}, constructor_method_attributes(), method_impl_runtime_attributes() }, "IC1.C1" } },
         class_type_attributes()
     };
 
@@ -1552,7 +1560,7 @@ TEST_CASE("Runtimeclass extend class base metadata")
     ExpectedClass c0{ "C0", {}, {}, {}, {}};
 
     ExpectedClass c1{ "C1", {}, {}, {}, {
-        { ExpectedMethod("Draw", ElementType::I4, { ExpectedParam{ "param1", ElementType::I4 } }, class_method_attributes()), "IC1.Draw" },
+        { ExpectedMethod{ "Draw", ElementType::I4, { ExpectedParam{ "param1", ElementType::I4 } }, class_method_attributes() }, "IC1.Draw" },
     }, "N.C0"};
 
     ExpectedInterface ic1{ "IC1",

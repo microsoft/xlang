@@ -240,7 +240,12 @@ namespace xlang::xmeta
         return token_typedef;
     }
 
-    mdMethodDef xmeta_emit::define_method(std::shared_ptr<method_model> const& model, std::string const& qualified_interface_name, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_defs, mdTypeDef const& token_def)
+    mdMethodDef xmeta_emit::define_method(std::shared_ptr<method_model> const& model, 
+        std::string const& qualified_interface_name, 
+        DWORD const& method_flag, 
+        std::map<std::string_view, mdMethodDef> & method_defs,
+        mdTypeDef const& token_def, 
+        CorMethodImpl method_impl_flag)
     {
         std::wstring method_name = s2ws(model->get_name());
 
@@ -254,7 +259,7 @@ namespace xlang::xmeta
             method_sig.data(),
             method_sig.size(),
             0,
-            0,
+            method_impl_flag,
             &token_method_def));
 
         method_defs.emplace(model->get_name(), token_method_def);
@@ -380,6 +385,7 @@ namespace xlang::xmeta
     void xmeta_emit::define_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& token_def)
     {
         std::map<std::string_view, mdMethodDef> method_defs;
+
         for (auto const& val : model->get_methods())
         {
             if (val->get_method_association() == method_association::None)
@@ -437,7 +443,7 @@ namespace xlang::xmeta
             else if (val->get_method_association() == method_association::Constructor)
             {
                 static constexpr DWORD method_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/; //TODO: Figure out what mdInstance is
-                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
+                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def, miRuntime);
             }
         
             // Defining method impl table, find the member ref token from the method_references map
@@ -844,7 +850,7 @@ namespace xlang::xmeta
                         return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
                     }
                 }
-
+                // else it is either one of the tyep categories
                 type_ref = to_TypeRef(get_or_define_type_ref(name, xlang_model.m_assembly));
                 
                 if (std::holds_alternative<std::shared_ptr<class_model>>(target)

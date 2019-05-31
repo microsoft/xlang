@@ -76,26 +76,28 @@ struct ExpectedTypeRefModel
         fundamental_type,
         object_type> type;
 
-   ExpectedTypeRefModel(ExpectedClassRef const& type)
-       : type{ type } {}
+   bool is_araray;
 
-   ExpectedTypeRefModel(ExpectedInterfaceRef const& type)
-       : type{ type } {}
+   ExpectedTypeRefModel(ExpectedClassRef const& type, bool is_array = false)
+       : type{ type }, is_araray{ is_array } {}
 
-    ExpectedTypeRefModel(ExpectedDelegateRef const& type)
-        : type{ type } {}
+   ExpectedTypeRefModel(ExpectedInterfaceRef const& type, bool is_array = false)
+       : type{ type }, is_araray{ is_array } {}
 
-    ExpectedTypeRefModel(ExpectedEnumRef const& type)
-        : type{ type } {}
+    ExpectedTypeRefModel(ExpectedDelegateRef const& type, bool is_array = false)
+        : type{ type }, is_araray{ is_array } {}
 
-    ExpectedTypeRefModel(ExpectedStructRef const& type)
-        : type{ type } {}
+    ExpectedTypeRefModel(ExpectedEnumRef const& type, bool is_array = false)
+        : type{ type }, is_araray{ is_array } {}
 
-    ExpectedTypeRefModel(object_type const& type)
-        : type{ type } {}
+    ExpectedTypeRefModel(ExpectedStructRef const& type, bool is_array = false)
+        : type{ type }, is_araray{ is_array } {}
 
-    ExpectedTypeRefModel(fundamental_type const& type)
-        : type{ type } {}
+    ExpectedTypeRefModel(object_type const& type, bool is_array = false)
+        : type{ type }, is_araray{ is_array } {}
+
+    ExpectedTypeRefModel(fundamental_type const& type, bool is_array = false)
+        : type{ type }, is_araray{ is_array } {}
 
     void VerifyType(type_ref const& actual)
     {
@@ -3348,15 +3350,4 @@ TEST_CASE("Array test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
-
-    //ExpectedMethodModel Paint{ "Paint", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {} };
-    //ExpectedMethodModel Paint2{ "Paint", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {
-    //    ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
-    //} };
-
-    //ExpectedInterfaceModel i1{ "i1", "N.i1", { Paint, Paint2 }, {}, {}, {} };
-    //ExpectedClassModel c1{ "c1", "N.c1", { Paint, Paint2 }, {}, {}, std::nullopt, {} };
-
-    //ExpectedNamespaceModel N{ "N", "N", {}, { c1, i1 } };
-    //N.VerifyType(find_namespace(reader, "N"));
 }

@@ -55,7 +55,13 @@ namespace xlang::xmeta
 
         mdTypeDef define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[]);
         
-        mdMethodDef define_method(std::shared_ptr<method_model> const& model, std::string const& qualified_interface_name, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_references, mdTypeDef const& token_def);
+        mdMethodDef define_method(std::shared_ptr<method_model> const& model, 
+            std::string const& qualified_interface_name, 
+            DWORD const& method_flag, 
+            std::map<std::string_view, mdMethodDef> & method_references, 
+            mdTypeDef const& token_def,
+            CorMethodImpl method_impl_flag = miIL);
+
         void define_property(std::shared_ptr<property_model> const& model, std::map<std::string_view, mdMethodDef> const& method_references, mdTypeDef const& token_def);
         void define_event(std::shared_ptr<event_model> const& model, std::map<std::string_view, mdMethodDef> const& method_references, mdTypeDef const& token_def);
         void define_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& token_def);
