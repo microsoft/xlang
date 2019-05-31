@@ -446,7 +446,7 @@ namespace xlang::xmeta
             auto const& member_ref_list = iter->second;
             auto iter2 = member_ref_list.find(val->get_name());
             assert(iter2 != member_ref_list.end());
-            //check_hresult(m_metadata_emitter->DefineMethodImpl(class_token_def, method_def, iter2->second));
+            check_hresult(m_metadata_emitter->DefineMethodImpl(class_token_def, method_def, iter2->second));
         }
         for (auto const& val : model->get_properties())
         {
