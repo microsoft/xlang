@@ -1034,7 +1034,9 @@ namespace xlang
             return;
         }
 
-        if (signature.return_signature().Type().is_szarray())
+        auto category = get_category(signature.return_signature().Type());
+
+        if (category == param_category::array_type)
         {
             auto format = R"(
         uint32_t %_impl_size{};
@@ -1049,12 +1051,12 @@ namespace xlang
 
             w.abi_types = false;
         }
-        else if (can_take_ownership_of_return_type(signature))
+        else if (category == param_category::object_type || category == param_category::string_type)
         {
             auto format = "\n        void* %{};";
             w.write(format, signature.return_param_name());
         }
-        else if (std::holds_alternative<GenericTypeIndex>(signature.return_signature().Type().Type()))
+        else if (category == param_category::generic_type)
         {
             auto format = "\n        % %{ empty_value<%>() };";
             w.write(format, signature.return_signature(), signature.return_param_name(), signature.return_signature());
@@ -1075,23 +1077,19 @@ namespace xlang
 
         auto category = get_category(signature.return_signature().Type());
 
-        switch (category)
+        if (category == param_category::array_type)
         {
-        case param_category::array_type:
             w.write("\n        return { %, %_impl_size, take_ownership_from_abi };",
                 signature.return_param_name(),
                 signature.return_param_name());
-            break;
-        case param_category::object_type:
-        case param_category::string_type:
+        }
+        else if (category == param_category::object_type || category == param_category::string_type)
+        {
             w.write("\n        return { %, take_ownership_from_abi };", signature.return_param_name());
-            break;
-        case param_category::enum_type:
-        case param_category::fundamental_type:
-        case param_category::generic_type:
-        case param_category::struct_type:
+        }
+        else
+        {
             w.write("\n        return %;", signature.return_param_name());
-            break;
         }
     }
 
