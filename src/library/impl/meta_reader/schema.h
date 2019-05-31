@@ -61,11 +61,6 @@ namespace xlang::meta::reader
             return get_string(2);
         }
 
-        auto FullyQualifiedName() const
-        {
-            return std::string(get_string(1)) + std::string(get_string(2));
-        }
-
         auto Extends() const
         {
             return get_coded_index<TypeDefOrRef>(3);

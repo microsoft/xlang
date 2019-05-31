@@ -51,19 +51,19 @@ namespace xlang::xmeta
             return m_modifier;
         }
 
-        auto const& get_synthesized_static_interface() const noexcept
+        auto const& get_synthesized_static_interface(size_t index = 0) const noexcept
         {
-            return m_synthesized_static_interface;
+            return m_synthesized_static_interface[0];
         }
 
-        auto const& get_synthesized_factory_interface() const noexcept
+        auto const& get_synthesized_factory_interface(size_t index = 0) const noexcept
         {
-            return m_synthesized_factory_interface;
+            return m_synthesized_factory_interface[0];
         }
 
-        auto const& get_synthesized_instance_interface() const noexcept
+        auto const& get_synthesized_instance_interface(size_t index = 0) const noexcept
         {
-            return m_synthesized_instance_interface;
+            return m_synthesized_instance_interface[0];
         }
 
         void add_class_base_ref(std::string_view const& class_base_ref)
@@ -73,17 +73,17 @@ namespace xlang::xmeta
 
         void add_static_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
         {
-            m_synthesized_static_interface = static_interface_ref;
+            m_synthesized_static_interface.emplace_back(static_interface_ref);
         }
 
         void add_factory_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
         {
-            m_synthesized_factory_interface = static_interface_ref;
+            m_synthesized_factory_interface.emplace_back(static_interface_ref);
         }
 
         void add_instance_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
         {
-            m_synthesized_instance_interface = static_interface_ref;
+            m_synthesized_instance_interface.emplace_back(static_interface_ref);
         }
 
         // TODO: Composition and inheritance is coming in a later update
@@ -103,13 +103,13 @@ namespace xlang::xmeta
         // TODO: Add type parameters (generic types)
 
 
-        std::shared_ptr<interface_model> m_synthesized_static_interface;
-        std::shared_ptr<interface_model> m_synthesized_factory_interface;
-        std::shared_ptr<interface_model> m_synthesized_instance_interface;
+        std::vector<std::shared_ptr<interface_model>> m_synthesized_static_interface;
+        std::vector<std::shared_ptr<interface_model>> m_synthesized_factory_interface;
+        std::vector<std::shared_ptr<interface_model>> m_synthesized_instance_interface;
 
         // TODO: Composition and inheritance is coming in a later update
-        // std::shared_ptr<interface_model> m_overrides_interfaces;
-        // std::shared_ptr<interface_model> m_protected_interfaces;
+        // std::vector<std::shared_ptr<interface_model>> m_overrides_interfaces;
+        // std::vector<std::shared_ptr<interface_model>> m_protected_interfaces;
 
         std::set<std::shared_ptr<class_or_interface_model>> get_all_bases();
 
