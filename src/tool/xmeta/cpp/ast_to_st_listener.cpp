@@ -327,7 +327,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             {
                 set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), property_accessor->SET()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(std::nullopt), property_method_modifier, method_association::Property);
                 parameter_semantics sem = parameter_semantics::in;
-                set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
+                set_method->add_formal_parameter(formal_parameter_model{ "value", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == semantic_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_qualified_name());
@@ -346,7 +346,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
 
         set_method = std::make_shared<method_model>("put_" + prop_model->get_name(), prop_model->get_decl_line(), xlang_model.m_assembly, std::move(std::nullopt), property_method_modifier, method_association::Property);
         parameter_semantics sem = parameter_semantics::in;
-        set_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
+        set_method->add_formal_parameter(formal_parameter_model{ "value", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
 
         // Adding property methods to the model
         listener_error error = listener_error::passed;
@@ -429,10 +429,10 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     }
 
     std::shared_ptr<method_model> add_method = std::make_shared<method_model>("add_" + event->get_name(), event->get_decl_line(), xlang_model.m_assembly, std::move(event_registration), event_method_modifier, method_association::Event);
-    add_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), xlang_model.m_assembly, param_sem, std::move(tr) });
+    add_method->add_formal_parameter(formal_parameter_model{ "value", event->get_decl_line(), xlang_model.m_assembly, param_sem, std::move(tr) });
 
     std::shared_ptr<method_model> remove_method = std::make_shared<method_model>("remove_" + event->get_name(), event->get_decl_line(), xlang_model.m_assembly, std::move(std::nullopt), event_method_modifier, method_association::Event);
-    remove_method->add_formal_parameter(formal_parameter_model{ "TODO:findname", event->get_decl_line(), xlang_model.m_assembly, param_sem, std::move(event_registration) });
+    remove_method->add_formal_parameter(formal_parameter_model{ "value", event->get_decl_line(), xlang_model.m_assembly, param_sem, std::move(event_registration) });
 
     assert(event->set_add_method(add_method) == semantic_error::passed);
     assert(event->set_remove_method(remove_method) == semantic_error::passed);

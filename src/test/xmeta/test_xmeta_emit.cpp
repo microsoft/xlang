@@ -1174,7 +1174,7 @@ TEST_CASE("Interface property metadata")
             },
             std::vector<ExpectedMethod> {
                 ExpectedMethod("get_property1", "S1", {}, interface_method_property_attributes()),
-                ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", "S1"} }, interface_method_property_attributes())
+                ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"value", "S1"} }, interface_method_property_attributes())
             }
         ),
         std::make_unique<ExpectedEnum>("E1", std::vector<ExpectedEnumField>{})
@@ -1203,8 +1203,8 @@ TEST_CASE("Interface event metadata")
                 ExpectedEvent("Changed", "StringListEvent")
             },
             std::vector<ExpectedMethod> {
-                ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }, interface_method_event_attributes()),
-                ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes())
+                ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"value", "StringListEvent"} }, interface_method_event_attributes()),
+                ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"value", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes())
             }
         ),
         std::make_unique<ExpectedDelegate>("StringListEvent", ElementType::Void,
@@ -1420,7 +1420,7 @@ TEST_CASE("Runtimeclass property metadata")
         {}, 
         {
             { ExpectedMethod{ "get_property1", "S1", {}, interface_method_property_attributes()}, "IC1.get_property1" },
-            { ExpectedMethod{"put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", "S1"} }, interface_method_property_attributes()}, "IC1.put_property1" }
+            { ExpectedMethod{"put_property1", ElementType::Void, { ExpectedParam{"value", "S1"} }, interface_method_property_attributes()}, "IC1.put_property1" }
         } 
     };
     ExpectedStruct s1{ "S1", std::vector<ExpectedStructField> {} };
@@ -1462,8 +1462,8 @@ TEST_CASE("Runtimeclass event metadata")
     ExpectedClass c1{ "C1", {}, {},
         { ExpectedEvent{ "Changed", "StringListEvent" } },
         {
-            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }, interface_method_event_attributes()), "IC1.add_Changed" },
-            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()), "IC1.remove_Changed" }
+            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"value", "StringListEvent"} }, interface_method_event_attributes()), "IC1.add_Changed" },
+            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"value", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()), "IC1.remove_Changed" }
         }
     };
 
@@ -1513,11 +1513,11 @@ TEST_CASE("Runtimeclass requires interfacebase metadata")
         { ExpectedProperty{ "property1" , ElementType::I4 } },
         { ExpectedEvent{ "Changed", "StringListEvent" } },
         {
-            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }, interface_method_event_attributes()), "I1.add_Changed" },
-            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()), "I1.remove_Changed" },
+            { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"value", "StringListEvent"} }, interface_method_event_attributes()), "I1.add_Changed" },
+            { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"value", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()), "I1.remove_Changed" },
             { ExpectedMethod("m0", ElementType::Void, {}, class_method_attributes()), "I1.m0" },
             { ExpectedMethod("get_property1", ElementType::I4, {}, interface_method_property_attributes()), "I1.get_property1" },
-            { ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", ElementType::I4} }, interface_method_property_attributes()), "I1.put_property1" }
+            { ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"value", ElementType::I4} }, interface_method_property_attributes()), "I1.put_property1" }
         }
     };
 
@@ -1525,11 +1525,11 @@ TEST_CASE("Runtimeclass requires interfacebase metadata")
             { ExpectedProperty("property1", ElementType::I4) },
             { ExpectedEvent("Changed", "StringListEvent") },
             {
-                ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"TODO:findname", "StringListEvent"} }, interface_method_event_attributes()),
-                ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"TODO:findname", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()),
+                ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"value", "StringListEvent"} }, interface_method_event_attributes()),
+                ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"value", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()),
                 ExpectedMethod("m0", ElementType::Void, {}, interface_method_attributes()),
                 ExpectedMethod("get_property1", ElementType::I4, {}, interface_method_property_attributes()),
-                ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"TODO:findname", ElementType::I4} }, interface_method_property_attributes())
+                ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"value", ElementType::I4} }, interface_method_property_attributes())
             }
     };
 
