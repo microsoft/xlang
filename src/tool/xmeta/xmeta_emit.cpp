@@ -385,7 +385,6 @@ namespace xlang::xmeta
     void xmeta_emit::define_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& token_def)
     {
         std::map<std::string_view, mdMethodDef> method_defs;
-
         for (auto const& val : model->get_methods())
         {
             if (val->get_method_association() == method_association::None)

@@ -537,8 +537,8 @@ struct ExpectedMethod : ExpectedType
     void VerifyType(MethodDef const& method) const override
     {
         REQUIRE(method.Name() == name);
-        //std::cout << flag.value << std::endl;
-        //REQUIRE(method.Flags().value == flag.value);
+        // TODO: the flags are wonky right now too. Might be related to methodimpltable. Reenable once the fix is found
+        // REQUIRE(method.Flags().value == flag.value);
         VerifyReturnType(returnType, returnTypeRef, method, method.Parent());
 
         REQUIRE(method.ImplFlags().value == implFlag.value);
@@ -794,7 +794,7 @@ struct ExpectedClass : ExpectedType
         REQUIRE(empty(typeDef.FieldList()));
 
         REQUIRE(methods_and_implements.size() == size(typeDef.MethodList()));
-        // TODO: reenable this sonce a solution is found
+        // TODO: reenable this once a fix to meta_reader is done. 
         //REQUIRE(methods_and_implements.size() == size(typeDef.MethodImplList()));
         if (!methods_and_implements.empty())
         {
