@@ -290,14 +290,7 @@ void test_delegate_type_properties(TypeDef const& delegate_type)
     REQUIRE(empty(delegate_type.EventList()));
     REQUIRE(empty(delegate_type.InterfaceImpl()));
 
-    // TODO: Reenable when when the methodimpl bug is fixed
-    //for (auto && d : delegate_type.MethodImplList())
-    //{
-    //    std::cout << "1. " << d.MethodBody().MethodDef().Name() << std::endl;
-    //    std::cout << "2. " << d.MethodDeclaration().MemberRef().Name() << std::endl;
-    //}
-    //REQUIRE(empty(delegate_type.MethodImplList()));
-
+    REQUIRE(empty(delegate_type.MethodImplList()));
     REQUIRE(empty(delegate_type.PropertyList()));
     REQUIRE(size(delegate_type.MethodList()) == 2);
 
@@ -803,8 +796,7 @@ struct ExpectedClass : ExpectedType
         REQUIRE(empty(typeDef.FieldList()));
 
         REQUIRE(methods_and_implements.size() == size(typeDef.MethodList()));
-        // TODO: reenable this once a fix to meta_reader is done. 
-        //REQUIRE(methods_and_implements.size() == size(typeDef.MethodImplList()));
+
         if (!methods_and_implements.empty())
         {
             {
@@ -816,17 +808,20 @@ struct ExpectedClass : ExpectedType
                     ++expectedMethod;
                 }
             }
-            //{ TODO: renable this
-            //    auto expectedMethod(methods_and_implements.begin());
-            //    for (auto &&method_impl : typeDef.MethodImplList())
-            //    {
-            //        std::string expected_impl = expectedMethod->second;
-            //        std::string actual = std::string(method_impl.MethodDeclaration().MemberRef().Class().TypeRef().TypeName()) 
-            //            + "." + std::string(method_impl.MethodDeclaration().MemberRef().Name());
-            //        REQUIRE(actual == expected_impl);
-            //        ++expectedMethod;
-            //    }
-            //}
+            {
+                auto expectedMethod(methods_and_implements.begin());
+                for (auto &&method_impl : typeDef.MethodImplList())
+                {
+                    std::string expected_impl = expectedMethod->second;
+                    if (expected_impl != "")
+                    {
+                        std::string actual = std::string(method_impl.MethodDeclaration().MemberRef().Class().TypeRef().TypeName())
+                            + "." + std::string(method_impl.MethodDeclaration().MemberRef().Name());
+                        REQUIRE(actual == expected_impl);
+                        ++expectedMethod;
+                    }
+                }
+            }
         }
 
         if (!properties.empty())
@@ -866,25 +861,10 @@ struct ExpectedClass : ExpectedType
 void ValidateTypesInMetadata(std::istringstream & testIdl, std::vector<std::shared_ptr<ExpectedType>> const& fileTypes)
 {
     xlang::meta::reader::database db{ run_and_save_to_memory(testIdl, "testidl") };
- 
-    // TODO: remove print debugger code
-    //std::cout << "NAME " << db.TypeDef[1].TypeName() << std::endl;
-    //std::cout << "size " << size(db.TypeDef[1].MethodImplList()) << std::endl;
-    //for (auto const& tb : db.MethodImpl)
-    //{
-    //    std::cout << tb.Class().TypeName() <<  std::endl;
-    //    std::cout << tb.MethodBody().MethodDef().Name() << std::endl;
-    //    std::cout << tb.MethodDeclaration().MethodDef().Name() << std::endl;
-    //    std::cout << std::endl;
-    //}
 
     auto expectedType(fileTypes.begin());
     REQUIRE(fileTypes.size() == db.TypeDef.size() - 1);
-    //for (size_t i = 0; i < fileTypes.size(); i++)
-    //{
-    //    std::cout << db.TypeDef[i].TypeName() << std::endl;
-    //    std::cout << fileTypes[i]->name << std::endl;
-    //}
+
     // Start at 1 to skip over <Module> element
     for (size_t i = 1; i < db.TypeDef.size(); i++)
     {
