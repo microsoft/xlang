@@ -546,11 +546,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                     // Synthesizing constructors
                     if (create_instance_index != 1)
                     {
-                        char number[256] = ""; /* In fact not necessary as snprintf() adds the
-                                               0-terminator. */
-
-                        snprintf(number, sizeof number, "%zu", create_instance_index);
-                        factory_name = create_instance + number;
+                        factory_name = create_instance + std::to_string(create_instance_index);
                     }
                     else
                     {
