@@ -335,7 +335,7 @@ namespace xlang::meta::reader
 
     private:
         std::vector<CustomModSig> m_cmod;
-        bool m_byref;
+        bool m_byref{};
         std::optional<TypeSig> m_type;
     };
 

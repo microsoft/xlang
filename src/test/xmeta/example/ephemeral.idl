@@ -1,12 +1,14 @@
-namespace Windows.Foundation
+namespace N
 {
-    class Pair<TFirst, TSecond> 
+    delegate void StringListEvent(Int32 sender);
+    interface I1
     {
-        
-        Boolean Equals(Uri pUri);
-        Uri CombineUri(String relativeUri);
-        
-    	TFirst First;
-    	TSecond Second;
+        event StringListEvent Changed;
+        void m0();
+        Int32 property1;
+    }
+
+    runtimeclass C1 requires I1
+    {
     }
 }

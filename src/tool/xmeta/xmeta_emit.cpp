@@ -171,7 +171,7 @@ namespace xlang::xmeta
     // This doesn't really output in a PE format
     void xmeta_emit::save_to_file() const
     {
-        m_metadata_emitter->Save((s2ws(remove_extension(xlang_model.m_assembly)) + L".xmeta").c_str(), 0);
+        check_hresult(m_metadata_emitter->Save((s2ws(remove_extension(xlang_model.m_assembly)) + L".xmeta").c_str(), 0));
     }
 
     std::vector<uint8_t> xmeta_emit::save_to_memory() const
@@ -234,7 +234,7 @@ namespace xlang::xmeta
         if (iter == type_references.end())
         {
             mdTypeRef md_ref;
-            m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &md_ref);
+            check_hresult(m_metadata_emitter->DefineTypeRefByName(to_token(m_module), wname.c_str(), &md_ref));
             type_references.emplace(name, md_ref);
         }
         return token_typedef;
@@ -247,7 +247,7 @@ namespace xlang::xmeta
         signature_blob method_sig = create_method_sig(model->get_return_type(), model->get_formal_parameters());
 
         mdMethodDef token_method_def;
-        m_metadata_emitter->DefineMethod(
+        check_hresult(m_metadata_emitter->DefineMethod(
             token_def,
             method_name.c_str(),
             method_flag,
@@ -255,7 +255,7 @@ namespace xlang::xmeta
             method_sig.size(),
             0,
             0,
-            &token_method_def);
+            &token_method_def));
 
         method_defs.emplace(model->get_name(), token_method_def);
         define_return(token_method_def);
@@ -282,12 +282,12 @@ namespace xlang::xmeta
 
         // If it is not defined, define member ref and return
         mdMemberRef token_member_ref;
-        m_metadata_emitter->DefineMemberRef(
+        check_hresult(m_metadata_emitter->DefineMemberRef(
             get_or_define_type_ref(qualified_interface_name, model->get_assembly_name()),
             method_name.c_str(),
             method_sig.data(),
             method_sig.size(),
-            &token_member_ref);
+            &token_member_ref));
 
         method_references[qualified_interface_name][model->get_name()] = token_member_ref;
 
@@ -321,7 +321,7 @@ namespace xlang::xmeta
         property_sig.add_signature(PropertySig{ create_type_sig(model->get_type()).value() });
 
         mdProperty token_property;
-        m_metadata_emitter->DefineProperty(
+        check_hresult(m_metadata_emitter->DefineProperty(
             token_def,
             property_name.c_str(),
             0,
@@ -333,7 +333,7 @@ namespace xlang::xmeta
             token_set_method,
             token_get_method,
             implements,
-            &token_property);
+            &token_property));
     }
 
 
@@ -365,7 +365,7 @@ namespace xlang::xmeta
 
         mdTypeRef event_type_ref = get_or_define_type_ref(dm->get_qualified_name(), dm->get_assembly_name());
         mdEvent token_event;
-        m_metadata_emitter->DefineEvent(
+        check_hresult(m_metadata_emitter->DefineEvent(
             token_def,
             event_name.c_str(),
             0,
@@ -374,7 +374,7 @@ namespace xlang::xmeta
             token_remove_method,
             mdTokenNil,
             implements,
-            &token_event);
+            &token_event));
     }
     
     void xmeta_emit::define_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& token_def)
@@ -446,7 +446,7 @@ namespace xlang::xmeta
             auto const& member_ref_list = iter->second;
             auto iter2 = member_ref_list.find(val->get_name());
             assert(iter2 != member_ref_list.end());
-            m_metadata_emitter->DefineMethodImpl(class_token_def, method_def, iter2->second);
+            //check_hresult(m_metadata_emitter->DefineMethodImpl(class_token_def, method_def, iter2->second));
         }
         for (auto const& val : model->get_properties())
         {
@@ -811,7 +811,7 @@ namespace xlang::xmeta
         if (iter == type_references.end())
         {
             mdTypeRef md_ref;
-            m_metadata_emitter->DefineTypeRefByName(token_assembly_ref, s2ws(ref_name).c_str(), &md_ref);
+            check_hresult(m_metadata_emitter->DefineTypeRefByName(token_assembly_ref, s2ws(ref_name).c_str(), &md_ref));
             type_references.emplace(ref_name, md_ref);
             return md_ref;
         }
@@ -828,15 +828,30 @@ namespace xlang::xmeta
                 std::string name = std::get<std::string>(semantic);
                 TypeRef type_ref;
 
-                // if it holds a meta reader type def, this must be coming from another assembly. 
-                if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(ref->get_semantic().get_resolved_target()))
+                // if it holds a meta reader type def, this must be coming from another assembly.
+                auto const& target = ref->get_semantic().get_resolved_target();
+                if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(target))
                 {
-                    auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(ref->get_semantic().get_resolved_target());
+                    auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
                     type_ref = to_TypeRef(get_or_define_type_ref(name, type_def->get_database().Assembly[0].Name()));
+
+                    if (type_def->is_runtime_class() || type_def->is_interface() || type_def->is_delegate())
+                    {
+                        return TypeSig{ ElementType::Class, type_ref.coded_index<TypeDefOrRef>() };
+                    }
+                    else
+                    {
+                        return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
+                    }
                 }
-                else
+
+                type_ref = to_TypeRef(get_or_define_type_ref(name, xlang_model.m_assembly));
+                
+                if (std::holds_alternative<std::shared_ptr<class_model>>(target)
+                    || std::holds_alternative<std::shared_ptr<interface_model>>(target)
+                    || std::holds_alternative<std::shared_ptr<delegate_model>>(target))
                 {
-                    type_ref = to_TypeRef(get_or_define_type_ref(name, xlang_model.m_assembly));
+                    return TypeSig{ ElementType::Class, type_ref.coded_index<TypeDefOrRef>() };
                 }
                 return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
             }

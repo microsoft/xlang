@@ -56,7 +56,7 @@ namespace xlang::xmeta
 
         void save_to_current_path()
         {
-            return writer.save_to_file(std::filesystem::current_path().append(std::string(m_xlang_model.m_assembly) + ".xmeta"));
+            return writer.save_to_file(std::filesystem::current_path().append(std::string(m_xlang_model.m_assembly) + ".winmd"));
         }
 
     private:
