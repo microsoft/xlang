@@ -44,6 +44,16 @@ const TypeAttributes static_class_type_attributes()
     result.Abstract(true);
     return result;
 }
+//mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName
+const MethodAttributes constructor_method_attributes()
+{
+    MethodAttributes result{};
+    result.Access(MemberAccess::Public);
+    result.HideBySig(true);
+    result.SpecialName(true);
+    result.RTSpecialName(true);
+    return result;
+}
 
 const MethodAttributes class_method_attributes()
 {
@@ -1302,6 +1312,42 @@ TEST_CASE("Interface type metadata")
     ValidateTypesInMetadata(test_idl, fileTypes);
 }
 
+TEST_CASE("Runtime class constructor metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            runtimeclass C1
+            {
+                C1();
+
+                C1(Int32 param1, Int32 param2);
+            }
+        }
+    )" };
+
+    ExpectedClass c1{ "C1", {}, {}, {},
+        { { ExpectedMethod{ ".ctor", ElementType::Void, {}, constructor_method_attributes() }, "IC1.C1" } },
+        class_type_attributes()
+    };
+
+    ExpectedInterface ic1{ "IC1",
+        { ExpectedMethod{ ".ctor", ElementType::Void, {}, constructor_method_attributes() } }
+    };
+
+    ExpectedInterface ic1f{ "IC1Factory",
+        { ExpectedMethod{ ".ctor", ElementType::Void, { ExpectedParam{ "param1", ElementType::I4 }, ExpectedParam{ "param2", ElementType::I4 } }, constructor_method_attributes() } }
+    };
+
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
+    {
+        std::make_unique<ExpectedClass>(c1),
+        std::make_unique<ExpectedInterface>(ic1),
+        std::make_unique<ExpectedInterface>(ic1f)
+    };
+    ValidateTypesInMetadata(test_idl, fileTypes);
+}
+
 TEST_CASE("Runtimeclass method metadata")
 {
     std::istringstream test_idl{ R"(
@@ -1506,11 +1552,12 @@ TEST_CASE("Runtimeclass extend class base metadata")
     ExpectedClass c0{ "C0", {}, {}, {}, {}};
 
     ExpectedClass c1{ "C1", {}, {}, {}, {
-        { ExpectedMethod("Draw", ElementType::I4, { ExpectedParam("param1", ElementType::I4) }, class_method_attributes()), "IC1.Draw" },
+        { ExpectedMethod("Draw", ElementType::I4, { ExpectedParam{ "param1", ElementType::I4 } }, class_method_attributes()), "IC1.Draw" },
     }, "N.C0"};
 
     ExpectedInterface ic1{ "IC1",
-        { ExpectedMethod{ "Draw", ElementType::I4, { ExpectedParam("param1", ElementType::I4) }, interface_method_attributes() } } };
+        { ExpectedMethod{ "Draw", ElementType::I4, { ExpectedParam{ "param1", ElementType::I4 } }, interface_method_attributes() } }
+};
 
     std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
@@ -1536,7 +1583,8 @@ TEST_CASE("Static class metadata")
     ExpectedClass c1{ "C1", {}, {}, {}, {}, static_class_type_attributes() };
 
     ExpectedInterface ic1{ "IC1Statics",
-        { ExpectedMethod{ "Draw", ElementType::I4, { ExpectedParam("param1", ElementType::I4) }, interface_method_attributes() } } };
+        { ExpectedMethod{ "Draw", ElementType::I4, { ExpectedParam{ "param1", ElementType::I4 } }, interface_method_attributes() } } 
+    };
 
     std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {

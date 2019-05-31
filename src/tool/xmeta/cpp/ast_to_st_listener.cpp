@@ -559,7 +559,6 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods 
                 properties and events and the metadata emit can user the interfaces that are referenced in the class
                  to emit metadata */
-                clss_model->add_member(constructor_model);
                 if (clss_model->add_member(constructor_model) == semantic_error::symbol_exists)
                 {
                     error_manager.write_type_member_exists_error(decl_line, constructor_model->get_name(), clss_model->get_qualified_name());
