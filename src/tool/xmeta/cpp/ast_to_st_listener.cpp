@@ -101,9 +101,11 @@ listener_error ast_to_st_listener::extract_type(XlangParser::TypeContext* tc, ty
     else if (tc->array_type())
     {
         assert(tc->array_type()->non_array_type());
+        tr = type_ref{ tc->array_type()->non_array_type()->getText() };
+        tr.set_is_array();
         if (tc->array_type()->non_array_type()->value_type())
         {
-            tr.set_semantic(str_to_simple_type(tc->getText()));
+            tr.set_semantic(str_to_simple_type(tc->array_type()->non_array_type()->getText()));
         }
         else if (tc->array_type()->non_array_type()->class_type())
         {

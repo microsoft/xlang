@@ -3330,3 +3330,33 @@ TEST_CASE("Runtime class require interface test")
         N.VerifyType(find_namespace(reader, "N"));
     }
 }
+
+TEST_CASE("Array test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            struct test{}
+            interface i1
+            {
+                test[] Paint();
+            }
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 0);
+
+    //ExpectedMethodModel Paint{ "Paint", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {} };
+    //ExpectedMethodModel Paint2{ "Paint", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.s1" } }, {
+    //    ExpectedFormalParameterModel{ "p1", parameter_semantics::in, ExpectedTypeRefModel{ fundamental_type::Int32 } }
+    //} };
+
+    //ExpectedInterfaceModel i1{ "i1", "N.i1", { Paint, Paint2 }, {}, {}, {} };
+    //ExpectedClassModel c1{ "c1", "N.c1", { Paint, Paint2 }, {}, {}, std::nullopt, {} };
+
+    //ExpectedNamespaceModel N{ "N", "N", {}, { c1, i1 } };
+    //N.VerifyType(find_namespace(reader, "N"));
+}

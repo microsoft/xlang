@@ -65,6 +65,11 @@ namespace xlang::xmeta
             m_ref = value;
         }
 
+        void rename(std::string const& name)
+        {
+            m_ref = name;
+        }
+
     private:
         std::variant<std::string, resolved_type> m_ref;
         std::string ref_name;
