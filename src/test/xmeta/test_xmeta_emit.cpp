@@ -65,6 +65,17 @@ const MethodAttributes class_method_attributes()
     return result;
 }
 
+const MethodAttributes class_method_property_attributes()
+{
+    MethodAttributes result{};
+    result.Access(MemberAccess::Public);
+    result.Virtual(true);
+    result.HideBySig(true);
+    result.Layout(VtableLayout::NewSlot);
+    result.SpecialName(true);
+    return result;
+}
+
 const TypeAttributes interface_type_attributes()
 {
     TypeAttributes result{};
@@ -1419,8 +1430,8 @@ TEST_CASE("Runtimeclass property metadata")
         { ExpectedProperty{"property1", "S1"} },
         {}, 
         {
-            { ExpectedMethod{ "get_property1", "S1", {}, interface_method_property_attributes()}, "IC1.get_property1" },
-            { ExpectedMethod{"put_property1", ElementType::Void, { ExpectedParam{"value", "S1"} }, interface_method_property_attributes()}, "IC1.put_property1" }
+            { ExpectedMethod{ "get_property1", "S1", {}, class_method_property_attributes()}, "IC1.get_property1" },
+            { ExpectedMethod{"put_property1", ElementType::Void, { ExpectedParam{"value", "S1"} }, class_method_property_attributes()}, "IC1.put_property1" }
         } 
     };
     ExpectedStruct s1{ "S1", std::vector<ExpectedStructField> {} };
@@ -1516,8 +1527,8 @@ TEST_CASE("Runtimeclass requires interfacebase metadata")
             { ExpectedMethod("add_Changed", "Foundation.EventRegistrationToken", { ExpectedParam{"value", "StringListEvent"} }, interface_method_event_attributes()), "I1.add_Changed" },
             { ExpectedMethod("remove_Changed", ElementType::Void, { ExpectedParam{"value", "Foundation.EventRegistrationToken"} }, interface_method_event_attributes()), "I1.remove_Changed" },
             { ExpectedMethod("m0", ElementType::Void, {}, class_method_attributes()), "I1.m0" },
-            { ExpectedMethod("get_property1", ElementType::I4, {}, interface_method_property_attributes()), "I1.get_property1" },
-            { ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"value", ElementType::I4} }, interface_method_property_attributes()), "I1.put_property1" }
+            { ExpectedMethod("get_property1", ElementType::I4, {}, class_method_property_attributes()), "I1.get_property1" },
+            { ExpectedMethod("put_property1", ElementType::Void, { ExpectedParam{"value", ElementType::I4} }, class_method_property_attributes()), "I1.put_property1" }
         }
     };
 

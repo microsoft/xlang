@@ -382,6 +382,11 @@ namespace xlang::xmeta
             &token_event));
     }
     
+    static constexpr DWORD interface_method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot;
+    static constexpr DWORD interface_property_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot | mdAbstract | mdSpecialName;
+    static constexpr DWORD interface_event_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
+    static constexpr DWORD interface_constructor_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
+
     void xmeta_emit::define_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& token_def)
     {
         std::map<std::string_view, mdMethodDef> method_defs;
@@ -389,23 +394,19 @@ namespace xlang::xmeta
         {
             if (val->get_method_association() == method_association::None)
             {
-                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdAbstract | mdNewSlot /*| mdInstance*/;
-                define_method(val, model->get_qualified_name(), method_flag, method_defs, token_def);
+                define_method(val, model->get_qualified_name(), interface_method_flag, method_defs, token_def);
             }
             else if (val->get_method_association() == method_association::Property)
             {
-                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot | mdAbstract | mdSpecialName;
-                define_method(val, model->get_qualified_name(), method_flag, method_defs, token_def);
+                define_method(val, model->get_qualified_name(), interface_property_flag, method_defs, token_def);
             }
             else if (val->get_method_association() == method_association::Event)
             {
-                static constexpr DWORD method_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
-                define_method(val, model->get_qualified_name(), method_flag, method_defs, token_def);
+                define_method(val, model->get_qualified_name(), interface_event_flag, method_defs, token_def);
             }
             else if (val->get_method_association() == method_association::Constructor)
             {
-                static constexpr DWORD method_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/; //TODO: Figure out what mdInstance is
-                define_method(val, model->get_qualified_name(), method_flag, method_defs, token_def);
+                define_method(val, model->get_qualified_name(), interface_constructor_flag, method_defs, token_def);
             }
         }
         for (auto const& val : model->get_properties())
@@ -418,6 +419,11 @@ namespace xlang::xmeta
         }
     }
 
+    static constexpr DWORD class_method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot /*| mdInstance*/;
+    static constexpr DWORD class_property_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
+    static constexpr DWORD class_event_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
+    static constexpr DWORD class_constructor_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/;
+
     void xmeta_emit::define_required_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& class_token_def)
     {
         std::map<std::string_view, mdMethodDef> method_defs;
@@ -426,24 +432,20 @@ namespace xlang::xmeta
             mdMethodDef method_def;
             if (val->get_method_association() == method_association::None)
             {
-                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot /*| mdInstance*/;
-                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
+                method_def = define_method(val, model->get_qualified_name(), class_method_flag, method_defs, class_token_def);
             }
             else if (val->get_method_association() == method_association::Property)
             {
-                static constexpr DWORD method_flag = mdPublic | mdVirtual | mdHideBySig | mdNewSlot | mdAbstract | mdSpecialName;
-                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
+                method_def = define_method(val, model->get_qualified_name(), class_property_flag, method_defs, class_token_def);
             }
             else if (val->get_method_association() == method_association::Event)
             {
-                static constexpr DWORD method_flag = mdPublic | mdFinal | mdVirtual | mdHideBySig | mdNewSlot | mdSpecialName;
-                method_def = define_method(val, model->get_qualified_name(), method_flag, method_defs, class_token_def);
+                method_def = define_method(val, model->get_qualified_name(), class_event_flag, method_defs, class_token_def);
             }
             else if (val->get_method_association() == method_association::Constructor)
             {
                 auto constructor = std::make_shared<method_model>(".ctor", val->get_decl_line(), val->get_assembly_name(), std::nullopt, val->get_formal_parameter_copy(), val->get_modifier(), val->get_method_association());
-                static constexpr DWORD method_flag = mdPublic | mdHideBySig | mdSpecialName | mdRTSpecialName /*| mdInstance*/; //TODO: Figure out what mdInstance is
-                method_def = define_method(constructor, ".ctor", method_flag, method_defs, class_token_def, miRuntime);
+                method_def = define_method(constructor, ".ctor", class_constructor_flag, method_defs, class_token_def, miRuntime);
             }
             if (val->get_method_association() != method_association::Constructor)
             {
