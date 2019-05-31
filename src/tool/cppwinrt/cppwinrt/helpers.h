@@ -605,23 +605,6 @@ namespace xlang
         return result;
     }
 
-    static bool wrap_abi(TypeSig const& signature)
-    {
-        bool wrap{};
-
-        call(signature.Type(),
-            [&](ElementType type)
-            {
-                wrap = type == ElementType::String || type == ElementType::Object;
-            },
-            [&](auto&&)
-            {
-                wrap = true;
-            });
-
-        return wrap;
-    }
-
     enum class param_category
     {
         generic_type,
