@@ -33,6 +33,18 @@ const TypeAttributes class_type_attributes()
     return result;
 }
 
+const TypeAttributes static_class_type_attributes()
+{
+    TypeAttributes result{};
+    result.Visibility(TypeVisibility::Public);
+    result.Semantics(TypeSemantics::Class);
+    result.Sealed(true);
+    result.Layout(TypeLayout::AutoLayout);
+    result.WindowsRuntime(true);
+    result.Abstract(true);
+    return result;
+}
+
 const MethodAttributes class_method_attributes()
 {
     MethodAttributes result{};
@@ -208,14 +220,6 @@ void test_interface_type_properties(TypeDef const& interface_type)
     auto const& interface_flags = interface_type.Flags();
     REQUIRE(interface_flags.value == interface_type_attributes().value);
     REQUIRE(!interface_type.Extends());
-}
-
-// In-depth checking of type properties of structs
-void test_class_type_properties(TypeDef const& class_type)
-{
-    auto const& class_flags = class_type.Flags();
-    REQUIRE(class_flags.value == class_type_attributes().value);
-    REQUIRE(empty(class_type.FieldList()));
 }
 
 // In-depth checking of type properties of structs
@@ -736,6 +740,7 @@ struct ExpectedClass : ExpectedType
     std::vector<ExpectedEvent> events;
     std::vector<std::string> requires;
     std::string extends = "System.Object";
+    TypeAttributes class_flag = class_type_attributes();
 
     ExpectedClass(std::string const& expectedName, 
             std::vector<std::string> expectedRequires,
@@ -750,7 +755,15 @@ struct ExpectedClass : ExpectedType
             std::vector<ExpectedEvent> expectedEvents, 
             std::vector<std::pair<ExpectedMethod, std::string>> expected_methods_and_implements,
             std::string extends)
-        : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods_and_implements(expected_methods_and_implements), extends( extends ) {}
+        : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods_and_implements(expected_methods_and_implements), extends(extends) {}
+
+    ExpectedClass(std::string const& expectedName,
+            std::vector<std::string> expectedRequires,
+            std::vector<ExpectedProperty> expectedProperties,
+            std::vector<ExpectedEvent> expectedEvents,
+            std::vector<std::pair<ExpectedMethod, std::string>> expected_methods_and_implements,
+            TypeAttributes flag)
+        : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods_and_implements(expected_methods_and_implements), class_flag(flag) {}
 
     void VerifyType(TypeDef const& typeDef) const override
     {
@@ -758,7 +771,8 @@ struct ExpectedClass : ExpectedType
 
         std::string actual_extend_name = std::string(typeDef.Extends().TypeRef().TypeNamespace()) + "." + std::string(typeDef.Extends().TypeRef().TypeName());
         REQUIRE(actual_extend_name == extends);
-        test_class_type_properties(typeDef);
+        REQUIRE(typeDef.Flags().value == class_flag.value);
+        REQUIRE(empty(typeDef.FieldList()));
 
         REQUIRE(methods_and_implements.size() == size(typeDef.MethodList()));
         // TODO: reenable this sonce a solution is found
@@ -838,6 +852,11 @@ void ValidateTypesInMetadata(std::istringstream & testIdl, std::vector<std::shar
 
     auto expectedType(fileTypes.begin());
     REQUIRE(fileTypes.size() == db.TypeDef.size() - 1);
+    //for (size_t i = 0; i < fileTypes.size(); i++)
+    //{
+    //    std::cout << db.TypeDef[i].TypeName() << std::endl;
+    //    std::cout << fileTypes[i]->name << std::endl;
+    //}
     // Start at 1 to skip over <Module> element
     for (size_t i = 1; i < db.TypeDef.size(); i++)
     {
@@ -1496,6 +1515,31 @@ TEST_CASE("Runtimeclass extend class base metadata")
     std::vector<std::shared_ptr<ExpectedType>> fileTypes =
     {
         std::make_unique<ExpectedClass>(c0),
+        std::make_unique<ExpectedClass>(c1),
+        std::make_unique<ExpectedInterface>(ic1)
+    };
+    ValidateTypesInMetadata(test_idl, fileTypes);
+}
+
+TEST_CASE("Static class metadata")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            static runtimeclass C1
+            {
+                static Int32 Draw(Int32 param1);
+            }
+        }
+    )" };
+
+    ExpectedClass c1{ "C1", {}, {}, {}, {}, static_class_type_attributes() };
+
+    ExpectedInterface ic1{ "IC1Statics",
+        { ExpectedMethod{ "Draw", ElementType::I4, { ExpectedParam("param1", ElementType::I4) }, interface_method_attributes() } } };
+
+    std::vector<std::shared_ptr<ExpectedType>> fileTypes =
+    {
         std::make_unique<ExpectedClass>(c1),
         std::make_unique<ExpectedInterface>(ic1)
     };
