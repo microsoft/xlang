@@ -486,7 +486,7 @@ namespace xlang::xmeta
             {
                 auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
                 assert(type_def->is_interface());
-                extends =  get_or_define_type_ref(type_def->FullyQualifiedName(), type_def->get_database().Assembly[0].Name());
+                extends =  get_or_define_type_ref(std::string(type_def->TypeNamespace()) + "." + std::string(type_def->TypeName()), type_def->get_database().Assembly[0].Name());
             }
         }
         else
@@ -507,7 +507,7 @@ namespace xlang::xmeta
             {
                 auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
                 assert(type_def->is_interface());
-                implements.emplace_back(get_or_define_type_ref(type_def->FullyQualifiedName(), type_def->get_database().Assembly[0].Name()));
+                implements.emplace_back(get_or_define_type_ref(std::string(type_def->TypeNamespace()) + "." + std::string(type_def->TypeName()), type_def->get_database().Assembly[0].Name()));
             }
         }
         implements.emplace_back(mdTokenNil);
@@ -515,7 +515,7 @@ namespace xlang::xmeta
         auto token_class_type_def = define_type_def(class_qualified_name, class_type_flag, extends, implements.data());
 
         // Method list for first contiguous run of methods owned by this type
-        if (model->get_synthesized_instance_interface())
+        if (model->has_synthesized_instance_interface())
         {
             auto const& instance_interface = model->get_synthesized_instance_interface();
             define_required_interface_members(instance_interface, token_class_type_def);
@@ -555,7 +555,7 @@ namespace xlang::xmeta
             {
                 auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(target);
                 assert(type_def->is_interface());
-                implements.emplace_back(get_or_define_type_ref(type_def->FullyQualifiedName(), type_def->get_database().Assembly[0].Name()));
+                implements.emplace_back(get_or_define_type_ref(std::string(type_def->TypeNamespace()) + "." + std::string(type_def->TypeName()), type_def->get_database().Assembly[0].Name()));
             }
         }
         implements.emplace_back(mdTokenNil);
