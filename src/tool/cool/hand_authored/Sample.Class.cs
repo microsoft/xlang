@@ -17,16 +17,14 @@ namespace Sample
         }
     }
 
-    public class Class
+    public class Class : WinRT.RuntimeClass<Class, Interop.IClassVftbl>
     {
-        static Lazy<WinRT.ActivationFactory<Class>> _factory = new Lazy<WinRT.ActivationFactory<Class>>();
-        WinRT.ObjectReference<Interop.IClassVftbl> _IClass;
         WinRT.EventSource<Class, object> _myPropertyChanged;
 
-        public Class()
+        public Class() :
+            base(_factory.Value.ActivateInstance<Interop.IClassVftbl>())
         {
-            _IClass = _factory.Value.ActivateInstance<Interop.IClassVftbl>();
-            _myPropertyChanged = new WinRT.EventSource<Class, object>(this, _IClass.ThisPtr, _IClass.Vftbl.add_MyPropertyChanged, _IClass.Vftbl.remove_MyPropertyChanged, (IntPtr) => null);
+            _myPropertyChanged = new WinRT.EventSource<Class, object>(this, _obj.As<WinRT.Interop.IInspectableVftbl>(), _obj.Vftbl.add_MyPropertyChanged, _obj.Vftbl.remove_MyPropertyChanged, (IntPtr) => null);
         }
 
         public int MyProperty
@@ -34,12 +32,12 @@ namespace Sample
             get
             {
                 int value = 0;
-                unsafe { Marshal.ThrowExceptionForHR(_IClass.Vftbl.get_MyProperty(_IClass.ThisPtr, &value)); }
+                unsafe { Marshal.ThrowExceptionForHR(_obj.Vftbl.get_MyProperty(_obj.ThisPtr, &value)); }
                 return value;
             }
             set
             {
-                Marshal.ThrowExceptionForHR(_IClass.Vftbl.put_MyProperty(_IClass.ThisPtr, value));
+                Marshal.ThrowExceptionForHR(_obj.Vftbl.put_MyProperty(_obj.ThisPtr, value));
             }
         }
 
