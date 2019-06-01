@@ -373,8 +373,8 @@ void VerifyReturnType(ElementType const& expectedType, std::string const& expect
 struct ExpectedType
 {
     std::string name;
+    ExpectedType() = delete;
 
-    ExpectedType() {}
     ExpectedType(std::string const& typeName) : name(typeName) {}
 
     virtual void VerifyType(TypeDef const& /*typeDef*/) const {}
@@ -528,14 +528,14 @@ struct ExpectedMethod : ExpectedType
     MethodAttributes flag;
     MethodImplAttributes implFlag{};
         
-    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag)
+    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes const& flag)
         : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams), flag(flag) {}
-    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag)
+    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes const& flag)
         : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams), flag(flag) {}
 
-    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag, MethodImplAttributes const implFlag)
+    ExpectedMethod(std::string const& expectedName, ElementType const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes const& flag, MethodImplAttributes const&  implFlag)
         : ExpectedType(expectedName), returnType(expectedReturnType), returnTypeRef(""), params(expectedParams), flag(flag), implFlag{ implFlag } {}
-    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes flag, MethodImplAttributes const implFlag)
+    ExpectedMethod(std::string const& expectedName, std::string const& expectedReturnType, std::vector<ExpectedParam> expectedParams, MethodAttributes const& flag, MethodImplAttributes const&  implFlag)
         : ExpectedType(expectedName), returnType(ElementType::End), returnTypeRef(expectedReturnType), params(expectedParams), flag(flag), implFlag{ implFlag } {}
 
     void VerifyType(MethodDef const& method) const override
@@ -775,7 +775,7 @@ struct ExpectedClass : ExpectedType
             std::vector<ExpectedProperty> expectedProperties, 
             std::vector<ExpectedEvent> expectedEvents, 
             std::vector<std::pair<ExpectedMethod, std::string>> expected_methods_and_implements,
-            std::string extends)
+            std::string const& extends)
         : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods_and_implements(expected_methods_and_implements), extends(extends) {}
 
     ExpectedClass(std::string const& expectedName,
@@ -783,7 +783,7 @@ struct ExpectedClass : ExpectedType
             std::vector<ExpectedProperty> expectedProperties,
             std::vector<ExpectedEvent> expectedEvents,
             std::vector<std::pair<ExpectedMethod, std::string>> expected_methods_and_implements,
-            TypeAttributes flag)
+            TypeAttributes const&  flag)
         : ExpectedType(expectedName), requires(expectedRequires), properties(expectedProperties), events(expectedEvents), methods_and_implements(expected_methods_and_implements), class_flag(flag) {}
 
     void VerifyType(TypeDef const& typeDef) const override

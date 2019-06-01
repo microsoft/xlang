@@ -862,7 +862,7 @@ namespace xlang::xmeta
                         return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
                     }
                 }
-                // else it is either one of the tyep categories
+                // else it is either one of the type categories
                 type_ref = to_TypeRef(get_or_define_type_ref(name, xlang_model.m_assembly));
                 
                 if (std::holds_alternative<std::shared_ptr<class_model>>(target)
