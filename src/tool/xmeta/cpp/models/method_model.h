@@ -17,6 +17,8 @@ namespace xlang::xmeta
         bool is_overridable = false;
     };
 
+    std::shared_ptr<method_model> create_method_from(std::shared_ptr<xlang::meta::reader::MethodDef> method_def);
+
     struct method_model : base_model
     {
         method_model() = delete;
@@ -84,13 +86,17 @@ namespace xlang::xmeta
             m_implemented_method_ref{ "" }
         { }
 
-
         auto const& get_method_association()
         {
             return m_association;
         }
 
         auto const& get_formal_parameters() const noexcept
+        {
+            return m_formal_parameters;
+        }
+
+        auto get_formal_parameter_copy() const noexcept
         {
             return m_formal_parameters;
         }

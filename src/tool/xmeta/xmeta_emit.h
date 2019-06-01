@@ -1,5 +1,6 @@
 #pragma once
-#include "xmeta_models.h"
+
+#include "base_model.h"
 #include "xlang_model_listener.h"
 #include <winrt/base.h>
 #include <vector>
@@ -36,26 +37,35 @@ namespace xlang::xmeta
         winrt::com_ptr<IMetaDataEmit2> m_metadata_emitter;
         winrt::com_ptr<IMetaDataImport> m_metadata_import;
 
+        std::map<std::string, std::map<std::string, mdMemberRef>> method_references;
         std::map<std::string, mdTypeRef> type_references;
         std::map<std::string, mdAssemblyRef> assembly_references;
         meta::reader::Module m_module;
 
         mdAssembly token_assembly;
         mdAssemblyRef token_mscorlib;
+
         mdTypeRef token_enum;
         mdTypeRef token_value_type;
         mdTypeRef token_delegate;
-        mdTypeRef token_event_registration;
+        mdTypeRef token_object;
 
         void define_assembly();
         void define_common_reference_assembly();
-        void define_imported_reference_assembly();
 
         mdTypeDef define_type_def(std::string const& name, DWORD const& type_flag, mdToken token_extend, mdToken token_implements[]);
         
-        void define_method(std::shared_ptr<method_model> const& model, DWORD const& method_flag, std::map<std::string_view, mdMethodDef> & method_references, mdTypeDef const& token_def);
+        mdMethodDef define_method(std::shared_ptr<method_model> const& model, 
+            std::string const& qualified_interface_name, 
+            DWORD const& method_flag, 
+            std::map<std::string_view, mdMethodDef> & method_references, 
+            mdTypeDef const& token_def,
+            CorMethodImpl method_impl_flag = miIL);
+
         void define_property(std::shared_ptr<property_model> const& model, std::map<std::string_view, mdMethodDef> const& method_references, mdTypeDef const& token_def);
         void define_event(std::shared_ptr<event_model> const& model, std::map<std::string_view, mdMethodDef> const& method_references, mdTypeDef const& token_def);
+        void define_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& token_def);
+        void define_required_interface_members(std::shared_ptr<interface_model> const& model, mdTypeDef const& token_def);
 
         mdParamDef define_return(mdTypeDef const& type_def);
         void define_parameters(formal_parameter_model const& model, mdMethodDef const& token_method, uint16_t parameter_index);
@@ -63,7 +73,7 @@ namespace xlang::xmeta
         std::optional<xlang::meta::reader::TypeSig> create_type_sig(std::optional<type_ref> const& ref);
         xlang::meta::writer::signature_blob create_method_sig(std::optional<type_ref> const& return_type_ref, std::vector<formal_parameter_model> const& formal_parameters);
 
-        mdTypeRef get_or_define_type_ref(std::string const& ref_name, std::string const& assembly_ref);
+        mdTypeRef get_or_define_type_ref(std::string const& ref_name, std::string_view const& assembly_ref);
 
         // A generic assembly metadata struct.
         static constexpr ASSEMBLYMETADATA s_genericMetadata =

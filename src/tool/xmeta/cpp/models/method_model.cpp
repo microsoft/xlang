@@ -4,9 +4,24 @@
 #include "formal_parameter_model.h"
 #include "model_ref.h"
 #include "model_types.h"
+#include "meta_reader.h"
 
 namespace xlang::xmeta
 {
+    using namespace xlang::meta::reader;
+
+    std::shared_ptr<method_model> create_method_from(std::shared_ptr<MethodDef> method_def)
+    {
+        auto const& return_type = method_def->Signature().ReturnType().Type().Type();
+        if (std::holds_alternative<ElementType>(return_type))
+        {
+            auto const& return_elemment_type = std::get<ElementType>(return_type);
+        }
+
+        auto model = std::make_shared<method_model>(method_def->Name(), 0, method_def->get_database().Assembly[0].Name(), std::move(std::nullopt), method_association::None);
+        return model;
+    }
+
     void method_model::set_overridden_method_ref(std::shared_ptr<method_model> const& ref) noexcept
     {
         assert(ref != nullptr);

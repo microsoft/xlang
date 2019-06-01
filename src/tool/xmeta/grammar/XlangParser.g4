@@ -196,12 +196,12 @@ attribute_body
     ;
 
 class_declaration
-    : attributes? class_modifier* CLASS IDENTIFIER type_parameter_list?
+    : attributes? class_modifiers* CLASS IDENTIFIER type_parameter_list?
         class_base? class_body SEMICOLON?
     ;
 
-class_modifier // Explicit Seal? allow it to be explicitly sealed
-    : UNSEALED
+class_modifiers // Explicit Seal? allow it to be explicitly sealed
+    : SEALED
     | STATIC
     ;
 
@@ -211,7 +211,7 @@ type_parameter_list // attributes on generic types? Something<[Attribute] K>
 
 // Semantically check for one class and multiple interfaces restriction
 class_base
-    : COLON type_base (COMMA type_base)*
+    : (COLON type_base)? interface_base?
     ;
 
 type_base
@@ -247,7 +247,7 @@ class_property_declaration // Restrict property_identifier first ///TODO: Proper
     ;
 
 class_constructor_declaration
-    : attributes? class_constructor_modifier* IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
+    : attributes? class_constructor_modifier? IDENTIFIER OPEN_PARENS formal_parameter_list? CLOSE_PARENS SEMICOLON
     ;
 
 method_modifier

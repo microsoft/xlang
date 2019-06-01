@@ -35,8 +35,8 @@ int main(int argc, const char* argv[])
 {
     std::ifstream stream;
     stream.open(argv[1]);
-    std::vector<std::string> imports;
-    xmeta_idl_reader reader{ "", imports};
+    std::vector<std::string> paths = { "Foundation.xmeta" };
+    xmeta_idl_reader reader{ remove_extension(remove_path(argv[1])), paths };
     reader.read(stream);
     reader.save_to_current_path();
 }

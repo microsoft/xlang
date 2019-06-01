@@ -10,6 +10,12 @@
 
 namespace xlang::xmeta
 {
+    std::shared_ptr<interface_model> create_interface_from(std::shared_ptr<xlang::meta::reader::TypeDef> type_def)
+    {
+        // TODO: this method may be required to import interfaces that are required by the runtime class. 
+        return nullptr;
+    }
+
     void interface_model::validate(xlang_error_manager & error_manager)
     {
         std::set<std::shared_ptr<interface_model>> bases = get_all_interface_bases();

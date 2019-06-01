@@ -45,6 +45,11 @@ namespace xlang::xmeta
 
         void set_semantic(object_type o);
 
+        void set_is_array()
+        {
+            m_is_array = true;
+        }
+
         // To be use for testing purposes only
         bool operator==(type_ref const& right_ref) const;
 

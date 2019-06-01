@@ -190,11 +190,11 @@ namespace xlang::meta::reader
         {
             bool operator()(MethodImpl const& lhs, uint32_t rhs) const noexcept
             {
-                return lhs.get_value<uint32_t>(1) < rhs;
+                return lhs.get_value<uint32_t>(0) < rhs;
             }
             bool operator()(uint32_t lhs, MethodImpl const& rhs) const noexcept
             {
-                return lhs < rhs.get_value<uint32_t>(1);
+                return lhs < rhs.get_value<uint32_t>(0);
             }
         };
         return equal_range(get_database().get_table<MethodImpl>(), index() + 1, compare{});

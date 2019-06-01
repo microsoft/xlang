@@ -13,18 +13,6 @@
 
 namespace xlang::xmeta
 {
-    enum class enum_types
-    {
-        Int8,
-        UInt8,
-        Int16,
-        UInt16,
-        Int32,
-        UInt32,
-        Int64,
-        UInt64
-    };
-
     using enum_value_semantics = std::variant<int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t>;
 
     struct enum_member : base_model
@@ -60,16 +48,16 @@ namespace xlang::xmeta
 
         enum_value_semantics get_resolved_value() const;
         
-        std::errc increment(enum_types type);
+        std::errc increment(enum_type type);
 
-        std::errc resolve_decimal_val(enum_types type);
+        std::errc resolve_decimal_val(enum_type type);
 
-        std::errc resolve_hexadecimal_val(enum_types type);
+        std::errc resolve_hexadecimal_val(enum_type type);
 
     private:
         model_ref<enum_value_semantics> m_value;
 
-        std::errc resolve_numeric_val(enum_types type, int base) noexcept;
+        std::errc resolve_numeric_val(enum_type type, int base) noexcept;
 
         // resolve_numeric_val resolves the m_value string to type T. It is required that T is one
         // of int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, or uint64_t.
@@ -109,7 +97,7 @@ namespace xlang::xmeta
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::shared_ptr<namespace_body_model> const& containing_ns_body,
-                enum_types t) :
+                enum_type t) :
             namespace_member_model{ name, decl_line, assembly_name, containing_ns_body },
             m_type{ t }
         { }
@@ -118,7 +106,7 @@ namespace xlang::xmeta
                 size_t decl_line,
                 std::string_view const& assembly_name,
                 std::string_view const& containing_ns_name,
-                enum_types t) :
+                enum_type t) :
             namespace_member_model{ name, decl_line, assembly_name, containing_ns_name },
             m_type{ t }
         { }
@@ -160,6 +148,6 @@ namespace xlang::xmeta
 
     private:
         std::vector<enum_member> m_members;
-        enum_types m_type;
+        enum_type m_type;
     };
 }

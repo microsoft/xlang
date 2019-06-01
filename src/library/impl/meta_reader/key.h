@@ -114,6 +114,20 @@ namespace xlang::meta::reader
         return get_row<reader::TypeDef>();
     }
 
+    inline bool TypeDef::is_runtime_class() const
+    {
+        if (extends_type(*this, "System"sv, "Object"sv))
+        {
+            return true;
+        }
+        return !is_interface() && !is_enum() && !is_delegate() && !is_struct();
+    }
+
+    inline bool TypeDef::is_interface() const
+    {
+        return extends_type(*this, ""sv, ""sv);
+    }
+
     inline bool TypeDef::is_enum() const
     {
         return extends_type(*this, "System"sv, "Enum"sv);

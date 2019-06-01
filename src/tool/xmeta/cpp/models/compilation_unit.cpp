@@ -2,6 +2,105 @@
 
 namespace xlang::xmeta
 {
+    using namespace xlang::meta::reader;
+
+    fundamental_type to_fundamental_type(xlang::meta::reader::ElementType arg)
+    {
+        switch (arg)
+        {
+        case ElementType::String:
+            return fundamental_type::String;
+        case ElementType::I1:
+            return fundamental_type::Int8;
+        case ElementType::U1:
+            return fundamental_type::UInt8;
+        case ElementType::I2:
+            return fundamental_type::Int16;
+        case ElementType::U2:
+            return fundamental_type::UInt16;
+        case ElementType::I4:
+            return fundamental_type::Int32;
+        case ElementType::U4:
+            return fundamental_type::UInt32;
+        case ElementType::I8:
+            return fundamental_type::Int64;
+        case ElementType::U8:
+            return fundamental_type::UInt64;
+        case ElementType::Char:
+            return fundamental_type::Char16;
+        case ElementType::R4:
+            return fundamental_type::Single;
+        case ElementType::R8:
+            return fundamental_type::Double;
+        case ElementType::Boolean:
+            return fundamental_type::Boolean;
+        default:
+            XLANG_ASSERT(false);
+        }
+    }
+
+    ElementType to_ElementType(enum_type arg)
+    {
+        switch (arg)
+        {
+        case enum_type::Int8:
+            return ElementType::I1;
+        case enum_type::UInt8:
+            return ElementType::U1;
+        case enum_type::Int16:
+            return ElementType::I2;
+        case enum_type::UInt16:
+            return ElementType::U2;
+        case enum_type::Int32:
+            return ElementType::I4;
+        case enum_type::UInt32:
+            return ElementType::U4;
+        case enum_type::Int64:
+            return ElementType::I8;
+        case enum_type::UInt64:
+            return ElementType::U8;
+        default:
+            XLANG_ASSERT(false);
+            return ElementType::Void;
+        }
+    }
+
+    ElementType to_ElementType(fundamental_type arg)
+    {
+        switch (arg)
+        {
+        case fundamental_type::String:
+            return ElementType::String;
+        case fundamental_type::Int8:
+            return ElementType::I1;
+        case fundamental_type::UInt8:
+            return ElementType::U1;
+        case fundamental_type::Int16:
+            return ElementType::I2;
+        case fundamental_type::UInt16:
+            return ElementType::U2;
+        case fundamental_type::Int32:
+            return ElementType::I4;
+        case fundamental_type::UInt32:
+            return ElementType::U4;
+        case fundamental_type::Int64:
+            return ElementType::I8;
+        case fundamental_type::UInt64:
+            return ElementType::U8;
+        case fundamental_type::Char16:
+            return ElementType::Char;
+        case fundamental_type::Single:
+            return ElementType::R4;
+        case fundamental_type::Double:
+            return ElementType::R8;
+        case fundamental_type::Boolean:
+            return ElementType::Boolean;
+        default:
+            XLANG_ASSERT(false);
+            return ElementType::Void;
+        }
+    }
+
     semantic_error symbol_table::set_symbol(std::string_view symbol, type_category const& class_type)
     {
         if (!table.insert(std::pair<std::string, type_category>(symbol, class_type)).second)

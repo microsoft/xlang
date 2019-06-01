@@ -70,6 +70,18 @@ namespace xlang::xmeta
         Double,
     };
 
+    enum class enum_type
+    {
+        Int8,
+        UInt8,
+        Int16,
+        UInt16,
+        Int32,
+        UInt32,
+        Int64,
+        UInt64
+    };
+
     struct object_type {};
 
     using type_category = std::variant<std::monostate,

@@ -4,9 +4,16 @@
 #include <string_view>
 #include <vector>
 #include "base_model.h"
+#include  "meta_reader.h"
 
 namespace xlang::xmeta
 {
+    xlang::meta::reader::ElementType to_ElementType(enum_type arg);
+
+    xlang::meta::reader::ElementType  to_ElementType(fundamental_type arg);
+
+    fundamental_type to_fundamental_type(xlang::meta::reader::ElementType arg);
+
     struct symbol_table
     {
         symbol_table() = delete;

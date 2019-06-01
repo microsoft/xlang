@@ -2,36 +2,6 @@
 
 namespace xlang::xmeta
 {
-    void class_model::add_class_base_ref(std::string_view const& class_base_ref)
-    {
-        m_class_base_ref = type_ref{ class_base_ref };
-    }
-
-    void class_model::add_static_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
-    {
-        m_static_interfaces.emplace_back(static_interface_ref);
-    }
-
-    void class_model::add_instance_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
-    {
-        m_static_interfaces.emplace_back(static_interface_ref);
-    }
-
-    void class_model::add_factory_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
-    {
-        m_static_interfaces.emplace_back(static_interface_ref);
-    }
-
-    //void class_model::add_overrides_interface_ref(std::shared_ptr<interface_model> const& static_interface_ref)
-    //{
-    //    m_static_interfaces.emplace_back(static_interface_ref);
-    //}    
-    //
-    //void class_model::add_protected_interface_ref(std::shared_ptr<interface_model> const& protected_interface_ref)
-    //{
-    //    m_protected_interfaces.emplace_back(protected_interface_ref);
-    //}
-
     std::set<std::shared_ptr<class_or_interface_model>> class_model::get_all_bases()
     {
         std::set<std::shared_ptr<class_or_interface_model>> bases;
@@ -118,6 +88,18 @@ namespace xlang::xmeta
                 if (std::holds_alternative<std::shared_ptr<class_model>>(iter))
                 {
                     m_class_base_ref->set_semantic(iter);
+                }
+                else if (std::holds_alternative<std::shared_ptr<xlang::meta::reader::TypeDef>>(iter))
+                {
+                    auto const& type_def = std::get<std::shared_ptr<xlang::meta::reader::TypeDef>>(iter);
+                    if (type_def->is_runtime_class())
+                    {
+                        m_class_base_ref->set_semantic(iter);
+                    }
+                    else
+                    {
+                        error_manager.write_not_an_interface_error(get_decl_line(), symbol);
+                    }
                 }
                 else
                 {

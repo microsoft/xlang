@@ -41,7 +41,6 @@ namespace xlang::xmeta
         {
             if (!std::holds_alternative<resolved_type>(m_ref))
             {
-                std::cout << ref_name << std::endl;
                 xlang::throw_invalid("Model Ref is not resolved");
             }
             return std::get<resolved_type>(m_ref);
@@ -64,6 +63,11 @@ namespace xlang::xmeta
                 ref_name = std::get<std::string>(m_ref);
             }
             m_ref = value;
+        }
+
+        void rename(std::string const& name)
+        {
+            m_ref = name;
         }
 
     private:

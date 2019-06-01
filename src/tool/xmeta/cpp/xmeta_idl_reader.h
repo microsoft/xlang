@@ -56,7 +56,7 @@ namespace xlang::xmeta
 
         void save_to_current_path()
         {
-            return writer.save_to_file(std::filesystem::current_path().append(std::string(m_xlang_model.m_assembly) + ".xmeta"));
+            return writer.save_to_file(std::filesystem::current_path().append(std::string(m_xlang_model.m_assembly) + ".winmd"));
         }
 
     private:
@@ -76,6 +76,7 @@ namespace xlang::xmeta
 
         xlang_model_pass_1() = delete;
 
+        void listen_class_model(std::shared_ptr<class_model> const& model) final;
         void listen_interface_model(std::shared_ptr<interface_model> const& model) final;
         void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
         void listen_delegate_model(std::shared_ptr<delegate_model> const& model) final;
@@ -92,6 +93,7 @@ namespace xlang::xmeta
         {}
         xlang_model_pass_2() = delete;
 
+        void listen_class_model(std::shared_ptr<class_model> const& model) final;
         void listen_interface_model(std::shared_ptr<interface_model> const& model) final;
         void listen_struct_model(std::shared_ptr<struct_model> const& model) final;
 
