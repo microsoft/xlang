@@ -214,19 +214,23 @@ namespace xlang
         bool async{};
 
         call(method_signature.return_signature().Type().Type(),
-            [&](GenericTypeInstSig const& type)
-        {
-            auto const&[type_namespace, type_name] = get_type_namespace_and_name(type.GenericType());
-
-            if (type_namespace == "Windows.Foundation")
+            [&](coded_index<TypeDefOrRef> const& type)
             {
-                async =
-                    type_name == "IAsyncAction" ||
-                    type_name == "IAsyncOperation`1" ||
-                    type_name == "IAsyncActionWithProgress`1" ||
-                    type_name == "IAsyncOperationWithProgress`2";
-            }
-        },
+                auto const& [type_namespace, type_name] = get_type_namespace_and_name(type);
+                async = type_namespace == "Windows.Foundation" && type_name == "IAsyncAction";
+            },
+            [&](GenericTypeInstSig const& type)
+            {
+                auto const& [type_namespace, type_name] = get_type_namespace_and_name(type.GenericType());
+
+                if (type_namespace == "Windows.Foundation")
+                {
+                    async =
+                        type_name == "IAsyncOperation`1" ||
+                        type_name == "IAsyncActionWithProgress`1" ||
+                        type_name == "IAsyncOperationWithProgress`2";
+                }
+            },
             [](auto&&) {});
 
         return async;
