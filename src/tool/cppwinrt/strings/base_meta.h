@@ -144,12 +144,6 @@ namespace winrt::impl
 #endif
 
     template <typename T>
-    struct is_enum_flag : std::false_type {};
-
-    template <typename T>
-    inline constexpr bool is_enum_flag_v = is_enum_flag<T>::value;
-
-    template <typename T>
     constexpr auto to_underlying_type(T const value) noexcept
     {
         return static_cast<std::underlying_type_t<T>>(value);
@@ -295,49 +289,4 @@ namespace winrt::impl
             return (func(Types{}) || ...);
         }
     };
-}
-
-template <typename T>
-constexpr auto operator|(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    return static_cast<T>(winrt::impl::to_underlying_type(left) | winrt::impl::to_underlying_type(right));
-}
-
-template <typename T>
-constexpr auto operator|=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    left = left | right;
-    return left;
-}
-
-template <typename T>
-constexpr auto operator&(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    return static_cast<T>(winrt::impl::to_underlying_type(left) & winrt::impl::to_underlying_type(right));
-}
-
-template <typename T>
-constexpr auto operator&=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    left = left & right;
-    return left;
-}
-
-template <typename T>
-constexpr auto operator~(T const value) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    return static_cast<T>(~winrt::impl::to_underlying_type(value));
-}
-
-template <typename T>
-constexpr auto operator^(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    return static_cast<T>(winrt::impl::to_underlying_type(left) ^ winrt::impl::to_underlying_type(right));
-}
-
-template <typename T>
-constexpr auto operator^=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    left = left ^ right;
-    return left;
 }

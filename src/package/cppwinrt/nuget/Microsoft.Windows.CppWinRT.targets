@@ -11,13 +11,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTProjectWinMD>$(OutDir)$(RootNamespace).winmd</CppWinRTProjectWinMD>
         <CppWinRTMergedDir>$(OutDir)Merged</CppWinRTMergedDir>
         <CppWinRTUnmergedDir>$(OutDir)Unmerged</CppWinRTUnmergedDir>
-        <CppWinRTTargetPlatformReferences Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(TargetPlatformVersion)</CppWinRTTargetPlatformReferences>
         <CppWinRTWriteOnlyWhenDifferent Condition="('$(CppWinRTWriteOnlyWhenDifferent)' == '') And (('$(MSBuildToolsVersion)' == 'Current') Or ('$(MSBuildToolsVersion)' &gt;= '15'))">true</CppWinRTWriteOnlyWhenDifferent>
         <CppWinRTWriteOnlyWhenDifferent Condition="'$(CppWinRTWriteOnlyWhenDifferent)' != 'true'">false</CppWinRTWriteOnlyWhenDifferent>
         <CppWinRTPackageDir Condition="'$(CppWinRTPackage)' == 'true' and '$(CppWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\</CppWinRTPackageDir>
         <CppWinRTPackageDir Condition="'$(CppWinRTPackage)' != 'true' and '$(CppWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))</CppWinRTPackageDir>
         <CppWinRTPath Condition="'$(CppWinRTPackage)' == 'true' and '$(CppWinRTPath)'==''">"$(CppWinRTPackageDir)bin\"</CppWinRTPath>
         <CppWinRTPath Condition="'$(CppWinRTPackage)' != 'true' and '$(CppWinRTPath)'==''">"$(CppWinRTPackageDir)"</CppWinRTPath>
+        <XamlLanguage Condition="'$(CppWinRTProjectLanguage)' == 'C++/CX'">C++</XamlLanguage>
         
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
         <!--Override SDK's uap.props setting to ensure version-matched headers-->
@@ -396,8 +396,7 @@ $(XamlMetaDataProviderPch)
     <PropertyGroup>
       <_CppwinrtParameters>$(CppWinRTCommandVerbosity) $(CppWinRTParameters)</_CppwinrtParameters>
       <_CppwinrtParameters>$(_CppwinrtParameters) @(_CppwinrtRefInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
-      <_CppwinrtParameters Condition="'$(CppWinRTOverrideSDKReferences)' != 'true'">$(_CppwinrtParameters) -ref $(CppWinRTTargetPlatformReferences)</_CppwinrtParameters>
-      <_CppwinrtParameters Condition="'$(CppWinRTOverrideSDKReferences)' == 'true'">$(_CppwinrtParameters) @(_CppwinrtRefRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
+      <_CppwinrtParameters>$(_CppwinrtParameters) @(_CppwinrtRefRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_CppwinrtParameters>
       <_CppwinrtParameters>$(_CppwinrtParameters) -out &quot;$(GeneratedFilesDir).&quot;</_CppwinrtParameters>
     </PropertyGroup>
     <WriteLinesToFile Condition="!$(CppWinRTWriteOnlyWhenDifferent)"
@@ -479,7 +478,13 @@ $(XamlMetaDataProviderPch)
     </Target>
 
     <!-- Fast ABI component support -->
-    <Import Condition="'$(CppWinRTFastAbi)'=='true'"
-        Project="$(MSBuildThisFileDirectory)Microsoft.Windows.CppWinRT.FastAbi.targets" />
+    <PropertyGroup Condition="'$(CppWinRTFastAbi)'=='true'">
+        <CppWinRTParameters>$(CppWinRTParameters) -fastabi</CppWinRTParameters>
+    </PropertyGroup>
+    <ItemDefinitionGroup Condition="'$(CppWinRTFastAbi)'=='true'">
+        <Link>
+            <AdditionalDependencies>%(AdditionalDependencies);$(CppWinRTPackageDir)build\native\lib\$(Platform)\cppwinrt_fast_forwarder.lib</AdditionalDependencies>
+        </Link>
+    </ItemDefinitionGroup>
 
 </Project>

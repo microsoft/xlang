@@ -694,6 +694,11 @@ catch (...) { return winrt::to_hresult(); }
         }
         else
         {
+            if (!has_fastabi_tearoffs(w, type))
+            {
+                return;
+            }
+
             auto format = R"(
         int32_t query_interface_tearoff(guid const& id, void** result) const noexcept override
         {%
@@ -987,6 +992,17 @@ namespace winrt::@::implementation
         }
     }
 
+    static void write_generated_static_assert(writer& w)
+    {
+        auto format = R"(
+// Note: Remove this static_assert after copying these generated source files to your project.
+// This assertion exists to avoid compiling these generated source files directly.
+static_assert(false, "Do not compile generated C++/WinRT source files directly");
+)";
+
+        w.write(format);
+    }
+
     static void write_component_h(writer& w, TypeDef const& type)
     {
         auto type_name = type.TypeName();
@@ -1001,7 +1017,7 @@ namespace winrt::@::implementation
 
         {
             auto format = R"(#include "%.g.h"
-%
+%%
 namespace winrt::@::implementation
 {
     struct %%
@@ -1015,6 +1031,7 @@ namespace winrt::@::implementation
             w.write(format,
                 get_generated_component_filename(type),
                 base_include,
+                bind<write_generated_static_assert>(),
                 type_namespace,
                 type_name,
                 bind<write_component_base>(type),
@@ -1157,14 +1174,41 @@ namespace winrt::@::implementation
             w.write(format, filename);
         }
 
-        auto format = R"(
+        auto format = R"(%
 namespace winrt::@::implementation
 {
 %}
 )";
 
         w.write(format,
+            bind<write_generated_static_assert>(),
             type.TypeNamespace(),
             bind<write_component_member_definitions>(type));
+    }
+
+    static void write_component_fast_abi_thunk(writer& w)
+    {
+        for (uint32_t slot = 6; slot < 1024; ++slot)
+        {
+            auto format = R"(    extern "C" void WINRT_IMPL_CALL winrt_ff_thunk%();
+)";
+
+            w.write(format, slot);
+        }
+    }
+
+    static void write_component_fast_abi_vtable(writer& w)
+    {
+        for (uint32_t slot = 6; slot < 1024; ++slot)
+        {
+            auto format = R"(
+#if WINRT_FAST_ABI_SIZE > %
+            winrt_ff_thunk%,
+#endif
+)";
+            w.write(format,
+                slot,
+                slot);
+        }
     }
 }

@@ -275,7 +275,7 @@ namespace winrt::impl
 
             if (handler)
             {
-                handler(*this, status);
+                invoke(handler, *this, status);
             }
         }
 
@@ -377,7 +377,7 @@ namespace winrt::impl
 
             if (handler)
             {
-                handler(*this, status);
+                invoke(handler, *this, status);
             }
         }
 
@@ -539,7 +539,7 @@ namespace std::experimental
             {
                 if (auto handler = Progress())
                 {
-                    handler(*this, result);
+                    winrt::impl::invoke(handler, *this, result);
                 }
             }
 
@@ -610,7 +610,7 @@ namespace std::experimental
             {
                 if (auto handler = Progress())
                 {
-                    handler(*this, result);
+                    winrt::impl::invoke(handler, *this, result);
                 }
             }
 

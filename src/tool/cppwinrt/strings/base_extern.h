@@ -9,6 +9,8 @@ extern "C"
     int32_t WINRT_CALL WINRT_SetRestrictedErrorInfo(void* info) noexcept;
     int32_t WINRT_CALL WINRT_RoGetAgileReference(uint32_t options, winrt::guid const& iid, void* object, void** reference) noexcept;
     int32_t WINRT_CALL WINRT_CoIncrementMTAUsage(void** cookie) noexcept;
+    [[noreturn]] void WINRT_CALL WINRT_RoFailFastWithErrorContext(int32_t error) noexcept;
+    int32_t WINRT_CALL WINRT_RoTransformError(int32_t oldError, int32_t newError, void* message) noexcept;
 
     int32_t WINRT_CALL WINRT_WindowsCreateString(wchar_t const* sourceString, uint32_t length, void** string) noexcept;
     int32_t WINRT_CALL WINRT_WindowsCreateStringReference(wchar_t const* sourceString, uint32_t length, void* hstringHeader, void** string) noexcept;
@@ -93,6 +95,8 @@ WINRT_LINK(RoUninitialize, 0)
 WINRT_LINK(SetRestrictedErrorInfo, 4)
 WINRT_LINK(RoGetAgileReference, 16)
 WINRT_LINK(CoIncrementMTAUsage, 4)
+WINRT_LINK(RoFailFastWithErrorContext, 4)
+WINRT_LINK(RoTransformError, 12)
 
 WINRT_LINK(WindowsCreateString, 12)
 WINRT_LINK(WindowsCreateStringReference, 16)

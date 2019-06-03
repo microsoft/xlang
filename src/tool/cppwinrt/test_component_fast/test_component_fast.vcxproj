@@ -26,8 +26,6 @@
     <ProjectName>test_component_fast</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <!-- Hard-coded reference to cppwinrt props file, as if NuGet package was added -->
-  <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.props" />
   <Import Project="$(SolutionDir)\cppwinrt.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -103,7 +101,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/await /DWINRT_FAST_ABI_SIZE=50 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
@@ -159,7 +157,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/await /DWINRT_FAST_ABI_SIZE=50 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
@@ -217,7 +215,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/await /DWINRT_FAST_ABI_SIZE=50 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
@@ -277,7 +275,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/await /DWINRT_FAST_ABI_SIZE=50 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
@@ -353,9 +351,12 @@
   <ItemGroup>
     <Midl Include="test_component_fast.idl" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\fast_fwd\fast_fwd.vcxproj">
+      <Project>{a63b3ad1-ab7b-461e-9fff-2447f5bcd459}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <!-- Hard-coded reference to cppwinrt targets file, as if NuGet package was added -->
-    <Import Project="$(CppWinRTPackageDir)Microsoft.Windows.CppWinRT.FastAbi.targets" />
   </ImportGroup>
 </Project>

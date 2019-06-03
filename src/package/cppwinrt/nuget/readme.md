@@ -60,32 +60,18 @@ C++/WinRT behavior can be customized with these project properties:
 | CppWinRTModernIDL | *true \| false | Enables the Midl item metadata settings above |
 | CppWinRTVerbosity | low \| *normal \| high | Sets the [importance](https://docs.microsoft.com/en-us/visualstudio/msbuild/message-task?view=vs-2017) of C++/WinRT build messages (see below) |
 | CppWinRTNamespaceMergeDepth | *1 | Sets the depth of namespace merging (Xaml apps require 1) |
-| CppWinRTUsePrefixes | *false \| true | Uses a dotted prefix namespace convention (versus a nested folder convention) |
+| CppWinRTUsePrefixes | *true \| false | Uses a dotted prefix namespace convention (versus a nested folder convention) |
 | CppWinRTPath | ...\cppwinrt.exe | NuGet package-relative path to cppwinrt.exe, for custom build rule invocation |
 | CppWinRTParameters | "" | Custom cppwinrt.exe command-line parameters (be sure to append to existing) |
 | CppWinRTFastAbi | true \| *false | Enables Fast ABI feature for both consuming and producing projections |
+| CppWinRTProjectLanguage | C++/CX \| *C++/WinRT | Selects the C++ dialect for the project.  C++/WinRT provides full projection support, C++/CX permits consuming projection headers. |
+| CppWinRTOptimized | true \| *false | Enables component projection optimization features (e.g., unified construction) |
 \*Default value
 
-To customize the above properties, a property sheet can be added to the project:
+To customize common C++/WinRT project properties: 
 * right-click the project node
-* select Add | New Item... | Visual C++ | Property Sheets | Property Sheet (.props) 
-* edit the resulting property sheet file
-* add the necessary project customizations
-* select View | Other Windows | Property Manager
-* right-click the project node
-* select Add Existing Property Sheet...
-* select the new property sheet file
-
-Alternatively, the project file can be edited directly:
-* right-click the project node
-* select Unload Project
-* right-click the project node
-* select Edit \<project\>.vcxproj
-* add the necessary project customizations
-* right-click the project node
-* select Reload Project and close the editor
-
-Finally, a standalone props or targets file can be injected into your project as described [here](https://docs.microsoft.com/en-us/cpp/build/modify-project-properties-without-changing-project-file?view=vs-2019).  However, this technique does not work well with automated builds.
+* expand the Common Properties item
+* select the C++/WinRT property page
 
 ## Troubleshooting
 

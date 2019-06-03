@@ -11,7 +11,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CanReferenceWinRT>true</CanReferenceWinRT>
         <CppWinRTPackage Condition="'$(CppWinRTEnabled)' != 'true'">true</CppWinRTPackage>
         <CppWinRTPackage Condition="'$(CppWinRTPackage)' != 'true'">false</CppWinRTPackage>
-        <XamlLanguage Condition="'$(CppWinRTProjectLanguage)' != 'C++/CX'">CppWinRT</XamlLanguage>
+        <XamlLanguage>CppWinRT</XamlLanguage>
         <IsNativeLanguage>true</IsNativeLanguage>
     </PropertyGroup>
 
@@ -40,5 +40,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <AdditionalDependencies Condition="'$(CppWinRTLibs)' != 'false'">WindowsApp.lib;%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
     </ItemDefinitionGroup>
+
+    <ItemGroup>
+        <PropertyPageSchema Include="$(MSBuildThisFileDirectory)\CppWinrtRules.Project.xml"/>
+    </ItemGroup>
 
 </Project>
