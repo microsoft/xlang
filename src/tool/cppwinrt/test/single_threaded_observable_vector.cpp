@@ -199,8 +199,8 @@ TEST_CASE("single_threaded_observable_vector")
         IIterator<int> iterator_i = vector_i.First();
         IIterator<IInspectable> iterator_o = vector_o.First();
 
-        iterator_i.HasCurrent();
-        iterator_o.HasCurrent();
+        REQUIRE(iterator_i.HasCurrent());
+        REQUIRE(iterator_o.HasCurrent());
 
         vector_i.Append(3);
 
@@ -328,8 +328,8 @@ TEST_CASE("single_threaded_observable_vector")
             IIterator<int> iterator_i = vector_i.First();
             IIterator<IInspectable> iterator_o = vector_o.First();
 
-            iterator_i.HasCurrent();
-            iterator_o.HasCurrent();
+            REQUIRE(iterator_i.HasCurrent());
+            REQUIRE(iterator_o.HasCurrent());
 
             bool changed_i{};
             bool changed_o{};
@@ -362,8 +362,8 @@ TEST_CASE("single_threaded_observable_vector")
             IIterator<int> iterator_i = vector_i.First();
             IIterator<IInspectable> iterator_o = vector_o.First();
 
-            iterator_i.HasCurrent();
-            iterator_o.HasCurrent();
+            REQUIRE(iterator_i.HasCurrent());
+            REQUIRE(iterator_o.HasCurrent());
 
             bool changed_i{};
             bool changed_o{};
