@@ -50,6 +50,10 @@ namespace test_component
         Simple();
 
         void Method();
+        Windows.Foundation.IReference<Int32> Reference(Windows.Foundation.DateTime value);
+        Windows.Foundation.IAsyncOperation<Int32> Operation(Windows.Foundation.DateTime value);
+        Windows.Foundation.IAsyncAction Action(Windows.Foundation.DateTime value);
+        Object Object(Windows.Foundation.DateTime value);
     }
 
     runtimeclass Class
