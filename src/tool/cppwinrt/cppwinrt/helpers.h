@@ -138,6 +138,11 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "put_");
     }
 
+    static bool is_get_overload(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "get_");
+    }
+
     static bool is_noexcept(MethodDef const& method)
     {
         return is_remove_overload(method) || has_attribute(method, "Windows.Foundation.Metadata", "NoExceptionAttribute");

@@ -936,7 +936,8 @@ namespace xlang
         auto method_name = get_name(method);
         auto type = method.Parent();
 
-        w.write("        % %(%) const%;\n",
+        w.write("        %% %(%) const%;\n",
+            is_get_overload(method) ? "[[nodiscard]] " : "",
             signature.return_signature(),
             method_name,
             bind<write_consume_params>(signature),
