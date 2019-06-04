@@ -28,10 +28,11 @@ namespace
         values.Insert(2,20);
         values.Insert(3,30);
         IIterator<IKeyValuePair<int, int>> first = values.First();
-        first.HasCurrent();
-        first.Current();
-        first.MoveNext();
-        first.GetMany(array);
+        REQUIRE(first.HasCurrent());
+        auto pair = first.Current();
+        pair;
+        REQUIRE(first.MoveNext());
+        REQUIRE(first.GetMany(array) == 2);
 
         change(); // <-- invalidate
 
