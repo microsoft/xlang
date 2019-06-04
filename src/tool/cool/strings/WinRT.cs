@@ -251,10 +251,12 @@ namespace WinRT
         public readonly T Vftbl;
         public readonly IntPtr ThisPtr;
         public readonly object Module;
+        readonly GCHandle _moduleHandle;
 
         public ObjectReference(object module, IntPtr thisPtr)
         {
             Module = module;
+            _moduleHandle = GCHandle.Alloc(module);
             ThisPtr = thisPtr;
             var vftblPtr = Marshal.PtrToStructure<VftblPtr>(ThisPtr);
             _vftblIUnknown = Marshal.PtrToStructure<Interop.IUnknownVftbl>(vftblPtr.Vftbl);
@@ -272,6 +274,7 @@ namespace WinRT
         ~ObjectReference()
         {
             _vftblIUnknown.Release(ThisPtr);
+            _moduleHandle.Free();
         }
     }
 
@@ -288,7 +291,7 @@ namespace WinRT
 
         static readonly string _currentModuleDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
-        static System.Collections.Generic.Dictionary<string, WeakReference<DllModule>> _cache = new System.Collections.Generic.Dictionary<string, WeakReference<DllModule>>();
+        static Dictionary<string, WeakReference<DllModule>> _cache = new System.Collections.Generic.Dictionary<string, WeakReference<DllModule>>();
 
         public static DllModule Load(string fileName)
         {
@@ -538,13 +541,17 @@ namespace WinRT
             public IntPtr _gchandlePtr;
         }
 
+        bool _disposed = false;
         readonly WinrtModule _module = WinrtModule.Instance;
+        readonly GCHandle _moduleHandle;
         readonly GCHandle _thisHandle;
         readonly WeakReference _weakInvoker = new WeakReference(null);
         readonly UnmanagedObject _unmanagedObj;
 
         public Delegate(IntPtr invokePtr, object invoker)
         {
+            _moduleHandle = GCHandle.Alloc(_module);
+
             var vftbl = _vftblTemplate;
             vftbl.Invoke = invokePtr;
 
@@ -559,8 +566,17 @@ namespace WinRT
             Marshal.StructureToPtr(_unmanagedObj, ThisPtr, false);
         }
 
+        ~Delegate()
+        {
+            if (!_disposed)
+            {
+                Dispose();
+            }
+        }
+
         public void Dispose()
         {
+            _disposed = true;
             if (_refs != 0)
             {
                 throw new InvalidOperationException("WinRT.Delegate has been leaked!");
@@ -568,6 +584,7 @@ namespace WinRT
 
             Marshal.FreeCoTaskMem(ThisPtr);
             _thisHandle.Free();
+            _moduleHandle.Free();
         }
     }
 
