@@ -85,7 +85,7 @@ namespace winrt::impl
     }
 
     template <typename... T>
-    struct WINRT_IMPL_NOVTABLE variadic_delegate_abi : unknown_abi
+    struct __declspec(novtable) variadic_delegate_abi : unknown_abi
     {
         virtual void invoke(T const&...) = 0;
     };

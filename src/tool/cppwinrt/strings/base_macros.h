@@ -13,7 +13,6 @@
 
 #endif
 
-#define WINRT_IMPL_NOVTABLE __declspec(novtable)
 #define WINRT_IMPL_CALL __stdcall
 #define WINRT_IMPL_NOINLINE  __declspec(noinline)
 

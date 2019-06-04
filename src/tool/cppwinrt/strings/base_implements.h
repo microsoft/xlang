@@ -746,7 +746,7 @@ namespace winrt::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_IMPL_NOVTABLE root_implements
+    struct __declspec(novtable) root_implements
         : root_implements_composing_outer<std::disjunction_v<std::is_same<composing, I>...>>
         , root_implements_composable_inner<D, std::disjunction_v<std::is_same<composable, I>...>>
     {

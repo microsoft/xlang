@@ -710,7 +710,7 @@ namespace xlang
         {
             auto format = R"(    template <> struct abi<%>
     {
-        struct WINRT_IMPL_NOVTABLE type : inspectable_abi
+        struct __declspec(novtable) type : inspectable_abi
         {
 )";
 
@@ -720,7 +720,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct abi<%>
     {
-        struct WINRT_IMPL_NOVTABLE type : inspectable_abi
+        struct __declspec(novtable) type : inspectable_abi
         {
 )";
 
@@ -760,7 +760,7 @@ namespace xlang
     {
         auto format = R"(    template <%> struct abi<%>
     {
-        struct WINRT_IMPL_NOVTABLE type : unknown_abi
+        struct __declspec(novtable) type : unknown_abi
         {
             virtual int32_t WINRT_IMPL_CALL Invoke(%) noexcept = 0;
         };

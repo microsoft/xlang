@@ -328,7 +328,7 @@ namespace winrt::impl
 
     template <> struct abi<Windows::Foundation::IActivationFactory>
     {
-        struct WINRT_IMPL_NOVTABLE type : inspectable_abi
+        struct __declspec(novtable) type : inspectable_abi
         {
             virtual int32_t WINRT_IMPL_CALL ActivateInstance(void** instance) noexcept = 0;
         };
