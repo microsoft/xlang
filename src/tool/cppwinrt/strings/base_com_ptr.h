@@ -193,7 +193,7 @@ namespace winrt
             }
         }
 
-        WINRT_NOINLINE void unconditional_release_ref() noexcept
+        WINRT_IMPL_NOINLINE void unconditional_release_ref() noexcept
         {
             std::exchange(m_ptr, {})->Release();
         }

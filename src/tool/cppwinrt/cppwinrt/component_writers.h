@@ -138,7 +138,7 @@ namespace xlang
     {
         w.write_root_include("base");
         auto format = R"(%
-bool WINRT_CALL %_can_unload_now() noexcept
+bool WINRT_IMPL_CALL %_can_unload_now() noexcept
 {
     if (winrt::get_module_lock())
     {
@@ -149,7 +149,7 @@ bool WINRT_CALL %_can_unload_now() noexcept
     return true;
 }
 
-void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
+void* WINRT_IMPL_CALL %_get_activation_factory(std::wstring_view const& name)
 {
     auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
     {
@@ -172,7 +172,7 @@ void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
         }
 
         format = R"(
-int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
+int32_t WINRT_IMPL_CALL WINRT_CanUnloadNow() noexcept
 {
 #ifdef _WRL_MODULE_H_
     if (!::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().Terminate())
@@ -184,7 +184,7 @@ int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
     return %_can_unload_now() ? 0 : 1;
 }
 
-int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept try
+int32_t WINRT_IMPL_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept try
 {
     uint32_t length{};
     wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
@@ -746,7 +746,7 @@ catch (...) { return winrt::to_hresult(); }
             auto format = R"(namespace winrt::@::implementation
 {
     template <typename D%, typename... I>
-    struct WINRT_EBO %_base : implements<D, @::%%%, %I...>%%%
+    struct WINRT_IMPL_EBO %_base : implements<D, @::%%%, %I...>%%%
     {
         using base_type = %_base;
         using class_type = @::%;
@@ -838,7 +838,7 @@ catch (...) { return winrt::to_hresult(); }
             auto format = R"(namespace winrt::@::factory_implementation
 {
     template <typename D, typename T, typename... I>
-    struct WINRT_EBO %T : implements<D, Windows::Foundation::IActivationFactory%, I...>
+    struct WINRT_IMPL_EBO %T : implements<D, Windows::Foundation::IActivationFactory%, I...>
     {
         using instance_type = @::%;
 

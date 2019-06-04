@@ -13,17 +13,10 @@
 
 #endif
 
-#if defined(_MSC_VER)
-#define WINRT_EBO __declspec(empty_bases)
-#define WINRT_NOVTABLE __declspec(novtable)
-#define WINRT_CALL __stdcall
-#define WINRT_NOINLINE  __declspec(noinline)
-#else
-#define WINRT_EBO
-#define WINRT_NOVTABLE
-#define WINRT_CALL
-#define WINRT_NOINLINE
-#endif
+#define WINRT_IMPL_EBO __declspec(empty_bases)
+#define WINRT_IMPL_NOVTABLE __declspec(novtable)
+#define WINRT_IMPL_CALL __stdcall
+#define WINRT_IMPL_NOINLINE  __declspec(noinline)
 
 #define WINRT_IMPL_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
 

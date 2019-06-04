@@ -9,7 +9,7 @@ namespace winrt::impl
 {
     struct natvis
     {
-        static auto WINRT_CALL abi_val(void* object, wchar_t const * iid_str, int method)
+        static auto WINRT_IMPL_CALL abi_val(void* object, wchar_t const * iid_str, int method)
         {
             union variant
             {
@@ -34,7 +34,7 @@ namespace winrt::impl
             if (WINRT_IIDFromString(iid_str, &iid) == error_ok)
             {
                 inspectable_abi* pinsp;
-                typedef int32_t(WINRT_CALL inspectable_abi::* PropertyAccessor)(void*);
+                typedef int32_t(WINRT_IMPL_CALL inspectable_abi::* PropertyAccessor)(void*);
                 if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
                 {
                     auto vtbl = *(PropertyAccessor**)pinsp;
@@ -47,7 +47,7 @@ namespace winrt::impl
             return value;
         }
 
-        static auto WINRT_CALL get_val(winrt::Windows::Foundation::IInspectable* object, wchar_t const * iid_str, int method)
+        static auto WINRT_IMPL_CALL get_val(winrt::Windows::Foundation::IInspectable* object, wchar_t const * iid_str, int method)
         {
             return abi_val(static_cast<unknown_abi*>(get_abi(*object)), iid_str, method);
         }

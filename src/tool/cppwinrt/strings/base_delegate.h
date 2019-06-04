@@ -6,7 +6,7 @@ namespace winrt::impl
     {
         implements_delegate(H&& handler) : H(std::forward<H>(handler)) {}
 
-        int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
+        int32_t WINRT_IMPL_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
             if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
             {
@@ -24,12 +24,12 @@ namespace winrt::impl
             return error_no_interface;
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept final
+        uint32_t WINRT_IMPL_CALL AddRef() noexcept final
         {
             return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t WINRT_CALL Release() noexcept final
+        uint32_t WINRT_IMPL_CALL Release() noexcept final
         {
             uint32_t const target = m_references.fetch_sub(1, std::memory_order_release) - 1;
 
@@ -85,7 +85,7 @@ namespace winrt::impl
     }
 
     template <typename... T>
-    struct WINRT_NOVTABLE variadic_delegate_abi : unknown_abi
+    struct WINRT_IMPL_NOVTABLE variadic_delegate_abi : unknown_abi
     {
         virtual void invoke(T const&...) = 0;
     };
@@ -100,7 +100,7 @@ namespace winrt::impl
             (*this)(args...);
         }
 
-        int32_t WINRT_CALL QueryInterface(guid const& id, void** result) noexcept final
+        int32_t WINRT_IMPL_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
             if (is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
             {
@@ -113,12 +113,12 @@ namespace winrt::impl
             return error_no_interface;
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept final
+        uint32_t WINRT_IMPL_CALL AddRef() noexcept final
         {
             return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t WINRT_CALL Release() noexcept final
+        uint32_t WINRT_IMPL_CALL Release() noexcept final
         {
             uint32_t const target = m_references.fetch_sub(1, std::memory_order_release) - 1;
 
@@ -140,7 +140,7 @@ namespace winrt::impl
 namespace winrt
 {
     template <typename... T>
-    struct WINRT_EBO delegate : Windows::Foundation::IUnknown
+    struct WINRT_IMPL_EBO delegate : Windows::Foundation::IUnknown
     {
         delegate(std::nullptr_t = nullptr) noexcept {}
         delegate(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
