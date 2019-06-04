@@ -6,8 +6,8 @@ using namespace Windows::Foundation;
 
 struct __declspec(uuid("5fb96f8d-409c-42a9-99a7-8a95c1459dbd")) ICapture : ::IUnknown
 {
-    virtual int32_t WINRT_CALL GetValue() noexcept = 0;
-    virtual int32_t WINRT_CALL CreateMemberCapture(int32_t value, GUID const& iid, void** object) noexcept = 0;
+    virtual int32_t __stdcall GetValue() noexcept = 0;
+    virtual int32_t __stdcall CreateMemberCapture(int32_t value, GUID const& iid, void** object) noexcept = 0;
 };
 
 struct Capture : implements<Capture, ICapture>
@@ -19,12 +19,12 @@ struct Capture : implements<Capture, ICapture>
     {
     }
 
-    int32_t WINRT_CALL GetValue() noexcept override
+    int32_t __stdcall GetValue() noexcept override
     {
         return m_value;
     }
 
-    int32_t WINRT_CALL CreateMemberCapture(int32_t value, GUID const& iid, void** object) noexcept override
+    int32_t __stdcall CreateMemberCapture(int32_t value, GUID const& iid, void** object) noexcept override
     {
         auto capture = make<Capture>(value);
         return capture->QueryInterface(iid, object);

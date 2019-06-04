@@ -671,7 +671,7 @@ namespace xlang
 
         std::for_each(bases.rbegin(), bases.rend(), [&](auto&& base)
         {
-            auto format = R"(            virtual void* WINRT_CALL base_%() noexcept = 0;
+            auto format = R"(            virtual void* __stdcall base_%() noexcept = 0;
 )";
 
             w.write(format, base.TypeName());
@@ -689,7 +689,7 @@ namespace xlang
                 break;
             }
 
-            auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
+            auto format = R"(            virtual int32_t __stdcall %(%) noexcept = 0;
 )";
 
             for (auto&& method : info.type.MethodList())
@@ -710,7 +710,7 @@ namespace xlang
         {
             auto format = R"(    template <> struct abi<%>
     {
-        struct WINRT_NOVTABLE type : inspectable_abi
+        struct __declspec(novtable) type : inspectable_abi
         {
 )";
 
@@ -720,7 +720,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct abi<%>
     {
-        struct WINRT_NOVTABLE type : inspectable_abi
+        struct __declspec(novtable) type : inspectable_abi
         {
 )";
 
@@ -730,7 +730,7 @@ namespace xlang
         }
 
 
-        auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
+        auto format = R"(            virtual int32_t __stdcall %(%) noexcept = 0;
 )";
 
         for (auto&& method : type.MethodList())
@@ -760,9 +760,9 @@ namespace xlang
     {
         auto format = R"(    template <%> struct abi<%>
     {
-        struct WINRT_NOVTABLE type : unknown_abi
+        struct __declspec(novtable) type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(%) noexcept = 0;
+            virtual int32_t __stdcall Invoke(%) noexcept = 0;
         };
     };
 )";
@@ -1074,7 +1074,7 @@ namespace xlang
         {
             format = R"(    template <typename D%> % consume_%<D%>::%(%) const noexcept
     {%
-        WINRT_VERIFY_(0, WINRT_SHIM(%)->%(%));%
+        WINRT_VERIFY_(0, WINRT_IMPL_SHIM(%)->%(%));%
     }
 )";
         }
@@ -1082,7 +1082,7 @@ namespace xlang
         {
             format = R"(    template <typename D%> % consume_%<D%>::%(%) const
     {%
-        check_hresult(WINRT_SHIM(%)->%(%));%
+        check_hresult(WINRT_IMPL_SHIM(%)->%(%));%
     }
 )";
         }
@@ -1298,7 +1298,7 @@ namespace xlang
             if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -1306,7 +1306,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1324,7 +1324,7 @@ namespace xlang
             if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                WINRT_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
+                WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -1332,7 +1332,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1748,7 +1748,7 @@ namespace xlang
 
         if (is_noexcept(method))
         {
-            format = R"(        int32_t WINRT_CALL %(%) noexcept final
+            format = R"(        int32_t __stdcall %(%) noexcept final
         {
 %            typename D::abi_guard guard(this->shim());
             %
@@ -1758,7 +1758,7 @@ namespace xlang
         }
         else
         {
-            format = R"(        int32_t WINRT_CALL %(%) noexcept final try
+            format = R"(        int32_t __stdcall %(%) noexcept final try
         {
 %            typename D::abi_guard guard(this->shim());
             %
@@ -1798,7 +1798,7 @@ namespace xlang
 
         std::for_each(bases.rbegin(), bases.rend(), [&](auto && base)
         {
-            auto format = R"(        void* WINRT_CALL base_%() noexcept final
+            auto format = R"(        void* __stdcall base_%() noexcept final
         {
             return this->shim().base_%();
         }
@@ -1871,7 +1871,7 @@ namespace xlang
     static void write_dispatch_overridable(writer& w, TypeDef const& class_type)
     {
         auto format = R"(template <typename T, typename D>
-struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
+struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     : produce_dispatch_to_overridable_base<T, D, %>
 {
 %};)";
@@ -2229,7 +2229,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         if (empty(generics))
         {
-            auto format = R"(    struct WINRT_EBO % :
+            auto format = R"(    struct __declspec(empty_bases) % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
     {
@@ -2252,7 +2252,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             type_name = remove_tick(type_name);
 
             auto format = R"(    template <%>
-    struct WINRT_EBO % :
+    struct __declspec(empty_bases) % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
     {%
@@ -2325,7 +2325,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     {
         delegate(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
-        int32_t WINRT_CALL Invoke(%) noexcept final try
+        int32_t __stdcall Invoke(%) noexcept final try
         {
 %            %
             return 0;
@@ -2976,7 +2976,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto type_name = type.TypeName();
         auto factories = get_factories(w, type);
 
-        auto format = R"(    struct WINRT_EBO % : %%%
+        auto format = R"(    struct __declspec(empty_bases) % : %%%
     {
         %(std::nullptr_t) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
@@ -3001,7 +3001,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto type_name = type.TypeName();
         auto factories = get_factories(w, type);
 
-        auto format = R"(    struct WINRT_EBO % : %%
+        auto format = R"(    struct __declspec(empty_bases) % : %%
     {
         %(std::nullptr_t) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
