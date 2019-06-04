@@ -24,6 +24,12 @@ namespace winrt
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+#if defined _M_ARM
+#define WINRT_IMPL_INTERLOCKED_READ_MEMORY_BARRIER (__dmb(_ARM_BARRIER_ISH));
+#elif defined _M_ARM64
+#define WINRT_IMPL_INTERLOCKED_READ_MEMORY_BARRIER (__dmb(_ARM64_BARRIER_ISH));
+#endif
+
 namespace winrt::impl
 {
     inline int32_t interlocked_read_32(int32_t const volatile* target) noexcept
@@ -34,8 +40,8 @@ namespace winrt::impl
         return result;
 #elif defined _M_ARM || defined _M_ARM64
         int32_t const result = __iso_volatile_load32(reinterpret_cast<int32_t const volatile*>(target));
-        WINRT_INTERLOCKED_READ_MEMORY_BARRIER
-            return result;
+        WINRT_IMPL_INTERLOCKED_READ_MEMORY_BARRIER
+        return result;
 #else
 #error Unsupported architecture
 #endif
@@ -50,13 +56,15 @@ namespace winrt::impl
         return result;
 #elif defined _M_ARM64
         int64_t const result = __iso_volatile_load64(target);
-        WINRT_INTERLOCKED_READ_MEMORY_BARRIER
-            return result;
+        WINRT_IMPL_INTERLOCKED_READ_MEMORY_BARRIER
+        return result;
 #else
 #error Unsupported architecture
 #endif
     }
 #endif
+
+#undef WINRT_IMPL_INTERLOCKED_READ_MEMORY_BARRIER
 
 #ifdef __clang__
 #pragma clang diagnostic pop
