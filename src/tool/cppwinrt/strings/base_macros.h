@@ -25,7 +25,7 @@
 #define WINRT_NOINLINE
 #endif
 
-#define WINRT_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
+#define WINRT_IMPL_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
 
 #ifndef WINRT_EXTERNAL_CATCH_CLAUSE
 #define WINRT_EXTERNAL_CATCH_CLAUSE

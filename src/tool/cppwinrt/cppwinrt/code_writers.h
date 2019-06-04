@@ -1074,7 +1074,7 @@ namespace xlang
         {
             format = R"(    template <typename D%> % consume_%<D%>::%(%) const noexcept
     {%
-        WINRT_VERIFY_(0, WINRT_SHIM(%)->%(%));%
+        WINRT_VERIFY_(0, WINRT_IMPL_SHIM(%)->%(%));%
     }
 )";
         }
@@ -1082,7 +1082,7 @@ namespace xlang
         {
             format = R"(    template <typename D%> % consume_%<D%>::%(%) const
     {%
-        check_hresult(WINRT_SHIM(%)->%(%));%
+        check_hresult(WINRT_IMPL_SHIM(%)->%(%));%
     }
 )";
         }
@@ -1298,7 +1298,7 @@ namespace xlang
             if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -1306,7 +1306,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1324,7 +1324,7 @@ namespace xlang
             if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                WINRT_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
+                WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -1332,7 +1332,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
