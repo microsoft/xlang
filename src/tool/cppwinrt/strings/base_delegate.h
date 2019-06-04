@@ -140,7 +140,7 @@ namespace winrt::impl
 namespace winrt
 {
     template <typename... T>
-    struct WINRT_IMPL_EBO delegate : Windows::Foundation::IUnknown
+    struct __declspec(empty_bases) delegate : Windows::Foundation::IUnknown
     {
         delegate(std::nullptr_t = nullptr) noexcept {}
         delegate(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}

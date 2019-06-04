@@ -695,7 +695,7 @@ namespace winrt::impl
     };
 
     template <bool>
-    struct WINRT_IMPL_EBO root_implements_composing_outer
+    struct __declspec(empty_bases) root_implements_composing_outer
     {
     protected:
         static constexpr bool is_composing = false;
@@ -703,7 +703,7 @@ namespace winrt::impl
     };
 
     template <>
-    struct WINRT_IMPL_EBO root_implements_composing_outer<true>
+    struct __declspec(empty_bases) root_implements_composing_outer<true>
     {
         template <typename Qi>
         auto try_as() const noexcept
@@ -721,7 +721,7 @@ namespace winrt::impl
     };
 
     template <typename D, bool>
-    struct WINRT_IMPL_EBO root_implements_composable_inner
+    struct __declspec(empty_bases) root_implements_composable_inner
     {
     protected:
         static constexpr inspectable_abi* outer() noexcept { return nullptr; }
@@ -731,7 +731,7 @@ namespace winrt::impl
     };
 
     template <typename D>
-    struct WINRT_IMPL_EBO root_implements_composable_inner<D, true> : producer<D, INonDelegatingInspectable>
+    struct __declspec(empty_bases) root_implements_composable_inner<D, true> : producer<D, INonDelegatingInspectable>
     {
     protected:
         inspectable_abi* outer() noexcept { return m_outer; }

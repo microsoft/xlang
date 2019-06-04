@@ -1871,7 +1871,7 @@ namespace xlang
     static void write_dispatch_overridable(writer& w, TypeDef const& class_type)
     {
         auto format = R"(template <typename T, typename D>
-struct WINRT_IMPL_EBO produce_dispatch_to_overridable<T, D, %>
+struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     : produce_dispatch_to_overridable_base<T, D, %>
 {
 %};)";
@@ -2229,7 +2229,7 @@ struct WINRT_IMPL_EBO produce_dispatch_to_overridable<T, D, %>
 
         if (empty(generics))
         {
-            auto format = R"(    struct WINRT_IMPL_EBO % :
+            auto format = R"(    struct __declspec(empty_bases) % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
     {
@@ -2252,7 +2252,7 @@ struct WINRT_IMPL_EBO produce_dispatch_to_overridable<T, D, %>
             type_name = remove_tick(type_name);
 
             auto format = R"(    template <%>
-    struct WINRT_IMPL_EBO % :
+    struct __declspec(empty_bases) % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
     {%
@@ -2976,7 +2976,7 @@ struct WINRT_IMPL_EBO produce_dispatch_to_overridable<T, D, %>
         auto type_name = type.TypeName();
         auto factories = get_factories(w, type);
 
-        auto format = R"(    struct WINRT_IMPL_EBO % : %%%
+        auto format = R"(    struct __declspec(empty_bases) % : %%%
     {
         %(std::nullptr_t) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
@@ -3001,7 +3001,7 @@ struct WINRT_IMPL_EBO produce_dispatch_to_overridable<T, D, %>
         auto type_name = type.TypeName();
         auto factories = get_factories(w, type);
 
-        auto format = R"(    struct WINRT_IMPL_EBO % : %%
+        auto format = R"(    struct __declspec(empty_bases) % : %%
     {
         %(std::nullptr_t) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
