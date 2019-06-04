@@ -671,7 +671,7 @@ namespace xlang
 
         std::for_each(bases.rbegin(), bases.rend(), [&](auto&& base)
         {
-            auto format = R"(            virtual void* WINRT_IMPL_CALL base_%() noexcept = 0;
+            auto format = R"(            virtual void* __stdcall base_%() noexcept = 0;
 )";
 
             w.write(format, base.TypeName());
@@ -689,7 +689,7 @@ namespace xlang
                 break;
             }
 
-            auto format = R"(            virtual int32_t WINRT_IMPL_CALL %(%) noexcept = 0;
+            auto format = R"(            virtual int32_t __stdcall %(%) noexcept = 0;
 )";
 
             for (auto&& method : info.type.MethodList())
@@ -730,7 +730,7 @@ namespace xlang
         }
 
 
-        auto format = R"(            virtual int32_t WINRT_IMPL_CALL %(%) noexcept = 0;
+        auto format = R"(            virtual int32_t __stdcall %(%) noexcept = 0;
 )";
 
         for (auto&& method : type.MethodList())
@@ -762,7 +762,7 @@ namespace xlang
     {
         struct __declspec(novtable) type : unknown_abi
         {
-            virtual int32_t WINRT_IMPL_CALL Invoke(%) noexcept = 0;
+            virtual int32_t __stdcall Invoke(%) noexcept = 0;
         };
     };
 )";
@@ -1748,7 +1748,7 @@ namespace xlang
 
         if (is_noexcept(method))
         {
-            format = R"(        int32_t WINRT_IMPL_CALL %(%) noexcept final
+            format = R"(        int32_t __stdcall %(%) noexcept final
         {
 %            typename D::abi_guard guard(this->shim());
             %
@@ -1758,7 +1758,7 @@ namespace xlang
         }
         else
         {
-            format = R"(        int32_t WINRT_IMPL_CALL %(%) noexcept final try
+            format = R"(        int32_t __stdcall %(%) noexcept final try
         {
 %            typename D::abi_guard guard(this->shim());
             %
@@ -1798,7 +1798,7 @@ namespace xlang
 
         std::for_each(bases.rbegin(), bases.rend(), [&](auto && base)
         {
-            auto format = R"(        void* WINRT_IMPL_CALL base_%() noexcept final
+            auto format = R"(        void* __stdcall base_%() noexcept final
         {
             return this->shim().base_%();
         }
@@ -2325,7 +2325,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     {
         delegate(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
-        int32_t WINRT_IMPL_CALL Invoke(%) noexcept final try
+        int32_t __stdcall Invoke(%) noexcept final try
         {
 %            %
             return 0;
