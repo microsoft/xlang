@@ -20,7 +20,7 @@ namespace
     };
 
     // Global handler to translate custom exception
-    int32_t WINRT_CALL handler(void* address) noexcept
+    int32_t __stdcall handler(void* address) noexcept
     {
         REQUIRE(address);
 

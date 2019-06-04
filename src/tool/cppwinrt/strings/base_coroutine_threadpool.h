@@ -24,7 +24,7 @@ namespace winrt
 
         private:
 
-            static void WINRT_CALL callback(void*, void* context) noexcept
+            static void __stdcall callback(void*, void* context) noexcept
             {
                 std::experimental::coroutine_handle<>::from_address(context)();
             }
@@ -63,7 +63,7 @@ namespace winrt
 
         private:
 
-            static void WINRT_CALL callback(void*, void* context) noexcept
+            static void __stdcall callback(void*, void* context) noexcept
             {
                 auto that = static_cast<awaitable*>(context);
                 auto guard = that->m_context();
@@ -102,7 +102,7 @@ namespace winrt
 
     private:
 
-        static int32_t WINRT_CALL callback(impl::com_callback_args* args) noexcept
+        static int32_t __stdcall callback(impl::com_callback_args* args) noexcept
         {
             std::experimental::coroutine_handle<>::from_address(args->data)();
             return impl::error_ok;
@@ -138,7 +138,7 @@ namespace winrt
 
         private:
 
-            static void WINRT_CALL callback(void*, void* context, void*) noexcept
+            static void __stdcall callback(void*, void* context, void*) noexcept
             {
                 std::experimental::coroutine_handle<>::from_address(context)();
             }
@@ -202,7 +202,7 @@ namespace winrt
 
         private:
 
-            static void WINRT_CALL callback(void*, void* context, void*, uint32_t result) noexcept
+            static void __stdcall callback(void*, void* context, void*, uint32_t result) noexcept
             {
                 auto that = static_cast<awaitable*>(context);
                 that->m_result = result;
@@ -267,7 +267,7 @@ namespace winrt
 
     private:
 
-        static void WINRT_CALL callback(void*, void* context) noexcept
+        static void __stdcall callback(void*, void* context) noexcept
         {
             std::experimental::coroutine_handle<>::from_address(context)();
         }
