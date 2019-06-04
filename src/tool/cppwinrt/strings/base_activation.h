@@ -330,7 +330,7 @@ namespace winrt::impl
     {
         struct __declspec(novtable) type : inspectable_abi
         {
-            virtual int32_t WINRT_IMPL_CALL ActivateInstance(void** instance) noexcept = 0;
+            virtual int32_t __stdcall ActivateInstance(void** instance) noexcept = 0;
         };
     };
 
@@ -341,7 +341,7 @@ namespace winrt::impl
 
     template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
     {
-        int32_t WINRT_IMPL_CALL ActivateInstance(void** instance) noexcept final try
+        int32_t __stdcall ActivateInstance(void** instance) noexcept final try
         {
             *instance = nullptr;
             typename D::abi_guard guard(this->shim());

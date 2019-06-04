@@ -6,7 +6,7 @@ namespace winrt::impl
     {
         implements_delegate(H&& handler) : H(std::forward<H>(handler)) {}
 
-        int32_t WINRT_IMPL_CALL QueryInterface(guid const& id, void** result) noexcept final
+        int32_t __stdcall QueryInterface(guid const& id, void** result) noexcept final
         {
             if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
             {
@@ -24,12 +24,12 @@ namespace winrt::impl
             return error_no_interface;
         }
 
-        uint32_t WINRT_IMPL_CALL AddRef() noexcept final
+        uint32_t __stdcall AddRef() noexcept final
         {
             return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t WINRT_IMPL_CALL Release() noexcept final
+        uint32_t __stdcall Release() noexcept final
         {
             uint32_t const target = m_references.fetch_sub(1, std::memory_order_release) - 1;
 
@@ -100,7 +100,7 @@ namespace winrt::impl
             (*this)(args...);
         }
 
-        int32_t WINRT_IMPL_CALL QueryInterface(guid const& id, void** result) noexcept final
+        int32_t __stdcall QueryInterface(guid const& id, void** result) noexcept final
         {
             if (is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id))
             {
@@ -113,12 +113,12 @@ namespace winrt::impl
             return error_no_interface;
         }
 
-        uint32_t WINRT_IMPL_CALL AddRef() noexcept final
+        uint32_t __stdcall AddRef() noexcept final
         {
             return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t WINRT_IMPL_CALL Release() noexcept final
+        uint32_t __stdcall Release() noexcept final
         {
             uint32_t const target = m_references.fetch_sub(1, std::memory_order_release) - 1;
 

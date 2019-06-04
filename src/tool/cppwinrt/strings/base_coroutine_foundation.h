@@ -237,7 +237,7 @@ namespace winrt::impl
     {
         using AsyncStatus = Windows::Foundation::AsyncStatus;
 
-        unsigned long WINRT_IMPL_CALL Release() noexcept
+        unsigned long __stdcall Release() noexcept
         {
             uint32_t const remaining = this->subtract_reference();
 
