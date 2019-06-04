@@ -20,10 +20,10 @@ namespace
 
         values.ReplaceAll({ 1,2,3 });
         IIterator<int> first = values.First();
-        first.HasCurrent();
-        first.Current();
-        first.MoveNext();
-        first.GetMany(array);
+        REQUIRE(first.HasCurrent());
+        REQUIRE(first.Current() == 1);
+        REQUIRE(first.MoveNext());
+        REQUIRE(first.GetMany(array) == 2);
 
         change(); // <-- invalidate
 
