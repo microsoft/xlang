@@ -13,8 +13,6 @@
 
 #endif
 
-#define WINRT_IMPL_NOINLINE  __declspec(noinline)
-
 #define WINRT_IMPL_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
 
 #ifndef WINRT_EXTERNAL_CATCH_CLAUSE

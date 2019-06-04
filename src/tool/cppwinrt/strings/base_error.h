@@ -278,7 +278,7 @@ namespace winrt
         hresult_canceled(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_canceled, take_ownership_from_abi) {}
     };
 
-    [[noreturn]] inline WINRT_IMPL_NOINLINE void throw_hresult(hresult const result)
+    [[noreturn]] inline __declspec(noinline) void throw_hresult(hresult const result)
     {
         if (result == impl::error_bad_alloc)
         {
@@ -348,7 +348,7 @@ namespace winrt
         throw hresult_error(result, take_ownership_from_abi);
     }
 
-    inline WINRT_IMPL_NOINLINE hresult to_hresult() noexcept
+    inline __declspec(noinline) hresult to_hresult() noexcept
     {
         if (winrt_to_hresult_handler)
         {
