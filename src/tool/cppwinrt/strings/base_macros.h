@@ -31,18 +31,6 @@
 #define WINRT_EXTERNAL_CATCH_CLAUSE
 #endif
 
-#if defined(_MSC_VER)
-#ifdef _M_HYBRID
-#define WINRT_LINK(function, count) __pragma(comment(linker, "/alternatename:#WINRT_" #function "@" #count "=#" #function "@" #count))
-#elif _M_IX86
-#define WINRT_LINK(function, count) __pragma(comment(linker, "/alternatename:_WINRT_" #function "@" #count "=_" #function "@" #count))
-#else
-#define WINRT_LINK(function, count) __pragma(comment(linker, "/alternatename:WINRT_" #function "=" #function))
-#endif
-#else
-#define WINRT_LINK(function, count)
-#endif
-
 #if defined _M_ARM
 #define WINRT_INTERLOCKED_READ_MEMORY_BARRIER (__dmb(_ARM_BARRIER_ISH));
 #elif defined _M_ARM64
