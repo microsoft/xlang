@@ -72,7 +72,7 @@ namespace winrt::impl
 
             if (ref)
             {
-                return[ref = std::move(ref)](auto&&... args)
+                return [ref = std::move(ref)](auto&& ... args)
                 {
                     T delegate;
                     ref->Resolve(guid_of<T>(), put_abi(delegate));
@@ -84,20 +84,27 @@ namespace winrt::impl
         }
     }
 
-    template <typename... T>
+    template <typename R, typename... Args>
     struct __declspec(novtable) variadic_delegate_abi : unknown_abi
     {
-        virtual void invoke(T const&...) = 0;
+        virtual R invoke(Args const& ...) = 0;
     };
 
-    template <typename H, typename... T>
-    struct variadic_delegate final : variadic_delegate_abi<T...>, H
+    template <typename H, typename R, typename... Args>
+    struct variadic_delegate final : variadic_delegate_abi<R, Args...>, H
     {
         variadic_delegate(H&& handler) : H(std::forward<H>(handler)) {}
 
-        void invoke(T const&... args) final
+        R invoke(Args const& ... args) final
         {
-            (*this)(args...);
+            if constexpr (std::is_void_v<R>)
+            {
+                (*this)(args...);
+            }
+            else
+            {
+                return (*this)(args...);
+            }
         }
 
         int32_t __stdcall QueryInterface(guid const& id, void** result) noexcept final
@@ -135,50 +142,62 @@ namespace winrt::impl
 
         std::atomic<uint32_t> m_references{ 1 };
     };
-}
 
-namespace winrt
-{
-    template <typename... T>
-    struct __declspec(empty_bases) delegate : Windows::Foundation::IUnknown
+    template <typename R, typename... Args>
+    struct __declspec(empty_bases) delegate_base : Windows::Foundation::IUnknown
     {
-        delegate(std::nullptr_t = nullptr) noexcept {}
-        delegate(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
+        delegate_base(std::nullptr_t = nullptr) noexcept {}
+        delegate_base(void* ptr, take_ownership_from_abi_t) noexcept : IUnknown(ptr, take_ownership_from_abi) {}
 
         template <typename L>
-        delegate(L handler) :
-            delegate(make(std::forward<L>(handler)))
+        delegate_base(L handler) :
+            delegate_base(make(std::forward<L>(handler)))
         {}
 
-        template <typename F> delegate(F* handler) :
-            delegate([=](auto&&... args) { handler(args...); })
+        template <typename F> delegate_base(F* handler) :
+            delegate_base([=](auto&& ... args) { handler(args...); })
         {}
 
-        template <typename O, typename M> delegate(O* object, M method) :
-            delegate([=](auto&&... args) { ((*object).*(method))(args...); })
+        template <typename O, typename M> delegate_base(O* object, M method) :
+            delegate_base([=](auto&& ... args) { ((*object).*(method))(args...); })
         {}
 
-        template <typename O, typename M> delegate(com_ptr<O>&& object, M method) :
-            delegate([o = std::move(object), method](auto&&... args) { return ((*o).*(method))(args...); })
+        template <typename O, typename M> delegate_base(com_ptr<O>&& object, M method) :
+            delegate_base([o = std::move(object), method](auto&& ... args) { return ((*o).*(method))(args...); })
         {
         }
 
-        template <typename O, typename M> delegate(weak_ref<O>&& object, M method) :
-            delegate([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
+        template <typename O, typename M> delegate_base(winrt::weak_ref<O>&& object, M method) :
+            delegate_base([o = std::move(object), method](auto&& ... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
         {
         }
 
-        void operator()(T const&... args) const
+        auto operator()(Args const& ... args) const
         {
-            (*(impl::variadic_delegate_abi<T...>**)this)->invoke(args...);
+            return (*(variadic_delegate_abi<R, Args...> * *)this)->invoke(args...);
         }
 
     private:
 
         template <typename H>
-        static winrt::delegate<T...> make(H&& handler)
+        static delegate_base<R, Args...> make(H&& handler)
         {
-            return { static_cast<void*>(new impl::variadic_delegate<H, T...>(std::forward<H>(handler))), take_ownership_from_abi };
+            return { static_cast<void*>(new variadic_delegate<H, void, Args...>(std::forward<H>(handler))), take_ownership_from_abi };
         }
+    };
+}
+
+namespace winrt
+{
+    template <typename... Args>
+    struct __declspec(empty_bases)delegate : impl::delegate_base<void, Args...>
+    {
+        using impl::delegate_base<void, Args...>::delegate_base;
+    };
+
+    template <typename R, typename... Args>
+    struct __declspec(empty_bases)delegate<R(Args...)> : impl::delegate_base<R, Args...>
+    {
+        using impl::delegate_base<R, Args...>::delegate_base;
     };
 }
