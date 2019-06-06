@@ -58,7 +58,6 @@ extern "C"
     int32_t __stdcall WINRT_SleepConditionVariableSRW(winrt::impl::condition_variable* cv, winrt::impl::srwlock* lock, uint32_t milliseconds, uint32_t flags) noexcept;
     void    __stdcall WINRT_WakeConditionVariable(winrt::impl::condition_variable* cv) noexcept;
     void    __stdcall WINRT_WakeAllConditionVariable(winrt::impl::condition_variable* cv) noexcept;
-    void    __stdcall WINRT_InitializeSListHead(void* head) noexcept;
     void*   __stdcall WINRT_InterlockedPushEntrySList(void* head, void* entry) noexcept;
     void*   __stdcall WINRT_InterlockedFlushSList(void* head) noexcept;
 
@@ -152,7 +151,6 @@ WINRT_IMPL_LINK(ReleaseSRWLockShared, 4)
 WINRT_IMPL_LINK(SleepConditionVariableSRW, 16)
 WINRT_IMPL_LINK(WakeConditionVariable, 4)
 WINRT_IMPL_LINK(WakeAllConditionVariable, 4)
-WINRT_IMPL_LINK(InitializeSListHead, 4)
 WINRT_IMPL_LINK(InterlockedPushEntrySList, 8)
 WINRT_IMPL_LINK(InterlockedFlushSList, 4)
 

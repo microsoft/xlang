@@ -160,15 +160,15 @@ namespace winrt::impl
         }
     };
 
+#if !defined _M_IX86 && !defined _M_X64 && !defined _M_ARM && !defined _M_ARM64
+#error Unsupported architecture: verify that zero-initialization of SLIST_HEADER is still safe
+#endif
+
     struct factory_cache
     {
         factory_cache(factory_cache const&) = delete;
         factory_cache& operator=(factory_cache const&) = delete;
-
-        factory_cache() noexcept
-        {
-            WINRT_InitializeSListHead(&m_list);
-        }
+        factory_cache() noexcept = default;
 
         void add(factory_cache_typeless_entry* const entry) noexcept
         {
@@ -284,14 +284,6 @@ namespace winrt::impl
         alignas(memory_allocation_alignment) slist_entry m_next;
     };
 
-    template <typename Class, typename Interface>
-    struct factory_storage
-    {
-        static factory_cache_entry<Class, Interface> factory;
-    };
-
-    template <typename Class, typename Interface>
-    factory_cache_entry<Class, Interface> factory_storage<Class, Interface>::factory;
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
     auto call_factory(F&& callback)
@@ -301,7 +293,8 @@ namespace winrt::impl
         static_assert(std::is_standard_layout_v<factory_cache_typeless_entry>);
         static_assert(std::is_standard_layout_v<factory_cache_entry<Class, Interface>>);
 
-        return factory_storage<Class, Interface>::factory.call(callback);
+        static factory_cache_entry<Class, Interface> factory;
+        return factory.call(callback);
     }
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
