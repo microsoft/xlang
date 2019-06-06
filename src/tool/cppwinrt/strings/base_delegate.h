@@ -182,7 +182,7 @@ namespace winrt::impl
         template <typename H>
         static delegate_base<R, Args...> make(H&& handler)
         {
-            return { static_cast<void*>(new variadic_delegate<H, void, Args...>(std::forward<H>(handler))), take_ownership_from_abi };
+            return { static_cast<void*>(new variadic_delegate<H, R, Args...>(std::forward<H>(handler))), take_ownership_from_abi };
         }
     };
 }
