@@ -160,6 +160,10 @@ namespace winrt::impl
         }
     };
 
+#if !defined _M_IX86 && !defined _M_X64 && !defined _M_ARM && !defined _M_ARM64
+#error Unsupported architecture: verify that zero-initialization of SLIST_HEADER is still safe
+#endif
+
     struct factory_cache
     {
         factory_cache(factory_cache const&) = delete;
