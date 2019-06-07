@@ -5,6 +5,7 @@
       "project": "OS",
       "repo": "os",
       "name": "official/rs_onecore_dep_apt7",
+      "completePR": "True",
       "CheckinFiles": [
         {
           "source": "vpack\\OSBuildTools.Manifest",
