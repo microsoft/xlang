@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <charconv>
 #include <chrono>
 #include <clocale>
 #include <cstddef>
@@ -38,9 +39,4 @@
 #undef _WINDOWS_NUMERICS_NAMESPACE_
 #undef _WINDOWS_NUMERICS_BEGIN_NAMESPACE_
 #undef _WINDOWS_NUMERICS_END_NAMESPACE_
-#endif
-
-#if __has_include(<charconv>)
-#include <charconv>
-#define WINRT_IMPL_HAS_CHARCONV
 #endif
