@@ -7,7 +7,7 @@
       "name": "official/rs_onecore_dep_apt7",
       "CheckinFiles": [
         {
-          "source": "OSBuildTools.Manifest",
+          "source": "vpack\\OSBuildTools.Manifest",
           "path": "/build/Config",
           "type": "File",
           "ignorecopyerror": "False"
@@ -17,7 +17,8 @@
   ],
   "Email":[
 	  {
-		"sendTo":"cpp4uwpt"
+		"sendTo":"sjones",
+		"sendToTeam":"cpp4uwpt"
 	  }
   ]
 }
