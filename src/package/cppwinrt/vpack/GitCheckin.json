@@ -5,7 +5,7 @@
       "project": "OS",
       "repo": "os",
       "name": "official/rs_onecore_dep_apt7",
-      "workitem": "11658403",
+      "workitem": "22030928",
       "completePR": "True",
       "CheckinFiles": [
         {
@@ -19,8 +19,7 @@
   ],
   "Email":[
 	  {
-		"sendTo":"sjones",
-		"sendToTeam":"cpp4uwpt"
+		"sendTo":"cpp4uwpt"
 	  }
   ]
 }
