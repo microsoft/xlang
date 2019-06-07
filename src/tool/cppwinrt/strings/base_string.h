@@ -394,79 +394,138 @@ namespace winrt
     }
 
     inline hstring to_hstring(uint8_t value)
-    {
-        wchar_t buffer[32];
-        swprintf_s(buffer, L"%hhu", value);
-        return hstring{ buffer };
+	{
+		wchar_t buffer[32];
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
+		swprintf_s(buffer, L"%hhu", value);
+		return hstring{ buffer };
+#endif
     }
 
     inline hstring to_hstring(int8_t value)
     {
-        wchar_t buffer[32];
+		wchar_t buffer[32];
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
         swprintf_s(buffer, L"%hhd", value);
         return hstring{ buffer };
-    }
+#endif
+	}
 
     inline hstring to_hstring(uint16_t value)
     {
-        wchar_t buffer[32];
-        swprintf_s(buffer, L"%hu", value);
+		wchar_t buffer[32];
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
+		swprintf_s(buffer, L"%hu", value);
         return hstring{ buffer };
-    }
+#endif    }
 
     inline hstring to_hstring(int16_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%hd", value);
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
+		swprintf_s(buffer, L"%hd", value);
         return hstring{ buffer };
-    }
+#endif
+	}
 
     inline hstring to_hstring(uint32_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%I32u", value);
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
+		swprintf_s(buffer, L"%I32u", value);
         return hstring{ buffer };
+#endif
     }
 
     inline hstring to_hstring(int32_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%I32d", value);
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
+		swprintf_s(buffer, L"%I32d", value);
         return hstring{ buffer };
+#endif
     }
 
     inline hstring to_hstring(uint64_t value)
     {
-        wchar_t buffer[32];
+		wchar_t buffer[32];
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
         swprintf_s(buffer, L"%I64u", value);
         return hstring{ buffer };
+#endif
     }
 
     inline hstring to_hstring(int64_t value)
     {
         wchar_t buffer[32];
-        swprintf_s(buffer, L"%I64d", value);
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
+		swprintf_s(buffer, L"%I64d", value);
         return hstring{ buffer };
+#endif
     }
 
     inline hstring to_hstring(float value)
     {
         wchar_t buffer[32];
-        _swprintf_s_l(buffer, std::size(buffer), L"%G", impl::get_default_locale(), value);
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value, std::chars_format::general);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{ buffer, result.ptr - buffer } };
+#else
+		_swprintf_s_l(buffer, std::size(buffer), L"%G", impl::get_default_locale(), value);
         return hstring{ buffer };
+#endif
     }
 
     inline hstring to_hstring(double value)
     {
         wchar_t buffer[32];
-        _swprintf_s_l(buffer, std::size(buffer), L"%G", impl::get_default_locale(), value);
+#ifdef WINRT_IMPL_HAS_CHARCONV
+		auto result = std::to_chars(std::begin(buffer), std::end(buffer), value, std::chars_format::general);
+		WINRT_ASSERT(result.ec == std::errc{});
+		return hstring{ std::wstring_view{buffer, result.ptr - buffer} };
+#else
+		_swprintf_s_l(buffer, std::size(buffer), L"%G", impl::get_default_locale(), value);
         return hstring{ buffer };
+#endif
     }
 
     inline hstring to_hstring(char16_t value)
     {
         wchar_t buffer[2] = { value, 0 };
-        return hstring{ buffer };
+		return hstring{ std::wstring_view{ buffer, 1 } };
     }
 
     inline hstring to_hstring(hstring const& value) noexcept
