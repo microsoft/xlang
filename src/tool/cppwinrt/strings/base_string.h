@@ -399,7 +399,7 @@ namespace winrt::impl
 	};
 
 	template <typename T>
-	struct hstring_convert_impl <T, std::void_t<decltype(std::to_chars(T{}))>>
+	struct hstring_convert_impl < T, std::void_t<decltype(std::to_chars(nullptr, nullptr, T{})) >>
 	{
 		static hstring convert(T value)
 		{
@@ -416,7 +416,7 @@ namespace winrt::impl
 			WINRT_ASSERT(result.ec == std::errc{});
 			wchar_t buffer[32];
 			auto end = std::copy(std::begin(temp), result.ptr, buffer);
-			return hstring{ std::wstring_view{ buffer, end - buffer} };
+			return hstring{ std::wstring_view{ buffer, static_cast<std::size_t>(end - buffer)} };
 		}
 	};
 
