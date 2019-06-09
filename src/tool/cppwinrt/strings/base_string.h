@@ -291,8 +291,8 @@ namespace winrt::impl
 
     inline handle_type<locale_handle_traits> get_default_locale()
     {
-		return handle_type<locale_handle_traits>{ _create_locale(LC_ALL, "C") };
-	}
+        return handle_type<locale_handle_traits>{ _create_locale(LC_ALL, "C") };
+    }
 
     struct hstring_builder
     {
@@ -384,47 +384,47 @@ namespace winrt::impl
         }
     };
 
-	// Temporary workaround to deal with partially-implemented to_chars support in some implementations
-	template <typename T, typename = std::void_t<>>
-	struct hstring_convert_impl
-	{
-		static hstring convert(T value)
-		{
-			static_assert(std::is_floating_point_v<T>);
-			wchar_t buffer[32];
-			auto loc = impl::get_default_locale();
-			_swprintf_s_l(buffer, std::size(buffer), L"%G", loc.get(), value);
-			return hstring{ buffer };
-		}
-	};
+    // Temporary workaround to deal with partially-implemented to_chars support in some implementations
+    template <typename T, typename = std::void_t<>>
+    struct hstring_convert_impl
+    {
+        static hstring convert(T value)
+        {
+            static_assert(std::is_floating_point_v<T>);
+            wchar_t buffer[32];
+            auto loc = impl::get_default_locale();
+            _swprintf_s_l(buffer, std::size(buffer), L"%G", loc.get(), value);
+            return hstring{ buffer };
+        }
+    };
 
-	template <typename T>
-	struct hstring_convert_impl < T, std::void_t<decltype(std::to_chars(nullptr, nullptr, T{})) >>
-	{
-		static hstring convert(T value)
-		{
-			char temp[32];
-			std::to_chars_result result;
-			if constexpr (std::is_integral_v<T>)
-			{
-				result = std::to_chars(std::begin(temp), std::end(temp), value);
-			}
-			else
-			{
-				result = std::to_chars(std::begin(temp), std::end(temp), value, std::chars_format::general);
-			}
-			WINRT_ASSERT(result.ec == std::errc{});
-			wchar_t buffer[32];
-			auto end = std::copy(std::begin(temp), result.ptr, buffer);
-			return hstring{ std::wstring_view{ buffer, static_cast<std::size_t>(end - buffer)} };
-		}
-	};
+    template <typename T>
+    struct hstring_convert_impl < T, std::void_t<decltype(std::to_chars(nullptr, nullptr, T{})) >>
+    {
+        static hstring convert(T value)
+        {
+            char temp[32];
+            std::to_chars_result result;
+            if constexpr (std::is_integral_v<T>)
+            {
+                result = std::to_chars(std::begin(temp), std::end(temp), value);
+            }
+            else
+            {
+                result = std::to_chars(std::begin(temp), std::end(temp), value, std::chars_format::general);
+            }
+            WINRT_ASSERT(result.ec == std::errc{});
+            wchar_t buffer[32];
+            auto end = std::copy(std::begin(temp), result.ptr, buffer);
+            return hstring{ std::wstring_view{ buffer, static_cast<std::size_t>(end - buffer)} };
+        }
+    };
 
-	template <typename T>
-	inline hstring hstring_convert(T value)
-	{
-		return hstring_convert_impl<T>::convert(value);
-	}
+    template <typename T>
+    inline hstring hstring_convert(T value)
+    {
+        return hstring_convert_impl<T>::convert(value);
+    }
 }
 
 namespace winrt
@@ -435,59 +435,59 @@ namespace winrt
     }
 
     inline hstring to_hstring(uint8_t value)
-	{
-		return impl::hstring_convert(value);
-	}
+    {
+        return impl::hstring_convert(value);
+    }
 
     inline hstring to_hstring(int8_t value)
     {
-		return impl::hstring_convert(value);
-	}
+        return impl::hstring_convert(value);
+    }
 
-	inline hstring to_hstring(uint16_t value)
-	{
-		return impl::hstring_convert(value);
-	}
+    inline hstring to_hstring(uint16_t value)
+    {
+        return impl::hstring_convert(value);
+    }
 
     inline hstring to_hstring(int16_t value)
     {
-		return impl::hstring_convert(value);
-	}
+        return impl::hstring_convert(value);
+    }
 
     inline hstring to_hstring(uint32_t value)
     {
-		return impl::hstring_convert(value);
-	}
+        return impl::hstring_convert(value);
+    }
 
     inline hstring to_hstring(int32_t value)
     {
-		return impl::hstring_convert(value);
-	}
+        return impl::hstring_convert(value);
+    }
 
     inline hstring to_hstring(uint64_t value)
     {
-		return impl::hstring_convert(value);
-	}
+        return impl::hstring_convert(value);
+    }
 
     inline hstring to_hstring(int64_t value)
     {
-		return impl::hstring_convert(value);
+        return impl::hstring_convert(value);
     }
 
     inline hstring to_hstring(float value)
     {
-		return impl::hstring_convert(value);
+        return impl::hstring_convert(value);
     }
 
     inline hstring to_hstring(double value)
     {
-		return impl::hstring_convert(value);
-	}
+        return impl::hstring_convert(value);
+    }
 
     inline hstring to_hstring(char16_t value)
     {
         wchar_t buffer[2] = { value, 0 };
-		return hstring{ std::wstring_view{ buffer, 1 } };
+        return hstring{ std::wstring_view{ buffer, 1 } };
     }
 
     inline hstring to_hstring(hstring const& value) noexcept
