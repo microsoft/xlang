@@ -1,0 +1,31 @@
+
+namespace TestCool
+{
+    enum BasicEnum
+    {
+      Value1,
+      Value2
+    };
+
+    struct BasicStruct
+    {
+        Int32 Field1;
+        Int32 Field2;
+    };
+
+    interface IInterface
+    {
+        Int32 MyProperty;
+    };
+
+    runtimeclass Class
+    {
+        Class();
+
+        void MyMethod(String data);
+        Int32 MyProperty;
+        Int32 MyProperty2;
+
+        //event Windows.Foundation.TypedEventHandler<Class, IInspectable> MyPropertyChanged;
+    };
+}

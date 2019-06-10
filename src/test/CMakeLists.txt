@@ -4,6 +4,7 @@ add_subdirectory(platform)
 add_subdirectory(abi_component)
 add_subdirectory(library)
 add_subdirectory(cppx)
+add_subdirectory(cool)
 
 if (WIN32)
     add_subdirectory(python)
