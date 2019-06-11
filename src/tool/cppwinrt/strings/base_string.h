@@ -384,46 +384,25 @@ namespace winrt::impl
         }
     };
 
-    // Temporary workaround to deal with partially-implemented to_chars support in some implementations
-    template <typename T, typename = std::void_t<>>
-    struct hstring_convert_impl
-    {
-        static hstring convert(T value)
-        {
-            static_assert(std::is_floating_point_v<T>);
-            wchar_t buffer[32];
-            auto loc = impl::get_default_locale();
-            _swprintf_s_l(buffer, std::size(buffer), L"%G", loc.get(), value);
-            return hstring{ buffer };
-        }
-    };
-
-    template <typename T>
-    struct hstring_convert_impl < T, std::void_t<decltype(std::to_chars(nullptr, nullptr, T{})) >>
-    {
-        static hstring convert(T value)
-        {
-            char temp[32];
-            std::to_chars_result result;
-            if constexpr (std::is_integral_v<T>)
-            {
-                result = std::to_chars(std::begin(temp), std::end(temp), value);
-            }
-            else
-            {
-                result = std::to_chars(std::begin(temp), std::end(temp), value, std::chars_format::general);
-            }
-            WINRT_ASSERT(result.ec == std::errc{});
-            wchar_t buffer[32];
-            auto end = std::copy(std::begin(temp), result.ptr, buffer);
-            return hstring{ std::wstring_view{ buffer, static_cast<std::size_t>(end - buffer)} };
-        }
-    };
-
     template <typename T>
     inline hstring hstring_convert(T value)
     {
-        return hstring_convert_impl<T>::convert(value);
+        static_assert(std::is_arithmetic_v<T>);
+        char temp[32];
+        std::to_chars_result result;
+        if constexpr (std::is_integral_v<T>)
+        {
+            result = std::to_chars(std::begin(temp), std::end(temp), value);
+        }
+        else
+        {
+            // Floating point
+            result = std::to_chars(std::begin(temp), std::end(temp), value, std::chars_format::general);
+        }
+        WINRT_ASSERT(result.ec == std::errc{});
+        wchar_t buffer[32];
+        auto end = std::copy(std::begin(temp), result.ptr, buffer);
+        return hstring{ std::wstring_view{ buffer, static_cast<std::size_t>(end - buffer)} };
     }
 }
 
