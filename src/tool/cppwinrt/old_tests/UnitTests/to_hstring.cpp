@@ -61,7 +61,7 @@ namespace
         }
         {
             double value = 1234567890.123456789;
-            REQUIRE(to_hstring(value) == L"1.23457E+09");
+            REQUIRE(to_hstring(value) == L"1.2345678901234567e+09");
         }
         {
             REQUIRE(to_hstring("") == L"");
