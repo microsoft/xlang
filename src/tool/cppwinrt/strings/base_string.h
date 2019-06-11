@@ -272,28 +272,6 @@ namespace winrt::impl
         using type = basic_category;
     };
 
-    // Temporary workaround to support locale-independent numeric formatting
-    // until C++17's to_chars arrives
-    struct locale_handle_traits
-    {
-        using type = _locale_t;
-
-        static void close(type value) noexcept
-        {
-            _free_locale(value);
-        }
-
-        static constexpr type invalid() noexcept
-        {
-            return nullptr;
-        }
-    };
-
-    inline handle_type<locale_handle_traits> get_default_locale()
-    {
-        return handle_type<locale_handle_traits>{ _create_locale(LC_ALL, "C") };
-    }
-
     struct hstring_builder
     {
         hstring_builder(hstring_builder const&) = delete;

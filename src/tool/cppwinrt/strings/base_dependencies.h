@@ -4,7 +4,6 @@
 #include <atomic>
 #include <charconv>
 #include <chrono>
-#include <clocale>
 #include <cstddef>
 #include <iterator>
 #include <limits>
