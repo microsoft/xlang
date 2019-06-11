@@ -936,9 +936,8 @@ namespace xlang
         auto method_name = get_name(method);
         auto type = method.Parent();
 
-        w.write("        %% %(%) const%;\n",
+        w.write("        %auto %(%) const%;\n",
             is_get_overload(method) ? "[[nodiscard]] " : "",
-            signature.return_signature(),
             method_name,
             bind<write_consume_params>(signature),
             is_noexcept(method) ? " noexcept" : "");
@@ -1037,13 +1036,16 @@ namespace xlang
 
         if (category == param_category::array_type)
         {
-            w.write("\n        return { %, %_impl_size, take_ownership_from_abi };",
+            w.write("\n        return %{ %, %_impl_size, take_ownership_from_abi };",
+                signature.return_signature(),
                 signature.return_param_name(),
                 signature.return_param_name());
         }
         else if (category == param_category::object_type || category == param_category::string_type)
         {
-            w.write("\n        return { %, take_ownership_from_abi };", signature.return_param_name());
+            w.write("\n        return %{ %, take_ownership_from_abi };",
+                signature.return_signature(),
+                signature.return_param_name());
         }
         else
         {
@@ -1072,7 +1074,7 @@ namespace xlang
 
         if (is_noexcept(method))
         {
-            format = R"(    template <typename D%> % consume_%<D%>::%(%) const noexcept
+            format = R"(    template <typename D%> auto consume_%<D%>::%(%) const noexcept
     {%
         WINRT_VERIFY_(0, WINRT_IMPL_SHIM(%)->%(%));%
     }
@@ -1080,7 +1082,7 @@ namespace xlang
         }
         else
         {
-            format = R"(    template <typename D%> % consume_%<D%>::%(%) const
+            format = R"(    template <typename D%> auto consume_%<D%>::%(%) const
     {%
         check_hresult(WINRT_IMPL_SHIM(%)->%(%));%
     }
@@ -1089,7 +1091,6 @@ namespace xlang
 
         w.write(format,
             bind<write_comma_generic_typenames>(generics),
-            signature.return_signature(),
             type_impl_name,
             bind<write_comma_generic_types>(generics),
             method_name,
@@ -1137,14 +1138,13 @@ namespace xlang
         // return static_cast<% const&>(*this).%(%);
         //
 
-        std::string_view format = R"(    inline % %::%(%) const%
+        std::string_view format = R"(    inline auto %::%(%) const%
     {
         return [&](% const& winrt_impl_base) { return winrt_impl_base.%(%); }(*this);
     }
 )";
 
         w.write(format,
-            signature.return_signature(),
             class_type.TypeName(),
             method_name,
             bind<write_consume_params>(signature),
@@ -1845,7 +1845,7 @@ namespace xlang
 
     static void write_dispatch_overridable_method(writer& w, MethodDef const& method)
     {
-        auto format = R"(    % %(%)
+        auto format = R"(    auto %(%)
     {
         if (auto overridable = this->shim_overridable())
         {
@@ -1859,7 +1859,6 @@ namespace xlang
         method_signature signature{ method };
 
         w.write(format,
-            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             get_name(method),
@@ -1890,7 +1889,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
 
     static void write_interface_override_method(writer& w, MethodDef const& method, std::string_view const& interface_name)
     {
-        auto format = R"(    template <typename D> % %T<D>::%(%) const
+        auto format = R"(    template <typename D> auto %T<D>::%(%) const
     {
         return shim().template try_as<%>().%(%);
     }
@@ -1900,7 +1899,6 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         auto method_name = get_name(method);
 
         w.write(format,
-            signature.return_signature(),
             interface_name,
             method_name,
             bind<write_consume_params>(signature),
@@ -2299,7 +2297,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         template <typename O, typename M> %(O* object, M method);
         template <typename O, typename M> %(com_ptr<O>&& object, M method);
         template <typename O, typename M> %(weak_ref<O>&& object, M method);
-        % operator()(%) const;
+        auto operator()(%) const;
     };
 )";
 
@@ -2315,7 +2313,6 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             type_name,
             type_name,
             type_name,
-            signature.return_signature(),
             bind<write_consume_params>(signature));
     }
 
@@ -2378,7 +2375,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
     {
     }
-    template <%> % %<%>::operator()(%) const
+    template <%> auto %<%>::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%<%>>**)this)->Invoke(%));%
     }
@@ -2415,7 +2412,6 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                 type_name,
                 type_name,
                 bind<write_generic_typenames>(generics),
-                signature.return_signature(),
                 type_name,
                 bind_list(", ", generics),
                 bind<write_consume_params>(signature),
@@ -2447,7 +2443,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
     {
     }
-    inline % %::operator()(%) const
+    inline auto %::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
     }
@@ -2470,7 +2466,6 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                 type_name,
                 type_name,
                 type_name,
-                signature.return_signature(),
                 type_name,
                 bind<write_consume_params>(signature),
                 bind<write_consume_return_type>(signature),
@@ -2844,9 +2839,8 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             auto method_name = get_name(method);
             w.async_types = is_async(method, signature);
 
-            w.write("        %static % %(%);\n",
+            w.write("        %static auto %(%);\n",
                 is_get_overload(method) ? "[[nodiscard]] " : "",
-                signature.return_signature(),
                 method_name,
                 bind<write_consume_params>(signature));
 
@@ -2875,14 +2869,13 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         w.async_types = is_async(method, signature);
 
         {
-            auto format = R"(    inline % %::%(%)
+            auto format = R"(    inline auto %::%(%)
     {
         %impl::call_factory<%, %>([&](auto&& f) { return f.%(%); });
     }
 )";
 
             w.write(format,
-                signature.return_signature(),
                 type_name,
                 method_name,
                 bind<write_consume_params>(signature),
