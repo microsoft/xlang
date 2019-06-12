@@ -20,6 +20,12 @@
     <DisplayString Condition="this == 0">null</DisplayString>
   </Type>
   <!--Primitive type visualizers-->
+  <Type Name="winrt::com_ptr&lt;*&gt;">
+    <DisplayString>{m_ptr}</DisplayString>
+    <Expand>
+      <ExpandedItem>m_ptr</ExpandedItem>
+    </Expand>
+  </Type>
   <Type Name="winrt::guid">
     <DisplayString>{*((GUID*)this)}</DisplayString>
     <StringView>*((GUID*)this)</StringView>
