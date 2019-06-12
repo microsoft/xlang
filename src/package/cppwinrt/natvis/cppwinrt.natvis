@@ -41,4 +41,18 @@
       <Item Name="[ptr]">WindowsGetStringRawBuffer(m_handle.m_value, nullptr)</Item>
     </Expand>
   </Type>
+  <Type Name="winrt::param::hstring">
+    <DisplayString>{m_handle,sh}</DisplayString>
+    <StringView>m_handle,sh</StringView>
+    <Expand>
+      <Item Name="size">WindowsGetStringLen(m_handle)</Item>
+      <Item Name="[ptr]">WindowsGetStringRawBuffer(m_handle, nullptr)</Item>
+    </Expand>
+  </Type>
+  <Type Name="winrt::Windows::Foundation::IUnknown">
+    <DisplayString>{m_ptr}</DisplayString>
+    <Expand>
+      <ExpandedItem>m_ptr</ExpandedItem>
+    </Expand>
+  </Type>
 </AutoVisualizer>
