@@ -20,6 +20,12 @@
     <DisplayString Condition="this == 0">null</DisplayString>
   </Type>
   <!--Primitive type visualizers-->
+  <Type Name="winrt::com_ptr&lt;*&gt;">
+    <DisplayString>{m_ptr}</DisplayString>
+    <Expand>
+      <ExpandedItem>m_ptr</ExpandedItem>
+    </Expand>
+  </Type>
   <Type Name="winrt::guid">
     <DisplayString>{*((GUID*)this)}</DisplayString>
     <StringView>*((GUID*)this)</StringView>
@@ -33,6 +39,20 @@
     <Expand>
       <Item Name="size">WindowsGetStringLen(m_handle.m_value)</Item>
       <Item Name="[ptr]">WindowsGetStringRawBuffer(m_handle.m_value, nullptr)</Item>
+    </Expand>
+  </Type>
+  <Type Name="winrt::param::hstring">
+    <DisplayString>{m_handle,sh}</DisplayString>
+    <StringView>m_handle,sh</StringView>
+    <Expand>
+      <Item Name="size">WindowsGetStringLen(m_handle)</Item>
+      <Item Name="[ptr]">WindowsGetStringRawBuffer(m_handle, nullptr)</Item>
+    </Expand>
+  </Type>
+  <Type Name="winrt::Windows::Foundation::IUnknown">
+    <DisplayString>{m_ptr}</DisplayString>
+    <Expand>
+      <ExpandedItem>m_ptr</ExpandedItem>
     </Expand>
   </Type>
 </AutoVisualizer>
