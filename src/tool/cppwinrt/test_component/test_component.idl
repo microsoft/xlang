@@ -60,6 +60,9 @@ namespace test_component
     {
         Class();
         Class(String name);
+        static void StaticTest();
+        static Int32 StaticTestReturn();
+        static Int32 StaticProperty{ get; };
 
         Class(Windows.Foundation.Collections.IIterable<String> arg, Int32 dummy1);
         Class(Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, String> > arg, Int32 dummy1, Int32 dummy2);
