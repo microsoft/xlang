@@ -498,7 +498,7 @@ catch (...) { return winrt::to_hresult(); }
                     }
                     else
                     {
-                        auto format = R"(    auto %::%(%)
+                        auto format = R"(    % %::%(%)
     {
         return @::implementation::%::%(%);
     }
@@ -506,6 +506,7 @@ catch (...) { return winrt::to_hresult(); }
 
 
                         w.write(format,
+                            signature.return_signature(),
                             type_name,
                             method_name,
                             bind<write_consume_params>(signature),

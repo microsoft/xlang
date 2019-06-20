@@ -2826,7 +2826,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     }
 
 
-    static void write_static_declaration(writer& w, std::pair<std::string const, factory_info> const& factory)
+    static void write_static_declaration(writer& w, std::pair<std::string const, factory_info> const& factory, TypeDef const& type)
     {
         if (!factory.second.statics)
         {
@@ -2839,10 +2839,21 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             auto method_name = get_name(method);
             w.async_types = is_async(method, signature);
 
-            w.write("        %static auto %(%);\n",
-                is_get_overload(method) ? "[[nodiscard]] " : "",
-                method_name,
-                bind<write_consume_params>(signature));
+            if (settings.component_opt && settings.component_filter.includes(type))
+            {
+                w.write("        %static % %(%);\n",
+                    is_get_overload(method) ? "[[nodiscard]] " : "",
+                    signature.return_signature(),
+                    method_name,
+                    bind<write_consume_params>(signature));
+            }
+            else
+            {
+                w.write("        %static auto %(%);\n",
+                    is_get_overload(method) ? "[[nodiscard]] " : "",
+                    method_name,
+                    bind<write_consume_params>(signature));
+            }
 
             if (is_add_overload(method))
             {
@@ -2987,7 +2998,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             base_type,
             bind<write_constructor_declarations>(type, factories),
             bind<write_class_usings>(type),
-            bind_each<write_static_declaration>(factories));
+            bind_each<write_static_declaration>(factories, type));
     }
 
     static void write_fast_class(writer& w, TypeDef const& type, coded_index<TypeDefOrRef> const& base_type)
@@ -3011,7 +3022,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             base_type,
             bind<write_constructor_declarations>(type, factories),
             bind<write_fast_class_base_declarations>(type),
-            bind_each<write_static_declaration>(factories));
+            bind_each<write_static_declaration>(factories, type));
     }
 
     static void write_static_class(writer& w, TypeDef const& type)
@@ -3028,7 +3039,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         w.write(format,
             type_name,
             type_name,
-            bind_each<write_static_declaration>(factories));
+            bind_each<write_static_declaration>(factories, type));
     }
 
     static void write_class(writer& w, TypeDef const& type)

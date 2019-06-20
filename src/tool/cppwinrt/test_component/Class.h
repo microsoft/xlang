@@ -8,6 +8,20 @@ namespace winrt::test_component::implementation
         Class() = default;
         Class(hstring const&) {}
 
+        static void StaticTest()
+        {
+        }
+
+        static int32_t StaticTestReturn()
+        {
+            return 0;
+        }
+
+        static int32_t StaticProperty()
+        {
+            return 0;
+        }
+
         void Fail(bool fail)
         {
             m_fail = fail;
