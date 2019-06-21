@@ -112,8 +112,8 @@ END
 )",
     XLANG_VERSION_STRING);
 
+    std::filesystem::create_directories(argv[2]);
     auto const output = std::filesystem::canonical(argv[2]);
-    std::filesystem::create_directories(output);
     strings_h.flush_to_file(output / "strings.h");
     strings_cpp.flush_to_file(output / "strings.cpp");
     version_rc.flush_to_file(output / "version.rc");
