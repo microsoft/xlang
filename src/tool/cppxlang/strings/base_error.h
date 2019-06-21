@@ -11,91 +11,124 @@ namespace xlang::impl
         return ((int32_t)((x) | 0x10000000));
     }
 
-    constexpr int32_t hresult_from_xlang_result(xlang_result const result) noexcept
+    constexpr xlang_result xlang_result_from_com(com_interop_result const result)
     {
         switch (result)
         {
-        case xlang_result::success:
-            return error_ok;
-        case xlang_result::access_denied:
-            return error_access_denied;
-        case xlang_result::bounds:
-            return error_out_of_bounds;
-        case xlang_result::fail:
-            return error_fail;
-        case xlang_result::handle:
-            return static_cast<hresult>(0x80070006);
-        case xlang_result::invalid_arg:
-            return error_invalid_argument;
-        case xlang_result::invalid_state:
-            return error_illegal_state_change;
-        case xlang_result::no_interface:
-            return error_no_interface;
-        case xlang_result::not_impl:
-            return error_not_implemented;
-        case xlang_result::out_of_memory:
-            return error_bad_alloc;
-        case xlang_result::pointer:
-            return static_cast<hresult>(0x80004003);
-        case xlang_result::type_load:
-            return static_cast<hresult>(0x80040154);
+        case com_interop_result::success:
+            return xlang_result::success;
+        case com_interop_result::no_interface:
+            return xlang_result::no_interface;
+        case com_interop_result::pointer:
+            return xlang_result::pointer;
         }
 
-        return error_fail;
+        return xlang_result::fail;
     }
+
+/*    constexpr xlang_result xlang_result_from_hresult(hresult const result)
+    {
+        switch (result)
+        {
+        case S_OK:
+            return xlang_result::success;
+        case E_ACCESSDENIED:
+            return xlang_result::access_denied;
+        case E_BOUNDS:
+            return xlang_result::bounds;
+        case E_FAIL:
+            return xlang_result::fail;
+        case E_HANDLE:
+            return xlang_result::handle;
+        case E_INVALIDARG:
+            return xlang_result::invalid_arg;
+        case E_ILLEGAL_STATE_CHANGE:
+            return xlang_result::invalid_state;
+        case E_NOINTERFACE:
+            return xlang_result::no_interface;
+        case E_NOTIMPL:
+            return xlang_result::not_impl;
+        case E_OUTOFMEMORY:
+            return xlang_result::out_of_memory;
+        case E_POINTER:
+            return xlang_result::pointer;
+        case REGDB_E_CLASSNOTREG:
+        case COR_E_TYPELOAD:
+            return xlang_result::type_load;
+        }
+
+        return xlang_result::fail;
+    }*/
 }
 
 namespace xlang
 {
-    struct hresult_error
+    struct xlang_error
     {
-        using from_abi_t = take_ownership_from_abi_t;
-        static constexpr auto from_abi{ take_ownership_from_abi };
+        xlang_error() noexcept = default;
+        xlang_error(xlang_error&&) = default;
+        xlang_error& operator=(xlang_error&&) = default;
 
-        hresult_error() noexcept = default;
-        hresult_error(hresult_error&&) = default;
-        hresult_error& operator=(hresult_error&&) = default;
-
-        hresult_error(hresult_error const& other) noexcept :
+        xlang_error(xlang_error const& other) noexcept :
             m_code(other.m_code)
         {
         }
 
-        hresult_error& operator=(hresult_error const& other) noexcept
+        xlang_error& operator=(xlang_error const& other) noexcept
         {
             m_code = other.m_code;
             return *this;
         }
 
-        explicit hresult_error(hresult const code) noexcept : m_code(code)
+        explicit xlang_error(xlang_result const code) noexcept : m_code(code)
         {
             originate(code, nullptr);
         }
 
-        hresult_error(hresult const code, param::hstring const& message) noexcept : m_code(code)
+        xlang_error(xlang_result const code, param::hstring const& message) noexcept : m_code(code)
         {
             originate(code, get_abi(message));
         }
 
-        hresult_error(hresult const code, take_ownership_from_abi_t) noexcept : m_code(code)
+        xlang_error(xlang_result const code, xlang_error_info* error_info) noexcept : m_code(code)
         {
-            originate(code, nullptr);
+            if (error_info == nullptr)
+            {
+                originate(code, nullptr);
+            }
+            else
+            {
+                m_error_info.copy_from(error_info);
+                m_error_info->PropagateError(nullptr, nullptr, nullptr, nullptr);
+            }
         }
 
-        hresult code() const noexcept
+        xlang_result code() const noexcept
         {
             return m_code;
         }
 
-        hresult to_abi() const noexcept
+        hstring message() const noexcept
         {
-            return m_code;
+            hstring message;
+            if (m_error_info)
+            {
+                m_error_info->GetMessage(put_abi(message));
+            }
+
+            return message;
+        }
+
+        xlang_error_info* to_abi() const noexcept
+        {
+            return m_error_info.get();
         }
 
     private:
 
-        void originate(hresult const, void*) noexcept
+        void originate(xlang_result const code, xlang_string message) noexcept
         {
+            m_error_info.attach(xlang_originate_error(code, message));
         }
 
 #ifdef __clang__
@@ -104,193 +137,158 @@ namespace xlang
 #endif
 
         uint32_t const m_debug_magic{ 0xAABBCCDD };
-        hresult m_code{ impl::error_fail };
+        xlang_result m_code{ xlang_result::fail };
+        com_ptr<xlang_error_info> m_error_info;
 
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
     };
 
-    struct hresult_access_denied : hresult_error
+    struct access_denied_error : xlang_error
     {
-        hresult_access_denied() noexcept : hresult_error(impl::error_access_denied) {}
-        hresult_access_denied(param::hstring const& message) noexcept : hresult_error(impl::error_access_denied, message) {}
-        hresult_access_denied(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_access_denied, take_ownership_from_abi) {}
+        access_denied_error() noexcept : xlang_error(xlang_result::access_denied) {}
+        access_denied_error(param::hstring const& message) noexcept : xlang_error(xlang_result::access_denied, message) {}
+        access_denied_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::access_denied, error_info) {}
     };
 
-    struct hresult_wrong_thread : hresult_error
+    struct out_of_bounds_error : xlang_error
     {
-        hresult_wrong_thread() noexcept : hresult_error(impl::error_wrong_thread) {}
-        hresult_wrong_thread(param::hstring const& message) noexcept : hresult_error(impl::error_wrong_thread, message) {}
-        hresult_wrong_thread(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_wrong_thread, take_ownership_from_abi) {}
+        out_of_bounds_error() noexcept : xlang_error(xlang_result::bounds) {}
+        out_of_bounds_error(param::hstring const& message) noexcept : xlang_error(xlang_result::bounds, message) {}
+        out_of_bounds_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::bounds, error_info) {}
     };
 
-    struct hresult_not_implemented : hresult_error
+    struct invalid_handle_error : xlang_error
     {
-        hresult_not_implemented() noexcept : hresult_error(impl::error_not_implemented) {}
-        hresult_not_implemented(param::hstring const& message) noexcept : hresult_error(impl::error_not_implemented, message) {}
-        hresult_not_implemented(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_not_implemented, take_ownership_from_abi) {}
+        invalid_handle_error() noexcept : xlang_error(xlang_result::handle) {}
+        invalid_handle_error(param::hstring const& message) noexcept : xlang_error(xlang_result::handle, message) {}
+        invalid_handle_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::handle, error_info) {}
     };
 
-    struct hresult_invalid_argument : hresult_error
+    struct invalid_argument_error : xlang_error
     {
-        hresult_invalid_argument() noexcept : hresult_error(impl::error_invalid_argument) {}
-        hresult_invalid_argument(param::hstring const& message) noexcept : hresult_error(impl::error_invalid_argument, message) {}
-        hresult_invalid_argument(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_invalid_argument, take_ownership_from_abi) {}
+        invalid_argument_error() noexcept : xlang_error(xlang_result::invalid_arg) {}
+        invalid_argument_error(param::hstring const& message) noexcept : xlang_error(xlang_result::invalid_arg, message) {}
+        invalid_argument_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::invalid_arg, error_info) {}
     };
 
-    struct hresult_out_of_bounds : hresult_error
+    struct invalid_state_error : xlang_error
     {
-        hresult_out_of_bounds() noexcept : hresult_error(impl::error_out_of_bounds) {}
-        hresult_out_of_bounds(param::hstring const& message) noexcept : hresult_error(impl::error_out_of_bounds, message) {}
-        hresult_out_of_bounds(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_out_of_bounds, take_ownership_from_abi) {}
+        invalid_state_error() noexcept : xlang_error(xlang_result::invalid_state) {}
+        invalid_state_error(param::hstring const& message) noexcept : xlang_error(xlang_result::invalid_state, message) {}
+        invalid_state_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::invalid_state, error_info) {}
     };
 
-    struct hresult_no_interface : hresult_error
+    struct no_interface_error : xlang_error
     {
-        hresult_no_interface() noexcept : hresult_error(impl::error_no_interface) {}
-        hresult_no_interface(param::hstring const& message) noexcept : hresult_error(impl::error_no_interface, message) {}
-        hresult_no_interface(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_no_interface, take_ownership_from_abi) {}
+        no_interface_error() noexcept : xlang_error(xlang_result::no_interface) {}
+        no_interface_error(param::hstring const& message) noexcept : xlang_error(xlang_result::no_interface, message) {}
+        no_interface_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::no_interface, error_info) {}
     };
 
-    struct hresult_class_not_available : hresult_error
+    struct not_implemented_error : xlang_error
     {
-        hresult_class_not_available() noexcept : hresult_error(impl::error_class_not_available) {}
-        hresult_class_not_available(param::hstring const& message) noexcept : hresult_error(impl::error_class_not_available, message) {}
-        hresult_class_not_available(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_class_not_available, take_ownership_from_abi) {}
+        not_implemented_error() noexcept : xlang_error(xlang_result::not_impl) {}
+        not_implemented_error(param::hstring const& message) noexcept : xlang_error(xlang_result::not_impl, message) {}
+        not_implemented_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::not_impl, error_info) {}
     };
 
-    struct hresult_changed_state : hresult_error
+    struct pointer_error : xlang_error
     {
-        hresult_changed_state() noexcept : hresult_error(impl::error_changed_state) {}
-        hresult_changed_state(param::hstring const& message) noexcept : hresult_error(impl::error_changed_state, message) {}
-        hresult_changed_state(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_changed_state, take_ownership_from_abi) {}
+        pointer_error() noexcept : xlang_error(xlang_result::pointer) {}
+        pointer_error(param::hstring const& message) noexcept : xlang_error(xlang_result::pointer, message) {}
+        pointer_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::pointer, error_info) {}
     };
 
-    struct hresult_illegal_method_call : hresult_error
+    struct type_load_error : xlang_error
     {
-        hresult_illegal_method_call() noexcept : hresult_error(impl::error_illegal_method_call) {}
-        hresult_illegal_method_call(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_method_call, message) {}
-        hresult_illegal_method_call(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_method_call, take_ownership_from_abi) {}
+        type_load_error() noexcept : xlang_error(xlang_result::type_load) {}
+        type_load_error(param::hstring const& message) noexcept : xlang_error(xlang_result::type_load, message) {}
+        type_load_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::type_load, error_info) {}
     };
 
-    struct hresult_illegal_state_change : hresult_error
+    [[noreturn]] inline XLANG_NOINLINE void throw_xlang_result(xlang_result const result, xlang_error_info* error_info = nullptr)
     {
-        hresult_illegal_state_change() noexcept : hresult_error(impl::error_illegal_state_change) {}
-        hresult_illegal_state_change(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_state_change, message) {}
-        hresult_illegal_state_change(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_state_change, take_ownership_from_abi) {}
-    };
-
-    struct hresult_illegal_delegate_assignment : hresult_error
-    {
-        hresult_illegal_delegate_assignment() noexcept : hresult_error(impl::error_illegal_delegate_assignment) {}
-        hresult_illegal_delegate_assignment(param::hstring const& message) noexcept : hresult_error(impl::error_illegal_delegate_assignment, message) {}
-        hresult_illegal_delegate_assignment(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_illegal_delegate_assignment, take_ownership_from_abi) {}
-    };
-
-    struct hresult_canceled : hresult_error
-    {
-        hresult_canceled() noexcept : hresult_error(impl::error_canceled) {}
-        hresult_canceled(param::hstring const& message) noexcept : hresult_error(impl::error_canceled, message) {}
-        hresult_canceled(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_canceled, take_ownership_from_abi) {}
-    };
-
-    [[noreturn]] inline XLANG_NOINLINE void throw_hresult(hresult const result)
-    {
-        if (result == impl::error_bad_alloc)
+        if (result == xlang_result::out_of_memory)
         {
             throw std::bad_alloc();
         }
 
-        if (result == impl::error_access_denied)
+        if (result == xlang_result::access_denied)
         {
-            throw hresult_access_denied(take_ownership_from_abi);
+            throw access_denied_error(error_info);
         }
 
-        if (result == impl::error_wrong_thread)
+        if (result == xlang_result::bounds)
         {
-            throw hresult_wrong_thread(take_ownership_from_abi);
+            throw out_of_bounds_error(error_info);
         }
 
-        if (result == impl::error_not_implemented)
+        if (result == xlang_result::handle)
         {
-            throw hresult_not_implemented(take_ownership_from_abi);
+            throw invalid_handle_error(error_info);
         }
 
-        if (result == impl::error_invalid_argument)
+        if (result == xlang_result::invalid_arg)
         {
-            throw hresult_invalid_argument(take_ownership_from_abi);
+            throw invalid_argument_error(error_info);
         }
 
-        if (result == impl::error_out_of_bounds)
+        if (result == xlang_result::invalid_state)
         {
-            throw hresult_out_of_bounds(take_ownership_from_abi);
+            throw invalid_state_error(error_info);
         }
 
-        if (result == impl::error_no_interface)
+        if (result == xlang_result::no_interface)
         {
-            throw hresult_no_interface(take_ownership_from_abi);
+            throw no_interface_error(error_info);
         }
 
-        if (result == impl::error_class_not_available)
+        if (result == xlang_result::not_impl)
         {
-            throw hresult_class_not_available(take_ownership_from_abi);
+            throw not_implemented_error(error_info);
         }
 
-        if (result == impl::error_changed_state)
+        if (result == xlang_result::pointer)
         {
-            throw hresult_changed_state(take_ownership_from_abi);
+            throw pointer_error(error_info);
         }
 
-        if (result == impl::error_illegal_method_call)
+        if (result == xlang_result::type_load)
         {
-            throw hresult_illegal_method_call(take_ownership_from_abi);
+            throw type_load_error(error_info);
         }
 
-        if (result == impl::error_illegal_state_change)
-        {
-            throw hresult_illegal_state_change(take_ownership_from_abi);
-        }
-
-        if (result == impl::error_illegal_delegate_assignment)
-        {
-            throw hresult_illegal_delegate_assignment(take_ownership_from_abi);
-        }
-
-        if (result == impl::error_canceled)
-        {
-            throw hresult_canceled(take_ownership_from_abi);
-        }
-
-        throw hresult_error(result, take_ownership_from_abi);
+        throw xlang_error(result, error_info);
     }
 
-    inline XLANG_NOINLINE hresult to_hresult() noexcept
+    inline XLANG_NOINLINE xlang_error_info* to_xlang_error() noexcept
     {
         try
         {
             throw;
         }
-        catch (hresult_error const& e)
+        catch (xlang_error const& e)
         {
             return e.to_abi();
         }
         XLANG_EXTERNAL_CATCH_CLAUSE
-        catch (std::bad_alloc const&)
+        catch (std::bad_alloc const& e)
         {
-            return impl::error_bad_alloc;
+            return xlang_error(xlang_result::out_of_memory, to_hstring(e.what())).to_abi();
         }
         catch (std::out_of_range const& e)
         {
-            return hresult_out_of_bounds(to_hstring(e.what())).to_abi();
+            return out_of_bounds_error(to_hstring(e.what())).to_abi();
         }
         catch (std::invalid_argument const& e)
         {
-            return hresult_invalid_argument(to_hstring(e.what())).to_abi();
+            return invalid_argument_error(to_hstring(e.what())).to_abi();
         }
         catch (std::exception const& e)
         {
-            return hresult_error(impl::error_fail, to_hstring(e.what())).to_abi();
+            return xlang_error(xlang_result::fail, to_hstring(e.what())).to_abi();
         }
         catch (...)
         {
@@ -298,28 +296,41 @@ namespace xlang
         }
     }
 
-    inline void check_hresult(hresult const result)
-    {
-        if (result < 0)
-        {
-            throw_hresult(result);
-        }
-    }
-
-    inline void check_hresult(xlang_error_info* result)
+    inline void check_xlang_error(xlang_error_info* result)
     {
         if (result != nullptr)
         {
             xlang_result error;
             result->GetError(&error);
-            throw_hresult(impl::hresult_from_xlang_result(error));
+            throw_xlang_result(error, result);
         }
     }
 
-#ifdef _WIN32
-    [[noreturn]] inline void throw_last_error()
+    inline void check_com_interop_result(com_interop_result result)
     {
-        throw_hresult(impl::hresult_from_win32(XLANG_GetLastError()));
+        if (result != com_interop_result::success)
+        {
+            throw_xlang_result(xlang_result_from_com(result), nullptr);
+        }
+    }
+
+
+#ifdef _WIN32
+
+
+/*
+    template<typename T>
+    void check_hresult(T result)
+    {
+        if (result != 0)
+        {
+            //throw_xlang_result(impl::xlang_result_from_hresult(result));
+        }
+    }
+
+[[noreturn]] inline void throw_last_error()
+    {
+        check_hresult(impl::hresult_from_win32(XLANG_GetLastError()));
     }
 
     template<typename T>
@@ -327,7 +338,7 @@ namespace xlang
     {
         if (result != 0)
         {
-            throw_hresult(impl::hresult_from_nt(result));
+            check_hresult(impl::hresult_from_nt(result));
         }
     }
 
@@ -336,7 +347,16 @@ namespace xlang
     {
         if (result != 0)
         {
-            throw_hresult(impl::hresult_from_win32(result));
+            check_hresult(impl::hresult_from_win32(result));
+        }
+    }
+
+    template<typename T>
+    void check_hresult(T result)
+    {
+        if (result != 0)
+        {
+            throw_xlang_result(impl::xlang_result_from_hresult(result));
         }
     }
 
@@ -358,6 +378,6 @@ namespace xlang
         }
 
         return pointer;
-    }
+    }*/
 #endif
 }

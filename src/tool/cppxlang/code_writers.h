@@ -987,7 +987,7 @@ namespace xlang
             {
                 format = R"(    template <typename D%> % consume_%<D%>::%(%) const
     {%
-        check_hresult(XLANG_SHIM(%)->%(%));%
+        check_xlang_error(XLANG_SHIM(%)->%(%));%
     }
 )";
             }
@@ -2115,7 +2115,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
     }
     template <%> % %<%>::operator()(%) const
     {%
-        check_hresult((*(impl::abi_t<%<%>>**)this)->Invoke(%));%
+        check_xlang_error((*(impl::abi_t<%<%>>**)this)->Invoke(%));%
     }
 )";
 
@@ -2184,7 +2184,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
     }
     inline % %::operator()(%) const
     {%
-        check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
+        check_xlang_error((*(impl::abi_t<%>**)this)->Invoke(%));%
     }
 )";
 

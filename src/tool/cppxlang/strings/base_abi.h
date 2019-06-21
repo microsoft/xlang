@@ -1,7 +1,7 @@
 
 namespace xlang::impl
 {
-    inline constexpr hresult error_ok{ 0 }; // S_OK
+/*    inline constexpr hresult error_ok{ 0 }; // S_OK
     inline constexpr hresult error_fail{ static_cast<hresult>(0x80004005) }; // E_FAIL
     inline constexpr hresult error_access_denied{ static_cast<hresult>(0x80070005) }; // E_ACCESSDENIED
     inline constexpr hresult error_wrong_thread{ static_cast<hresult>(0x8001010E) }; // RPC_E_WRONG_THREAD
@@ -16,7 +16,7 @@ namespace xlang::impl
     inline constexpr hresult error_illegal_delegate_assignment{ static_cast<hresult>(0x80000018) }; // E_ILLEGAL_DELEGATE_ASSIGNMENT
     inline constexpr hresult error_canceled{ static_cast<hresult>(0x800704C7) }; // HRESULT_FROM_WIN32(ERROR_CANCELLED)
     inline constexpr hresult error_bad_alloc{ static_cast<hresult>(0x8007000E) }; // E_OUTOFMEMORY
-    inline constexpr hresult error_not_initialized{ static_cast<hresult>(0x800401F0) }; // CO_E_NOTINITIALIZED
+    inline constexpr hresult error_not_initialized{ static_cast<hresult>(0x800401F0) }; // CO_E_NOTINITIALIZED*/
 
     template <> struct abi<Windows::Foundation::IUnknown>
     {
@@ -57,7 +57,7 @@ namespace xlang::impl
 
     struct XLANG_NOVTABLE IAgileReference : unknown_abi
     {
-        virtual int32_t XLANG_CALL Resolve(guid const& id, void** object) noexcept = 0;
+        virtual com_interop_result XLANG_CALL Resolve(guid const& id, void** object) noexcept = 0;
     };
 
     struct XLANG_NOVTABLE IStaticLifetime : xlang_object_abi
@@ -87,7 +87,7 @@ namespace xlang::impl
 
     struct XLANG_NOVTABLE IWeakReference : unknown_abi
     {
-        virtual int32_t XLANG_CALL Resolve(guid const& iid, void** objectReference) noexcept = 0;
+        virtual com_interop_result XLANG_CALL Resolve(guid const& iid, void** objectReference) noexcept = 0;
     };
     template <> struct guid_storage<IWeakReference>
     {
@@ -96,7 +96,7 @@ namespace xlang::impl
 
     struct XLANG_NOVTABLE IWeakReferenceSource : unknown_abi
     {
-        virtual int32_t XLANG_CALL GetWeakReference(IWeakReference** weakReference) noexcept = 0;
+        virtual com_interop_result XLANG_CALL GetWeakReference(IWeakReference** weakReference) noexcept = 0;
     };
     template <> struct guid_storage<IWeakReferenceSource>
     {

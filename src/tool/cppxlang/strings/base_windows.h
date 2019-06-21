@@ -25,7 +25,7 @@ namespace xlang::impl
         }
 
         void* result{};
-        check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
+        check_com_interop_result(ptr->QueryInterface(guid_of<To>(), &result));
         return wrap_as_result<To>(result);
     }
 

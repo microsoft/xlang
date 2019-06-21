@@ -41,7 +41,7 @@ namespace xlang::impl
 
             if (shim().outer())
             {
-                check_hresult(shim().QueryInterface(guid_of<I>(), &result));
+                check_com_interop_result(shim().QueryInterface(guid_of<I>(), &result));
             }
 
             return { result, take_ownership_from_abi };

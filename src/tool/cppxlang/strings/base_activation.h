@@ -5,9 +5,9 @@ namespace xlang
     impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
         void* result;
-        auto hr = xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result);
+        auto error = xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result);
 
-        check_hresult(hr);
+        check_xlang_error(error);
         return { result, take_ownership_from_abi };
     }
 }
@@ -140,7 +140,7 @@ namespace xlang
             T ActivateInstance() const
             {
                 IXlangObject instance;
-                check_hresult((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
+                check_xlang_error((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
                 return instance.try_as<T>();
             }
         };

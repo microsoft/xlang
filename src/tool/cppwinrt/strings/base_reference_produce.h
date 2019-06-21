@@ -100,7 +100,7 @@ namespace winrt::impl
             }
             else
             {
-                throw hresult_not_implemented();
+                throw not_implemented_error();
             }
         }
 

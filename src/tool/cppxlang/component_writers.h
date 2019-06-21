@@ -165,7 +165,7 @@ int32_t XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xla
 {
     uint32_t length{};
     xlang_char8 const* const buffer{};
-    xlang::check_hresult(xlang_get_string_raw_buffer_utf8(class_name, &buffer, &length));
+    xlang::check_xlang_error(xlang_get_string_raw_buffer_utf8(class_name, &buffer, &length));
     std::basic_string_view<xlang_char8> const name{ buffer, length };
     *factory = %_get_activation_factory(name);
 
@@ -174,7 +174,7 @@ int32_t XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xla
         return 0;
     }
 
-    return xlang::hresult_class_not_available(name).to_abi();
+    return xlang::type_load_error(name).to_abi();
 }
 catch (...) { return xlang::to_hresult(); }
 )";
@@ -318,7 +318,7 @@ catch (...) { return xlang::to_hresult(); }
         {
             w.write(R"(        [[noreturn]] Windows::Foundation::IXlangObject ActivateInstance() const
         {
-            throw hresult_not_implemented();
+            throw not_implemented_error();
         }
 )");
         }
@@ -914,7 +914,7 @@ namespace xlang::@::implementation
 
                 auto format = R"(    %::%(%)
     {
-        throw hresult_not_implemented();
+        throw not_implemented_error();
     }
 )";
 
@@ -943,7 +943,7 @@ namespace xlang::@::implementation
             {
                 auto format = R"(    % %::%(%)%
     {
-        throw hresult_not_implemented();
+        throw not_implemented_error();
     }
 )";
 
@@ -976,7 +976,7 @@ namespace xlang::@::implementation
             {
                 auto format = R"(    % %::%(%)%
     {
-        throw hresult_not_implemented();
+        throw not_implemented_error();
     }
 )";
 

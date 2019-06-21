@@ -27,7 +27,7 @@ namespace xlang::impl
                     return error_ok;
                 };
 
-                check_hresult(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
+                check_xlang_error(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
             });
         }
 

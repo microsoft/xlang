@@ -457,28 +457,28 @@ namespace xlang
     inline hstring get_TypeName(Windows::Foundation::IXlangObject const& object)
     {
         void* value{};
-        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::TypeName, &value));
+        check_xlang_error((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::TypeName, &value));
         return { static_cast<xlang_string>(value), take_ownership_from_abi };
     }
 
     inline uint32_t get_HashCode(Windows::Foundation::IXlangObject const& object)
     {
         void* value{};
-        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::HashCode, &value));
+        check_xlang_error((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::HashCode, &value));
         return static_cast<uint32_t>(reinterpret_cast<std::size_t>(value));
     }
 
     inline hstring get_StringRepresentation(Windows::Foundation::IXlangObject const& object)
     {
         void* value{};
-        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::StringRepresentation, &value));
+        check_xlang_error((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::StringRepresentation, &value));
         return { static_cast<xlang_string>(value), take_ownership_from_abi };
     }
 
     inline uint32_t get_ObjectSize(Windows::Foundation::IXlangObject const& object)
     {
         void* value{};
-        check_hresult((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::ObjectSize, &value));
+        check_xlang_error((*(impl::xlang_object_abi**)&object)->GetObjectInfo(XlangObjectInfoCategory::ObjectSize, &value));
         return static_cast<uint32_t>(reinterpret_cast<std::size_t>(value));
     }
 }

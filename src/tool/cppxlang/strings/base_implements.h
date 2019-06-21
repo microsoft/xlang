@@ -395,7 +395,7 @@ namespace xlang::impl
     {
         static hstring get()
         {
-            throw hresult_not_implemented{};
+            throw not_implemented_error{};
         }
     };
 
@@ -423,7 +423,7 @@ namespace xlang::impl
             return*static_cast<D*>(reinterpret_cast<producer<D, I>*>(this));
         }
 
-        int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
+        com_interop_result XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
         {
             return shim().QueryInterface(id, object);
         }
@@ -476,7 +476,7 @@ namespace xlang::impl
     template <typename D>
     struct produce<D, INonDelegatingXlangObject> : produce_base<D, INonDelegatingXlangObject>
     {
-        int32_t XLANG_CALL QueryInterface(const guid& id, void** object) noexcept final
+        com_interop_result XLANG_CALL QueryInterface(const guid& id, void** object) noexcept final
         {
             return this->shim().NonDelegatingQueryInterface(id, object);
         }
@@ -516,13 +516,13 @@ namespace xlang::impl
             return static_cast<weak_ref<Agile>*>(reinterpret_cast<weak_source_producer<Agile>*>(this));
         }
 
-        int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
+        com_interop_result XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
         {
             if (is_guid_of<IWeakReferenceSource>(id))
             {
                 *object = static_cast<IWeakReferenceSource*>(this);
                 that()->increment_strong();
-                return error_ok;
+                return com_interop_result::success;
             }
 
             return that()->m_object->QueryInterface(id, object);
@@ -538,11 +538,11 @@ namespace xlang::impl
             return that()->m_object->Release();
         }
 
-        int32_t XLANG_CALL GetWeakReference(IWeakReference** weakReference) noexcept override
+        com_interop_result XLANG_CALL GetWeakReference(IWeakReference** weakReference) noexcept override
         {
             *weakReference = that();
             that()->AddRef();
-            return error_ok;
+            return com_interop_result::success;
         }
     };
 
@@ -563,17 +563,17 @@ namespace xlang::impl
             XLANG_ASSERT(object);
         }
 
-        int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
+        com_interop_result XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
         {
             if (is_guid_of<IWeakReference>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
                 *object = static_cast<IWeakReference*>(this);
                 AddRef();
-                return error_ok;
+                return com_interop_result::success;
             }
 
             *object = nullptr;
-            return error_no_interface;
+            return com_interop_result::no_interface;
         }
 
         uint32_t XLANG_CALL AddRef() noexcept override
@@ -593,7 +593,7 @@ namespace xlang::impl
             return target;
         }
 
-        int32_t XLANG_CALL Resolve(guid const& id, void** objectReference) noexcept override
+        com_interop_result XLANG_CALL Resolve(guid const& id, void** objectReference) noexcept override
         {
             uint32_t target = m_strong.load(std::memory_order_relaxed);
 
@@ -602,12 +602,12 @@ namespace xlang::impl
                 if (target == 0)
                 {
                     *objectReference = nullptr;
-                    return error_ok;
+                    return com_interop_result::success;
                 }
 
                 if (m_strong.compare_exchange_weak(target, target + 1, std::memory_order_acquire, std::memory_order_relaxed))
                 {
-                    int32_t hr = m_object->QueryInterface(id, objectReference);
+                    com_interop_result hr = m_object->QueryInterface(id, objectReference);
                     m_strong.fetch_sub(1, std::memory_order_relaxed);
                     return hr;
                 }
@@ -712,16 +712,16 @@ namespace xlang::impl
         using IXlangObject = Windows::Foundation::IXlangObject;
         using root_implements_type = root_implements;
 
-        int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept
+        com_interop_result XLANG_CALL QueryInterface(guid const& id, void** object) noexcept
         {
             if (this->outer())
             {
                 return this->outer()->QueryInterface(id, object);
             }
 
-            int32_t result = query_interface(id, object);
+            com_interop_result result = query_interface(id, object);
 
-            if (result == error_no_interface && this->m_inner)
+            if (result == com_interop_result::no_interface && this->m_inner)
             {
                 result = static_cast<unknown_abi*>(get_abi(this->m_inner))->QueryInterface(id, object);
             }
@@ -858,19 +858,19 @@ namespace xlang::impl
             return target;
         }
 
-        int32_t XLANG_CALL NonDelegatingQueryInterface(const guid& id, void** object) noexcept
+        com_interop_result XLANG_CALL NonDelegatingQueryInterface(const guid& id, void** object) noexcept
         {
             if (is_guid_of<Windows::Foundation::IXlangObject>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
                 auto result = to_abi<INonDelegatingXlangObject>(this);
                 NonDelegatingAddRef();
                 *object = result;
-                return error_ok;
+                return com_interop_result::success;
             }
 
-            int32_t result = query_interface(id, object);
+            com_interop_result result = query_interface(id, object);
 
-            if (result == error_no_interface && this->m_inner)
+            if (result == com_interop_result::no_interface && this->m_inner)
             {
                 result = static_cast<unknown_abi*>(get_abi(this->m_inner))->QueryInterface(id, object);
             }
@@ -951,7 +951,7 @@ namespace xlang::impl
             attach_abi(source, weak_ref);
 
             xlang::weak_ref<T> result;
-            check_hresult(source->GetWeakReference(result.put()));
+            check_com_interop_result(source->GetWeakReference(result.put()));
             return result;
         }
 
