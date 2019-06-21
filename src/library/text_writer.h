@@ -158,7 +158,7 @@ namespace xlang::text
             m_second.clear();
         }
 
-        void flush_to_file(std::experimental::filesystem::path const& filename)
+        void flush_to_file(std::filesystem::path const& filename)
         {
             flush_to_file(filename.string());
         }
@@ -181,7 +181,7 @@ namespace xlang::text
 
         bool file_equal(std::string const& filename) const
         {
-            if (!std::experimental::filesystem::exists(filename))
+            if (!std::filesystem::exists(filename))
             {
                 return false;
             }

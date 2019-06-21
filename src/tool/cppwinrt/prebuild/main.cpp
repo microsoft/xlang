@@ -26,9 +26,9 @@ namespace xlang::strings {
 namespace xlang::strings {
 )");
 
-    for (auto&& file : std::experimental::filesystem::directory_iterator(argv[1]))
+    for (auto&& file : std::filesystem::directory_iterator(argv[1]))
     {
-        if (!std::experimental::filesystem::is_regular_file(file))
+        if (!std::filesystem::is_regular_file(file))
         {
             continue;
         }
@@ -112,8 +112,8 @@ END
 )",
     XLANG_VERSION_STRING);
 
-    auto const output = std::experimental::filesystem::canonical(argv[2]);
-    std::experimental::filesystem::create_directories(output);
+    auto const output = std::filesystem::canonical(argv[2]);
+    std::filesystem::create_directories(output);
     strings_h.flush_to_file(output / "strings.h");
     strings_cpp.flush_to_file(output / "strings.cpp");
     version_rc.flush_to_file(output / "version.rc");
