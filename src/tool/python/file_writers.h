@@ -2,7 +2,7 @@
 
 namespace pywinrt
 {
-    namespace stdfs = std::experimental::filesystem;
+    namespace stdfs = std::filesystem;
 
     inline void write_pch_cpp(stdfs::path const& folder)
     {
