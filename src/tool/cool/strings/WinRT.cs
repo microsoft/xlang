@@ -355,19 +355,61 @@ namespace WinRT
         public IntPtr Vftbl;
     }
 
-    internal class ObjectReference<T>
+    internal class IObjectReference
     {
-        Interop.IUnknownVftbl _vftblIUnknown;
-        public readonly T Vftbl;
         public readonly IntPtr ThisPtr;
         public readonly object Module;
         readonly GCHandle _moduleHandle;
 
-        public ObjectReference(object module, IntPtr thisPtr)
+        protected IObjectReference(object module, IntPtr thisPtr)
         {
             Module = module;
-            _moduleHandle = GCHandle.Alloc(module);
             ThisPtr = thisPtr;
+            if (Module != null)
+            {
+                _moduleHandle = GCHandle.Alloc(module);
+            }
+        }
+
+        ~IObjectReference()
+        {
+            if (_moduleHandle.IsAllocated)
+            {
+                _moduleHandle.Free();
+            }
+        }
+    }
+
+    internal class ObjectReference<T> : IObjectReference
+    {
+        Interop.IUnknownVftbl _vftblIUnknown;
+        public readonly T Vftbl;
+        readonly bool _owned;
+
+        public static ObjectReference<T> Attach(object module, ref IntPtr thisPtr)
+        {
+            var obj = new ObjectReference<T>(module, thisPtr, true);
+            thisPtr = IntPtr.Zero;
+            return obj;
+        }
+
+        public static ObjectReference<T> FromNativePtr(object module, IntPtr thisPtr)
+        {
+            var obj = new ObjectReference<T>(module, thisPtr, true);
+            obj._vftblIUnknown.AddRef(obj.ThisPtr);
+            return obj;
+        }
+
+        public static ObjectReference<T> FromNativePtrNoRef(IntPtr thisPtr)
+        {
+            return new ObjectReference<T>(null, thisPtr, false);
+        }
+
+
+        ObjectReference(object module, IntPtr thisPtr, bool owned) :
+            base(module, thisPtr)
+        {
+            _owned = owned;
             var vftblPtr = Marshal.PtrToStructure<VftblPtr>(ThisPtr);
             _vftblIUnknown = Marshal.PtrToStructure<Interop.IUnknownVftbl>(vftblPtr.Vftbl);
             Vftbl = Marshal.PtrToStructure<T>(vftblPtr.Vftbl);
@@ -378,13 +420,15 @@ namespace WinRT
         {
             IntPtr thatPtr;
             unsafe { Marshal.ThrowExceptionForHR(_vftblIUnknown.QueryInterface(ThisPtr, ref iid, &thatPtr)); }
-            return new ObjectReference<T>(Module, thatPtr);
+            return ObjectReference<T>.Attach(Module, ref thatPtr);
         }
 
         ~ObjectReference()
         {
-            _vftblIUnknown.Release(ThisPtr);
-            _moduleHandle.Free();
+            if (_owned)
+            {
+                _vftblIUnknown.Release(ThisPtr);
+            }
         }
     }
 
@@ -437,7 +481,7 @@ namespace WinRT
         {
             IntPtr instancePtr;
             unsafe { Marshal.ThrowExceptionForHR(_GetActivationFactory(runtimeClassId.Handle, &instancePtr)); }
-            return new ObjectReference<Interop.IActivationFactoryVftbl>(this, instancePtr);
+            return ObjectReference<Interop.IActivationFactoryVftbl>.Attach(this, ref instancePtr);
         }
 
         ~DllModule()
@@ -494,7 +538,7 @@ namespace WinRT
             Guid iid = typeof(Interop.IActivationFactoryVftbl).GUID;
             IntPtr instancePtr;
             unsafe { Marshal.ThrowExceptionForHR(Platform.RoGetActivationFactory(runtimeClassId.Handle, ref iid, &instancePtr)); }
-            return new ObjectReference<Interop.IActivationFactoryVftbl>(module, instancePtr);
+            return ObjectReference<Interop.IActivationFactoryVftbl>.Attach(module, ref instancePtr);
         }
 
         ~WinrtModule()
@@ -545,7 +589,7 @@ namespace WinRT
         {
             IntPtr instancePtr = IntPtr.Zero;
             unsafe { Marshal.ThrowExceptionForHR(_IActivationFactory.Vftbl.ActivateInstance(_IActivationFactory.ThisPtr, &instancePtr)); }
-            return new ObjectReference<Interop.IInspectableVftbl>(_IActivationFactory.Module, instancePtr).As<T>();
+            return ObjectReference<Interop.IInspectableVftbl>.Attach(_IActivationFactory.Module, ref instancePtr).As<T>();
         }
 
         public ObjectReference<T> As<T>()
@@ -712,7 +756,7 @@ namespace WinRT
         internal delegate A UnmarshalArgs(IntPtr argsPtr);
         internal delegate void EventHandler(A args);
 
-        readonly ObjectReference<Interop.IInspectableVftbl> _obj; // TODO: IInspectable is dangerous here!
+        readonly IObjectReference _obj;
         readonly Interop._add_EventHandler _addHandler;
         readonly Interop._remove_EventHandler _removeHandler;
         readonly UnmarshalArgs _unmarshalArgs;
@@ -744,7 +788,7 @@ namespace WinRT
             }
         }
 
-        internal EventSourceNoSender(ObjectReference<Interop.IInspectableVftbl> obj, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs)
+        internal EventSourceNoSender(IObjectReference obj, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs)
         {
             _delegate = new Delegate(Marshal.GetFunctionPointerForDelegate(_invoke), new _Invoke(Invoke));
             _obj = obj;
@@ -785,7 +829,7 @@ namespace WinRT
         Delegate _delegate;
 
         readonly S _sender;
-        readonly ObjectReference<Interop.IInspectableVftbl> _obj;
+        readonly IObjectReference _obj;
         readonly Interop._add_EventHandler _addHandler;
         readonly Interop._remove_EventHandler _removeHandler;
         readonly UnmarshalArgs _unmarshalArgs;
@@ -817,7 +861,7 @@ namespace WinRT
             }
         }
 
-        internal EventSource(S sender, ObjectReference<Interop.IInspectableVftbl> obj, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs)
+        internal EventSource(S sender, IObjectReference obj, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs)
         {
             _delegate = new Delegate(Marshal.GetFunctionPointerForDelegate(_invoke), new _Invoke(Invoke));
             _sender = sender;
@@ -856,7 +900,7 @@ namespace WinRT
         Guid _iidIterable;
         internal delegate T CreateT(ObjectReference<Interop.IInspectableVftbl> obj);
         CreateT _createT;
-        T _CreateT(IntPtr instancePtr) => _createT(new ObjectReference<Interop.IInspectableVftbl>(_obj.Module, instancePtr));
+        T _CreateT(ref IntPtr instancePtr) => _createT(ObjectReference<Interop.IInspectableVftbl>.Attach(_obj.Module, ref instancePtr));
 
         internal VectorViewOfObject(ObjectReference<Interop.IVectorViewOfObject> obj, Guid iidIterable, CreateT createT)
         {
@@ -881,7 +925,7 @@ namespace WinRT
                 {
                     IntPtr instancePtr;
                     Marshal.ThrowExceptionForHR(_obj.Vftbl.get_Current(_obj.ThisPtr, &instancePtr));
-                    return _parent._CreateT(instancePtr);
+                    return _parent._CreateT(ref instancePtr);
                 }
             }
 
@@ -904,7 +948,7 @@ namespace WinRT
                 var iterable = _parent._obj.As<Interop.IIterableOfObject>(_parent._iidIterable);
                 IntPtr iteratorPtr;
                 Marshal.ThrowExceptionForHR(iterable.Vftbl.get_First(iterable.ThisPtr, &iteratorPtr));
-                _obj = new ObjectReference<Interop.IIteratorOfObject>(_parent._obj.Module, iteratorPtr);
+                _obj = ObjectReference<Interop.IIteratorOfObject>.Attach(_parent._obj.Module, ref iteratorPtr);
             }
         }
 
@@ -924,7 +968,7 @@ namespace WinRT
             {
                 IntPtr instancePtr;
                 Marshal.ThrowExceptionForHR(_obj.Vftbl.GetAt(_obj.ThisPtr, (uint)index, &instancePtr));
-                return _CreateT(instancePtr);
+                return _CreateT(ref instancePtr);
             }
         }
 
@@ -989,7 +1033,7 @@ namespace WinRT
                 var iterable = _parent._obj.As<Interop.IIterableOfByte>(_parent._iidIterable);
                 IntPtr iteratorPtr;
                 Marshal.ThrowExceptionForHR(iterable.Vftbl.get_First(iterable.ThisPtr, &iteratorPtr));
-                _obj = new ObjectReference<Interop.IIteratorOfByte>(_parent._obj.Module, iteratorPtr);
+                _obj = ObjectReference<Interop.IIteratorOfByte>.Attach(_parent._obj.Module, ref iteratorPtr);
             }
         }
 
