@@ -116,7 +116,7 @@ namespace xlang::cmd
                 {
                     if (std::filesystem::is_regular_file(file))
                     {
-                        auto filename = canonical(file.path()).string();
+                        auto filename = std::filesystem::canonical(file.path()).string();
 
                         if (directory_filter(filename))
                         {
@@ -128,17 +128,15 @@ namespace xlang::cmd
 
             for (auto&& path : values(name))
             {
-                auto canonical = std::filesystem::canonical(path);
-
-                if (std::filesystem::is_directory(canonical))
+                if (std::filesystem::is_directory(path))
                 {
-                    add_directory(canonical);
+                    add_directory(std::filesystem::canonical(path));
                     continue;
                 }
 
-                if (std::filesystem::is_regular_file(canonical))
+                if (std::filesystem::is_regular_file(path))
                 {
-                    files.insert(canonical.string());
+                    files.insert(std::filesystem::canonical(path).string());
                     continue;
                 }
 #if XLANG_PLATFORM_WINDOWS
