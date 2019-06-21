@@ -265,7 +265,7 @@ Where <spec> is one or more of:
 
             if (settings.verbose)
             {
-                w.write(" tool:  %\n", canonical(argv[0]).string());
+                w.write(" tool:  %\n", canonical(path(argv[0]).replace_extension("exe")).string());
                 w.write(" ver:   %\n", XLANG_VERSION_STRING);
 
                 for (auto&& file : settings.input)
