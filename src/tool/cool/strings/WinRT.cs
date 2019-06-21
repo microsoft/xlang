@@ -609,7 +609,7 @@ namespace WinRT
         }
     }
 
-    internal class Delegate : IDisposable
+    internal class Delegate
     {
         int _refs = 0;
         public readonly IntPtr ThisPtr;
@@ -659,6 +659,10 @@ namespace WinRT
             }
 
             System.Threading.Interlocked.Decrement(ref _refs);
+            if (_refs == 0)
+            {
+                _Dispose();
+            }
             return (uint)_refs;
         }
 
@@ -698,14 +702,39 @@ namespace WinRT
             public IntPtr _gchandlePtr;
         }
 
-        bool _disposed = false;
         readonly WinrtModule _module = WinrtModule.Instance;
         readonly GCHandle _moduleHandle;
         readonly GCHandle _thisHandle;
         readonly WeakReference _weakInvoker = new WeakReference(null);
         readonly UnmanagedObject _unmanagedObj;
 
-        public Delegate(IntPtr invokePtr, object invoker)
+        public class InitialReference : IDisposable
+        {
+            Delegate _delegate;
+            public IntPtr DelegatePtr => _delegate.ThisPtr;
+            public InitialReference(IntPtr invoke, object invoker)
+            {
+                _delegate = new Delegate(invoke, invoker);
+                _delegate.AddRef();
+            }
+
+            ~InitialReference()
+            {
+                Dispose();
+            }
+
+            public void Dispose()
+            {
+                if (_delegate != null)
+                {
+                    _delegate.Release();
+                    _delegate = null;
+                }
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        Delegate(IntPtr invokePtr, object invoker)
         {
             _moduleHandle = GCHandle.Alloc(_module);
 
@@ -725,15 +754,11 @@ namespace WinRT
 
         ~Delegate()
         {
-            if (!_disposed)
-            {
-                Dispose();
-            }
+            _Dispose();
         }
 
-        public void Dispose()
+        public void _Dispose()
         {
-            _disposed = true;
             if (_refs != 0)
             {
                 throw new InvalidOperationException("WinRT.Delegate has been leaked!");
@@ -742,6 +767,8 @@ namespace WinRT
             Marshal.FreeCoTaskMem(ThisPtr);
             _thisHandle.Free();
             _moduleHandle.Free();
+
+            GC.SuppressFinalize(this);
         }
     }
 
@@ -750,8 +777,6 @@ namespace WinRT
         delegate void _Invoke(IntPtr argsPtr);
         static Interop.IEventHandlerNoSender_Invoke _invoke = (IntPtr thisPtr, IntPtr argsPtr) =>
             Delegate.MarshalInvoke(thisPtr, (_Invoke invoke) => invoke(argsPtr));
-
-        Delegate _delegate;
 
         internal delegate A UnmarshalArgs(IntPtr argsPtr);
         internal delegate void EventHandler(A args);
@@ -770,9 +795,10 @@ namespace WinRT
                 lock (this)
                 {
                     if (_event == null)
+                        using (var reference = new Delegate.InitialReference(Marshal.GetFunctionPointerForDelegate(_invoke), new _Invoke(Invoke)))
                     {
-                        Interop.EventRegistrationToken token;
-                        unsafe { Marshal.ThrowExceptionForHR(_addHandler(_obj.ThisPtr, _delegate.ThisPtr, &token)); }
+                            Interop.EventRegistrationToken token;
+                        unsafe { Marshal.ThrowExceptionForHR(_addHandler(_obj.ThisPtr, reference.DelegatePtr, &token)); }
                         _token = token;
                     }
                     _event += value;
@@ -790,7 +816,6 @@ namespace WinRT
 
         internal EventSourceNoSender(IObjectReference obj, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs)
         {
-            _delegate = new Delegate(Marshal.GetFunctionPointerForDelegate(_invoke), new _Invoke(Invoke));
             _obj = obj;
             _addHandler = addHandler;
             _removeHandler = removeHandler;
@@ -803,7 +828,6 @@ namespace WinRT
             {
                 _Unsubscribe();
             }
-            _delegate.Dispose();
         }
 
         void Invoke(IntPtr argsPtr)
@@ -826,8 +850,6 @@ namespace WinRT
 
         internal delegate A UnmarshalArgs(IntPtr argsPtr);
 
-        Delegate _delegate;
-
         readonly S _sender;
         readonly IObjectReference _obj;
         readonly Interop._add_EventHandler _addHandler;
@@ -843,9 +865,10 @@ namespace WinRT
                 lock (this)
                 {
                     if (_event == null)
+                        using (var reference = new Delegate.InitialReference(Marshal.GetFunctionPointerForDelegate(_invoke), new _Invoke(Invoke)))
                     {
-                        Interop.EventRegistrationToken token;
-                        unsafe { Marshal.ThrowExceptionForHR(_addHandler(_obj.ThisPtr, _delegate.ThisPtr, &token)); }
+                            Interop.EventRegistrationToken token;
+                        unsafe { Marshal.ThrowExceptionForHR(_addHandler(_obj.ThisPtr, reference.DelegatePtr, &token)); }
                         _token = token;
                     }
                     _event += value;
@@ -863,7 +886,6 @@ namespace WinRT
 
         internal EventSource(S sender, IObjectReference obj, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs)
         {
-            _delegate = new Delegate(Marshal.GetFunctionPointerForDelegate(_invoke), new _Invoke(Invoke));
             _sender = sender;
             _obj = obj;
             _addHandler = addHandler;
@@ -874,7 +896,6 @@ namespace WinRT
         ~EventSource()
         {
             _Unsubscribe();
-            _delegate.Dispose();
         }
 
         void Invoke(IntPtr senderPtr, IntPtr argsPtr)
