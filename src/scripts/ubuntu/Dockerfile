@@ -26,5 +26,5 @@ RUN apt-get install -y \
         clang \
         cmake \
         ninja-build \
-        libc++-dev \
-        libc++abi-dev
+        libc++-8-dev \
+        libc++abi-8-dev
