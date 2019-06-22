@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Numerics;
 
 namespace WinRT
 {
@@ -73,8 +74,22 @@ namespace WinRT
         public delegate int _put_PropertyAsObject([In] IntPtr thisPtr, [In] IntPtr value);
         public unsafe delegate int _get_PropertyAsGuid([In] IntPtr thisPtr, [Out] Guid* value);
         public delegate int _put_PropertyAsGuid([In] IntPtr thisPtr, [In] Guid value);
+        public unsafe delegate int _get_PropertyAsVector3([In] IntPtr thisPtr, [Out] Vector3* value);
+        public delegate int _put_PropertyAsVector3([In] IntPtr thisPtr, [In] Vector3 value);
+        public unsafe delegate int _get_PropertyAsQuaternion([In] IntPtr thisPtr, [Out] Quaternion* value);
+        public delegate int _put_PropertyAsQuaternion([In] IntPtr thisPtr, [In] Quaternion value);
+        public unsafe delegate int _get_PropertyAsMatrix4x4([In] IntPtr thisPtr, [Out] Matrix4x4* value);
+        public delegate int _put_PropertyAsMatrix4x4([In] IntPtr thisPtr, [In] Matrix4x4 value);
         public unsafe delegate int _add_EventHandler([In] IntPtr thisPtr, [In] IntPtr handler, [Out] WinRT.Interop.EventRegistrationToken* token);
         public delegate int _remove_EventHandler([In] IntPtr thisPtr, [In] WinRT.Interop.EventRegistrationToken token);
+
+        // IReference
+        [Guid("dacbffdc-68ef-5fd0-b657-782d0ac9807e")]
+        public struct IReference_Matrix4x4
+        {
+            IInspectableVftbl IInspectableVftbl;
+            public _get_PropertyAsMatrix4x4 get_Value;
+        }
 
         // IDelegate
         public struct IDelegateVftbl
@@ -556,7 +571,7 @@ namespace WinRT
         {
             string moduleName = typeof(T).Namespace;
 
-            using (HString runtimeClassId = new HString(typeof(T).FullName))
+            using (HString runtimeClassId = new HString(typeof(T).FullName.Replace("WinRT", "Windows")))
             {
                 do
                 {
