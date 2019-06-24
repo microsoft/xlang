@@ -15,9 +15,5 @@
 
 #define WINRT_IMPL_SHIM(...) (*(abi_t<__VA_ARGS__>**)&static_cast<__VA_ARGS__ const&>(static_cast<D const&>(*this)))
 
-#ifndef WINRT_EXTERNAL_CATCH_CLAUSE
-#define WINRT_EXTERNAL_CATCH_CLAUSE
-#endif
-
 // Note: this is a workaround for a false-positive warning produced by the Visual C++ 15.9 compiler.
 #pragma warning(disable : 5046)
