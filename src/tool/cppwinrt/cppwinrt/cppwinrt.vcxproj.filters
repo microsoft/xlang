@@ -151,6 +151,12 @@
     <ClInclude Include="..\strings\base_fast_forward.h">
       <Filter>strings</Filter>
     </ClInclude>
+    <ClInclude Include="..\strings\base_xaml.h">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\strings\base_xaml_binding.h">
+      <Filter>strings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(OutDir)version.rc" />
