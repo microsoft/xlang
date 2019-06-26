@@ -156,7 +156,7 @@ namespace winrt::impl
                 return info->second();
             }
 
-            return {};
+            return nullptr;
         }
     };
 
@@ -373,7 +373,7 @@ namespace winrt
 
             Windows::Foundation::IInspectable GetIndexedValue(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept
             {
-                return {};
+                return nullptr;
             }
 
             void SetIndexedValue(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept
@@ -420,12 +420,12 @@ namespace winrt
 
             bool IsAttachable() const noexcept
             {
-                return {};
+                return false;
             }
 
             bool IsDependencyProperty() const noexcept
             {
-                return {};
+                return false;
             }
 
             hstring Name() const noexcept
@@ -439,7 +439,7 @@ namespace winrt
                 {
                     operator Windows::UI::Xaml::Markup::IXamlType()
                     {
-                        return {};
+                        return nullptr;
                     }
                     operator Windows::UI::Xaml::Interop::TypeName()
                     {
@@ -452,7 +452,7 @@ namespace winrt
 
             Windows::UI::Xaml::Markup::IXamlType TargetType() const noexcept
             {
-                return {};
+                return nullptr;
             }
 
             Windows::UI::Xaml::Data::ICustomProperty GetCustomProperty(hstring const& member)
@@ -462,7 +462,7 @@ namespace winrt
 
             Windows::UI::Xaml::Data::ICustomProperty GetIndexedProperty(hstring const&, Windows::UI::Xaml::Interop::TypeName const&) const noexcept
             {
-                return {};
+                return nullptr;
             }
 
             hstring GetStringRepresentation() const noexcept
@@ -539,23 +539,57 @@ namespace winrt
                 return members[name] = make<xaml_member>(s_last_type->get_strong(), name);
             }
 
-            Windows::UI::Xaml::Markup::IXamlMember ContentProperty() const noexcept { return {}; }
-            bool IsArray() const noexcept { return {}; }
-            bool IsCollection() const noexcept { return {}; }
-            bool IsDictionary() const noexcept { return {}; }
-            bool IsMarkupExtension() const noexcept { return {}; }
-            Windows::UI::Xaml::Markup::IXamlType ItemType() const noexcept { return {}; }
-            Windows::UI::Xaml::Markup::IXamlType KeyType() const noexcept { return {}; }
-
-            Windows::Foundation::IInspectable CreateFromString(hstring const& value) const noexcept
+            Windows::UI::Xaml::Markup::IXamlMember ContentProperty() const noexcept
             {
-                value;
-                return {};
+                return nullptr;
             }
 
-            void AddToVector(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept { }
-            void AddToMap(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept { }
-            void RunInitializer() const noexcept { }
+            bool IsArray() const noexcept
+            {
+                return false;
+            }
+
+            bool IsCollection() const noexcept
+            {
+                return false;
+            }
+
+            bool IsDictionary() const noexcept
+            {
+                return false;
+            }
+
+            bool IsMarkupExtension() const noexcept
+            {
+                return false;
+            }
+
+            Windows::UI::Xaml::Markup::IXamlType ItemType() const noexcept
+            {
+                return nullptr;
+            }
+
+            Windows::UI::Xaml::Markup::IXamlType KeyType() const noexcept
+            {
+                return nullptr;
+            }
+
+            Windows::Foundation::IInspectable CreateFromString(hstring const&) const noexcept
+            {
+                return nullptr;
+            }
+
+            void AddToVector(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept
+            {
+            }
+
+            void AddToMap(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept
+            {
+            }
+
+            void RunInitializer() const noexcept
+            {
+            }
         };
 
         static hstring type_name()
@@ -619,23 +653,57 @@ namespace winrt
                 return nullptr;
             }
 
-            Windows::UI::Xaml::Markup::IXamlMember ContentProperty() const noexcept { return {}; }
-            bool IsArray() const noexcept { return {}; }
-            bool IsCollection() const noexcept { return {}; }
-            bool IsDictionary() const noexcept { return {}; }
-            bool IsMarkupExtension() const noexcept { return {}; }
-            Windows::UI::Xaml::Markup::IXamlType ItemType() const noexcept { return {}; }
-            Windows::UI::Xaml::Markup::IXamlType KeyType() const noexcept { return {}; }
-
-            Windows::Foundation::IInspectable CreateFromString(hstring const& value) const noexcept
+            Windows::UI::Xaml::Markup::IXamlMember ContentProperty() const noexcept
             {
-                value;
-                return {};
+                return nullptr;
             }
 
-            void AddToVector(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept { }
-            void AddToMap(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept { }
-            void RunInitializer() const noexcept { }
+            bool IsArray() const noexcept
+            {
+                return false;
+            }
+
+            bool IsCollection() const noexcept
+            {
+                return false;
+            }
+
+            bool IsDictionary() const noexcept
+            {
+                return false;
+            }
+
+            bool IsMarkupExtension() const noexcept
+            {
+                return false;
+            }
+
+            Windows::UI::Xaml::Markup::IXamlType ItemType() const noexcept
+            {
+                return nullptr;
+            }
+
+            Windows::UI::Xaml::Markup::IXamlType KeyType() const noexcept
+            {
+                return nullptr;
+            }
+
+            Windows::Foundation::IInspectable CreateFromString(hstring const&) const noexcept
+            {
+                return nullptr;
+            }
+
+            void AddToVector(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept
+            {
+            }
+
+            void AddToMap(Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&, Windows::Foundation::IInspectable const&) const noexcept
+            {
+            }
+
+            void RunInitializer() const noexcept
+            {
+            }
         };
     };
 
