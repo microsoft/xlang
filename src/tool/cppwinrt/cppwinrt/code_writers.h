@@ -3157,7 +3157,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
 
         auto format = R"(    template <typename U> struct bindable<%, U>
     {
-        static binding bind(% const& object, hstring const& name)
+        static xaml_binding bind(% const& object, hstring const& name)
         {
 %            return {};
         }

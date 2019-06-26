@@ -9,22 +9,22 @@ namespace winrt::impl
 
 namespace winrt
 {
-    struct binding
+    struct xaml_binding
     {
-        binding() noexcept = default;
+        xaml_binding() noexcept = default;
 
         // TODO: add overloads that take leading strong/weak reference
         template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
-        binding(T& reference);
+        xaml_binding(T& reference);
 
         template <typename T, typename = std::enable_if_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
-        binding(T const& object);
+        xaml_binding(T const& object);
 
         template <typename Get, typename = std::enable_if_t<std::is_invocable_v<Get>>>
-        binding(Get && get_self);
+        xaml_binding(Get && get_self);
 
         template <typename Get, typename Set>
-        binding(Get&& get_self, Set&& set_self);
+        xaml_binding(Get&& get_self, Set&& set_self);
 
         auto get() const;
         auto set(Windows::Foundation::IInspectable const& value) const;

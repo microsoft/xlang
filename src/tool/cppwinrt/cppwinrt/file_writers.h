@@ -45,6 +45,24 @@ namespace xlang
         w.flush_to_file(settings.output_folder + "winrt/base.h");
     }
 
+    static void write_xaml_h()
+    {
+        writer w;
+        write_preamble(w);
+        write_open_file_guard(w, "XAML");
+        write_version_assert(w);
+        w.write_root_include("Windows.Foundation");
+        w.write_root_include("Windows.UI.Xaml.Controls");
+        w.write_root_include("Windows.UI.Xaml.Data");
+        w.write_root_include("Windows.UI.Xaml.Interop");
+        w.write_root_include("Windows.UI.Xaml.Markup");
+
+        w.write(strings::base_xaml);
+
+        write_close_file_guard(w);
+        w.flush_to_file(settings.output_folder + "winrt/xaml.h");
+    }
+
     static void write_fast_forward_h(std::vector<TypeDef> const& classes)
     {
         writer w;
