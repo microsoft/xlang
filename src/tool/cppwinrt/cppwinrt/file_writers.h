@@ -171,6 +171,7 @@ namespace xlang
         w.write_each<write_delegate_implementation>(members.delegates);
         w.write_each<write_produce>(members.interfaces);
         w.write_each<write_dispatch_overridable>(members.classes);
+        w.write_each<write_bind>(members.classes);
         write_close_namespace(w);
         write_type_namespace(w, ns);
         w.write_each<write_enum_operators>(members.enums);

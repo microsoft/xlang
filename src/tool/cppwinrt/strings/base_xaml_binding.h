@@ -2,6 +2,9 @@
 namespace winrt::impl
 {
     struct binding_base;
+
+    template <typename T, typename U>
+    struct bindable;
 }
 
 namespace winrt

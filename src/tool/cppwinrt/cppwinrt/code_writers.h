@@ -3071,6 +3071,105 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             type);
     }
 
+    static void write_bind_property(writer& w, MethodDef const& get_method, MethodDef const& put_method)
+    {
+        auto name = get_name(get_method);
+
+        if (put_method)
+        {
+            auto format = R"(            if (name == L"%") return
+            {
+                [object] { return object.%(); },
+                [object](auto&& value) { object.%(value); }
+            };
+)";
+            w.write(format, name, name, name);
+        }
+        else
+        {
+            auto format = R"(            if (name == L"%") return
+            {
+                [object] { return object.%(); }
+            };
+)";
+            w.write(format, name, name);
+        }
+    }
+
+    static MethodDef find_put_method(std::pair<MethodDef, MethodDef> const& methods, MethodDef const& get_method)
+    {
+        std::string name{ get_method.Name() };
+        name.replace(0, 3, "put");
+
+        for (auto&& method : methods)
+        {
+            if (method.Name() == name)
+            {
+                return method;
+            }
+        }
+
+        return {};
+    }
+
+    static void write_bind_properties(writer& w, get_interfaces_t const& interfaces)
+    {
+        for (auto&& [name, info] : interfaces)
+        {
+            auto methods = info.type.MethodList();
+
+            for (auto&& method : methods)
+            {
+                if (!is_get_overload(method))
+                {
+                    continue;
+                }
+
+                write_bind_property(w, method, find_put_method(methods, method));
+            }
+        }
+    }
+
+    static bool has_properties(get_interfaces_t const& interfaces)
+    {
+        for (auto&& [name, info] : interfaces)
+        {
+            for (auto&& method : info.type.MethodList())
+            {
+                if (is_get_overload(method))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    static void write_bind(writer& w, TypeDef const& type)
+    {
+        auto interfaces = get_interfaces(w, type);
+
+        if (!has_properties(interfaces))
+        {
+            return;
+        }
+
+        auto format = R"(    template <typename U> struct bindable<%, U>
+    {
+        static binding bind(% const& object, hstring const& name)
+        {
+%            return {};
+        }
+    };
+)";
+
+        w.write(format,
+            type,
+            type,
+            bind<write_bind_properties>(interfaces));
+    }
+
     static void write_namespace_special(writer& w, std::string_view const& namespace_name, cache const& c)
     {
         if (namespace_name == "Windows.Foundation")
