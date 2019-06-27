@@ -6,6 +6,7 @@ endif()
 
 set(XLANG_SCRIPTS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 set(XLANG_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
+set(DETOURS_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/winrt/detours/include")
 
 if(NOT DEFINED XLANG_BUILD_VERSION)
 set(XLANG_BUILD_VERSION "0.0.0")
@@ -142,4 +143,8 @@ add_subdirectory(tool)
 add_subdirectory(foundation)
 add_subdirectory(platform)
 add_subdirectory(test)
+if (WIN32)
+   add_subdirectory(winrt)
+endif()
 add_subdirectory(package EXCLUDE_FROM_ALL)
+
