@@ -128,7 +128,7 @@ namespace xlang::Windows::Foundation
             return static_cast<bool>(to);
         }
 
-        hresult as(guid const& id, void** result) const noexcept
+        com_interop_result as(guid const& id, void** result) const noexcept
         {
             return m_ptr->QueryInterface(id, result);
         }

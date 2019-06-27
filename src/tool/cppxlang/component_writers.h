@@ -161,7 +161,7 @@ void* XLANG_CALL %_get_activation_factory(std::basic_string_view<xlang_char8> co
         }
 
         format = R"(
-int32_t XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory) noexcept try
+xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory) noexcept try
 {
     uint32_t length{};
     xlang_char8 const* const buffer{};
@@ -171,12 +171,12 @@ int32_t XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xla
 
     if (*factory)
     {
-        return 0;
+        return nullptr;
     }
 
     return xlang::type_load_error(name).to_abi();
 }
-catch (...) { return xlang::to_hresult(); }
+catch (...) { return xlang::to_xlang_result(); }
 )";
 
         w.write(format,

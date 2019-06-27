@@ -771,9 +771,9 @@ namespace xlang::impl
         void abi_exit() const noexcept {}
         static void final_release(std::unique_ptr<D>) noexcept {}
 
-        int32_t query_interface_tearoff(guid const&, void**) const noexcept
+        com_interop_result query_interface_tearoff(guid const&, void**) const noexcept
         {
-            return error_no_interface;
+            return com_interop_result::no_interface;
         }
 
     protected:
@@ -967,14 +967,14 @@ namespace xlang::impl
 
         std::atomic<std::conditional_t<is_weak_ref_source::value, uintptr_t, uint32_t>> m_references{ 1 };
 
-        int32_t query_interface(guid const& id, void** object) noexcept
+        com_interop_result query_interface(guid const& id, void** object) noexcept
         {
             *object = static_cast<D*>(this)->find_interface(id);
 
             if (*object != nullptr)
             {
                 AddRef();
-                return error_ok;
+                return com_interop_result::success;
             }
 
             if constexpr (is_agile::value)
@@ -983,7 +983,7 @@ namespace xlang::impl
                 {
                     *object = get_unknown();
                     AddRef();
-                    return error_ok;
+                    return com_interop_result::success;
                 }
             }
 
@@ -993,7 +993,7 @@ namespace xlang::impl
                 {
                     *object = find_xlang_object();
                     AddRef();
-                    return error_ok;
+                    return com_interop_result::success;
                 }
             }
 
@@ -1001,7 +1001,7 @@ namespace xlang::impl
             {
                 *object = get_unknown();
                 AddRef();
-                return error_ok;
+                return com_interop_result::success;
             }
 
             if constexpr (is_weak_ref_source::value)
@@ -1009,7 +1009,7 @@ namespace xlang::impl
                 if (is_guid_of<impl::IWeakReferenceSource>(id))
                 {
                     *object = make_weak_ref();
-                    return *object ? error_ok : error_bad_alloc;
+                    return *object ? com_interop_result::success : com_interop_result::pointer;
                 }
             }
 
@@ -1193,14 +1193,14 @@ namespace xlang
             return result;
         }
 
-        impl::hresult_type XLANG_CALL QueryInterface(guid const& id, void** object) noexcept
+        com_interop_result XLANG_CALL QueryInterface(guid const& id, void** object) noexcept
         {
             return root_implements_type::QueryInterface(id, object);
         }
 
 #ifdef XLANG_WINDOWS_ABI
 
-        impl::hresult_type XLANG_CALL QueryInterface(GUID const& id, void** object) noexcept
+        com_interop_result XLANG_CALL QueryInterface(GUID const& id, void** object) noexcept
         {
             return root_implements_type::QueryInterface(reinterpret_cast<guid const&>(id), object);
         }

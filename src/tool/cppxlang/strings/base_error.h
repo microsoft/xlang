@@ -1,16 +1,6 @@
 
 namespace xlang::impl
 {
-    constexpr int32_t hresult_from_win32(uint32_t const x) noexcept
-    {
-        return (int32_t)(x) <= 0 ? (int32_t)(x) : (int32_t)(((x) & 0x0000FFFF) | (7 << 16) | 0x80000000);
-    }
-
-    constexpr int32_t hresult_from_nt(uint32_t const x) noexcept
-    {
-        return ((int32_t)((x) | 0x10000000));
-    }
-
     constexpr xlang_result xlang_result_from_com(com_interop_result const result)
     {
         switch (result)
@@ -26,7 +16,14 @@ namespace xlang::impl
         return xlang_result::fail;
     }
 
-/*    constexpr xlang_result xlang_result_from_hresult(hresult const result)
+#ifdef _WIN32
+
+    constexpr int32_t hresult_from_win32(uint32_t const x) noexcept
+    {
+        return (int32_t)(x) <= 0 ? (int32_t)(x) : (int32_t)(((x) & 0x0000FFFF) | (7 << 16) | 0x80000000);
+    }
+
+    constexpr xlang_result xlang_result_from_hresult(HRESULT const result)
     {
         switch (result)
         {
@@ -53,12 +50,14 @@ namespace xlang::impl
         case E_POINTER:
             return xlang_result::pointer;
         case REGDB_E_CLASSNOTREG:
-        case COR_E_TYPELOAD:
+        case static_cast<HRESULT>(0x80131522):
             return xlang_result::type_load;
         }
 
         return xlang_result::fail;
-    }*/
+    }
+
+#endif
 }
 
 namespace xlang
@@ -208,6 +207,13 @@ namespace xlang
         type_load_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::type_load, error_info) {}
     };
 
+    struct cancelled_error : xlang_error
+    {
+        cancelled_error() noexcept : xlang_error(xlang_result::fail) {}
+        cancelled_error(param::hstring const& message) noexcept : xlang_error(xlang_result::fail, message) {}
+        cancelled_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::fail, error_info) {}
+    };
+
     [[noreturn]] inline XLANG_NOINLINE void throw_xlang_result(xlang_result const result, xlang_error_info* error_info = nullptr)
     {
         if (result == xlang_result::out_of_memory)
@@ -310,46 +316,11 @@ namespace xlang
     {
         if (result != com_interop_result::success)
         {
-            throw_xlang_result(xlang_result_from_com(result), nullptr);
+            throw_xlang_result(impl::xlang_result_from_com(result), nullptr);
         }
     }
-
 
 #ifdef _WIN32
-
-
-/*
-    template<typename T>
-    void check_hresult(T result)
-    {
-        if (result != 0)
-        {
-            //throw_xlang_result(impl::xlang_result_from_hresult(result));
-        }
-    }
-
-[[noreturn]] inline void throw_last_error()
-    {
-        check_hresult(impl::hresult_from_win32(XLANG_GetLastError()));
-    }
-
-    template<typename T>
-    void check_nt(T result)
-    {
-        if (result != 0)
-        {
-            check_hresult(impl::hresult_from_nt(result));
-        }
-    }
-
-    template<typename T>
-    void check_win32(T result)
-    {
-        if (result != 0)
-        {
-            check_hresult(impl::hresult_from_win32(result));
-        }
-    }
 
     template<typename T>
     void check_hresult(T result)
@@ -360,13 +331,9 @@ namespace xlang
         }
     }
 
-    template<typename T>
-    void check_bool(T result)
+    [[noreturn]] inline void throw_last_error()
     {
-        if (!result)
-        {
-            xlang::throw_last_error();
-        }
+        throw_xlang_result(impl::xlang_result_from_hresult(HRESULT_FROM_WIN32(XLANG_GetLastError())));
     }
 
     template<typename T>
@@ -378,6 +345,6 @@ namespace xlang
         }
 
         return pointer;
-    }*/
+    }
 #endif
 }

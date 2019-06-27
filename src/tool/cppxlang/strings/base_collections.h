@@ -132,7 +132,7 @@ namespace xlang::impl
         {
             if (m_invalid)
             {
-                throw hresult_illegal_method_call();
+                throw invalid_state_error();
             }
         }
 
@@ -168,7 +168,7 @@ namespace xlang::impl
             {
                 if (version.get_version() != m_snapshot)
                 {
-                    throw hresult_changed_state();
+                    throw invalid_state_error();
                 }
             }
 

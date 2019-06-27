@@ -1531,13 +1531,13 @@ namespace xlang
         }
         else
         {
-            format = R"(        int32_t XLANG_CALL %(%) noexcept final try
+            format = R"(        xlang_error_info* XLANG_CALL %(%) noexcept final try
         {
 %            typename D::abi_guard guard(this->shim());
             %
-            return 0;
+            return nullptr;
         }
-        catch (...) { return to_hresult(); }
+        catch (...) { return to_xlang_result(); }
 )";
         }
 
@@ -2053,16 +2053,16 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
         {
             type(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
-            int32_t XLANG_CALL Invoke(%) noexcept final
+            xlang_error_info* XLANG_CALL Invoke(%) noexcept final
             {
                 try
                 {
                     %;
-                    return 0;
+                    return nullptr;
                 }
                 catch (...)
                 {%
-                    return to_hresult();
+                    return to_xlang_result();
                 }
             }
         };
