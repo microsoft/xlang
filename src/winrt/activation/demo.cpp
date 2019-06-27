@@ -38,12 +38,13 @@ HRESULT WINAPI RoActivateInstanceDetour(
     HRESULT hr = WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
     if (hr == REGDB_E_CLASSNOTREG)
     {
-        return TrueRoActivateInstance(activatableClassId, instance);
+        hr =  TrueRoActivateInstance(activatableClassId, instance);
     }
     else if (SUCCEEDED(hr))
     {
-        return pFactory->ActivateInstance(instance);
+        hr = pFactory->ActivateInstance(instance);
     }
+    return hr;
 }
 
 HRESULT WINAPI RoGetActivationFactoryDetour(
@@ -55,7 +56,7 @@ HRESULT WINAPI RoGetActivationFactoryDetour(
     HRESULT hr = WinRTGetActivationFactory(activatableClassId, iid, factory);
     if (hr == REGDB_E_CLASSNOTREG)
     {
-        return TrueRoGetActivationFactory(activatableClassId, iid, factory);
+        hr = TrueRoGetActivationFactory(activatableClassId, iid, factory);
     }
     return hr;
 }
@@ -71,8 +72,9 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     if (hr == REGDB_E_CLASSNOTREG)
     {
-        return TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
+        hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     }
+    return hr;
 }
 
 HRESULT WINAPI RoResolveNamespaceDetour(
@@ -92,14 +94,15 @@ HRESULT WINAPI RoResolveNamespaceDetour(
         subNamespacesCount, subNamespaces);
     if (hr == REGDB_E_CLASSNOTREG)
     {
-        return TrueRoResolveNamespace(name, windowsMetaDataDir,
+        hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
             packageGraphDirsCount, packageGraphDirs,
             metaDataFilePathsCount, metaDataFilePaths,
             subNamespacesCount, subNamespaces);
     }
+    return hr;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     if (DetourIsHelperProcess()) {
         return TRUE;
@@ -119,22 +122,35 @@ int main()
     Sleep(1000);
 
     WinRTLoadComponent(L"demo.txt");
+    WinRTLoadComponent(L"demo2.txt");
 
     HRESULT hr = S_OK;
 
-    ComPtr<IInspectable> instance;
-    hr = RoActivateInstance(HStringReference(L"MyComponent.SampleClass").Get(), &instance);
-    if (FAILED(hr)) { printf("Failed activate: %d\n", hr); return false; }
-    ComPtr<IStringable> stringable;
-    hr = instance.As<IStringable>(&stringable);
-    if (FAILED(hr)) { printf("Failed QI: %d\n", hr); return false; }
+    {
+        ComPtr<IInspectable> instance;
+        hr = RoActivateInstance(HStringReference(L"test_component.Class").Get(), &instance);
+        if (FAILED(hr)) { printf("Failed activate: %x\n", hr); return false; }
 
-    HString result;
-    stringable->ToString(result.GetAddressOf());
-    if (FAILED(hr)) { printf("Failed tostring: %d\n", hr); return false; }
+        HString result;
+        instance->GetRuntimeClassName(result.GetAddressOf());
+        if (FAILED(hr)) { printf("Failed to load name: %x\n", hr); return false; }
 
-    unsigned int length = 0;
-    wprintf(L"%s\n", result.GetRawBuffer(&length));
+        unsigned int length = 0;
+        wprintf(L"%s\n", result.GetRawBuffer(&length));
+    }
+
+    {
+        ComPtr<IInspectable> instance;
+        hr = RoActivateInstance(HStringReference(L"MyComponent.SampleClass").Get(), &instance);
+        if (FAILED(hr)) { printf("Failed activate: %x\n", hr); return false; }
+
+        HString result;
+        instance->GetRuntimeClassName(result.GetAddressOf());
+        if (FAILED(hr)) { printf("Failed to load name: %x\n", hr); return false; }
+
+        unsigned int length = 0;
+        wprintf(L"%s\n", result.GetRawBuffer(&length));
+    }
 
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());

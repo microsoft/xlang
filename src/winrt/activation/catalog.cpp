@@ -39,7 +39,7 @@ struct component
             handle = LoadLibraryW(module_path.c_str());
             this->get_activation_factory = (activation_factory_type)GetProcAddress(handle, "DllGetActivationFactory");
         }
-        return handle != nullptr;
+        return handle != nullptr && this->get_activation_factory != nullptr;
     }
 
     HRESULT GetActivationFactory(HSTRING className, REFIID  iid, void** factory)
