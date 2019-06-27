@@ -370,11 +370,12 @@ namespace WinRT
         public IntPtr Vftbl;
     }
 
-    internal class IObjectReference
+    internal abstract class IObjectReference
     {
         public readonly IntPtr ThisPtr;
         public readonly object Module;
         readonly GCHandle _moduleHandle;
+        protected virtual Interop.IUnknownVftbl VftblIUnknown { get; }
 
         protected IObjectReference(object module, IntPtr thisPtr)
         {
@@ -385,6 +386,15 @@ namespace WinRT
                 _moduleHandle = GCHandle.Alloc(module);
             }
         }
+
+        public ObjectReference<T> As<T>() => As<T>(typeof(T).GUID);
+        public ObjectReference<T> As<T>(Guid iid)
+        {
+            IntPtr thatPtr;
+            unsafe { Marshal.ThrowExceptionForHR(VftblIUnknown.QueryInterface(ThisPtr, ref iid, &thatPtr)); }
+            return ObjectReference<T>.Attach(Module, ref thatPtr);
+        }
+
 
         ~IObjectReference()
         {
@@ -397,7 +407,9 @@ namespace WinRT
 
     internal class ObjectReference<T> : IObjectReference
     {
-        Interop.IUnknownVftbl _vftblIUnknown;
+
+        protected override Interop.IUnknownVftbl VftblIUnknown => _vftblIUnknown;
+        readonly Interop.IUnknownVftbl _vftblIUnknown;
         public readonly T Vftbl;
         readonly bool _owned;
 
@@ -428,14 +440,6 @@ namespace WinRT
             var vftblPtr = Marshal.PtrToStructure<VftblPtr>(ThisPtr);
             _vftblIUnknown = Marshal.PtrToStructure<Interop.IUnknownVftbl>(vftblPtr.Vftbl);
             Vftbl = Marshal.PtrToStructure<T>(vftblPtr.Vftbl);
-        }
-
-        public ObjectReference<T> As<T>() => As<T>(typeof(T).GUID);
-        public ObjectReference<T> As<T>(Guid iid)
-        {
-            IntPtr thatPtr;
-            unsafe { Marshal.ThrowExceptionForHR(_vftblIUnknown.QueryInterface(ThisPtr, ref iid, &thatPtr)); }
-            return ObjectReference<T>.Attach(Module, ref thatPtr);
         }
 
         ~ObjectReference()
@@ -600,23 +604,28 @@ namespace WinRT
             }
         }
 
-        public ObjectReference<T> ActivateInstance<T>()
+        ObjectReference<I> _ActivateInstance<I>()
         {
             IntPtr instancePtr = IntPtr.Zero;
             unsafe { Marshal.ThrowExceptionForHR(_IActivationFactory.Vftbl.ActivateInstance(_IActivationFactory.ThisPtr, &instancePtr)); }
-            return ObjectReference<Interop.IInspectableVftbl>.Attach(_IActivationFactory.Module, ref instancePtr).As<T>();
+            return ObjectReference<Interop.IInspectableVftbl>.Attach(_IActivationFactory.Module, ref instancePtr).As<I>();
         }
 
-        public ObjectReference<T> As<T>()
+        ObjectReference<I> _As<I>()
         {
-            return _IActivationFactory.As<T>();
+            return _IActivationFactory.As<I>();
         }
+
+        static WeakLazy<ActivationFactory<T>> _factory = new WeakLazy<ActivationFactory<T>>();
+        public static ObjectReference<I> As<I>() => _factory.Value._As<I>();
+        public static ObjectReference<I> ActivateInstance<I>() => _factory.Value._ActivateInstance<I>();
     }
 
-    public abstract class RuntimeClass<C, I>
+    public class RuntimeClass<C, I>
     {
         private protected static WeakLazy<WinRT.ActivationFactory<C>> _factory = new WeakLazy<ActivationFactory<C>>();
         private protected readonly ObjectReference<I> _obj;
+        internal IObjectReference Obj => _obj;
 
         private protected RuntimeClass(ObjectReference<I> obj)
         {
@@ -865,7 +874,7 @@ namespace WinRT
 
         internal delegate A UnmarshalArgs(IntPtr argsPtr);
 
-        readonly S _sender;
+        public S Sender;
         readonly IObjectReference _obj;
         readonly Interop._add_EventHandler _addHandler;
         readonly Interop._remove_EventHandler _removeHandler;
@@ -899,9 +908,8 @@ namespace WinRT
             }
         }
 
-        internal EventSource(S sender, IObjectReference obj, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs)
+        internal EventSource(IObjectReference obj, Interop._add_EventHandler addHandler, Interop._remove_EventHandler removeHandler, UnmarshalArgs unmarshalArgs)
         {
-            _sender = sender;
             _obj = obj;
             _addHandler = addHandler;
             _removeHandler = removeHandler;
@@ -920,7 +928,12 @@ namespace WinRT
                 throw new ArgumentException("Mis-matched sender.");
             }
 
-            _event?.Invoke(_sender, _unmarshalArgs(argsPtr));
+            if (Sender == null)
+            {
+                throw new NullReferenceException("Sender is missing!");
+            }
+
+            _event?.Invoke(Sender, _unmarshalArgs(argsPtr));
         }
 
         void _Unsubscribe()
