@@ -1344,50 +1344,26 @@ namespace xlang
         }
         else if (type_name == "Windows.Foundation.IAsyncAction")
         {
-            w.write(R"(        void get() const
-        {
-            wait_get(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperation`1")
         {
-            w.write(R"(        TResult get() const
-        {
-            return wait_get(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncActionWithProgress`1")
         {
-            w.write(R"(        void get() const
-        {
-            wait_get(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperationWithProgress`2")
         {
-            w.write(R"(        TResult get() const
-        {
-            return wait_get(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
     }
