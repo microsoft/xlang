@@ -1,3 +1,12 @@
+#define CPPXLANG_VERSION "%"
+
+#ifdef _WIN32
+extern "C"
+__declspec(selectany) char const* const cppxlang_projection_identifier = "cppxlang_" CPPXLANG_VERSION;
+#else
+extern "C"
+inline char const* const cppxlang_projection_identifier = "cppxlang_" CPPXLANG_VERSION;
+#endif
 
 namespace xlang::impl
 {
@@ -141,7 +150,7 @@ namespace xlang
         uint32_t const m_debug_magic{ 0xAABBCCDD };
         xlang_result m_code{ xlang_result::fail };
         com_ptr<xlang_error_info> m_error_info;
-        hstring m_projection_identifer{ "cppxlang_1.0" };
+        hstring m_projection_identifer{ cppxlang_projection_identifier };
 
 #ifdef __clang__
 #pragma clang diagnostic pop
