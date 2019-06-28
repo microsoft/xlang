@@ -96,10 +96,10 @@ Where <spec> is one or more of:
         settings.license = args.exists("license");
         settings.brackets = args.exists("brackets");
 
-        auto output_folder = canonical(args.value("output"));
+        path output_folder = args.value("output");
         create_directories(output_folder / "winrt/impl");
-        output_folder += '/';
-        settings.output_folder = output_folder.string();
+        settings.output_folder = canonical(output_folder).string();
+        settings.output_folder += '\\';
 
         for (auto && include : args.values("include"))
         {
@@ -149,10 +149,9 @@ Where <spec> is one or more of:
 
             if (!component.empty())
             {
-                auto component_folder = canonical(component);
-                create_directories(component_folder);
-                component_folder += '/';
-                settings.component_folder = component_folder.string();
+                create_directories(component);
+                settings.component_folder = canonical(component).string();
+                settings.component_folder += '\\';
             }
         }
     }
@@ -266,7 +265,7 @@ Where <spec> is one or more of:
 
             if (settings.verbose)
             {
-                w.write(" tool:  %\n", canonical(argv[0]).string());
+                w.write(" tool:  %\n", canonical(path(argv[0]).replace_extension("exe")).string());
                 w.write(" ver:   %\n", XLANG_VERSION_STRING);
 
                 for (auto&& file : settings.input)

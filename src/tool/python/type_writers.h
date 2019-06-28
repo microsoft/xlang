@@ -3,7 +3,7 @@
 namespace pywinrt
 {
     using namespace std::literals;
-    using namespace std::experimental::filesystem;
+    using namespace std::filesystem;
     using namespace xlang;
     using namespace xlang::meta::reader;
     using namespace xlang::text;

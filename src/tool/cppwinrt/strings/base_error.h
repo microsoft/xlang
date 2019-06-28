@@ -363,7 +363,6 @@ namespace winrt
         {
             return e.to_abi();
         }
-        WINRT_EXTERNAL_CATCH_CLAUSE
         catch (std::bad_alloc const&)
         {
             return impl::error_bad_alloc;

@@ -6,7 +6,7 @@
 using namespace Microsoft::VisualStudio::Debugger;
 using namespace Microsoft::VisualStudio::Debugger::Evaluation;
 using namespace Microsoft::VisualStudio::Debugger::Telemetry;
-using namespace std::experimental::filesystem;
+using namespace std::filesystem;
 using namespace winrt;
 using namespace xlang;
 using namespace xlang::meta;
@@ -78,9 +78,9 @@ cppwinrt_visualizer::cppwinrt_visualizer()
 #else
         ExpandEnvironmentStringsA("%windir%\\SysNative\\WinMetadata", local.data(), static_cast<DWORD>(local.size()));
 #endif
-        for (auto&& file : std::experimental::filesystem::directory_iterator(local.data()))
+        for (auto&& file : std::filesystem::directory_iterator(local.data()))
         {
-            if (std::experimental::filesystem::is_regular_file(file))
+            if (std::filesystem::is_regular_file(file))
             {
                 db_files.push_back(file.path().string());
             }
