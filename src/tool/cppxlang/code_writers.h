@@ -1074,7 +1074,10 @@ namespace xlang
             if constexpr (std::is_base_of_v<Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                com_ptr<xlang_error_info> error_info{
+                    XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result)),
+                    take_ownership_from_abi
+                };
                 return result;
             }
             else
@@ -1082,7 +1085,11 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (nullptr == XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                com_ptr<xlang_error_info> error_info{
+                    XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)),
+                    take_ownership_from_abi
+                };
+                if (nullptr == error_info)
                 {
                     result = std::move(value);
                 }
@@ -1100,7 +1107,10 @@ namespace xlang
             if constexpr (std::is_base_of_v<Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
+                com_ptr<xlang_error_info> error_info{
+                    XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result)),
+                    take_ownership_from_abi
+                };
                 return result;
             }
             else
@@ -1108,7 +1118,11 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (nullptr == XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                com_ptr<xlang_error_info> error_info{
+                    XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)),
+                    take_ownership_from_abi
+                };
+                if (nullptr == error_info)
                 {
                     result = std::move(value);
                 }
