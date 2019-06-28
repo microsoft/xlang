@@ -19,7 +19,7 @@ namespace
     {
         auto values = make_copy(param);
         REQUIRE(values.Size() == 0);
-        REQUIRE_THROWS_AS(values.GetAt(0), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.GetAt(0), out_of_bounds_error);
 
         std::array<int, 3> copy;
         REQUIRE(0 == values.GetMany(0, copy));

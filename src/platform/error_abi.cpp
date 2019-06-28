@@ -85,11 +85,13 @@ namespace xlang::impl
 
         void GetMessage(xlang_string* message) noexcept override
         {
+            *message = nullptr;
             copy_to_abi(m_message, *message);
         }
 
         void GetLanguageError(xlang_string* language_error) noexcept override
         {
+            *language_error = nullptr;
             copy_to_abi(m_language_error, *language_error);
         }
 
@@ -100,6 +102,7 @@ namespace xlang::impl
 
         void GetProjectionIdentifier(xlang_string* projection_identifier) noexcept override
         {
+            *projection_identifier = nullptr;
             copy_to_abi(m_projection_identifier, *projection_identifier);
         }
 

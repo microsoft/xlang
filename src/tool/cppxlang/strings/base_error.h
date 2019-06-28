@@ -1,21 +1,6 @@
 
 namespace xlang::impl
 {
-    constexpr xlang_result xlang_result_from_com(com_interop_result const result)
-    {
-        switch (result)
-        {
-        case com_interop_result::success:
-            return xlang_result::success;
-        case com_interop_result::no_interface:
-            return xlang_result::no_interface;
-        case com_interop_result::pointer:
-            return xlang_result::pointer;
-        }
-
-        return xlang_result::fail;
-    }
-
 #ifdef _WIN32
 
     constexpr int32_t hresult_from_win32(uint32_t const x) noexcept
@@ -56,8 +41,26 @@ namespace xlang::impl
 
         return xlang_result::fail;
     }
-
 #endif
+
+    constexpr xlang_result xlang_result_from_com(com_interop_result const result)
+    {
+        switch (result)
+        {
+        case com_interop_result::success:
+            return xlang_result::success;
+        case com_interop_result::no_interface:
+            return xlang_result::no_interface;
+        case com_interop_result::pointer:
+            return xlang_result::pointer;
+        }
+
+#ifdef _WIN32
+        return xlang_result_from_hresult(static_cast<HRESULT>(result));
+#else
+        return xlang_result::fail;
+#endif
+    }
 }
 
 namespace xlang

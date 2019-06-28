@@ -663,7 +663,7 @@ namespace xlang
         }
 
 
-        auto format = R"(            virtual int32_t XLANG_CALL %(%) noexcept = 0;
+        auto format = R"(            virtual xlang_error_info* XLANG_CALL %(%) noexcept = 0;
 )";
 
         for (auto&& method : type.MethodList())
@@ -683,7 +683,7 @@ namespace xlang
     {
         struct XLANG_NOVTABLE type : unknown_abi
         {
-            virtual int32_t XLANG_CALL Invoke(%) noexcept = 0;
+            virtual xlang_error_info* XLANG_CALL Invoke(%) noexcept = 0;
         };
     };
 )";
@@ -1082,7 +1082,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (nullptr == XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1108,7 +1108,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (nullptr == XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1521,7 +1521,7 @@ namespace xlang
 
         if (is_noexcept(method))
         {
-            format = R"(        int32_t XLANG_CALL %(%) noexcept final
+            format = R"(        xlang_error_info* XLANG_CALL %(%) noexcept final
         {
 %            typename D::abi_guard guard(this->shim());
             %
@@ -1537,7 +1537,7 @@ namespace xlang
             %
             return nullptr;
         }
-        catch (...) { return to_xlang_result(); }
+        catch (...) { return to_xlang_error(); }
 )";
         }
 
@@ -2062,7 +2062,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
                 }
                 catch (...)
                 {%
-                    return to_xlang_result();
+                    return to_xlang_error();
                 }
             }
         };

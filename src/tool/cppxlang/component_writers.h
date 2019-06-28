@@ -176,7 +176,7 @@ xlang_error_info* XLANG_CALL xlang_lib_get_activation_factory(xlang_string class
 
     return xlang::type_load_error(name).to_abi();
 }
-catch (...) { return xlang::to_xlang_result(); }
+catch (...) { return xlang::to_xlang_error(); }
 )";
 
         w.write(format,

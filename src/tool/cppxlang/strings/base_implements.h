@@ -884,7 +884,7 @@ namespace xlang::impl
         bool NonDelegatingGetObjectInfo(XlangObjectInfoCategory info_category, void** info)
         {
             *info = nullptr;
-            bool result = false;
+            bool result = true;
 
             switch (info_category)
             {
@@ -902,6 +902,10 @@ namespace xlang::impl
 
             case XlangObjectInfoCategory::ObjectSize:
                 *reinterpret_cast<uint32_t*>(info) = static_cast<D*>(this)->GetObjectInfo_ObjectSize();
+                break;
+
+            default:
+                result = false;
                 break;
             }
             return result;
