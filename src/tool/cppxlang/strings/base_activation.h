@@ -5,9 +5,8 @@ namespace xlang
     impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
         void* result;
-        auto error = xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result);
+        check_xlang_error(xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result));
 
-        check_xlang_error(error);
         return { result, take_ownership_from_abi };
     }
 }
@@ -60,7 +59,10 @@ namespace xlang::impl
     {
         param::hstring const name{ name_of<Class>() };
         void* result;
-        auto error_info = xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result);
+        com_ptr<xlang_error_info> error_info{
+            xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result),
+            take_ownership_from_abi
+        };
 
         if (error_info != nullptr)
         {

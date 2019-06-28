@@ -101,7 +101,7 @@ namespace xlang
             else
             {
                 m_error_info.copy_from(error_info);
-                m_error_info->PropagateError(nullptr, nullptr, nullptr, nullptr);
+                m_error_info->PropagateError(get_abi(m_projection_identifer), nullptr, nullptr, nullptr);
             }
         }
 
@@ -123,14 +123,14 @@ namespace xlang
 
         xlang_error_info* to_abi() const noexcept
         {
-            return m_error_info.get();
+            return com_ptr<xlang_error_info>(m_error_info).detach();
         }
 
     private:
 
         void originate(xlang_result const code, xlang_string message) noexcept
         {
-            m_error_info.attach(xlang_originate_error(code, message));
+            m_error_info.attach(xlang_originate_error(code, message, get_abi(m_projection_identifer)));
         }
 
 #ifdef __clang__
@@ -141,6 +141,7 @@ namespace xlang
         uint32_t const m_debug_magic{ 0xAABBCCDD };
         xlang_result m_code{ xlang_result::fail };
         com_ptr<xlang_error_info> m_error_info;
+        hstring m_projection_identifer{ "cppxlang_1.0" };
 
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -309,9 +310,10 @@ namespace xlang
     {
         if (result != nullptr)
         {
+            com_ptr<xlang_error_info> error_info{ result, take_ownership_from_abi };
             xlang_result error;
-            result->GetError(&error);
-            throw_xlang_result(error, result);
+            error_info->GetError(&error);
+            throw_xlang_result(error, error_info.get());
         }
     }
 
