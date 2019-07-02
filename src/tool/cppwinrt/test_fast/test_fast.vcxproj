@@ -80,7 +80,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WINRT_DIAGNOSTICS;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -101,7 +100,6 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WINRT_DIAGNOSTICS;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -120,7 +118,6 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WINRT_DIAGNOSTICS;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -141,7 +138,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(OutputPath);Generated Files;..\..\..\library</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WINRT_DIAGNOSTICS;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>

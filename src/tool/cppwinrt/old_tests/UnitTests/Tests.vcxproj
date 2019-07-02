@@ -186,7 +186,6 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files;..\..\..\..\library</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <MinimalRebuild>false</MinimalRebuild>
@@ -206,7 +205,6 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files;..\..\..\..\library</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <MinimalRebuild>false</MinimalRebuild>
@@ -228,7 +226,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files;..\..\..\..\library</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>4100;4297;4458</DisableSpecificWarnings>
     </ClCompile>
@@ -248,7 +245,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(OutputPath);..\Composable\Generated Files;..\Component\Generated Files;..\Composable;..\Reflection\Generated Files;..\..\..\..\library</AdditionalIncludeDirectories>
-      <AdditionalOptions>/await /bigobj</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>4100;4297;4458</DisableSpecificWarnings>
     </ClCompile>
