@@ -136,7 +136,11 @@ namespace winrt::impl
     template <typename T>
     struct guid_storage
     {
+#ifdef __clang__
+        inline static const guid value{ __uuidof(T) };
+#else
         static constexpr guid value{ __uuidof(T) };
+#endif
     };
 #else
     template <typename T>
