@@ -574,27 +574,6 @@ namespace xlang
             s();
             auto param_name = param.Name();
 
-            if (param_signature->Type().is_szarray())
-            {
-                std::string_view format;
-
-                if (param.Flags().In())
-                {
-                    format = "%.size(), get_abi(%)";
-                }
-                else if (param_signature->ByRef())
-                {
-                    format = "impl::put_size_abi(%), put_abi(%)";
-                }
-                else
-                {
-                    format = "%.size(), put_abi(%)";
-                }
-
-                w.write(format, param_name, param_name);
-                continue;
-            }
-
             TypeDef signature_type;
             auto category = get_category(param_signature->Type(), &signature_type);
 
@@ -616,6 +595,9 @@ namespace xlang
                 case param_category::fundamental_type:
                     w.write(param_name);
                     break;
+                case param_category::array_type:
+                    w.write("%.size(), get_abi(%)", param_name, param_name);
+                    break;
                 }
             }
             else
@@ -624,6 +606,16 @@ namespace xlang
                 {
                 case param_category::fundamental_type:
                     w.write("&%", param_name);
+                    break;
+                case param_category::array_type:
+                    if (param_signature->ByRef())
+                    {
+                        w.write("impl::put_size_abi(%), put_abi(%)", param_name, param_name);
+                    }
+                    else
+                    {
+                        w.write("%.size(), put_abi(%)", param_name, param_name);
+                    }
                     break;
                 default:
                     w.write("impl::bind_out(%)", param_name);
