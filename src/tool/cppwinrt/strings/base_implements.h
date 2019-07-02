@@ -811,6 +811,11 @@ namespace winrt::impl
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
 
+#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
+        // Please use winrt::make<T>(args...) to avoid allocating a C++/WinRT implementation type on the stack.
+        virtual void use_make_function_to_create_this_object() = 0;
+#endif
+
     protected:
 
         virtual int32_t query_interface_tearoff(guid const&, void**) const noexcept
@@ -1311,11 +1316,6 @@ namespace winrt
 
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
-
-#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
-        // Please use winrt::make<T>(args...) to avoid allocating a C++/WinRT implementation type on the stack.
-        virtual void use_make_function_to_create_this_object() = 0;
-#endif
 
         weak_ref<D> get_weak()
         {
