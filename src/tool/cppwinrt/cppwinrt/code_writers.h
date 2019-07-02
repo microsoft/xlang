@@ -2286,7 +2286,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
 
     static void write_delegate_implementation(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <typename H%> struct delegate<%, H> : implements_delegate<%, H>
+        auto format = R"(    template <typename H%> struct delegate<%, H> final : implements_delegate<%, H>
     {
         delegate(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
