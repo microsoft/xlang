@@ -47,7 +47,7 @@ namespace std::experimental
             return ptr;
         }
 
-        void operator()()
+        void operator()() const
         {
             resume();
         }
