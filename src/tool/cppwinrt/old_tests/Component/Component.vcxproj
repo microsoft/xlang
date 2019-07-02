@@ -121,7 +121,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <ModuleDefinitionFile>module.def</ModuleDefinitionFile>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
@@ -156,7 +155,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <ModuleDefinitionFile>module.def</ModuleDefinitionFile>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
@@ -192,7 +190,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <ModuleDefinitionFile>module.def</ModuleDefinitionFile>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
@@ -227,7 +224,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
       <ModuleDefinitionFile>module.def</ModuleDefinitionFile>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>

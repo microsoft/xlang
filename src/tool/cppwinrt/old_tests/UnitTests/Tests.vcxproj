@@ -208,7 +208,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>windowsapp.lib;ole32.lib;advapi32.lib</AdditionalDependencies>
       <GenerateMapFile>false</GenerateMapFile>
       <OutputFile>$(OutDir)test_old.exe</OutputFile>
     </Link>
@@ -230,7 +229,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>windowsapp.lib;ole32.lib;advapi32.lib</AdditionalDependencies>
       <GenerateMapFile>false</GenerateMapFile>
       <OutputFile>$(OutDir)test_old.exe</OutputFile>
     </Link>
@@ -252,7 +250,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>windowsapp.lib;ole32.lib;advapi32.lib</AdditionalDependencies>
       <GenerateMapFile>false</GenerateMapFile>
       <OutputFile>$(OutDir)test_old.exe</OutputFile>
     </Link>
@@ -274,7 +271,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>windowsapp.lib;ole32.lib;advapi32.lib</AdditionalDependencies>
       <GenerateMapFile>false</GenerateMapFile>
       <OutputFile>$(OutDir)test_old.exe</OutputFile>
     </Link>

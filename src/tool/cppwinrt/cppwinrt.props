@@ -35,6 +35,9 @@
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>onecore.lib</AdditionalDependencies>
+    </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>

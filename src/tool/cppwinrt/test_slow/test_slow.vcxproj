@@ -92,7 +92,6 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
@@ -112,7 +111,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
@@ -132,7 +130,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
@@ -156,7 +153,6 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>windowsapp.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(CppWinRTDir)cppwinrt -in $(OutputPath)test_component_fast.winmd -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
