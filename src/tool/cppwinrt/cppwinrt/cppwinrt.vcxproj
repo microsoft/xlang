@@ -75,7 +75,9 @@
     <ClInclude Include="type_writers.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(OutDir)strings.cpp" />
+    <ClCompile Include="$(OutDir)strings.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
