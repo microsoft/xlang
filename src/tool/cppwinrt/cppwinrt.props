@@ -43,6 +43,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions Condition="'$(Clang)'=='1'">-Wno-unused-command-line-argument -fno-delayed-template-parsing</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>onecore.lib</AdditionalDependencies>
