@@ -116,6 +116,16 @@ HRESULT WinRTGetMetadataFile(
     mdTypeDef* typeDefToken
 )
 {
+    // documentation: 
+    //  https://docs.microsoft.com/en-us/uwp/winrt-cref/winmd-files
+    //  https://docs.microsoft.com/en-us/windows/win32/api/rometadataresolution/nf-rometadataresolution-rogetmetadatafile
+    
+    // algorithm: search our metadata, find best match if any.
+    // search system metedata. 
+    // Take longest string match excluding extension (which should be winmd, but not clear it's required to be).
+
+    // TODO: Once implented, change the detour hook. no need to call the system API twice.
+
     return REGDB_E_CLASSNOTREG;
 }
 
@@ -130,5 +140,8 @@ HRESULT WinRTResolveNamespaceDetour(
     HSTRING** subNamespaces)
 
 {
+    // documentation:
+    // https://docs.microsoft.com/en-us/windows/win32/api/rometadataresolution/nf-rometadataresolution-roresolvenamespace
+
     return REGDB_E_CLASSNOTREG;
 }
