@@ -1,37 +1,19 @@
 
 #include <Windows.h>
+#include <synchapi.h>
 #include <roapi.h>
 #include <rometadataresolution.h>
 #include <windows.foundation.h>
-#include <stdio.h>
 #include <detours.h>
-#include <wrl\client.h>
-#include <wrl\wrappers\corewrappers.h>
-
 #include <catalog.h>
+#include <extwinrt.h>
 
-using namespace Microsoft::WRL;
-using namespace ABI::Windows::Foundation;
-using namespace Microsoft::WRL::Wrappers;
-
-// Target pointer for the uninstrumented Sleep API.
 static decltype(RoActivateInstance)* TrueRoActivateInstance = RoActivateInstance;
 static decltype(RoGetActivationFactory)* TrueRoGetActivationFactory = RoGetActivationFactory;
 static decltype(RoGetMetaDataFile)* TrueRoGetMetaDataFile = RoGetMetaDataFile;
-static decltype(Sleep)* TrueSleep = Sleep;
 static decltype(RoResolveNamespace)* TrueRoResolveNamespace = RoResolveNamespace;
 
-// Detour function that replaces the Sleep API.
-VOID WINAPI TimedSleep(DWORD dwMilliseconds)
-{
-    // Save the before and after times around calling the Sleep API.
-    printf("zzz...\n");
-    TrueSleep(dwMilliseconds);
-}
-
-HRESULT WINAPI RoActivateInstanceDetour(
-    HSTRING      activatableClassId,
-    IInspectable** instance
+HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable** instance
 )
 {
     IActivationFactory* pFactory;
@@ -47,10 +29,7 @@ HRESULT WINAPI RoActivateInstanceDetour(
     return hr;
 }
 
-HRESULT WINAPI RoGetActivationFactoryDetour(
-    HSTRING activatableClassId,
-    REFIID  iid,
-    void** factory
+HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID iid, void** factory
 )
 {
     HRESULT hr = WinRTGetActivationFactory(activatableClassId, iid, factory);
@@ -62,7 +41,7 @@ HRESULT WINAPI RoGetActivationFactoryDetour(
 }
 
 HRESULT WINAPI RoGetMetaDataFileDetour(
-    const HSTRING        name,
+    const HSTRING name,
     IMetaDataDispenserEx* metaDataDispenser,
     HSTRING* metaDataFilePath,
     IMetaDataImport2** metaDataImport,
@@ -80,18 +59,18 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
 HRESULT WINAPI RoResolveNamespaceDetour(
     const HSTRING name,
     const HSTRING windowsMetaDataDir,
-    const DWORD   packageGraphDirsCount,
+    const DWORD packageGraphDirsCount,
     const HSTRING* packageGraphDirs,
     DWORD* metaDataFilePathsCount,
     HSTRING** metaDataFilePaths,
     DWORD* subNamespacesCount,
     HSTRING** subNamespaces)
-
 {
     HRESULT hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
         packageGraphDirsCount, packageGraphDirs,
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
+
     if (hr == REGDB_E_CLASSNOTREG)
     {
         hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
@@ -102,63 +81,47 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     return hr;
 }
 
-int main(int argc, char *argv[])
+void InstallHooks()
 {
     if (DetourIsHelperProcess()) {
-        return TRUE;
+        return;
     }
 
     DetourRestoreAfterWith();
 
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
-    DetourAttach(&(PVOID&)TrueSleep, TimedSleep);
     DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour);
     DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour);
     DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour);
     DetourTransactionCommit();
+}
 
-    // basic sniff-test
-    Sleep(1000);
-
-    WinRTLoadComponent(L"demo.txt");
-    WinRTLoadComponent(L"demo2.txt");
-
-    HRESULT hr = S_OK;
-
-    {
-        ComPtr<IInspectable> instance;
-        hr = RoActivateInstance(HStringReference(L"test_component.Class").Get(), &instance);
-        if (FAILED(hr)) { printf("Failed activate: %x\n", hr); return false; }
-
-        HString result;
-        instance->GetRuntimeClassName(result.GetAddressOf());
-        if (FAILED(hr)) { printf("Failed to load name: %x\n", hr); return false; }
-
-        unsigned int length = 0;
-        wprintf(L"%s\n", result.GetRawBuffer(&length));
-    }
-
-    {
-        ComPtr<IInspectable> instance;
-        hr = RoActivateInstance(HStringReference(L"MyComponent.SampleClass").Get(), &instance);
-        if (FAILED(hr)) { printf("Failed activate: %x\n", hr); return false; }
-
-        HString result;
-        instance->GetRuntimeClassName(result.GetAddressOf());
-        if (FAILED(hr)) { printf("Failed to load name: %x\n", hr); return false; }
-
-        unsigned int length = 0;
-        wprintf(L"%s\n", result.GetRawBuffer(&length));
-    }
+void RemoveHooks()
+{
 
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
-    DetourDetach(&(PVOID&)TrueSleep, TimedSleep);
     DetourDetach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour);
     DetourDetach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour);
     DetourDetach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour);
     DetourTransactionCommit();
-
-    return TRUE;
 }
+
+HRESULT WINAPI ExtRoLoadCatalog(PCWSTR componentPath)
+{
+    return WinRTLoadComponent(componentPath);
+}
+
+BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
+{
+    if (reason == DLL_PROCESS_ATTACH)
+    {
+        InstallHooks();
+    }
+    if (reason == DLL_PROCESS_DETACH)
+    {
+        RemoveHooks();
+    }
+}
+
