@@ -13,9 +13,21 @@
   </PropertyGroup>
 
   <!--
-    Can use used as follows:
-    msbuild /p:Clang=1,Configuration=Debug,Platform=x64 cppwinrt.sln /t:cppwinrt
+    Can use used as follows.
+
+    Compile with Visual C++:
+
+        msbuild /m /p:Configuration=Debug,Platform=x64 cppwinrt.sln
+
+    Compile with Clang:
+
+        msbuild /m /p:Configuration=Debug,Platform=x64,Clang=1 cppwinrt.sln
+
+    Optionally add /t:<project> to only build a given a solution project:
+
+        msbuild /m /p:Configuration=Debug,Platform=x64,Clang=1 cppwinrt.sln /t:cppwinrt
   -->
+
   <PropertyGroup Condition="'$(Clang)'=='1'">
     <CLToolExe>clang-cl.exe</CLToolExe>
     <CLToolPath>C:\Program Files\LLVM\bin</CLToolPath>
