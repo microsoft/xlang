@@ -224,8 +224,12 @@ namespace winrt::impl
     template <typename T>
     struct name
     {
+#ifdef __clang__
+        inline static const auto value
+#else
 #pragma warning(suppress: 4307)
         static constexpr auto value
+#endif
         {
             combine
             (

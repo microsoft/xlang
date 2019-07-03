@@ -12,6 +12,10 @@ namespace
     {
         ULONG m_references{ 1 };
 
+        virtual ~base_base()
+        {
+        }
+
         HRESULT __stdcall QueryInterface(IID const& id, void** value)
         {
             REQUIRE(*value == nullptr); // C++/WinRT guards against invalid implementations.

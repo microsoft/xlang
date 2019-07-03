@@ -181,7 +181,7 @@ namespace
             Closed = true;
         }
 
-        static winrt::hstring GetRuntimeClassName()
+        winrt::hstring GetRuntimeClassName()
         {
             return L"RuntimeClassName";
         }

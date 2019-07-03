@@ -12,6 +12,15 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
 
+  <!--
+    Can use used as follows:
+    msbuild /p:Clang=1,Configuration=Debug,Platform=x64 cppwinrt.sln /t:cppwinrt
+  -->
+  <PropertyGroup Condition="'$(Clang)'=='1'">
+    <CLToolExe>clang-cl.exe</CLToolExe>
+    <CLToolPath>C:\Program Files\LLVM\bin</CLToolPath>
+  </PropertyGroup>
+
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 
   <PropertyGroup>
@@ -34,7 +43,12 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/await /bigobj</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Clang)'=='1'">-Wno-unused-command-line-argument -fno-delayed-template-parsing -Xclang -fcoroutines-ts -mcx16</AdditionalOptions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>onecore.lib</AdditionalDependencies>
+    </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
