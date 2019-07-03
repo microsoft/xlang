@@ -70,13 +70,11 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
     std::string u8_module_name;
     getline(manifest_file, u8_module_name);
     this_component->module_path = converter.from_bytes(u8_module_name);
-    printf("Registering module: %s\n", u8_module_name.c_str());
 
     // second line is the name of the winmd that contains the types (in case of CLR, can be the same as dll)
     string u8_metadata_path;
     getline(manifest_file, u8_metadata_path);
     this_component->metadata_path = converter.from_bytes(u8_metadata_path);
-    printf("Registering metadata: %s\n", u8_metadata_path.c_str());
 
     // each line after is an activatable class. No apartment-specific registration. Implicitly "both".
     string u8_class_name;
@@ -84,7 +82,6 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
     {
         std::wstring wide_class_name = converter.from_bytes(u8_class_name);
         g_types[wide_class_name] = this_component;
-        printf("Registering class: %s\n", u8_class_name.c_str());
     }
 
     return S_OK;
