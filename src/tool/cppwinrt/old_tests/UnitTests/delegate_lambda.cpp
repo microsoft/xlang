@@ -39,6 +39,7 @@ struct Movable
     {
         Value = other.Value;
         other.Value = 0;
+        return *this;
     }
 };
 
