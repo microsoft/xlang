@@ -13,7 +13,7 @@ TEST_CASE("Boxing")
         IInspectable object = box_value(SimpleStructure{ 123, {}, {}, {} });
         REQUIRE(unbox_value<SimpleStructure>(object) == SimpleStructure{ 123, {}, {}, {} });
         REQUIRE(unbox_value_or<SimpleStructure>(object, { 321, {}, {}, {} }) == SimpleStructure{ 123, {}, {}, {} });
-        REQUIRE(unbox_value_or<SimpleStructure>(nullptr, { 321, {}, {}, {} }) == SimpleStructure{ 123, {}, {}, {} });
+        REQUIRE(unbox_value_or<SimpleStructure>(nullptr, { 321, {}, {}, {} }) == SimpleStructure{ 321, {}, {}, {} });
 
         // Covers all failure paths for non-IInspectable types.
         REQUIRE_THROWS_AS(unbox_value<int>(object), hresult_no_interface);
