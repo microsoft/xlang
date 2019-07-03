@@ -630,7 +630,7 @@ catch (...) { return winrt::to_hresult(); }
         auto format = R"(
             if (is_guid_of<%>(id))
             {
-                *result = make_fast_abi_forwarder(static_cast<D const&>(*this).get_abi<class_type>(), guid_of<%>(), %);
+                *result = make_fast_abi_forwarder(static_cast<D const&>(*this).template get_abi<class_type>(), guid_of<%>(), %);
                 return 0;
             }
 )";
