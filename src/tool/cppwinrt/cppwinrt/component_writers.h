@@ -723,7 +723,7 @@ catch (...) { return winrt::to_hresult(); }
         auto format = R"(
         auto base_%() const noexcept
         {
-            return static_cast<D const&>(*this).get_abi<%>();
+            return static_cast<D const&>(*this).template get_abi<%>();
         }
 )";
 
