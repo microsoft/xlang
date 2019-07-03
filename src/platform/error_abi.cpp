@@ -41,11 +41,7 @@ namespace xlang::impl
 
         com_interop_result XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
         {
-            if (!object)
-            {
-                return com_interop_result::pointer;
-            }
-            else if (id == xlang_unknown_guid)
+            if (id == xlang_unknown_guid)
             {
                 static_assert(std::is_base_of_v<xlang_unknown, xlang_error_info>, "Can only combine these two cases if this is true.");
                 *object = static_cast<xlang_unknown*>(this);

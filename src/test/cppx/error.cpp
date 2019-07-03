@@ -10,7 +10,7 @@ using namespace Foundation::Collections;
 template <typename T>
 void test_exception(xlang_result const code)
 {
-    REQUIRE_THROWS_AS(throw_xlang_result(code), T);
+    REQUIRE_THROWS_AS(throw_xlang_error(code), T);
 
     try
     {
@@ -61,7 +61,7 @@ TEST_CASE("Errors")
 {
     // Ensure these don't throw.
     check_xlang_error(nullptr);
-    check_com_interop_result(com_interop_result::success);
+    check_com_interop_error(com_interop_result::success);
     check_hresult(S_OK);
 
     // Ensure these throw.
@@ -141,8 +141,8 @@ TEST_CASE("Errors")
     }
 
     // Support for com_interop_result errors
-    REQUIRE_THROWS_AS(check_com_interop_result(com_interop_result::no_interface), no_interface_error);
-    REQUIRE_THROWS_AS(check_com_interop_result(com_interop_result::pointer), pointer_error);
+    REQUIRE_THROWS_AS(check_com_interop_error(com_interop_result::no_interface), no_interface_error);
+    REQUIRE_THROWS_AS(check_com_interop_error(com_interop_result::pointer), pointer_error);
 
     // Make sure delegates propagate correctly.
     {

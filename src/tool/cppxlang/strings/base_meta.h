@@ -1,7 +1,7 @@
 
 namespace xlang
 {
-    void check_com_interop_result(com_interop_result const result);
+    void check_com_interop_error(com_interop_result const result);
     void check_xlang_error(xlang_error_info* result);
 
     template <typename D, typename I>

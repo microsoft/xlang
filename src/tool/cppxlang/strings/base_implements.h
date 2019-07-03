@@ -955,7 +955,7 @@ namespace xlang::impl
             attach_abi(source, weak_ref);
 
             xlang::weak_ref<T> result;
-            check_com_interop_result(source->GetWeakReference(result.put()));
+            check_com_interop_error(source->GetWeakReference(result.put()));
             return result;
         }
 

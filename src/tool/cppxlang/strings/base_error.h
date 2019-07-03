@@ -227,8 +227,10 @@ namespace xlang
         cancelled_error(xlang_error_info* error_info) noexcept : xlang_error(xlang_result::fail, error_info) {}
     };
 
-    [[noreturn]] inline XLANG_NOINLINE void throw_xlang_result(xlang_result const result, xlang_error_info* error_info = nullptr)
+    [[noreturn]] inline XLANG_NOINLINE void throw_xlang_error(xlang_result const result, xlang_error_info* error_info = nullptr)
     {
+        XLANG_ASSERT(result != xlang_result::success);
+
         if (result == xlang_result::out_of_memory)
         {
             throw std::bad_alloc();
@@ -322,15 +324,15 @@ namespace xlang
             com_ptr<xlang_error_info> error_info{ result, take_ownership_from_abi };
             xlang_result error;
             error_info->GetError(&error);
-            throw_xlang_result(error, error_info.get());
+            throw_xlang_error(error, error_info.get());
         }
     }
 
-    inline void check_com_interop_result(com_interop_result result)
+    inline void check_com_interop_error(com_interop_result result)
     {
         if (result != com_interop_result::success)
         {
-            throw_xlang_result(impl::xlang_result_from_com(result), nullptr);
+            throw_xlang_error(impl::xlang_result_from_com(result), nullptr);
         }
     }
 
@@ -341,13 +343,13 @@ namespace xlang
     {
         if (result != 0)
         {
-            throw_xlang_result(impl::xlang_result_from_hresult(result));
+            throw_xlang_error(impl::xlang_result_from_hresult(result));
         }
     }
 
     [[noreturn]] inline void throw_last_error()
     {
-        throw_xlang_result(impl::xlang_result_from_hresult(HRESULT_FROM_WIN32(XLANG_GetLastError())));
+        throw_xlang_error(impl::xlang_result_from_hresult(HRESULT_FROM_WIN32(XLANG_GetLastError())));
     }
 
     template<typename T>

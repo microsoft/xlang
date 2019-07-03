@@ -16,7 +16,7 @@ namespace xlang
                 }
                 else
                 {
-                    check_com_interop_result(object.template as<impl::IWeakReferenceSource>()->GetWeakReference(m_ref.put()));
+                    check_com_interop_error(object.template as<impl::IWeakReferenceSource>()->GetWeakReference(m_ref.put()));
                 }
             }
         }
