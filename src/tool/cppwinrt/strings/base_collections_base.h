@@ -103,7 +103,7 @@ namespace winrt
 
             uint32_t GetMany(array_view<T> values)
             {
-                if constexpr (std::is_same_v<decltype(std::iterator_traits<iterator_type>::iterator_category()), std::random_access_iterator_tag>)
+                if constexpr (std::is_same_v<decltype(typename std::iterator_traits<iterator_type>::iterator_category()), std::random_access_iterator_tag>)
                 {
                     uint32_t const actual = (std::min)(static_cast<uint32_t>(m_end - m_current), values.size());
                     m_owner->copy_n(m_current, actual, values.begin());
