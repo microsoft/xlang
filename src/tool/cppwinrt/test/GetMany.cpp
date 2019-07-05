@@ -13,6 +13,38 @@ using namespace Windows::Foundation::Collections;
 // covered.
 //
 
+namespace
+{
+    template <typename T>
+    IIterable<T> single_threaded_list(std::list<T>&& values = {})
+    {
+        struct list :
+            implements<list, IIterable<T>>,
+            iterable_base<list, T>
+        {
+            explicit list(std::list<T>&& values) : m_values(std::forward<std::list<T>>(values))
+            {
+            }
+
+            auto& get_container() noexcept
+            {
+                return m_values;
+            }
+
+            auto& get_container() const noexcept
+            {
+                return m_values;
+            }
+
+        private:
+
+            std::list<T> m_values;
+        };
+
+        return make<list>(std::move(values));
+    }
+}
+
 TEST_CASE("GetMany")
 {
     // All
@@ -202,6 +234,112 @@ TEST_CASE("GetMany")
         REQUIRE(buffer[0] == L"2");
         REQUIRE(buffer[1] == L"3");
         REQUIRE(buffer[2] == L"");
+        REQUIRE(buffer[3] == L"");
+    }
+
+    // Similar tests but with a list to ensure optimal code gen for containers that don't offer random access.
+
+    // All
+    {
+        auto v = single_threaded_list<int>({ 1,2,3 });
+        std::array<int, 3> buffer{ 0xCC, 0xCC, 0xCC };
+        REQUIRE(3 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == 1);
+        REQUIRE(buffer[1] == 2);
+        REQUIRE(buffer[2] == 3);
+    }
+
+    // None
+    {
+        auto v = single_threaded_list<int>({ 1,2,3,4 });
+        auto pos = v.First();
+        std::array<int, 3> buffer{ 0xCC, 0xCC, 0xCC };
+        REQUIRE(3 == pos.GetMany(buffer));
+        REQUIRE(buffer[0] == 1);
+        REQUIRE(buffer[1] == 2);
+        REQUIRE(buffer[2] == 3);
+        buffer = { 0xCC, 0xCC, 0xCC };
+        REQUIRE(1 == pos.GetMany(buffer));
+        REQUIRE(buffer[0] == 4);
+        REQUIRE(buffer[1] == 0xCC);
+        REQUIRE(buffer[2] == 0xCC);
+        buffer = { 0xCC, 0xCC, 0xCC };
+        REQUIRE(0 == pos.GetMany(buffer));
+        REQUIRE(buffer[0] == 0xCC);
+        REQUIRE(buffer[1] == 0xCC);
+        REQUIRE(buffer[2] == 0xCC);
+    }
+
+    // Less
+    {
+        auto v = single_threaded_list<int>({ 1,2,3 });
+        std::array<int, 2> buffer{ 0xCC, 0xCC };
+        REQUIRE(2 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == 1);
+        REQUIRE(buffer[1] == 2);
+    }
+
+    // More
+    {
+        auto v = single_threaded_list<int>({ 1,2,3 });
+        std::array<int, 4> buffer{ 0xCC, 0xCC, 0xCC, 0xCC };
+        REQUIRE(3 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == 1);
+        REQUIRE(buffer[1] == 2);
+        REQUIRE(buffer[2] == 3);
+        REQUIRE(buffer[3] == 0xCC);
+    }
+
+    // The same tests but with a non-trivially destructible type...
+
+    // All
+    {
+        auto v = single_threaded_list<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 3> buffer{ L"old", L"old", L"old" };
+        REQUIRE(3 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+        REQUIRE(buffer[2] == L"3");
+    }
+
+    // None
+    {
+        auto v = single_threaded_list<hstring>({ L"1",L"2",L"3",L"4" });
+        auto pos = v.First();
+        std::array<hstring, 3> buffer{ L"old", L"old", L"old" };
+        REQUIRE(3 == pos.GetMany(buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+        REQUIRE(buffer[2] == L"3");
+        buffer = { L"old", L"old", L"old" };
+        REQUIRE(1 == pos.GetMany(buffer));
+        REQUIRE(buffer[0] == L"4");
+        REQUIRE(buffer[1] == L"");
+        REQUIRE(buffer[2] == L"");
+        buffer = { L"old", L"old", L"old" };
+        REQUIRE(0 == pos.GetMany(buffer));
+        REQUIRE(buffer[0] == L"");
+        REQUIRE(buffer[1] == L"");
+        REQUIRE(buffer[2] == L"");
+    }
+
+    // Less
+    {
+        auto v = single_threaded_list<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 2> buffer{ L"old", L"old" };
+        REQUIRE(2 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+    }
+
+    // More
+    {
+        auto v = single_threaded_list<hstring>({ L"1",L"2",L"3" });
+        std::array<hstring, 4> buffer{ L"old", L"old", L"old", L"old" };
+        REQUIRE(3 == v.First().GetMany(buffer));
+        REQUIRE(buffer[0] == L"1");
+        REQUIRE(buffer[1] == L"2");
+        REQUIRE(buffer[2] == L"3");
         REQUIRE(buffer[3] == L"");
     }
 }
