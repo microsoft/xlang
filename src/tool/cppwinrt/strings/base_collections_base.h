@@ -103,17 +103,35 @@ namespace winrt
 
             uint32_t GetMany(array_view<T> values)
             {
-                uint32_t const actual = (std::min)(static_cast<uint32_t>(std::distance(m_current, m_end)), values.size());
-                m_owner->copy_n(m_current, actual, values.begin());
-                std::advance(m_current, actual);
-                return actual;
+                if constexpr (std::is_same_v<decltype(std::iterator_traits<iterator_type>::iterator_category()), std::random_access_iterator_tag>)
+                {
+                    uint32_t const actual = (std::min)(static_cast<uint32_t>(m_end - m_current), values.size());
+                    m_owner->copy_n(m_current, actual, values.begin());
+                    m_current += actual;
+                    return actual;
+                }
+                else
+                {
+                    auto output = values.begin();
+
+                    while (output < values.end() && m_current != m_end)
+                    {
+                        *output = Current();
+                        ++output;
+                        ++m_current;
+                    }
+
+                    return static_cast<uint32_t>(output - values.begin());
+                }
             }
 
         private:
 
+            using iterator_type = decltype(std::declval<D>().get_container().begin());
+
             com_ptr<D> m_owner;
-            decltype(m_owner->get_container().begin()) m_current;
-            decltype(m_owner->get_container().end()) const m_end;
+            iterator_type m_current;
+            iterator_type const m_end;
         };
     };
 
