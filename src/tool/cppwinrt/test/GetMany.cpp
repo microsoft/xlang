@@ -342,4 +342,21 @@ TEST_CASE("GetMany")
         REQUIRE(buffer[2] == L"3");
         REQUIRE(buffer[3] == L"");
     }
+
+    // Pair
+    {
+        auto m = single_threaded_map<int, hstring>();
+        m.Insert(1, L"1");
+        m.Insert(2, L"2");
+        m.Insert(3, L"3");
+        m.Insert(4, L"4");
+        std::array<IKeyValuePair<int, hstring>, 3> buffer;
+        REQUIRE(3 == m.First().GetMany(buffer));
+        REQUIRE(buffer[0].Key() == 1);
+        REQUIRE(buffer[1].Key() == 2);
+        REQUIRE(buffer[2].Key() == 3);
+        REQUIRE(buffer[0].Value() == L"1");
+        REQUIRE(buffer[1].Value() == L"2");
+        REQUIRE(buffer[2].Value() == L"3");
+    }
 }
