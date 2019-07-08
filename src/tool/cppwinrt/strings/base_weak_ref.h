@@ -17,7 +17,7 @@ namespace winrt
                 else
                 {
                     // An access violation (crash) on the following line means that the object does not support weak references.
-                    // Avoid using weak_ref/auto_revoke until the API has been fixed to support weak references.
+                    // Avoid using weak_ref/auto_revoke with such objects.
                     check_hresult(object.template try_as<impl::IWeakReferenceSource>()->GetWeakReference(m_ref.put()));
                 }
             }
