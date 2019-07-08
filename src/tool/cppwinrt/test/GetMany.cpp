@@ -21,7 +21,7 @@ namespace
         // This iterator may only be advanced once, ensuring the GetMany complexity optimization
         // is actually enforced with this test.
 
-        struct generator_container : std::iterator<std::input_iterator_tag, T>
+        struct generator_container
         {
             explicit generator_container(IIterator<T> const& first) : m_current(first)
             {
