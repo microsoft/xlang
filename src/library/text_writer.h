@@ -292,29 +292,29 @@ namespace xlang::text
 
 
     template <typename T>
-    struct indented_writer_base : public writer_base<T>
+    struct indented_writer_base : writer_base<T>
     {
         struct indent_guard
         {
-            explicit indent_guard(indented_writer_base<T>& w, int32_t offset = 1) noexcept : _writer(w), _offset(offset)
+            indent_guard(indented_writer_base<T>& w, int32_t offset = 1) noexcept : m_writer(w), m_offset(offset)
             {
-                _writer.indent += _offset;
+                m_writer.m_indent += m_offset;
             }
 
-            ~indent_guard()
+            ~indent_guard() noexcept
             {
-                _writer.indent -= _offset;
+                m_writer.m_indent -= m_offset;
             }
 
         private:
-            indented_writer_base<T>& _writer;
-            int32_t _offset;
+            indented_writer_base<T>& m_writer;
+            int32_t m_offset{};
         };
 
 
         void write_indent()
         {
-            for (int32_t i = 0; i < indent; i++)
+            for (int32_t i = 0; i < m_indent; i++)
             {
                 writer_base<T>::write_impl("    ");
             }
@@ -372,17 +372,17 @@ namespace xlang::text
         template <typename... Args>
         std::string write_temp(std::string_view const& value, Args const& ... args)
         {
-            auto restore_indent = indent;
-            indent = 0;
+            auto restore_indent = m_indent;
+            m_indent = 0;
 
             auto result = writer_base<T>::write_temp(value, args...);
 
-            indent = restore_indent;
+            m_indent = restore_indent;
 
             return result;
         }
 
-        int32_t indent{};
+        int32_t m_indent{};
     };
 
 
