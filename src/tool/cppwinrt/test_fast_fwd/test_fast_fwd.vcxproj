@@ -312,7 +312,7 @@
   </ItemGroup>
   <ItemDefinitionGroup>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)FastForwarderTest.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)FastForwarderTest.winmd -comp "$(ProjectDir)Generated Files" -out "$(ProjectDir)Generated Files" -ref sdk -verbose -fastabi -prefix -opt -name FastForwarderTest</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />

@@ -122,7 +122,7 @@
       <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -name test_component_derived</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -170,7 +170,7 @@
       <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -name test_component_derived</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -222,7 +222,7 @@
       <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -name test_component_derived</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -274,7 +274,7 @@
       <AdditionalIncludeDirectories>..\test_component_base</AdditionalIncludeDirectories>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_derived.winmd -ref $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -name test_component_derived</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />

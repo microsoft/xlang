@@ -121,7 +121,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -name test_component_base</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -168,7 +168,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -name test_component_base</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -219,7 +219,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -name test_component_base</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -270,7 +270,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_base.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk -verbose -name test_component_base</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
