@@ -121,7 +121,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp -out "$(ProjectDir)Generated Files" -ref sdk -verbose -overwrite</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp -out "$(ProjectDir)Generated Files" -ref sdk -verbose -overwrite -name test_component_folders</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -168,7 +168,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp -out "$(ProjectDir)Generated Files" -ref sdk -verbose -overwrite</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp -out "$(ProjectDir)Generated Files" -ref sdk -verbose -overwrite -name test_component_folders</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -219,7 +219,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp -out "$(ProjectDir)Generated Files" -ref sdk -verbose -overwrite</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp -out "$(ProjectDir)Generated Files" -ref sdk -verbose -overwrite -name test_component_folders</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />
@@ -270,7 +270,7 @@
       <PrependWithABINamepsace>true</PrependWithABINamepsace>
     </Midl>
     <CustomBuildStep>
-      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp -out "$(ProjectDir)Generated Files" -ref sdk -verbose -overwrite</Command>
+      <Command>$(CppWinRTDir)cppwinrt -input $(OutputPath)test_component_folders.winmd -comp -out "$(ProjectDir)Generated Files" -ref sdk -verbose -overwrite -name test_component_folders</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message />

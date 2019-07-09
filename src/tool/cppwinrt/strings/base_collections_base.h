@@ -103,29 +103,32 @@ namespace winrt
 
             uint32_t GetMany(array_view<T> values)
             {
-                if constexpr (std::is_same_v<decltype(typename std::iterator_traits<iterator_type>::iterator_category()), std::random_access_iterator_tag>)
-                {
-                    uint32_t const actual = (std::min)(static_cast<uint32_t>(m_end - m_current), values.size());
-                    m_owner->copy_n(m_current, actual, values.begin());
-                    m_current += actual;
-                    return actual;
-                }
-                else
-                {
-                    auto output = values.begin();
-
-                    while (output < values.end() && m_current != m_end)
-                    {
-                        *output = Current();
-                        ++output;
-                        ++m_current;
-                    }
-
-                    return static_cast<uint32_t>(output - values.begin());
-                }
+                return GetMany(values, typename std::iterator_traits<iterator_type>::iterator_category());
             }
 
         private:
+
+            uint32_t GetMany(array_view<T> values, std::random_access_iterator_tag)
+            {
+                uint32_t const actual = (std::min)(static_cast<uint32_t>(m_end - m_current), values.size());
+                m_owner->copy_n(m_current, actual, values.begin());
+                m_current += actual;
+                return actual;
+            }
+
+            uint32_t GetMany(array_view<T> values, std::input_iterator_tag)
+            {
+                auto output = values.begin();
+
+                while (output < values.end() && m_current != m_end)
+                {
+                    *output = Current();
+                    ++output;
+                    ++m_current;
+                }
+
+                return static_cast<uint32_t>(output - values.begin());
+            }
 
             using iterator_type = decltype(std::declval<D>().get_container().begin());
 

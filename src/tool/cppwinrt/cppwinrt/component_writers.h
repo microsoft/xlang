@@ -149,7 +149,7 @@ bool __stdcall %_can_unload_now() noexcept
     return true;
 }
 
-void* __stdcall %_get_activation_factory(std::wstring_view const& name)
+void* __stdcall %_get_activation_factory([[maybe_unused]] std::wstring_view const& name)
 {
     auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
     {
