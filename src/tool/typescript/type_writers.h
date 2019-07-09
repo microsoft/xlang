@@ -195,6 +195,7 @@ namespace xlang
             add_depends(type);
             auto ns = type.TypeNamespace();
             auto name = type.TypeName();
+
             auto generics = type.GenericParam();
 
             if (!empty(generics))
@@ -211,6 +212,10 @@ namespace xlang
             if (type_name(type) == "System.Guid")
             {
                 write("string /* System.Guid */");
+            }
+            else if (type_name(type) == "Windows.Foundation.IAsyncAction")
+            {
+                write("Promise<void>");
             }
             else
             {
@@ -246,8 +251,33 @@ namespace xlang
             auto name = generic_type.TypeName();
             name.remove_suffix(name.size() - name.rfind('`'));
             add_depends(find_required(generic_type));
+            
+            if (ns == "Windows.Foundation")
+            {
+                if (name == "IAsyncOperation")
+                {
+                    name = "Promise";
+                    ns = "";
+                }
+            }
+            else if (ns == "Windows.Foundation.Collections")
+            {
+                if ((name == "IVectorView")
+                    || (name == "IIterable")
+                    || (name == "IVector"))
+                {
+                    name = "Array";
+                    ns = "";
+                }
+            }
 
-            write("@.%<%>", ns, name, bind_list(", ", type.GenericArgs()));
+            if (ns != "") 
+            {
+                write(ns);
+                write(".");
+            }
+
+            write("%<%>", name, bind_list(", ", type.GenericArgs()));
         }
 
         void write(TypeSig::value_type const& type)
