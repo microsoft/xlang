@@ -273,22 +273,6 @@ Where <spec> is one or more of:
                 }
             }
 
-            if (settings.component && settings.component_name.empty())
-            {
-                auto& values = args.values("input");
-
-                if (!values.empty())
-                {
-                    // In C++/WinRT 1.0, the component name defaults to the *first* input, hence
-                    // the use of args.values() that will return the args in input order.
-
-                    auto compat_name = path(values[0]).filename().replace_extension().string();
-
-                    w.write(" warning: Use '-name %' to specify the explicit name for component files.\n",
-                        compat_name);
-                }
-            }
-
             w.flush_to_console();
             task_group group;
 
@@ -348,6 +332,22 @@ Where <spec> is one or more of:
             if (settings.verbose)
             {
                 w.write(" time:  %ms\n", get_elapsed_time(start));
+            }
+
+            if (settings.component && settings.component_name.empty())
+            {
+                auto& values = args.values("input");
+
+                if (!values.empty())
+                {
+                    // In C++/WinRT 1.0, the component name defaults to the *first* input, hence
+                    // the use of args.values() that will return the args in input order.
+
+                    auto compat_name = path(values[0]).filename().replace_extension().string();
+
+                    w.write("\n warning: Use '-name %' to specify the explicit name for component files.\n",
+                        compat_name);
+                }
             }
         }
         catch (usage_exception const&)
