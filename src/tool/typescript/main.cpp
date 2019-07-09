@@ -17,22 +17,14 @@ namespace xlang
     {
         { "input", 0, cmd::option::no_max, "<spec>", "Windows metadata to include in projection" },
         { "reference", 0, cmd::option::no_max, "<spec>", "Windows metadata to reference from projection" },
-        { "output", 0, 1, "<path>", "Location of generated projection and component templates" },
-        { "component", 0, 1, "[<path>]", "Generate component templates, and optional implementation" },
-        { "name", 0, 1, "<name>", "Specify explicit name for component files" },
+        { "output", 0, 1, "<path>", "Location of generated projection" },
         { "verbose", 0, 0, {}, "Show detailed progress information" },
         { "overwrite", 0, 0, {}, "Overwrite generated component files" },
-        { "prefix", 0, 0, {}, "Use dotted namespace convention for component files (defaults to folders)" },
-        { "pch", 0, 1, "<name>", "Specify name of precompiled header file (defaults to pch.h)" },
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
-        { "base", 0, 0, {}, "Generate base.h unconditionally" },
-        { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
-        { "lib", 0, 1, "Specify library prefix (defaults to winrt)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
-        { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
     };
 
     static void print_usage(writer& w)
@@ -52,10 +44,10 @@ namespace xlang
         };
 
         auto format = R"(
-C++/WinRT v%
+Typescript .d.ts generator v%
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-  cppwinrt.exe [options...]
+  tsrt.exe [options...]
 
 Options:
 
@@ -67,6 +59,7 @@ Where <spec> is one or more of:
   local               Local ^%WinDir^%\System32\WinMetadata folder
   sdk[+]              Current version of Windows SDK [with extensions]
   10.0.12345.0[+]     Specific version of Windows SDK [with extensions]
+
 )";
         w.write(format, XLANG_VERSION_STRING, bind_each(printOption, options));
     }
@@ -85,11 +78,9 @@ Where <spec> is one or more of:
         settings.input = args.files("input", database::is_database);
         settings.reference = args.files("reference", database::is_database);
 
-        settings.component = args.exists("component");
         settings.base = args.exists("base");
 
         settings.license = args.exists("license");
-        settings.brackets = args.exists("brackets");
 
         auto output_folder = canonical(args.value("output"));
         create_directories(output_folder / "winrt/impl");
@@ -109,45 +100,6 @@ Where <spec> is one or more of:
         for (auto && exclude : args.values("exclude"))
         {
             settings.exclude.insert(exclude);
-        }
-
-        if (settings.component)
-        {
-            settings.component_overwrite = args.exists("overwrite");
-            settings.component_name = args.value("name");
-
-            if (settings.component_name.empty())
-            {
-                // For compatibility with C++/WinRT 1.0, the component_name defaults to the *first*
-                // input, hence the use of values() here that will return the args in input order.
-
-                auto& values = args.values("input");
-
-                if (!values.empty())
-                {
-                    settings.component_name = path(values[0]).filename().replace_extension().string();
-                }
-            }
-
-            settings.component_pch = args.value("pch", "pch.h");
-            settings.component_prefix = args.exists("prefix");
-            settings.component_lib = args.value("lib", "winrt");
-            settings.component_opt = args.exists("opt");
-
-            if (settings.component_pch == ".")
-            {
-                settings.component_pch.clear();
-            }
-
-            auto component = args.value("component");
-
-            if (!component.empty())
-            {
-                auto component_folder = canonical(component);
-                create_directories(component_folder);
-                component_folder += '/';
-                settings.component_folder = component_folder.string();
-            }
         }
     }
 
@@ -190,16 +142,6 @@ Where <spec> is one or more of:
         }
 
         settings.projection_filter = { include, {} };
-
-        if (settings.include.empty() && settings.exclude.empty())
-        {
-            settings.component_filter = { include, {} };
-        }
-        else
-        {
-            settings.component_filter = { settings.include, settings.exclude };
-        }
-
     }
 
     static int run(int const argc, char** argv)
@@ -214,7 +156,7 @@ Where <spec> is one or more of:
             cache c{ get_files_to_cache() };
             c.remove_cppwinrt_foundation_types();
             build_filters(c);
-            settings.base = settings.base || (!settings.component && settings.projection_filter.empty());
+            settings.base = settings.base || settings.projection_filter.empty();
 
             if (settings.verbose)
             {
@@ -237,11 +179,6 @@ Where <spec> is one or more of:
                 }
 
                 w.write(" out:   %\n", settings.output_folder);
-
-                if (!settings.component_folder.empty())
-                {
-                    w.write(" cout:  %\n", settings.component_folder);
-                }
             }
 
             w.flush_to_console();

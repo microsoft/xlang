@@ -273,6 +273,7 @@ namespace xlang
                         write("number");
                         break;
                     case ElementType::String:
+                    case ElementType::Char:
                         write("string");
                         break;
                     case ElementType::Object:
