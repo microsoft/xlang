@@ -134,6 +134,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Message Text="CppWinRTDirectWinMDReferences: @(CppWinRTDirectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
+    <!--Get direct WinMD project references for projections, IDL processing, and AppX packaging-->
+    <Target Name="GetCppWinRTProjectWinMDReferences"
+            DependsOnTargets="ResolveProjectReferences;$(GetCppWinRTProjectWinMDReferencesDependsOn)"
+            Returns="@(CppWinRTStaticLibraryProjectWinMDReferences);@(CppWinRTDynamicLibraryProjectWinMDReferences)">
+        <ItemGroup>
+            <!-- Get static library project references -->
+            <_CppWinRTStaticProjectReferences Remove="@(_CppWinRTStaticProjectReferences)"/>
+            <_CppWinRTStaticProjectReferences Include="@(_ResolvedProjectReferencePaths)"
+                Condition= "'%(_ResolvedProjectReferencePaths.ProjectType)'=='StaticLibrary' AND '%(_ResolvedProjectReferencePaths.WinMDFile)' == 'true'"/>
+            <CppWinRTStaticLibraryProjectWinMDReferences Remove="@(CppWinRTStaticLibraryProjectWinMDReferences)"/>
+            <CppWinRTStaticLibraryProjectWinMDReferences Include="@(_CppWinRTStaticProjectReferences)">
+                <WinMDPath>%(FullPath)</WinMDPath>
+            </CppWinRTStaticLibraryProjectWinMDReferences>
+            <!--Get dynamic library project references-->
+            <_CppWinRTDynamicProjectReferences Remove="@(_CppWinRTDynamicProjectReferences)"/>
+            <_CppWinRTDynamicProjectReferences Include="@(_ResolvedProjectReferencePaths)"
+                Condition= "'%(_ResolvedProjectReferencePaths.ProjectType)'!='StaticLibrary'  AND '%(_ResolvedProjectReferencePaths.WinMDFile)' == 'true'"/>
+            <CppWinRTDynamicLibraryProjectWinMDReferences Remove="@(CppWinRTDynamicLibraryProjectWinMDReferences)"/>
+            <CppWinRTDynamicLibraryProjectWinMDReferences Include="@(_CppWinRTDynamicProjectReferences)">
+                <WinMDPath>%(FullPath)</WinMDPath>
+            </CppWinRTDynamicLibraryProjectWinMDReferences>
+        </ItemGroup>
+        <Message Text="CppWinRTStaticLibraryProjectWinMDReferences: @(CppWinRTStaticLibraryProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
+        <Message Text="CppWinRTDynamicLibraryProjectWinMDReferences: @(CppWinRTDynamicLibraryProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
+    </Target>
+
     <!--If building any Xaml content, include XamlMetaDataProvider in project metadata-->
     <Target Name="CppWinRTAddXamlMetaDataProviderIdl" Condition="'$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
         <PropertyGroup>
