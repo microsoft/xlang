@@ -75,15 +75,8 @@ Where <spec> is one or more of:
         w.write(format, XLANG_VERSION_STRING, bind_each(printOption, options));
     }
 
-    static void process_args(int const argc, char** argv)
+    static void process_args(cmd::reader const& args)
     {
-        cmd::reader args{ argc, argv, options };
-
-        if (!args || args.exists("help"))
-        {
-            throw usage_exception{};
-        }
-
         settings.verbose = args.exists("verbose");
         settings.fastabi = args.exists("fastabi");
 
@@ -120,20 +113,6 @@ Where <spec> is one or more of:
         {
             settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
-
-            if (settings.component_name.empty())
-            {
-                // For compatibility with C++/WinRT 1.0, the component_name defaults to the *first*
-                // input, hence the use of values() here that will return the args in input order.
-
-                auto& values = args.values("input");
-
-                if (!values.empty())
-                {
-                    settings.component_name = path(values[0]).filename().replace_extension().string();
-                }
-            }
-
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
             settings.component_lib = args.value("library", "winrt");
@@ -256,7 +235,15 @@ Where <spec> is one or more of:
         try
         {
             auto start = get_start_time();
-            process_args(argc, argv);
+
+            cmd::reader args{ argc, argv, options };
+
+            if (!args || args.exists("help"))
+            {
+                throw usage_exception{};
+            }
+
+            process_args(args);
             cache c{ get_files_to_cache() };
             remove_foundation_types(c);
             build_filters(c);
@@ -283,6 +270,22 @@ Where <spec> is one or more of:
                 if (!settings.component_folder.empty())
                 {
                     w.write(" cout:  %\n", settings.component_folder);
+                }
+            }
+
+            if (settings.component && settings.component_name.empty())
+            {
+                auto& values = args.values("input");
+
+                if (!values.empty())
+                {
+                    // In C++/WinRT 1.0, the component name defaults to the *first* input, hence
+                    // the use of args.values() that will return the args in input order.
+
+                    auto compat_name = path(values[0]).filename().replace_extension().string();
+
+                    w.write(" warning: Use '-name %' to specify the explicit name for component files.\n",
+                        compat_name);
                 }
             }
 
