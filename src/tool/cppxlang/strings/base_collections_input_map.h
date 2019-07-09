@@ -1,9 +1,9 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename K, typename V, typename Container>
-    struct input_map final :
-        implements<input_map<K, V, Container>, wfc::IMap<K, V>, wfc::IMapView<K, V>, wfc::IIterable<wfc::IKeyValuePair<K, V>>>,
+    struct input_map :
+        implements<input_map<K, V, Container>, fc::IMap<K, V>, fc::IMapView<K, V>, fc::IIterable<fc::IKeyValuePair<K, V>>>,
         map_base<input_map<K, V, Container>, K, V>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -34,13 +34,13 @@ namespace winrt::impl
     }
 }
 
-namespace winrt::param
+namespace xlang::param
 {
     template <typename K, typename V>
     struct map
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IMap<K, V>;
+        using value_type = Foundation::Collections::IKeyValuePair<K, V>;
+        using interface_type = Foundation::Collections::IMap<K, V>;
 
         map(std::nullptr_t) noexcept
         {
@@ -51,7 +51,7 @@ namespace winrt::param
 
         map(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -83,6 +83,11 @@ namespace winrt::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:

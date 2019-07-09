@@ -26,7 +26,7 @@ namespace xlang::impl
     {
         if (!source_string && length != 0)
         {
-            xlang::throw_result(xlang_error_pointer);
+            xlang::throw_result(xlang_result::pointer);
         }
 
         // length zero is the handle value for an empty string
@@ -46,12 +46,12 @@ namespace xlang::impl
     {
         if (!source_string && length != 0)
         {
-            xlang::throw_result(xlang_error_pointer);
+            xlang::throw_result(xlang_result::pointer);
         }
 
         if (source_string && source_string[length] != 0)
         {
-            xlang::throw_result(xlang_error_string_not_null_terminated);
+            xlang::throw_result(xlang_result::invalid_arg, "String is not null terminated");
         }
 
         if (length != 0)
@@ -177,7 +177,7 @@ try
 {
     if (!buffer_handle)
     {
-        xlang::throw_result(xlang_error_pointer);
+        xlang::throw_result(xlang_result::pointer);
     }
 
     from_handle(buffer_handle)->free_preallocated();
@@ -316,7 +316,7 @@ try
     {
         if (length != 0)
         {
-            xlang::throw_result(xlang_error_pointer);
+            xlang::throw_result(xlang_result::pointer);
         }
     }
 

@@ -2,7 +2,7 @@
 
 namespace xlang
 {
-    using namespace std::experimental::filesystem;
+    using namespace std::filesystem;
     using namespace text;
     using namespace meta::reader;
 
@@ -71,12 +71,20 @@ namespace xlang
     {
         using writer_base<writer>::write;
 
+        struct depends_compare
+        {
+            bool operator()(TypeDef const& left, TypeDef const& right) const
+            {
+                return left.TypeName() < right.TypeName();
+            }
+        };
+
         std::string type_namespace;
         bool abi_types{};
         bool param_names{};
         bool consume_types{};
         bool async_types{};
-        std::map<std::string_view, std::set<TypeDef>> depends;
+        std::map<std::string_view, std::set<TypeDef, depends_compare>> depends;
         std::vector<std::vector<std::string>> generic_param_stack;
 
         struct generic_param_guard
@@ -319,9 +327,8 @@ namespace xlang
             }
             else
             {
-                auto generic_type = type.GenericType().TypeRef();
-                auto ns = generic_type.TypeNamespace();
-                auto name = generic_type.TypeName();
+                auto generic_type = type.GenericType();
+                auto[ns, name] = get_type_namespace_and_name(generic_type);
                 name.remove_suffix(name.size() - name.rfind('`'));
                 add_depends(find_required(generic_type));
 

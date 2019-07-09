@@ -27,7 +27,7 @@ namespace winrt::impl
     };
 
     template <typename T, typename D, typename I>
-    class WINRT_EBO produce_dispatch_to_overridable_base
+    class __declspec(empty_bases) produce_dispatch_to_overridable_base
     {
     protected:
         D& shim() noexcept
@@ -58,10 +58,10 @@ namespace winrt::impl
         {
             D& instance;
 
-            template <typename T, typename D, typename I>
+            template <typename, typename, typename>
             friend class produce_dispatch_to_overridable_base;
 
-            template <typename D, typename... I>
+            template <typename, typename...>
             friend class dispatch_to_overridable;
 
             explicit wrapper(D& d) : instance(d) {}

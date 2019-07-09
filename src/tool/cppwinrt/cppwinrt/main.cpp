@@ -29,12 +29,14 @@ namespace xlang
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
         { "base", 0, 0, {}, "Generate base.h unconditionally" },
-        { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
+        { "optimize", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
-        { "lib", 0, 1, "Specify library prefix (defaults to winrt)" },
+        { "library", 0, 1, "<prefix>", "Specify library prefix (defaults to winrt)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
+        { "fastabi", 0, 0 }, // Enable support for the Fast ABI
+        { "ignore_velocity", 0, 0 }, // Ignore feature staging metadata and always include implementations
     };
 
     static void print_usage(writer& w)
@@ -73,16 +75,10 @@ Where <spec> is one or more of:
         w.write(format, XLANG_VERSION_STRING, bind_each(printOption, options));
     }
 
-    static void process_args(int const argc, char** argv)
+    static void process_args(cmd::reader const& args)
     {
-        cmd::reader args{ argc, argv, options };
-
-        if (!args || args.exists("help"))
-        {
-            throw usage_exception{};
-        }
-
         settings.verbose = args.exists("verbose");
+        settings.fastabi = args.exists("fastabi");
 
         settings.input = args.files("input", database::is_database);
         settings.reference = args.files("reference", database::is_database);
@@ -93,10 +89,10 @@ Where <spec> is one or more of:
         settings.license = args.exists("license");
         settings.brackets = args.exists("brackets");
 
-        auto output_folder = canonical(args.value("output"));
+        path output_folder = args.value("output");
         create_directories(output_folder / "winrt/impl");
-        output_folder += '/';
-        settings.output_folder = output_folder.string();
+        settings.output_folder = canonical(output_folder).string();
+        settings.output_folder += '\\';
 
         for (auto && include : args.values("include"))
         {
@@ -117,24 +113,11 @@ Where <spec> is one or more of:
         {
             settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
-
-            if (settings.component_name.empty())
-            {
-                // For compatibility with C++/WinRT 1.0, the component_name defaults to the *first*
-                // input, hence the use of values() here that will return the args in input order.
-
-                auto& values = args.values("input");
-
-                if (!values.empty())
-                {
-                    settings.component_name = path(values[0]).filename().replace_extension().string();
-                }
-            }
-
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
-            settings.component_lib = args.value("lib", "winrt");
-            settings.component_opt = args.exists("opt");
+            settings.component_lib = args.value("library", "winrt");
+            settings.component_opt = args.exists("optimize");
+            settings.component_ignore_velocity = args.exists("ignore_velocity");
 
             if (settings.component_pch == ".")
             {
@@ -145,10 +128,9 @@ Where <spec> is one or more of:
 
             if (!component.empty())
             {
-                auto component_folder = canonical(component);
-                create_directories(component_folder);
-                component_folder += '/';
-                settings.component_folder = component_folder.string();
+                create_directories(component);
+                settings.component_folder = canonical(component).string();
+                settings.component_folder += '\\';
             }
         }
     }
@@ -192,16 +174,57 @@ Where <spec> is one or more of:
         }
 
         settings.projection_filter = { include, {} };
+        
+        settings.component_filter = { settings.include.empty() ? include : settings.include, settings.exclude };
+    }
 
-        if (settings.include.empty() && settings.exclude.empty())
+    static void build_fastabi_cache(cache const& c)
+    {
+        if (!settings.fastabi)
         {
-            settings.component_filter = { include, {} };
-        }
-        else
-        {
-            settings.component_filter = { settings.include, settings.exclude };
+            return;
         }
 
+        for (auto&& [ns, members] : c.namespaces())
+        {
+            for (auto&& type : members.classes)
+            {
+                if (!has_fastabi(type))
+                {
+                    continue;
+                }
+
+                auto default_interface = get_default_interface(type);
+
+                if (default_interface.type() == TypeDefOrRef::TypeDef)
+                {
+                    settings.fastabi_cache.try_emplace(default_interface.TypeDef(), type);
+                }
+                else
+                {
+                    settings.fastabi_cache.try_emplace(find_required(default_interface.TypeRef()), type);
+                }
+            }
+        }
+    }
+
+    static void remove_foundation_types(cache& c)
+    {
+        c.remove_type("Windows.Foundation", "DateTime");
+        c.remove_type("Windows.Foundation", "EventRegistrationToken");
+        c.remove_type("Windows.Foundation", "HResult");
+        c.remove_type("Windows.Foundation", "Point");
+        c.remove_type("Windows.Foundation", "Rect");
+        c.remove_type("Windows.Foundation", "Size");
+        c.remove_type("Windows.Foundation", "TimeSpan");
+
+        c.remove_type("Windows.Foundation.Numerics", "Matrix3x2");
+        c.remove_type("Windows.Foundation.Numerics", "Matrix4x4");
+        c.remove_type("Windows.Foundation.Numerics", "Plane");
+        c.remove_type("Windows.Foundation.Numerics", "Quaternion");
+        c.remove_type("Windows.Foundation.Numerics", "Vector2");
+        c.remove_type("Windows.Foundation.Numerics", "Vector3");
+        c.remove_type("Windows.Foundation.Numerics", "Vector4");
     }
 
     static int run(int const argc, char** argv)
@@ -212,15 +235,24 @@ Where <spec> is one or more of:
         try
         {
             auto start = get_start_time();
-            process_args(argc, argv);
+
+            cmd::reader args{ argc, argv, options };
+
+            if (!args || args.exists("help"))
+            {
+                throw usage_exception{};
+            }
+
+            process_args(args);
             cache c{ get_files_to_cache() };
-            c.remove_cppwinrt_foundation_types();
+            remove_foundation_types(c);
             build_filters(c);
             settings.base = settings.base || (!settings.component && settings.projection_filter.empty());
+            build_fastabi_cache(c);
 
             if (settings.verbose)
             {
-                w.write(" tool:  %\n", canonical(argv[0]).string());
+                w.write(" tool:  %\n", canonical(path(argv[0]).replace_extension("exe")).string());
                 w.write(" ver:   %\n", XLANG_VERSION_STRING);
 
                 for (auto&& file : settings.input)
@@ -255,54 +287,67 @@ Where <spec> is one or more of:
 
                     write_namespace_0_h(ns, members);
                     write_namespace_1_h(ns, members);
-                    write_namespace_2_h(ns, members, c);
+                    write_namespace_2_h(ns, members);
                     write_namespace_h(c, ns, members);
                 });
             }
 
-            group.add([&]
+            if (settings.base)
             {
-                if (settings.base)
+                write_base_h();
+            }
+
+            if (settings.component)
+            {
+                std::vector<TypeDef> classes;
+
+                for (auto&&[ns, members] : c.namespaces())
                 {
-                    write_base_h();
-                    write_coroutine_h();
-                }
-
-                if (settings.component)
-                {
-                    std::vector<TypeDef> classes;
-
-                    for (auto&&[ns, members] : c.namespaces())
+                    for (auto&& type : members.classes)
                     {
-                        for (auto&& type : members.classes)
+                        if (settings.component_filter.includes(type))
                         {
-                            if (settings.component_filter.includes(type))
-                            {
-                                classes.push_back(type);
-                            }
-                        }
-                    }
-
-                    if (!classes.empty())
-                    {
-                        write_module_g_cpp(classes);
-
-                        for (auto&& type : classes)
-                        {
-                            write_component_g_h(type);
-                            write_component_g_cpp(type);
-                            write_component_h(type);
-                            write_component_cpp(type);
+                            classes.push_back(type);
                         }
                     }
                 }
-            });
+
+                if (!classes.empty())
+                {
+                    write_fast_forward_h(classes);
+                    write_module_g_cpp(classes);
+
+                    for (auto&& type : classes)
+                    {
+                        write_component_g_h(type);
+                        write_component_g_cpp(type);
+                        write_component_h(type);
+                        write_component_cpp(type);
+                    }
+                }
+            }
 
             group.get();
 
             if (settings.verbose)
             {
                 w.write(" time:  %ms\n", get_elapsed_time(start));
+            }
+
+            if (settings.component && settings.component_name.empty())
+            {
+                auto& values = args.values("input");
+
+                if (!values.empty())
+                {
+                    // In C++/WinRT 1.0, the component name defaults to the *first* input, hence
+                    // the use of args.values() that will return the args in input order.
+
+                    auto compat_name = path(values[0]).filename().replace_extension().string();
+
+                    w.write("\n warning: Use '-name %' to specify the explicit name for component files.\n",
+                        compat_name);
+                }
             }
         }
         catch (usage_exception const&)

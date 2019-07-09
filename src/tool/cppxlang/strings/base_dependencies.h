@@ -2,13 +2,18 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cassert>
 #include <chrono>
 #include <clocale>
+#include <cinttypes>
+#include <condition_variable>
 #include <cstddef>
+#include <cwchar>
 #include <iterator>
 #include <limits>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <optional>
 #include <shared_mutex>
@@ -21,20 +26,4 @@
 #include <unordered_map>
 #include <vector>
 
-#if __has_include(<WindowsNumerics.impl.h>)
-#define WINRT_NUMERICS
-#include <directxmath.h>
-#define _WINDOWS_NUMERICS_NAMESPACE_ winrt::Windows::Foundation::Numerics
-#define _WINDOWS_NUMERICS_BEGIN_NAMESPACE_ namespace winrt::Windows::Foundation::Numerics
-#define _WINDOWS_NUMERICS_END_NAMESPACE_
-#ifdef __clang__
-#define _XM_NO_INTRINSICS_
-#endif
-#include <WindowsNumerics.impl.h>
-#ifdef __clang__
-#undef _XM_NO_INTRINSICS_
-#endif
-#undef _WINDOWS_NUMERICS_NAMESPACE_
-#undef _WINDOWS_NUMERICS_BEGIN_NAMESPACE_
-#undef _WINDOWS_NUMERICS_END_NAMESPACE_
-#endif
+#include <pal.h>

@@ -1,6 +1,71 @@
 
 namespace winrt::impl
 {
+#ifdef WINRT_DIAGNOSTICS
+
+    struct factory_diagnostics_info
+    {
+        bool is_agile{ true };
+        uint32_t requests{ 0 };
+    };
+
+    struct diagnostics_info
+    {
+        std::map<std::wstring_view, uint32_t> queries;
+        std::map<std::wstring_view, factory_diagnostics_info> factories;
+    };
+
+    struct diagnostics_cache
+    {
+        template <typename T>
+        void add_query()
+        {
+            slim_lock_guard const guard(m_lock);
+            ++m_info.queries[name_of<T>()];
+        }
+
+        template <typename T>
+        void add_factory()
+        {
+            slim_lock_guard const guard(m_lock);
+            factory_diagnostics_info& factory = m_info.factories[name_of<T>()];
+            ++factory.requests;
+        }
+
+        template <typename T>
+        void non_agile_factory()
+        {
+            slim_lock_guard const guard(m_lock);
+            factory_diagnostics_info& factory = m_info.factories[name_of<T>()];
+            factory.is_agile = false;
+        }
+
+        auto get()
+        {
+            slim_lock_guard const guard(m_lock);
+            return m_info;
+        }
+
+        auto detach()
+        {
+            slim_lock_guard const guard(m_lock);
+            return std::move(m_info);
+        }
+
+    private:
+
+        slim_mutex m_lock;
+        diagnostics_info m_info;
+    };
+
+    inline diagnostics_cache& get_diagnostics_info() noexcept
+    {
+        static diagnostics_cache info;
+        return info;
+    }
+
+#endif
+
     template <typename T>
     using com_ref = std::conditional_t<std::is_base_of_v<Windows::Foundation::IUnknown, T>, T, com_ptr<T>>;
 
@@ -19,12 +84,16 @@ namespace winrt::impl
     template <typename To, typename From>
     com_ref<To> as(From* ptr)
     {
+#ifdef WINRT_DIAGNOSTICS
+        get_diagnostics_info().add_query<To>();
+#endif
+
         if (!ptr)
         {
             return nullptr;
         }
 
-        void* result;
+        void* result{};
         check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
         return wrap_as_result<To>(result);
     }
@@ -32,6 +101,10 @@ namespace winrt::impl
     template <typename To, typename From>
     com_ref<To> try_as(From* ptr) noexcept
     {
+#ifdef WINRT_DIAGNOSTICS
+        get_diagnostics_info().add_query<To>();
+#endif
+
         if (!ptr)
         {
             return nullptr;
@@ -156,7 +229,7 @@ namespace winrt::Windows::Foundation
             }
         }
 
-        WINRT_NOINLINE void unconditional_release_ref() noexcept
+        __declspec(noinline) void unconditional_release_ref() noexcept
         {
             std::exchange(m_ptr, {})->Release();
         }

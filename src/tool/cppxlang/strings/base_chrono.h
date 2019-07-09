@@ -1,54 +1,54 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     using filetime_period = std::ratio_multiply<std::ratio<100>, std::nano>;
 }
 
-namespace winrt
+namespace xlang
 {
     struct clock;
 
-    namespace Windows::Foundation
+    namespace Foundation
     {
         using TimeSpan = std::chrono::duration<int64_t, impl::filetime_period>;
         using DateTime = std::chrono::time_point<clock, TimeSpan>;
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
-    template <> struct abi<Windows::Foundation::TimeSpan>
+    template <> struct abi<Foundation::TimeSpan>
     {
         using type = int64_t;
     };
 
-    template <> struct abi<Windows::Foundation::DateTime>
+    template <> struct abi<Foundation::DateTime>
     {
         using type = int64_t;
     };
 
-    template <> struct name<Windows::Foundation::TimeSpan>
+    template <> struct name<Foundation::TimeSpan>
     {
-        static constexpr auto & value{ L"Windows.Foundation.TimeSpan" };
+        static constexpr auto & value{ u8"Foundation.TimeSpan" };
     };
 
-    template <> struct category<Windows::Foundation::TimeSpan>
+    template <> struct category<Foundation::TimeSpan>
     {
         using type = struct_category<int64_t>;
     };
 
-    template <> struct name<Windows::Foundation::DateTime>
+    template <> struct name<Foundation::DateTime>
     {
-        static constexpr auto & value{ L"Windows.Foundation.DateTime" };
+        static constexpr auto & value{ u8"Foundation.DateTime" };
     };
 
-    template <> struct category<Windows::Foundation::DateTime>
+    template <> struct category<Foundation::DateTime>
     {
         using type = struct_category<int64_t>;
     };
 }
 
-namespace winrt
+namespace xlang
 {
     struct file_time
     {
@@ -77,16 +77,15 @@ namespace winrt
     {
         using rep = int64_t;
         using period = impl::filetime_period;
-        using duration = Windows::Foundation::TimeSpan;
-        using time_point = Windows::Foundation::DateTime;
+        using duration = Foundation::TimeSpan;
+        using time_point = Foundation::DateTime;
 
         static constexpr bool is_steady = false;
 
         static time_point now() noexcept
         {
-            file_time ft;
-            WINRT_GetSystemTimePreciseAsFileTime(&ft);
-            return from_file_time(ft);
+            auto const sys_now = std::chrono::system_clock::now();
+            return time_t_epoch + std::chrono::duration_cast<duration>(sys_now.time_since_epoch());
         }
 
         static time_t to_time_t(time_point const& time) noexcept

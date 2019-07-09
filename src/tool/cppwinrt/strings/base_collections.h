@@ -41,8 +41,50 @@ namespace winrt::impl
 
     private:
 
-        T const* m_collection = nullptr;
-        uint32_t m_index = 0;
+        T const* m_collection{};
+        uint32_t m_index{};
+    };
+
+    template <typename T>
+    struct rfast_iterator
+    {
+        using iterator_category = std::input_iterator_tag;
+        using value_type = T;
+        using difference_type = ptrdiff_t;
+        using pointer = T *;
+        using reference = T &;
+
+        rfast_iterator(T const& collection, int64_t const index) noexcept :
+            m_collection(&collection),
+            m_index(index)
+        {}
+
+        rfast_iterator& operator++() noexcept
+        {
+            --m_index;
+            return*this;
+        }
+
+        auto operator*() const
+        {
+            return m_collection->GetAt(static_cast<uint32_t>(m_index));
+        }
+
+        bool operator==(rfast_iterator const& other) const noexcept
+        {
+            WINRT_ASSERT(m_collection == other.m_collection);
+            return m_index == other.m_index;
+        }
+
+        bool operator!=(rfast_iterator const& other) const noexcept
+        {
+            return !(*this == other);
+        }
+
+    private:
+
+        T const* m_collection{};
+        int64_t m_index{};
     };
 
     template <typename T>
@@ -78,20 +120,32 @@ namespace winrt::impl
     template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
     fast_iterator<T> begin(T const& collection) noexcept
     {
-        return fast_iterator<T>(collection, 0);
+        return { collection, 0 };
     }
 
     template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
     fast_iterator<T> end(T const& collection)
     {
-        return fast_iterator<T>(collection, collection.Size());
+        return { collection, collection.Size() };
+    }
+
+    template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
+    rfast_iterator<T> rbegin(T const& collection) noexcept
+    {
+        return { collection, collection.Size() - 1 };
+    }
+
+    template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
+    rfast_iterator<T> rend(T const& collection)
+    {
+        return { collection, -1 };
     }
 
     template <typename T>
     struct key_value_pair;
 
     template <typename K, typename V>
-    struct key_value_pair<wfc::IKeyValuePair<K, V>> final : implements<key_value_pair<wfc::IKeyValuePair<K, V>>, wfc::IKeyValuePair<K, V>>
+    struct key_value_pair<wfc::IKeyValuePair<K, V>> : implements<key_value_pair<wfc::IKeyValuePair<K, V>>, wfc::IKeyValuePair<K, V>>
     {
         key_value_pair(K key, V value) :
             m_key(std::move(key)),

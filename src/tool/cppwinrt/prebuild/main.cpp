@@ -22,13 +22,12 @@ namespace xlang::strings {
 )");
 
     strings_cpp.write(R"(
-#include "pch.h"
 namespace xlang::strings {
 )");
 
-    for (auto&& file : std::experimental::filesystem::directory_iterator(argv[1]))
+    for (auto&& file : std::filesystem::directory_iterator(argv[1]))
     {
-        if (!std::experimental::filesystem::is_regular_file(file))
+        if (!std::filesystem::is_regular_file(file))
         {
             continue;
         }
@@ -73,16 +72,14 @@ namespace xlang::strings {
 }
 )");
 
-    std::string version = XLANG_VERSION_STRING;
-    std::replace(version.begin(), version.end(), '.', ',');
     writer version_rc;
 
     version_rc.write(R"(
 #include "winres.h"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION %
- PRODUCTVERSION %
+ FILEVERSION 2,0,0,0
+ PRODUCTVERSION 2,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -99,7 +96,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Microsoft Corporation"
             VALUE "FileDescription", "C++/WinRT"
-            VALUE "FileVersion", "%"
+            VALUE "FileVersion", "2.0.0.0"
             VALUE "LegalCopyright", "Microsoft Corporation. All rights reserved."
             VALUE "OriginalFilename", "cppwinrt.exe"
             VALUE "ProductName", "C++/WinRT"
@@ -112,13 +109,10 @@ BEGIN
     END
 END
 )",
-    version,
-    version,
-    XLANG_VERSION_STRING,
     XLANG_VERSION_STRING);
 
-    auto const output = std::experimental::filesystem::canonical(argv[2]);
-    std::experimental::filesystem::create_directories(output);
+    std::filesystem::create_directories(argv[2]);
+    auto const output = std::filesystem::canonical(argv[2]);
     strings_h.flush_to_file(output / "strings.h");
     strings_cpp.flush_to_file(output / "strings.cpp");
     version_rc.flush_to_file(output / "version.rc");

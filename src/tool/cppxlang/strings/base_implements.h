@@ -1,5 +1,5 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     struct marker
     {
@@ -7,7 +7,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+namespace xlang
 {
     struct non_agile : impl::marker {};
     struct no_weak_ref : impl::marker {};
@@ -29,7 +29,7 @@ namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template<typename...T>
     using tuple_cat_t = decltype(std::tuple_cat(std::declval<T>()...));
@@ -43,15 +43,15 @@ namespace winrt::impl
     template <template <typename> typename Condition, typename T>
     using tuple_if = typename tuple_if_base<Condition, T>::type;
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef XLANG_WINDOWS_ABI
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
+    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IXlangObject, T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
 
 #else
 
     template <typename T>
-    struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>> {};
+    struct is_interface : std::is_base_of<Windows::Foundation::IXlangObject, T> {};
 
 #endif
 
@@ -75,8 +75,8 @@ namespace winrt::impl
 
     template <typename I>
     struct is_cloaked : std::disjunction<
-        std::is_same<Windows::Foundation::IInspectable, I>,
-        std::negation<std::is_base_of<Windows::Foundation::IInspectable, I>>
+        std::is_same<Windows::Foundation::IXlangObject, I>,
+        std::negation<std::is_base_of<Windows::Foundation::IXlangObject, I>>
     > {};
 
     template <typename I>
@@ -216,7 +216,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename D, typename I>
     D* get_self(I const& from) noexcept
@@ -243,7 +243,7 @@ namespace winrt
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename...> struct interface_list;
 
@@ -298,7 +298,7 @@ namespace winrt::impl
         using type = typename interface_list_append_impl<
             std::conditional_t<
             Predicate<T>::value,
-            interface_list<winrt::impl::uncloak<T>>,
+            interface_list<xlang::impl::uncloak<T>>,
             interface_list<>
             >,
             typename filter_impl<Predicate, Rest...>::type
@@ -315,7 +315,7 @@ namespace winrt::impl
     };
 
     template <template <typename> class Predicate, typename D, typename ... I, typename ... Rest>
-    struct filter_impl<Predicate, winrt::implements<D, I...>, Rest...>
+    struct filter_impl<Predicate, xlang::implements<D, I...>, Rest...>
     {
         using type = typename interface_list_append_impl<
             filter<Predicate, I...>,
@@ -327,19 +327,9 @@ namespace winrt::impl
     using implemented_interfaces = filter<is_interface, typename T::implements_type>;
 
     template <typename T>
-    struct is_uncloaked_interface : std::conjunction<is_interface<T>, std::negation<winrt::impl::is_cloaked<T>>> {};
+    struct is_uncloaked_interface : std::conjunction<is_interface<T>, std::negation<xlang::impl::is_cloaked<T>>> {};
     template <typename T>
     using uncloaked_interfaces = filter<is_uncloaked_interface, typename T::implements_type>;
-
-    template <typename T>
-    struct uncloaked_iids;
-
-    template <typename ... T>
-    struct uncloaked_iids<interface_list<T...>>
-    {
-#pragma warning(suppress: 4307)
-        static constexpr std::array<guid, sizeof...(T)> value{ winrt::guid_of<T>() ... };
-    };
 
     template <typename T, typename = void>
     struct implements_default_interface
@@ -350,7 +340,7 @@ namespace winrt::impl
     template <typename T>
     struct implements_default_interface<T, std::void_t<typename T::class_type>>
     {
-        using type = winrt::default_interface<typename T::class_type>;
+        using type = xlang::default_interface<typename T::class_type>;
     };
 
     template <typename T>
@@ -376,27 +366,27 @@ namespace winrt::impl
         return static_cast<unknown_abi*>(implemented_interfaces<T>::find(obj, iid_finder{ iid }));
     }
 
-    struct inspectable_finder
+    struct xlang_object_finder
     {
         template <typename I>
         static constexpr bool test() noexcept
         {
-            return std::is_base_of_v<inspectable_abi, abi_t<I>>;
+            return std::is_base_of_v<xlang_object_abi, abi_t<I>>;
         }
     };
 
     template <typename T>
-    inspectable_abi* find_inspectable(const T* obj) noexcept
+    xlang_object_abi* find_xlang_object(const T* obj) noexcept
     {
         using default_interface = typename implements_default_interface<T>::type;
 
-        if constexpr (std::is_base_of_v<inspectable_abi, abi_t<default_interface>>)
+        if constexpr (std::is_base_of_v<xlang_object_abi, abi_t<default_interface>>)
         {
             return to_abi<default_interface>(obj);
         }
         else
         {
-            return static_cast<inspectable_abi*>(implemented_interfaces<T>::find(obj, inspectable_finder{}));
+            return static_cast<xlang_object_abi*>(implemented_interfaces<T>::find(obj, xlang_object_finder{}));
         }
     }
 
@@ -433,38 +423,33 @@ namespace winrt::impl
             return*static_cast<D*>(reinterpret_cast<producer<D, I>*>(this));
         }
 
-        int32_t WINRT_CALL QueryInterface(guid const& id, void** object) noexcept override
+        int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
         {
             return shim().QueryInterface(id, object);
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept override
+        uint32_t XLANG_CALL AddRef() noexcept override
         {
             return shim().AddRef();
         }
 
-        uint32_t WINRT_CALL Release() noexcept override
+        uint32_t XLANG_CALL Release() noexcept override
         {
             return shim().Release();
         }
 
-        int32_t WINRT_CALL GetIids(uint32_t* count, guid** array) noexcept override
+        bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info) noexcept override
         {
-            return shim().GetIids(count, array);
+            return shim().abi_GetObjectInfo(info_category, info);
         }
 
-        int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept override
+        bool Equals(xlang_object_abi* object) noexcept override
         {
-            return shim().abi_GetRuntimeClassName(name);
-        }
-
-        int32_t WINRT_CALL GetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept final
-        {
-            return shim().abi_GetTrustLevel(trustLevel);
+            return shim().abi_Equals(object);
         }
     };
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef XLANG_WINDOWS_ABI
 
     template <typename D, typename I>
     struct producer<D, I, std::enable_if_t<std::is_base_of_v< ::IUnknown, I> && !is_implements_v<I>>> : I
@@ -478,42 +463,42 @@ namespace winrt::impl
 
 #endif
 
-    struct INonDelegatingInspectable : Windows::Foundation::IUnknown
+    struct INonDelegatingXlangObject : Windows::Foundation::IUnknown
     {
-        INonDelegatingInspectable(std::nullptr_t = nullptr) noexcept {}
+        INonDelegatingXlangObject(std::nullptr_t = nullptr) noexcept {}
     };
 
-    template <> struct abi<INonDelegatingInspectable>
+    template <> struct abi<INonDelegatingXlangObject>
     {
-        using type = inspectable_abi;
+        using type = xlang_object_abi;
     };
 
     template <typename D>
-    struct produce<D, INonDelegatingInspectable> : produce_base<D, INonDelegatingInspectable>
+    struct produce<D, INonDelegatingXlangObject> : produce_base<D, INonDelegatingXlangObject>
     {
-        int32_t WINRT_CALL QueryInterface(const guid& id, void** object) noexcept final
+        int32_t XLANG_CALL QueryInterface(const guid& id, void** object) noexcept final
         {
             return this->shim().NonDelegatingQueryInterface(id, object);
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept final
+        uint32_t XLANG_CALL AddRef() noexcept final
         {
             return this->shim().NonDelegatingAddRef();
         }
 
-        uint32_t WINRT_CALL Release() noexcept final
+        uint32_t XLANG_CALL Release() noexcept final
         {
             return this->shim().NonDelegatingRelease();
         }
 
-        int32_t WINRT_CALL GetIids(uint32_t* count, guid** array) noexcept final
+        bool GetObjectInfo(XlangObjectInfoCategory info_category, void** info) noexcept final
         {
-            return this->shim().NonDelegatingGetIids(count, array);
+            return this->shim().NonDelegatingGetObjectInfo(info_category, info);
         }
 
-        int32_t WINRT_CALL GetRuntimeClassName(void** name) noexcept final
+        bool Equals(xlang_object_abi* object) noexcept final
         {
-            return this->shim().NonDelegatingGetRuntimeClassName(name);
+            return this->shim().NonDelegatingEquals(object);
         }
     };
 
@@ -531,7 +516,7 @@ namespace winrt::impl
             return static_cast<weak_ref<Agile>*>(reinterpret_cast<weak_source_producer<Agile>*>(this));
         }
 
-        int32_t WINRT_CALL QueryInterface(guid const& id, void** object) noexcept override
+        int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
         {
             if (is_guid_of<IWeakReferenceSource>(id))
             {
@@ -543,17 +528,17 @@ namespace winrt::impl
             return that()->m_object->QueryInterface(id, object);
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept override
+        uint32_t XLANG_CALL AddRef() noexcept override
         {
             return that()->increment_strong();
         }
 
-        uint32_t WINRT_CALL Release() noexcept override
+        uint32_t XLANG_CALL Release() noexcept override
         {
             return that()->m_object->Release();
         }
 
-        int32_t WINRT_CALL GetWeakReference(IWeakReference** weakReference) noexcept override
+        int32_t XLANG_CALL GetWeakReference(IWeakReference** weakReference) noexcept override
         {
             *weakReference = that();
             that()->AddRef();
@@ -575,10 +560,10 @@ namespace winrt::impl
             m_object(object),
             m_strong(strong)
         {
-            WINRT_ASSERT(object);
+            XLANG_ASSERT(object);
         }
 
-        int32_t WINRT_CALL QueryInterface(guid const& id, void** object) noexcept override
+        int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept override
         {
             if (is_guid_of<IWeakReference>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
@@ -587,31 +572,16 @@ namespace winrt::impl
                 return error_ok;
             }
 
-            if constexpr (Agile)
-            {
-                if (is_guid_of<IAgileObject>(id))
-                {
-                    *object = static_cast<unknown_abi*>(this);
-                    AddRef();
-                    return error_ok;
-                }
-
-                if (is_guid_of<IMarshal>(id))
-                {
-                    return make_marshaler(this, object);
-                }
-            }
-
             *object = nullptr;
             return error_no_interface;
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept override
+        uint32_t XLANG_CALL AddRef() noexcept override
         {
             return 1 + m_weak.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t WINRT_CALL Release() noexcept override
+        uint32_t XLANG_CALL Release() noexcept override
         {
             uint32_t const target = m_weak.fetch_sub(1, std::memory_order_relaxed) - 1;
 
@@ -623,7 +593,7 @@ namespace winrt::impl
             return target;
         }
 
-        int32_t WINRT_CALL Resolve(guid const& id, void** objectReference) noexcept override
+        int32_t XLANG_CALL Resolve(guid const& id, void** objectReference) noexcept override
         {
             uint32_t target = m_strong.load(std::memory_order_relaxed);
 
@@ -684,15 +654,15 @@ namespace winrt::impl
     };
 
     template <bool>
-    struct WINRT_EBO root_implements_composing_outer
+    struct XLANG_EBO root_implements_composing_outer
     {
     protected:
         static constexpr bool is_composing = false;
-        static constexpr inspectable_abi* m_inner = nullptr;
+        static constexpr xlang_object_abi* m_inner = nullptr;
     };
 
     template <>
-    struct WINRT_EBO root_implements_composing_outer<true>
+    struct XLANG_EBO root_implements_composing_outer<true>
     {
         template <typename Qi>
         auto try_as() const noexcept
@@ -706,43 +676,43 @@ namespace winrt::impl
         }
     protected:
         static constexpr bool is_composing = true;
-        Windows::Foundation::IInspectable m_inner;
+        Windows::Foundation::IXlangObject m_inner;
     };
 
     template <typename D, bool>
-    struct WINRT_EBO root_implements_composable_inner
+    struct XLANG_EBO root_implements_composable_inner
     {
     protected:
-        static constexpr inspectable_abi* outer() noexcept { return nullptr; }
+        static constexpr xlang_object_abi* outer() noexcept { return nullptr; }
 
-        template <typename T, typename D, typename I>
+        template <typename, typename, typename>
         friend class produce_dispatch_to_overridable_base;
     };
 
     template <typename D>
-    struct WINRT_EBO root_implements_composable_inner<D, true> : producer<D, INonDelegatingInspectable>
+    struct XLANG_EBO root_implements_composable_inner<D, true> : producer<D, INonDelegatingXlangObject>
     {
     protected:
-        inspectable_abi* outer() noexcept { return m_outer; }
+        xlang_object_abi* outer() noexcept { return m_outer; }
     private:
-        inspectable_abi* m_outer = nullptr;
+        xlang_object_abi* m_outer = nullptr;
 
-        template <typename T, typename D, typename I>
+        template <typename, typename, typename>
         friend class produce_dispatch_to_overridable_base;
 
-        template <typename D>
+        template <typename>
         friend struct composable_factory;
     };
 
     template <typename D, typename... I>
-    struct WINRT_NOVTABLE root_implements
+    struct XLANG_NOVTABLE root_implements
         : root_implements_composing_outer<std::disjunction_v<std::is_same<composing, I>...>>
         , root_implements_composable_inner<D, std::disjunction_v<std::is_same<composable, I>...>>
     {
-        using IInspectable = Windows::Foundation::IInspectable;
+        using IXlangObject = Windows::Foundation::IXlangObject;
         using root_implements_type = root_implements;
 
-        int32_t WINRT_CALL QueryInterface(guid const& id, void** object) noexcept
+        int32_t XLANG_CALL QueryInterface(guid const& id, void** object) noexcept
         {
             if (this->outer())
             {
@@ -759,7 +729,7 @@ namespace winrt::impl
             return result;
         }
 
-        uint32_t WINRT_CALL AddRef() noexcept
+        uint32_t XLANG_CALL AddRef() noexcept
         {
             if (this->outer())
             {
@@ -769,7 +739,7 @@ namespace winrt::impl
             return NonDelegatingAddRef();
         }
 
-        uint32_t WINRT_CALL Release() noexcept
+        uint32_t XLANG_CALL Release() noexcept
         {
             if (this->outer())
             {
@@ -799,6 +769,12 @@ namespace winrt::impl
 
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
+        static void final_release(std::unique_ptr<D>) noexcept {}
+
+        int32_t query_interface_tearoff(guid const&, void**) const noexcept
+        {
+            return error_no_interface;
+        }
 
     protected:
 
@@ -821,37 +797,25 @@ namespace winrt::impl
             }
         }
 
-        int32_t WINRT_CALL GetIids(uint32_t* count, guid** array) noexcept
+        bool XLANG_CALL abi_GetObjectInfo(XlangObjectInfoCategory info_category, void** info) noexcept
         {
             if (this->outer())
             {
-                return this->outer()->GetIids(count, array);
+                return this->outer()->GetObjectInfo(info_category, info);
             }
-
-            return NonDelegatingGetIids(count, array);
+            return NonDelegatingGetObjectInfo(info_category, info);
         }
 
-        int32_t WINRT_CALL abi_GetRuntimeClassName(void** name) noexcept
+        bool XLANG_CALL abi_Equals(xlang_object_abi* object) noexcept
         {
             if (this->outer())
             {
-                return this->outer()->GetRuntimeClassName(name);
+                return this->outer()->Equals(object);
             }
-
-            return NonDelegatingGetRuntimeClassName(name);
+            return NonDelegatingEquals(object);
         }
 
-        int32_t WINRT_CALL abi_GetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept
-        {
-            if (this->outer())
-            {
-                return this->outer()->GetTrustLevel(trustLevel);
-            }
-
-            return NonDelegatingGetTrustLevel(trustLevel);
-        }
-
-        uint32_t WINRT_CALL NonDelegatingAddRef() noexcept
+        uint32_t XLANG_CALL NonDelegatingAddRef() noexcept
         {
             if constexpr (is_weak_ref_source::value)
             {
@@ -878,7 +842,7 @@ namespace winrt::impl
             }
         }
 
-        uint32_t WINRT_CALL NonDelegatingRelease() noexcept
+        uint32_t XLANG_CALL NonDelegatingRelease() noexcept
         {
             uint32_t const target = subtract_reference();
 
@@ -888,24 +852,17 @@ namespace winrt::impl
                 // This ensures destruction has a stable value during destruction.
                 m_references = 1;
 
-                if constexpr (has_final_release::value)
-                {
-                    D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
-                }
-                else
-                {
-                    delete this;
-                }
+                D::final_release(std::unique_ptr<D>(static_cast<D*>(this)));
             }
 
             return target;
         }
 
-        int32_t WINRT_CALL NonDelegatingQueryInterface(const guid& id, void** object) noexcept
+        int32_t XLANG_CALL NonDelegatingQueryInterface(const guid& id, void** object) noexcept
         {
-            if (is_guid_of<Windows::Foundation::IInspectable>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
+            if (is_guid_of<Windows::Foundation::IXlangObject>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
-                auto result = to_abi<INonDelegatingInspectable>(this);
+                auto result = to_abi<INonDelegatingXlangObject>(this);
                 NonDelegatingAddRef();
                 *object = result;
                 return error_ok;
@@ -921,68 +878,38 @@ namespace winrt::impl
             return result;
         }
 
-        int32_t WINRT_CALL NonDelegatingGetIids(uint32_t* count, guid** array) noexcept
+        // TODO: Determine nitty-gritty contract of these methods.
+        //       Can failure be represented, or should they be noexcept and terminate in case of exception?
+        //       What does the return type of GetObjectInfo represent?
+        bool NonDelegatingGetObjectInfo(XlangObjectInfoCategory info_category, void** info)
         {
-            const auto& local_iids = static_cast<D*>(this)->get_local_iids();
-            const uint32_t& local_count = local_iids.first;
-            if constexpr (root_implements_type::is_composing)
+            *info = nullptr;
+            bool result = false;
+
+            switch (info_category)
             {
-                if (local_count > 0)
-                {
-                    const com_array<guid>& inner_iids = get_interfaces(root_implements_type::m_inner);
-                    *count = local_count + inner_iids.size();
-                    *array = static_cast<guid*>(WINRT_CoTaskMemAlloc(sizeof(guid)*(*count)));
-                    if (*array == nullptr)
-                    {
-                        return error_bad_alloc;
-                    }
-                    *array = std::copy(local_iids.second, local_iids.second + local_count, *array);
-                    std::copy(inner_iids.cbegin(), inner_iids.cend(), *array);
-                }
-                else
-                {
-                    return static_cast<inspectable_abi*>(get_abi(root_implements_type::m_inner))->GetIids(count, array);
-                }
+            case XlangObjectInfoCategory::TypeName:
+                *info = detach_abi(static_cast<D*>(this)->GetObjectInfo_TypeName());
+                break;
+
+            case XlangObjectInfoCategory::HashCode:
+                *reinterpret_cast<uint32_t*>(info) = static_cast<D*>(this)->GetObjectInfo_HashCode();
+                break;
+
+            case XlangObjectInfoCategory::StringRepresentation:
+                *info = detach_abi(static_cast<D*>(this)->GetObjectInfo_StringRepresentation());
+                break;
+
+            case XlangObjectInfoCategory::ObjectSize:
+                *reinterpret_cast<uint32_t*>(info) = static_cast<D*>(this)->GetObjectInfo_ObjectSize();
+                break;
             }
-            else
-            {
-                if (local_count > 0)
-                {
-                    *count = local_count;
-                    *array = static_cast<guid*>(WINRT_CoTaskMemAlloc(sizeof(guid)*(*count)));
-                    if (*array == nullptr)
-                    {
-                        return error_bad_alloc;
-                    }
-                    std::copy(local_iids.second, local_iids.second + local_count, *array);
-                }
-                else
-                {
-                    *count = 0;
-                    *array = nullptr;
-                }
-            }
-            return error_ok;
+            return result;
         }
 
-        int32_t WINRT_CALL NonDelegatingGetRuntimeClassName(void** name) noexcept
+        bool NonDelegatingEquals(xlang_object_abi* object) const noexcept
         {
-            try
-            {
-                *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
-        }
-
-        int32_t WINRT_CALL NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept
-        {
-            try
-            {
-                *trustLevel = static_cast<D*>(this)->GetTrustLevel();
-                return error_ok;
-            }
-            catch (...) { return to_hresult(); }
+            return static_cast<D const*>(this)->Equals(*reinterpret_cast<IXlangObject const*>(&object));
         }
 
         uint32_t subtract_reference() noexcept
@@ -1013,7 +940,7 @@ namespace winrt::impl
         }
 
         template <typename T>
-        winrt::weak_ref<T> get_weak()
+        xlang::weak_ref<T> get_weak()
         {
             impl::IWeakReferenceSource* weak_ref = make_weak_ref();
             if (!weak_ref)
@@ -1023,7 +950,7 @@ namespace winrt::impl
             com_ptr<impl::IWeakReferenceSource> source;
             attach_abi(source, weak_ref);
 
-            winrt::weak_ref<T> result;
+            xlang::weak_ref<T> result;
             check_hresult(source->GetWeakReference(result.put()));
             return result;
         }
@@ -1032,19 +959,9 @@ namespace winrt::impl
 
     private:
 
-        class has_final_release
-        {
-            template <typename U, typename = decltype(std::declval<U>().final_release(0))> static constexpr bool get_value(int) { return true; }
-            template <typename> static constexpr bool get_value(...) { return false; }
-
-        public:
-
-            static constexpr bool value = get_value<D>(0);
-        };
-
         using is_agile = std::negation<std::disjunction<std::is_same<non_agile, I>...>>;
-        using is_inspectable = std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, I>...>;
-        using is_weak_ref_source = std::conjunction<is_inspectable, std::negation<is_factory>, std::negation<std::disjunction<std::is_same<no_weak_ref, I>...>>>;
+        using is_xlang_object = std::disjunction<std::is_base_of<Windows::Foundation::IXlangObject, I>...>;
+        using is_weak_ref_source = std::conjunction<is_xlang_object, std::negation<is_factory>, std::negation<std::disjunction<std::is_same<no_weak_ref, I>...>>>;
         using use_module_lock = std::negation<std::disjunction<std::is_same<no_module_lock, I>...>>;
         using weak_ref_t = impl::weak_ref<is_agile::value>;
 
@@ -1068,18 +985,13 @@ namespace winrt::impl
                     AddRef();
                     return error_ok;
                 }
-
-                if (is_guid_of<IMarshal>(id))
-                {
-                    return make_marshaler(get_unknown(), object);
-                }
             }
 
-            if constexpr (is_inspectable::value)
+            if constexpr (is_xlang_object::value)
             {
-                if (is_guid_of<Windows::Foundation::IInspectable>(id))
+                if (is_guid_of<Windows::Foundation::IXlangObject>(id))
                 {
-                    *object = find_inspectable();
+                    *object = find_xlang_object();
                     AddRef();
                     return error_ok;
                 }
@@ -1101,7 +1013,7 @@ namespace winrt::impl
                 }
             }
 
-            return error_no_interface;
+            return static_cast<D*>(this)->query_interface_tearoff(id, object);
         }
 
         impl::IWeakReferenceSource* make_weak_ref() noexcept
@@ -1158,26 +1070,38 @@ namespace winrt::impl
         {
             static_assert(is_weak_ref_source::value, "This is only for weak ref support.");
             constexpr uintptr_t pointer_flag = static_cast<uintptr_t>(1) << ((sizeof(uintptr_t) * 8) - 1);
-            WINRT_ASSERT((reinterpret_cast<uintptr_t>(value) & 1) == 0);
+            XLANG_ASSERT((reinterpret_cast<uintptr_t>(value) & 1) == 0);
             return (reinterpret_cast<uintptr_t>(value) >> 1) | pointer_flag;
         }
 
         virtual unknown_abi* get_unknown() const noexcept = 0;
-        virtual std::pair<uint32_t, const guid*> get_local_iids() const noexcept = 0;
-        virtual hstring GetRuntimeClassName() const = 0;
         virtual void* find_interface(guid const&) const noexcept = 0;
-        virtual inspectable_abi* find_inspectable() const noexcept = 0;
+        virtual xlang_object_abi* find_xlang_object() const noexcept = 0;
 
-        virtual Windows::Foundation::TrustLevel GetTrustLevel() const noexcept
-        {
-            return Windows::Foundation::TrustLevel::BaseTrust;
-        }
+        virtual bool Equals(IXlangObject const& object) const noexcept = 0;
+        
+        virtual hstring GetObjectInfo_TypeName() const = 0;
+        virtual uint32_t GetObjectInfo_HashCode() const = 0;
+        virtual hstring GetObjectInfo_StringRepresentation() const = 0;
+        virtual uint32_t GetObjectInfo_ObjectSize() const = 0;
 
-        template <typename D, typename I, typename Enable>
+        template <typename, typename, typename>
         friend struct impl::produce_base;
 
-        template <typename D, typename I>
+        template <typename, typename>
         friend struct impl::produce;
+    };
+
+    template <typename T>
+    struct heap_implements final : T
+    {
+        using T::T;
+
+#ifdef _DEBUG
+        void use_make_function_to_create_this_object() final
+        {
+        }
+#endif
     };
 
     template <typename D>
@@ -1185,35 +1109,7 @@ namespace winrt::impl
     {
         using result_type = typename impl::implements_default_interface<D>::type;
 
-        if constexpr (!has_static_lifetime_v<D>)
-        {
-            return { to_abi<result_type>(new D), take_ownership_from_abi };
-        }
-        else
-        {
-            auto const lifetime_factory = get_activation_factory<impl::IStaticLifetime>(L"Windows.ApplicationModel.Core.CoreApplication");
-            Windows::Foundation::IUnknown collection;
-            check_hresult(lifetime_factory->GetCollection(put_abi(collection)));
-            auto const map = collection.as<IStaticLifetimeCollection>();
-            param::hstring const name{ name_of<typename D::instance_type>() };
-            result_type object{ to_abi<result_type>(new D), take_ownership_from_abi };
-
-            static slim_mutex lock;
-            slim_lock_guard const guard{ lock };
-            void* result;
-            map->Lookup(get_abi(name), &result);
-
-            if (result)
-            {
-                return { result, take_ownership_from_abi };
-            }
-            else
-            {
-                bool found;
-                check_hresult(map->Insert(get_abi(name), get_abi(object), &found));
-                return object;
-            }
-        }
+        return { to_abi<result_type>(new heap_implements<D>), take_ownership_from_abi };
     }
 
     template <typename T>
@@ -1223,7 +1119,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename D, typename... Args>
     auto make(Args&&... args)
@@ -1237,24 +1133,24 @@ namespace winrt
         }
         else if constexpr (impl::has_composable<D>::value)
         {
-            impl::com_ref<I> result{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
+            impl::com_ref<I> result{ to_abi<I>(new impl::heap_implements<D>(std::forward<Args>(args)...)), take_ownership_from_abi };
             return result.template as<typename D::composable>();
         }
         else if constexpr (impl::has_class_type<D>::value)
         {
             static_assert(std::is_same_v<I, default_interface<typename D::class_type>>);
-            return typename D::class_type{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
+            return typename D::class_type{ to_abi<I>(new impl::heap_implements<D>(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
         else
         {
-            return impl::com_ref<I>{ to_abi<I>(new D(std::forward<Args>(args)...)), take_ownership_from_abi };
+            return impl::com_ref<I>{ to_abi<I>(new impl::heap_implements<D>(std::forward<Args>(args)...)), take_ownership_from_abi };
         }
     }
 
     template <typename D, typename... Args>
     com_ptr<D> make_self(Args&&... args)
     {
-        return { new D(std::forward<Args>(args)...), take_ownership_from_abi };
+        return { new impl::heap_implements<D>(std::forward<Args>(args)...), take_ownership_from_abi };
     }
 
     template <typename D, typename... I>
@@ -1271,13 +1167,11 @@ namespace winrt
     public:
 
         using implements_type = implements;
-        using IInspectable = Windows::Foundation::IInspectable;
+        using IXlangObject = Windows::Foundation::IXlangObject;
 
 #ifdef _DEBUG
-        implements() noexcept
-        {
-            WINRT_ASSERT(!is_stack_object());
-        }
+        // Please use xlang::make<T>(args...) to avoid allocating an implementation type on the stack.
+        virtual void use_make_function_to_create_this_object() = 0;
 #endif
 
         weak_ref<D> get_weak()
@@ -1292,33 +1186,33 @@ namespace winrt
             return result;
         }
 
-        operator IInspectable() const noexcept
+        operator IXlangObject() const noexcept
         {
-            IInspectable result;
-            copy_from_abi(result, find_inspectable());
+            IXlangObject result;
+            copy_from_abi(result, find_xlang_object());
             return result;
         }
 
-        impl::hresult_type WINRT_CALL QueryInterface(guid const& id, void** object) noexcept
+        impl::hresult_type XLANG_CALL QueryInterface(guid const& id, void** object) noexcept
         {
             return root_implements_type::QueryInterface(id, object);
         }
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef XLANG_WINDOWS_ABI
 
-        impl::hresult_type WINRT_CALL QueryInterface(GUID const& id, void** object) noexcept
+        impl::hresult_type XLANG_CALL QueryInterface(GUID const& id, void** object) noexcept
         {
             return root_implements_type::QueryInterface(reinterpret_cast<guid const&>(id), object);
         }
 
 #endif
 
-        impl::ref_count_type WINRT_CALL AddRef() noexcept
+        impl::ref_count_type XLANG_CALL AddRef() noexcept
         {
             return root_implements_type::AddRef();
         }
 
-        impl::ref_count_type WINRT_CALL Release() noexcept
+        impl::ref_count_type XLANG_CALL Release() noexcept
         {
             return root_implements_type::Release();
         }
@@ -1328,42 +1222,44 @@ namespace winrt
             return impl::find_iid(static_cast<const D*>(this), id);
         }
 
-        impl::inspectable_abi* find_inspectable() const noexcept override
+        impl::xlang_object_abi* find_xlang_object() const noexcept override
         {
-            return impl::find_inspectable(static_cast<const D*>(this));
-        }
-
-        std::pair<uint32_t, const guid*> get_local_iids() const noexcept override
-        {
-            using interfaces = impl::uncloaked_interfaces<D>;
-            using local_iids = impl::uncloaked_iids<interfaces>;
-            return { static_cast<uint32_t>(local_iids::value.size()), local_iids::value.data() };
+            return impl::find_xlang_object(static_cast<const D*>(this));
         }
 
     private:
-
-#ifdef _DEBUG
-        bool is_stack_object() const noexcept
-        {
-            uintptr_t low_limit{};
-            uintptr_t high_limit{};
-            WINRT_GetCurrentThreadStackLimits(&low_limit, &high_limit);
-            uintptr_t const address = reinterpret_cast<uintptr_t>(this);
-            return (low_limit <= address) && (address < high_limit);
-        }
-#endif
 
         impl::unknown_abi* get_unknown() const noexcept override
         {
             return reinterpret_cast<impl::unknown_abi*>(to_abi<typename impl::implements_default_interface<D>::type>(this));
         }
 
-        hstring GetRuntimeClassName() const override
+        bool Equals(IXlangObject const& object) const noexcept override
+        {
+            return find_xlang_object() == get_abi(object);
+        }
+
+        hstring GetObjectInfo_TypeName() const override
         {
             return impl::runtime_class_name<typename impl::implements_default_interface<D>::type>::get();
         }
 
-        template <typename D, typename... I>
+        uint32_t GetObjectInfo_HashCode() const override
+        {
+            return static_cast<uint32_t>(std::hash<void*>{}(find_xlang_object()));
+        }
+
+        hstring GetObjectInfo_StringRepresentation() const override
+        {
+            return GetObjectInfo_TypeName();
+        }
+
+        uint32_t GetObjectInfo_ObjectSize() const override
+        {
+            return static_cast<uint32_t>(sizeof(D));
+        }
+
+        template <typename, typename...>
         friend struct impl::root_implements;
 
         template <typename T>

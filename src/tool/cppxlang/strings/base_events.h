@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     struct event_token
     {
@@ -22,7 +22,7 @@ namespace winrt
     template <typename I>
     struct event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(winrt::event_token);
+        using method_type = int32_t(XLANG_CALL impl::abi_t<I>::*)(xlang::event_token);
 
         event_revoker() noexcept = default;
         event_revoker(event_revoker const&) = delete;
@@ -77,7 +77,7 @@ namespace winrt
     template <typename I>
     struct factory_event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(winrt::event_token);
+        using method_type = int32_t(XLANG_CALL impl::abi_t<I>::*)(xlang::event_token);
 
         factory_event_revoker() noexcept = default;
         factory_event_revoker(factory_event_revoker const&) = delete;
@@ -130,7 +130,7 @@ namespace winrt
     };
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename I, auto Method>
     struct event_revoker
@@ -151,7 +151,7 @@ namespace winrt::impl
             , m_token(token)
         {}
 
-        operator winrt::event_revoker<I>() && noexcept
+        operator xlang::event_revoker<I>() && noexcept
         {
             return { std::move(m_object), Method, m_token };
         }
@@ -189,7 +189,7 @@ namespace winrt::impl
             }
         }
 
-        winrt::weak_ref<I> m_object{};
+        xlang::weak_ref<I> m_object{};
         event_token m_token{};
     };
 
@@ -211,7 +211,7 @@ namespace winrt::impl
             , m_token(token)
         {}
 
-        operator winrt::factory_event_revoker<I>() && noexcept
+        operator xlang::factory_event_revoker<I>() && noexcept
         {
             return { std::move(m_object), Method, m_token };
         }
@@ -293,7 +293,7 @@ namespace winrt::impl
 
         reference back() noexcept
         {
-            WINRT_ASSERT(m_size > 0);
+            XLANG_ASSERT(m_size > 0);
             return*(data() + m_size - 1);
         }
 
@@ -337,7 +337,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+namespace xlang
 {
     template <typename Delegate>
     struct event
@@ -361,7 +361,7 @@ namespace winrt
             delegate_array temp_targets;
 
             {
-                slim_lock_guard const change_guard(m_change);
+                std::lock_guard const change_guard(m_change);
                 delegate_array new_targets = impl::make_event_array<delegate_type>((!m_targets) ? 1 : m_targets->size() + 1);
 
                 if (m_targets)
@@ -369,10 +369,10 @@ namespace winrt
                     std::copy_n(m_targets->begin(), m_targets->size(), new_targets->begin());
                 }
 
-                new_targets->back() = impl::make_agile_delegate(delegate);
+                new_targets->back() = delegate;
                 token = get_token(new_targets->back());
 
-                slim_lock_guard const swap_guard(m_swap);
+                std::lock_guard const swap_guard(m_swap);
                 temp_targets = std::exchange(m_targets, std::move(new_targets));
             }
 
@@ -385,7 +385,7 @@ namespace winrt
             delegate_array temp_targets;
 
             {
-                slim_lock_guard const change_guard(m_change);
+                std::lock_guard const change_guard(m_change);
 
                 if (!m_targets)
                 {
@@ -418,7 +418,7 @@ namespace winrt
 
                         if (available_slots == 0)
                         {
-                            WINRT_ASSERT(!removed);
+                            XLANG_ASSERT(!removed);
                             break;
                         }
 
@@ -430,7 +430,7 @@ namespace winrt
 
                 if (removed)
                 {
-                    slim_lock_guard const swap_guard(m_swap);
+                    std::lock_guard const swap_guard(m_swap);
                     temp_targets = std::exchange(m_targets, std::move(new_targets));
                 }
             }
@@ -442,7 +442,7 @@ namespace winrt
             delegate_array temp_targets;
 
             {
-                slim_lock_guard const swap_guard(m_swap);
+                std::lock_guard const swap_guard(m_swap);
                 temp_targets = m_targets;
             }
 
@@ -484,7 +484,7 @@ namespace winrt
         using delegate_array = com_ptr<impl::event_array<delegate_type>>;
 
         delegate_array m_targets;
-        slim_mutex m_swap;
-        slim_mutex m_change;
+        std::mutex m_swap;
+        std::mutex m_change;
     };
 }

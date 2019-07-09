@@ -1,7 +1,7 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
-    namespace wfc = Windows::Foundation::Collections;
+    namespace fc = Foundation::Collections;
 
     template <typename T>
     struct fast_iterator
@@ -30,7 +30,7 @@ namespace winrt::impl
 
         bool operator==(fast_iterator const& other) const noexcept
         {
-            WINRT_ASSERT(m_collection == other.m_collection);
+            XLANG_ASSERT(m_collection == other.m_collection);
             return m_index == other.m_index;
         }
 
@@ -91,7 +91,7 @@ namespace winrt::impl
     struct key_value_pair;
 
     template <typename K, typename V>
-    struct key_value_pair<wfc::IKeyValuePair<K, V>> final : implements<key_value_pair<wfc::IKeyValuePair<K, V>>, wfc::IKeyValuePair<K, V>>
+    struct key_value_pair<fc::IKeyValuePair<K, V>> : implements<key_value_pair<fc::IKeyValuePair<K, V>>, fc::IKeyValuePair<K, V>>
     {
         key_value_pair(K key, V value) :
             m_key(std::move(key)),
@@ -119,7 +119,7 @@ namespace winrt::impl
     struct is_key_value_pair : std::false_type {};
 
     template <typename K, typename V>
-    struct is_key_value_pair<wfc::IKeyValuePair<K, V>> : std::true_type {};
+    struct is_key_value_pair<fc::IKeyValuePair<K, V>> : std::true_type {};
 
     struct input_scope
     {

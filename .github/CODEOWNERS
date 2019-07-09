@@ -1,32 +1,3 @@
 # See https://help.github.com/articles/about-codeowners/
 
-# * @BenJKuhn @BrentRe @DefaultRyan @devhawk @dunhor @kennykerr @loarabia @manodasanW @Scottj1s 
-
-* @BenJKuhn @DefaultRyan @devhawk @kennykerr @Scottj1s 
-
-/design_notes/ @devhawk 
-/docs/ @devhawk 
-
-/src/library/ @kennykerr @DefaultRyan
-
-/src/package/ @Scottj1s
-
-/src/platform/ @DefaultRyan @devhawk
-/src/test/platform/ @DefaultRyan @devhawk
-
-/src/scripts/ @devhawk @Scottj1s 
-
-/src/tool/abi @dunhor
-
-/src/test/cpp/ @kennykerr
-/src/tool/cpp/ @kennykerr
-
-/src/tool/idl/ @kennykerr
-
-/src/tool/natvis/ @Scottj1s
-
-/src/test/python/ @devhawk  
-/src/tool/python/ @devhawk 
-/samples/python/ @devhawk 
-
-
+* @BenJKuhn @DefaultRyan @kennykerr @Scottj1s 

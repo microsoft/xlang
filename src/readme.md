@@ -98,7 +98,7 @@ The **/library** folder contains the C++ header libraries provided by xlang for 
 * **text_writer.h** writes formatted text output.
 
 * **xlang.meta.natvis** provides Visual Studio debug visualizations of xlang::meta types.  Recommended install technique is to create a symlink:
-  > mklink "%USERPROFILE%\Documents\Visual Studio 2017\Visualizers\xlang.meta.natvis" c:\xlang\src\library\xlang.meta.natvis
+  > for /f "tokens=2*" %i in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Personal ^| findstr Personal') do @for /f "tokens=2" %k in ('"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere" -latest ^| findstr catalog_productLineVersion') do @echo %j\Visual Studio %k\Visualizers| for /f "delims=" %l in ('more') do @md "%l" 2>nul & mklink "%l\xlang.meta.natvis" "c:\git\xlang\src\library\xlang.meta.natvis" 2>nul
 
   See also [Deploying .natvis files](https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2015#BKMK_natvis_location).
 
@@ -114,9 +114,7 @@ Eventually, source in the PAL will be split into separate folders based on under
 
 The **/tool** folder contains the tools provided in support of xlang development. This includes tools for working with idl and winmd files as well as for generating language projections.
 
-* **/tool/cpp** implements the tool that generates the C++ 17 language projection. Currently, the generated projection is Windows only, but the tool will be updated to generate cross-platform compatible code.
-
-* **/tool/idl** implements a tool that generates [MIDL 3](http://docs.microsoft.com/en-us/uwp/midl-3/) files from ECMA-335 metadata.
+* **/tool/cppwinrt** implements the tool that generates the C++ 17 language projection. Currently, the generated projection is Windows only, but the tool will be updated to generate cross-platform compatible code.
 
 * **/tool/natviz** implements a [Natvis visualization](http://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects) of C++/WinRT components for the Visual Studio debugger 2017. Over time, this tool will be updated to support visualization of xlang components.
 

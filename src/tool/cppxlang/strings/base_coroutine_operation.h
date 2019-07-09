@@ -2,11 +2,11 @@
 namespace std::experimental
 {
     template <typename TResult, typename... Args>
-    struct coroutine_traits<winrt::Windows::Foundation::IAsyncOperation<TResult>, Args...>
+    struct coroutine_traits<xlang::Foundation::IAsyncOperation<TResult>, Args...>
     {
-        struct promise_type final : winrt::impl::promise_base<promise_type,
-            winrt::Windows::Foundation::IAsyncOperation<TResult>,
-            winrt::Windows::Foundation::AsyncOperationCompletedHandler<TResult>>
+        struct promise_type final : xlang::impl::promise_base<promise_type,
+            xlang::Foundation::IAsyncOperation<TResult>,
+            xlang::Foundation::AsyncOperationCompletedHandler<TResult>>
         {
             TResult get_return_value() noexcept
             {
@@ -23,7 +23,7 @@ namespace std::experimental
                 m_result = value;
             }
 
-            TResult m_result{ winrt::impl::empty_value<TResult>() };
+            TResult m_result{ xlang::impl::empty_value<TResult>() };
         };
     };
 }

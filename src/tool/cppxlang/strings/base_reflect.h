@@ -1,10 +1,10 @@
 
-namespace winrt::experimental::reflect
+namespace xlang::experimental::reflect
 {
     template <typename T>
     struct base_type
     {
-        using type = Windows::Foundation::IInspectable;
+        using type = Windows::Foundation::IXlangObject;
     };
 
     template <typename T>
@@ -85,12 +85,12 @@ namespace winrt::experimental::reflect
     template <typename T>
     struct get_enumerator_names
     {
-        static_assert(impl::has_category_v<T> && std::is_enum_v<T>, "T must be a WinRT enum type");
+        static_assert(impl::has_category_v<T> && std::is_enum_v<T>, "T must be a xlang enum type");
     };
 
     template <typename T>
     struct get_enumerator_values
     {
-        static_assert(impl::has_category_v<T> && std::is_enum_v<T>, "T must be a WinRT enum type");
+        static_assert(impl::has_category_v<T> && std::is_enum_v<T>, "T must be a xlang enum type");
     };
 }

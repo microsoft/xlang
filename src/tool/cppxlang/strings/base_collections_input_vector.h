@@ -1,9 +1,9 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T, typename Container>
-    struct input_vector final :
-        implements<input_vector<T, Container>, wfc::IVector<T>, wfc::IVectorView<T>, wfc::IIterable<T>>,
+    struct input_vector :
+        implements<input_vector<T, Container>, fc::IVector<T>, fc::IVectorView<T>, fc::IIterable<T>>,
         vector_base<input_vector<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -28,13 +28,13 @@ namespace winrt::impl
     };
 }
 
-namespace winrt::param
+namespace xlang::param
 {
     template <typename T>
     struct vector
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IVector<value_type>;
+        using interface_type = Foundation::Collections::IVector<value_type>;
 
         vector(std::nullptr_t) noexcept
         {
@@ -45,7 +45,7 @@ namespace winrt::param
 
         vector(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -71,6 +71,11 @@ namespace winrt::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:

@@ -1,18 +1,22 @@
 
-#define CPPWINRT_VERSION "%"
+#define CPPXLANG_VERSION "%"
 
-// WINRT_version is used by Microsoft to analyze C++/WinRT library adoption and inform future product decisions.
+// XLANG_version is used by Microsoft to analyze cppxlang library adoption and inform future product decisions.
+#ifdef _WIN32
 extern "C"
-__declspec(selectany)
-char const * const WINRT_version = "C++/WinRT version:" CPPWINRT_VERSION;
-
-#ifdef _M_IX86
-#pragma comment(linker, "/include:_WINRT_version")
+__declspec(selectany) char const * const XLANG_version = "cppxlang version:" CPPXLANG_VERSION;
 #else
-#pragma comment(linker, "/include:WINRT_version")
+extern "C"
+inline char const * const XLANG_version = "cppxlang version:" CPPXLANG_VERSION;
 #endif
 
-namespace winrt
+#ifdef _M_IX86
+#pragma comment(linker, "/include:_XLANG_version")
+#else
+#pragma comment(linker, "/include:XLANG_version")
+#endif
+
+namespace xlang
 {
     template <size_t BaseSize, size_t ComponentSize>
     constexpr bool check_version(char const(&base)[BaseSize], char const(&component)[ComponentSize]) noexcept

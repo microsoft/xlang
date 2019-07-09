@@ -26,7 +26,7 @@ namespace winrt
         template<typename InputIt, typename Size, typename OutputIt>
         auto copy_n(InputIt first, Size count, OutputIt result) const
         {
-            if constexpr (std::is_same_v<T, decltype(*std::declval<D const>().get_container().begin())> && !impl::is_key_value_pair<T>::value)
+            if constexpr (std::is_same_v<T, std::decay_t<decltype(*std::declval<D const>().get_container().begin())>> && !impl::is_key_value_pair<T>::value)
             {
                 std::copy_n(first, count, result);
             }
@@ -48,7 +48,7 @@ namespace winrt
 
     private:
 
-        struct iterator final : Version::iterator_type, implements<iterator, Windows::Foundation::Collections::IIterator<T>>
+        struct iterator : Version::iterator_type, implements<iterator, Windows::Foundation::Collections::IIterator<T>>
         {
             void abi_enter()
             {
@@ -103,17 +103,38 @@ namespace winrt
 
             uint32_t GetMany(array_view<T> values)
             {
-                uint32_t const actual = (std::min)(static_cast<uint32_t>(std::distance(m_current, m_end)), values.size());
-                m_owner->copy_n(m_current, actual, values.begin());
-                std::advance(m_current, actual);
-                return actual;
+                return GetMany(values, typename std::iterator_traits<iterator_type>::iterator_category());
             }
 
         private:
 
+            uint32_t GetMany(array_view<T> values, std::random_access_iterator_tag)
+            {
+                uint32_t const actual = (std::min)(static_cast<uint32_t>(m_end - m_current), values.size());
+                m_owner->copy_n(m_current, actual, values.begin());
+                m_current += actual;
+                return actual;
+            }
+
+            uint32_t GetMany(array_view<T> values, std::input_iterator_tag)
+            {
+                auto output = values.begin();
+
+                while (output < values.end() && m_current != m_end)
+                {
+                    *output = Current();
+                    ++output;
+                    ++m_current;
+                }
+
+                return static_cast<uint32_t>(output - values.begin());
+            }
+
+            using iterator_type = decltype(std::declval<D>().get_container().begin());
+
             com_ptr<D> m_owner;
-            decltype(m_owner->get_container().begin()) m_current;
-            decltype(m_owner->get_container().end()) const m_end;
+            iterator_type m_current;
+            iterator_type const m_end;
         };
     };
 
@@ -309,16 +330,18 @@ namespace winrt
             call_changed(Windows::Foundation::Collections::CollectionChange::Reset, 0);
         }
 
-    private:
-
-        event<Windows::Foundation::Collections::VectorChangedEventHandler<T>> m_changed;
+    protected:
 
         void call_changed(Windows::Foundation::Collections::CollectionChange const change, uint32_t const index)
         {
             m_changed(static_cast<D const&>(*this), make<args>(change, index));
         }
 
-        struct args final : implements<args, Windows::Foundation::Collections::IVectorChangedEventArgs>
+    private:
+
+        event<Windows::Foundation::Collections::VectorChangedEventHandler<T>> m_changed;
+
+        struct args : implements<args, Windows::Foundation::Collections::IVectorChangedEventArgs>
         {
             args(Windows::Foundation::Collections::CollectionChange const change, uint32_t const index) noexcept :
                 m_change(change),
@@ -444,7 +467,7 @@ namespace winrt
             m_changed(static_cast<D const&>(*this), make<args>(change, key));
         }
 
-        struct args final : implements<args, Windows::Foundation::Collections::IMapChangedEventArgs<K>>
+        struct args : implements<args, Windows::Foundation::Collections::IMapChangedEventArgs<K>>
         {
             args(Windows::Foundation::Collections::CollectionChange const change, K const& key) noexcept :
                 m_change(change),

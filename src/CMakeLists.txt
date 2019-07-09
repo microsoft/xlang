@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.9)
 
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
+    cmake_policy(SET CMP0076 NEW)
+endif()
+
 set(XLANG_SCRIPTS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 set(XLANG_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/library")
 
 if(NOT DEFINED XLANG_BUILD_VERSION)
-set(XLANG_BUILD_VERSION "1.0.0")
+set(XLANG_BUILD_VERSION "0.0.0")
 endif()
 
 function(ADD_OBJECT_DEPENDS file dependency)
@@ -71,7 +75,7 @@ function(CONSUME_PAL target)
     target_link_libraries(${target} pal)
 endfunction()
 
-# set test_platform linker flags to look for .so files in the current directory 
+# set test_platform linker flags to look for .so files in the current directory
 # adapted from https://serverfault.com/a/926072
 function(RPATH_ORIGIN target)
     if (NOT WIN32)
@@ -101,11 +105,19 @@ if (MSVC)
         string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_${build_type} "${CMAKE_CXX_FLAGS_${build_type}}")
         string(APPEND CMAKE_CXX_FLAGS_${build_type} " /GL")
 
+        # /GL requires /LTCG
+        string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG")
+
         # TODO: replacing /INCREMENTAL leaves ":NO" on the command line, which screws up the link
         #       Figure out the best way to make these changes to the build and linker flags
         # string(REPLACE "/INCREMENTAL" "" CMAKE_EXE_LINKER_FLAGS_${build_type} "${CMAKE_EXE_LINKER_FLAGS_${build_type}}")
         # string(APPEND CMAKE_EXE_LINKER_FLAGS_${build_type} " /LTCG:INCREMENTAL /OPT:REF")
     endforeach()
+
+    # Always generate symbols for release builds
+    string(APPEND CMAKE_CXX_FLAGS_RELEASE " /Zi")
+    string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF /OPT:ICF /MAP")
+    string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /DEBUG /OPT:REF /OPT:ICF /MAP")
 
     if (CMAKE_CXX_COMPILER MATCHES "clang-cl")
         add_compile_options(-Wno-delete-non-virtual-dtor -mcx16 -fno-delayed-template-parsing -Xclang -fcoroutines-ts)
@@ -113,7 +125,7 @@ if (MSVC)
         add_compile_options(/permissive- /await)
     endif()
 
-    # Explicitly configure _DEBUG preprocessor macro 
+    # Explicitly configure _DEBUG preprocessor macro
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " /D_DEBUG")
 else()
     add_compile_options(-stdlib=libc++)
@@ -127,6 +139,7 @@ if (WIN32)
 endif()
 
 add_subdirectory(tool)
-add_subdirectory(test)
+add_subdirectory(foundation)
 add_subdirectory(platform)
-add_subdirectory(package)
+add_subdirectory(test)
+add_subdirectory(package EXCLUDE_FROM_ALL)

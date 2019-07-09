@@ -164,13 +164,13 @@ namespace xlang::impl
     {
         if (!is_preallocated_buffer())
         {
-            throw_result(xlang_error_invalid_arg);
+            throw_result(xlang_result::invalid_arg);
         }
         XLANG_ASSERT(!is_reference());
 
         if (get_length() < length)
         {
-            throw_result(xlang_error_invalid_arg);
+            throw_result(xlang_result::invalid_arg);
         }
         if (length > 0)
         {
@@ -200,7 +200,7 @@ namespace xlang::impl
     {
         if (!is_preallocated_buffer())
         {
-            throw_result(xlang_error_invalid_arg);
+            throw_result(xlang_result::invalid_arg);
         }
         XLANG_ASSERT(!is_reference());
         release();

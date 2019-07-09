@@ -1,5 +1,5 @@
 
-namespace winrt
+namespace xlang
 {
     template <typename T>
     struct handle_type
@@ -52,7 +52,7 @@ namespace winrt
 
         type* put() noexcept
         {
-            WINRT_ASSERT(m_value == T::invalid());
+            XLANG_ASSERT(m_value == T::invalid());
             return &m_value;
         }
 
@@ -78,38 +78,4 @@ namespace winrt
 
         type m_value = T::invalid();
     };
-
-    struct handle_traits
-    {
-        using type = void*;
-
-        static void close(type value) noexcept
-        {
-            WINRT_VERIFY_(1, WINRT_CloseHandle(value));
-        }
-
-        static constexpr type invalid() noexcept
-        {
-            return nullptr;
-        }
-    };
-
-    using handle = handle_type<handle_traits>;
-
-    struct file_handle_traits
-    {
-        using type = void*;
-
-        static void close(type value) noexcept
-        {
-            WINRT_VERIFY_(1, WINRT_CloseHandle(value));
-        }
-
-        static type invalid() noexcept
-        {
-            return reinterpret_cast<type>(-1);
-        }
-    };
-
-    using file_handle = handle_type<file_handle_traits>;
 }

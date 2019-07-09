@@ -1,5 +1,5 @@
 
-namespace winrt::param
+namespace xlang::param
 {
     struct hstring
     {
@@ -8,59 +8,117 @@ namespace winrt::param
         hstring& operator=(hstring const& values) = delete;
         hstring(std::nullptr_t) = delete;
 
-        hstring(winrt::hstring const& value) noexcept : m_handle(get_abi(value))
+        ~hstring() noexcept
+        {
+            xlang_delete_string(m_handle);
+        }
+
+        hstring(xlang::hstring const& value) noexcept : m_handle(get_abi(value))
         {
         }
 
-        hstring(std::wstring_view const& value) noexcept
+        // char8_t overloads
+        hstring(std::basic_string_view<xlang_char8> const& value) noexcept
         {
-            if (impl::error_ok != WINRT_WindowsCreateStringReference(value.data(), static_cast<uint32_t>(value.size()), &m_header, &m_handle))
-            {
-                std::terminate();
-            }
+            init<xlang_char8, false>(value);
         }
 
-        hstring(std::wstring const& value) noexcept
+        hstring(std::basic_string<xlang_char8> const& value) noexcept
         {
-            WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value.data(), static_cast<uint32_t>(value.size()), &m_header, &m_handle));
+            init<xlang_char8, true>(value);
+        }
+
+        hstring(xlang_char8 const* const value) noexcept
+        {
+            init<xlang_char8, true>(value);
+        }
+
+        // char16_t overloads
+        hstring(std::basic_string_view<char16_t> const& value) noexcept
+        {
+            init<char16_t, false>(value);
+        }
+
+        hstring(std::basic_string<char16_t> const& value) noexcept
+        {
+            init<char16_t, true>(value);
+        }
+
+        hstring(char16_t const* const value) noexcept
+        {
+            init<char16_t, true>(value);
+        }
+
+#ifdef _WIN32
+        // wchar_t overloads
+        hstring(std::basic_string_view<wchar_t> const& value) noexcept
+        {
+            init<wchar_t, false>(value);
+        }
+
+        hstring(std::basic_string<wchar_t> const& value) noexcept
+        {
+            init<wchar_t, true>(value);
         }
 
         hstring(wchar_t const* const value) noexcept
         {
-            WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value, static_cast<uint32_t>(wcslen(value)), &m_header, &m_handle));
+            init<wchar_t, true>(value);
         }
-
-        operator winrt::hstring const&() const noexcept
+#endif
+        operator xlang::hstring const&() const noexcept
         {
-            return *reinterpret_cast<winrt::hstring const*>(this);
+            return *reinterpret_cast<xlang::hstring const*>(this);
         }
 
     private:
-
-        struct header
+        template <typename char_type, bool is_safe>
+        void init(std::basic_string_view<char_type> str) noexcept
         {
-            union
+            static_assert(impl::is_char_type_supported<char_type>::value);
+            auto const value = impl::normalize_char_type(str);
+            auto const length = static_cast<uint32_t>(value.size());
+            if constexpr (is_safe)
             {
-                void* Reserved1;
-#ifdef _WIN64
-                char Reserved2[24];
-#else
-                char Reserved2[20];
-#endif
-            } Reserved;
-        };
-        
-        void* m_handle;
-        header m_header;
+                if constexpr (sizeof(char_type) == sizeof(xlang_char8))
+                {
+                    XLANG_VERIFY_(nullptr, xlang_create_string_reference_utf8(value.data(), length, &m_header, &m_handle));
+                }
+                else
+                {
+                    XLANG_VERIFY_(nullptr, xlang_create_string_reference_utf16(value.data(), length, &m_header, &m_handle));
+                }
+            }
+            else
+            {
+                if constexpr (sizeof(char_type) == sizeof(xlang_char8))
+                {
+                    if (nullptr != xlang_create_string_reference_utf8(value.data(), length, &m_header, &m_handle))
+                    {
+                        std::terminate();
+                    }
+                }
+                else
+                {
+                    if (nullptr != xlang_create_string_reference_utf16(value.data(), length, &m_header, &m_handle))
+                    {
+                        std::terminate();
+                    }
+                }
+            }
+        }
+
+        xlang_string m_handle;
+        xlang_string_header m_header;
     };
 
-    inline void* get_abi(hstring const& object) noexcept
+    inline xlang_string get_abi(hstring const& object) noexcept
     {
-        return *(void**)(&object);
+        return *(xlang_string*)(&object);
     }
 }
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T>
     using param_type = std::conditional_t<std::is_same_v<T, hstring>, param::hstring, T>;

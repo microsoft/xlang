@@ -8,7 +8,7 @@ namespace winrt
     D* get_self(I const& from) noexcept;
 
     struct take_ownership_from_abi_t {};
-    constexpr take_ownership_from_abi_t take_ownership_from_abi{};
+    inline constexpr take_ownership_from_abi_t take_ownership_from_abi{};
 
     template <typename T>
     struct com_ptr;
@@ -78,11 +78,8 @@ namespace winrt::impl
     template <typename D, typename I = D>
     using consume_t = typename consume<I>::template type<D>;
 
-    template <typename T>
-    struct delegate;
-
     template <typename T, typename H>
-    using delegate_t = typename delegate<T>::template type<H>;
+    struct delegate;
 
     template <typename T, typename = std::void_t<>>
     struct default_interface
@@ -139,18 +136,18 @@ namespace winrt::impl
     template <typename T>
     struct guid_storage
     {
+        // Unlike Visual C++, Clang does not treat __uuidof as a constexpr expression.
+        // This has a ripple effect and impacts both winrt::guid_of and winrt::name_of.
+#ifdef __clang__
+        inline static const guid value{ __uuidof(T) };
+#else
         static constexpr guid value{ __uuidof(T) };
+#endif
     };
 #else
     template <typename T>
     struct guid_storage : missing_guid<T> {};
 #endif
-
-    template <typename T>
-    struct is_enum_flag : std::false_type {};
-
-    template <typename T>
-    inline constexpr bool is_enum_flag_v = is_enum_flag<T>::value;
 
     template <typename T>
     constexpr auto to_underlying_type(T const value) noexcept
@@ -177,7 +174,7 @@ namespace winrt::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_EBO require : require_one<D, I>...
+    struct __declspec(empty_bases) require : require_one<D, I>...
     {};
 
     template <typename D, typename I>
@@ -190,7 +187,7 @@ namespace winrt::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_EBO base : base_one<D, I>...
+    struct __declspec(empty_bases) base : base_one<D, I>...
     {};
 
     template <typename T>
@@ -298,49 +295,4 @@ namespace winrt::impl
             return (func(Types{}) || ...);
         }
     };
-}
-
-template <typename T>
-constexpr auto operator|(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    return static_cast<T>(winrt::impl::to_underlying_type(left) | winrt::impl::to_underlying_type(right));
-}
-
-template <typename T>
-constexpr auto operator|=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    left = left | right;
-    return left;
-}
-
-template <typename T>
-constexpr auto operator&(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    return static_cast<T>(winrt::impl::to_underlying_type(left) & winrt::impl::to_underlying_type(right));
-}
-
-template <typename T>
-constexpr auto operator&=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    left = left & right;
-    return left;
-}
-
-template <typename T>
-constexpr auto operator~(T const value) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    return static_cast<T>(~winrt::impl::to_underlying_type(value));
-}
-
-template <typename T>
-constexpr auto operator^(T const left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    return static_cast<T>(winrt::impl::to_underlying_type(left) ^ winrt::impl::to_underlying_type(right));
-}
-
-template <typename T>
-constexpr auto operator^=(T& left, T const right) noexcept -> std::enable_if_t<winrt::impl::is_enum_flag_v<T>, T>
-{
-    left = left ^ right;
-    return left;
 }

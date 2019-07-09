@@ -1,9 +1,9 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T, typename Container>
-    struct input_vector_view final :
-        implements<input_vector_view<T, Container>, non_agile, no_weak_ref, wfc::IVectorView<T>, wfc::IIterable<T>>,
+    struct input_vector_view :
+        implements<input_vector_view<T, Container>, non_agile, no_weak_ref, fc::IVectorView<T>, fc::IIterable<T>>,
         vector_view_base<input_vector_view<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -23,9 +23,9 @@ namespace winrt::impl
     };
 
     template <typename T, typename InputIt>
-    struct scoped_input_vector_view final :
+    struct scoped_input_vector_view :
         input_scope,
-        implements<scoped_input_vector_view<T, InputIt>, non_agile, no_weak_ref, wfc::IVectorView<T>, wfc::IIterable<T>>,
+        implements<scoped_input_vector_view<T, InputIt>, non_agile, no_weak_ref, fc::IVectorView<T>, fc::IIterable<T>>,
         vector_view_base<scoped_input_vector_view<T, InputIt>, T>
     {
         void abi_enter() const
@@ -42,6 +42,12 @@ namespace winrt::impl
             return range_container<InputIt>{ m_begin, m_end };
         }
 
+#ifdef _DEBUG
+        void use_make_function_to_create_this_object() final
+        {
+        }
+#endif
+
     private:
 
         InputIt const m_begin;
@@ -51,7 +57,7 @@ namespace winrt::impl
     template <typename T, typename InputIt>
     auto make_scoped_input_vector_view(InputIt first, InputIt last)
     {
-        using interface_type = wfc::IVectorView<T>;
+        using interface_type = fc::IVectorView<T>;
         std::pair<interface_type, input_scope*> result;
         auto ptr = new scoped_input_vector_view<T, InputIt>(first, last);
         *put_abi(result.first) = to_abi<interface_type>(ptr);
@@ -60,13 +66,13 @@ namespace winrt::impl
     }
 }
 
-namespace winrt::param
+namespace xlang::param
 {
     template <typename T>
     struct vector_view
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IVectorView<value_type>;
+        using interface_type = Foundation::Collections::IVectorView<value_type>;
 
         vector_view(std::nullptr_t) noexcept
         {
@@ -77,7 +83,7 @@ namespace winrt::param
 
         vector_view(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_pair.first, winrt::get_abi(values));
+            attach_abi(m_pair.first, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -123,6 +129,11 @@ namespace winrt::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_pair.first;
+        }
+
     private:
 
         std::pair<interface_type, impl::input_scope*> m_pair;
@@ -139,7 +150,7 @@ namespace winrt::param
     struct async_vector_view
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IVectorView<value_type>;
+        using interface_type = Foundation::Collections::IVectorView<value_type>;
 
         async_vector_view(std::nullptr_t) noexcept
         {
@@ -150,7 +161,7 @@ namespace winrt::param
 
         async_vector_view(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -176,6 +187,11 @@ namespace winrt::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:

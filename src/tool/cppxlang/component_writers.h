@@ -78,7 +78,7 @@ namespace xlang
 
         if (settings.component_opt)
         {
-            auto format = R"(void* winrt_make_%();
+            auto format = R"(void* xlang_make_%();
 )";
 
             w.write(format, get_impl_name(type.TypeNamespace(), type.TypeName()));
@@ -106,9 +106,9 @@ namespace xlang
         if (settings.component_opt)
         {
             auto format = R"(
-    if (requal(name, L"%.%"))
+    if (requal(name, u8"%.%"))
     {
-        return winrt_make_%();
+        return xlang_make_%();
     }
 )";
 
@@ -120,9 +120,9 @@ namespace xlang
         else
         {
             auto format = R"(
-    if (requal(name, L"%.%"))
+    if (requal(name, u8"%.%"))
     {
-        return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
+        return xlang::detach_abi(xlang::make<xlang::@::factory_implementation::%>());
     }
 )";
 
@@ -138,20 +138,9 @@ namespace xlang
     {
         w.write_root_include("base");
         auto format = R"(%
-bool WINRT_CALL %_can_unload_now() noexcept
+void* XLANG_CALL %_get_activation_factory(std::basic_string_view<xlang_char8> const& name)
 {
-    if (winrt::get_module_lock())
-    {
-        return false;
-    }
-
-    winrt::clear_factory_cache();
-    return true;
-}
-
-void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
-{
-    auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
+    auto requal = [](std::basic_string_view<xlang_char8> const& left, std::basic_string_view<xlang_char8> const& right) noexcept
     {
         return std::equal(left.rbegin(), left.rend(), right.rbegin(), right.rend());
     };
@@ -166,47 +155,28 @@ void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
             settings.component_lib,
             bind_each<write_component_activation>(classes));
 
-        if (settings.component_lib != "winrt")
+        if (settings.component_lib != "xlang")
         {
             return;
         }
 
         format = R"(
-int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
+int32_t XLANG_CALL xlang_lib_get_activation_factory(xlang_string class_name, xlang_guid const& iid, void** factory) noexcept try
 {
-#ifdef _WRL_MODULE_H_
-    if (!::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().Terminate())
+    uint32_t length{};
+    xlang_char8 const* const buffer{};
+    xlang::check_hresult(xlang_get_string_raw_buffer_utf8(class_name, &buffer, &length));
+    std::basic_string_view<xlang_char8> const name{ buffer, length };
+    *factory = %_get_activation_factory(name);
+
+    if (*factory)
     {
-        return 1;
+        return 0;
     }
-#endif
 
-    return %_can_unload_now() ? 0 : 1;
+    return xlang::hresult_class_not_available(name).to_abi();
 }
-
-int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept
-{
-    try
-    {
-        uint32_t length{};
-        wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
-        std::wstring_view const name{ buffer, length };
-
-        *factory = %_get_activation_factory(name);
-
-        if (*factory)
-        {
-            return 0;
-        }
-
-#ifdef _WRL_MODULE_H_
-        return ::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().GetActivationFactory(static_cast<HSTRING>(classId), reinterpret_cast<::IActivationFactory**>(factory));
-#else
-        return winrt::hresult_class_not_available(name).to_abi();
-#endif
-    }
-    catch (...) { return winrt::to_hresult(); }
-}
+catch (...) { return xlang::to_hresult(); }
 )";
 
         w.write(format,
@@ -323,7 +293,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                 {
                     default_constructor = true;
 
-                    w.write(R"(        Windows::Foundation::IInspectable ActivateInstance() const
+                    w.write(R"(        Windows::Foundation::IXlangObject ActivateInstance() const
         {
             return make<T>();
         }
@@ -346,7 +316,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         if (!default_constructor)
         {
-            w.write(R"(        [[noreturn]] Windows::Foundation::IInspectable ActivateInstance() const
+            w.write(R"(        [[noreturn]] Windows::Foundation::IXlangObject ActivateInstance() const
         {
             throw hresult_not_implemented();
         }
@@ -375,9 +345,9 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         if (has_factory_members(w, type))
         {
-            auto format = R"(void* winrt_make_%()
+            auto format = R"(void* xlang_make_%()
 {
-    return winrt::detach_abi(winrt::make<winrt::@::factory_implementation::%>());
+    return xlang::detach_abi(xlang::make<xlang::@::factory_implementation::%>());
 }
 )";
 
@@ -472,7 +442,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                     {
                         auto format = R"(    % %::%(%)
     {
-        auto f = make<winrt::@::factory_implementation::%>().as<%>();
+        auto f = make<xlang::@::factory_implementation::%>().as<%>();
         return f.%(%);
     }
 )";
@@ -513,7 +483,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
                     {
                         auto format = R"(    %::%_revoker %::%(auto_revoke_t, %)
     {
-        auto f = make<winrt::@::factory_implementation::%>().as<%>();
+        auto f = make<xlang::@::factory_implementation::%>().as<%>();
         return { f, f.%(%) };
     }
 )";
@@ -628,10 +598,10 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         if (non_static)
         {
-            auto format = R"(namespace winrt::@::implementation
+            auto format = R"(namespace xlang::@::implementation
 {
     template <typename D%, typename... I>
-    struct WINRT_EBO %_base : implements<D, @::%%%, %I...>%%%
+    struct XLANG_EBO %_base : implements<D, @::%%%, %I...>%%%
     {
         using base_type = %_base;
         using class_type = @::%;
@@ -640,7 +610,7 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         %
         hstring GetRuntimeClassName() const
         {
-            return L"%.%";
+            return u8"%.%";
         }
 %%    };
 }
@@ -718,16 +688,16 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
 
         if (has_factory_members(w, type))
         {
-            auto format = R"(namespace winrt::@::factory_implementation
+            auto format = R"(namespace xlang::@::factory_implementation
 {
     template <typename D, typename T, typename... I>
-    struct WINRT_EBO %T : implements<D, Windows::Foundation::IActivationFactory%, I...>
+    struct XLANG_EBO %T : implements<D, Windows::Foundation::IActivationFactory%, I...>
     {
         using instance_type = @::%;
 
         hstring GetRuntimeClassName() const
         {
-            return L"%.%";
+            return u8"%.%";
         }
 %    };
 }
@@ -747,11 +717,11 @@ int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noe
         if (non_static)
         {
             auto format = R"(
-#if defined(WINRT_FORCE_INCLUDE_%_XAML_G_H) || __has_include("%.xaml.g.h")
+#if defined(XLANG_FORCE_INCLUDE_%_XAML_G_H) || __has_include("%.xaml.g.h")
 #include "%.xaml.g.h"
 #else
 
-namespace winrt::@::implementation
+namespace xlang::@::implementation
 {
     template <typename D, typename... I>
     using %T = %_base<D, I...>;
@@ -890,7 +860,7 @@ namespace winrt::@::implementation
         {
             auto format = R"(#include "%.g.h"
 %
-namespace winrt::@::implementation
+namespace xlang::@::implementation
 {
     struct %%
     {
@@ -913,7 +883,7 @@ namespace winrt::@::implementation
 
         if (has_factory_members(w, type))
         {
-            auto format = R"(namespace winrt::@::factory_implementation
+            auto format = R"(namespace xlang::@::factory_implementation
 {
     struct % : %T<%, implementation::%>
     {
@@ -1046,7 +1016,7 @@ namespace winrt::@::implementation
         }
 
         auto format = R"(
-namespace winrt::@::implementation
+namespace xlang::@::implementation
 {
 %}
 )";

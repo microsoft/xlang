@@ -10,16 +10,16 @@ using namespace winrt;
 TEST_CASE("handle, file")
 {
     wchar_t path[1024] {};
-    REQUIRE(0 != GetModuleFileName(nullptr, path, _countof(path)));
+    REQUIRE(0 != GetModuleFileNameW(nullptr, path, _countof(path)));
 
     file_handle empty;
     REQUIRE(!empty);
     static_assert(sizeof(empty) == sizeof(HANDLE), "fail");
 
-    file_handle good{ CreateFile(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
+    file_handle good{ CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
     REQUIRE(good);
 
-    file_handle bad{ CreateFile(L"BAD", GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
+    file_handle bad{ CreateFileW(L"BAD", GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
     REQUIRE(!bad);
 }
 
@@ -32,16 +32,16 @@ TEST_CASE("handle, event")
     handle empty;
     REQUIRE(!empty);
 
-    handle good{ CreateEvent(nullptr, true, true, nullptr) };
+    handle good{ CreateEventW(nullptr, true, true, nullptr) };
     REQUIRE(good);
 
-    handle bad{ CreateEvent(nullptr, true, true, L"BAD\\") };
+    handle bad{ CreateEventW(nullptr, true, true, L"BAD\\") };
     REQUIRE(!bad);
 }
 
 TEST_CASE("handle, move")
 {
-    handle a{ CreateEvent(nullptr, true, true, nullptr) };
+    handle a{ CreateEventW(nullptr, true, true, nullptr) };
     REQUIRE(a);
 
     handle b = std::move(a); // move construct

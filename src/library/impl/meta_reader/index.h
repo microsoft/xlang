@@ -48,9 +48,9 @@ namespace xlang::meta::reader
     {
         using index_base<TypeDefOrRef>::index_base;
 
-        auto TypeDef() const;
-        auto TypeRef() const;
-        auto TypeSpec() const;
+        TypeDef TypeDef() const;
+        TypeRef TypeRef() const;
+        TypeSpec TypeSpec() const;
         auto CustomAttribute() const;
     };
 }

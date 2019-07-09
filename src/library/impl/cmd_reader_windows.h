@@ -54,8 +54,8 @@ namespace xlang::impl
     inline void add_files_from_xml(
         std::set<std::string>& files,
         std::string const& sdk_version,
-        std::experimental::filesystem::path const& xml_path,
-        std::experimental::filesystem::path const& sdk_path)
+        std::filesystem::path const& xml_path,
+        std::filesystem::path const& sdk_path)
     {
         com_ptr<IStream> stream;
 
@@ -126,7 +126,7 @@ namespace xlang::impl
         return { key };
     }
 
-    inline std::experimental::filesystem::path get_sdk_path()
+    inline std::filesystem::path get_sdk_path()
     {
         auto key = open_sdk();
 
@@ -187,7 +187,12 @@ namespace xlang::impl
 
         if (std::regex_search(module_path.c_str(), match, rx))
         {
-            return match[1].str();
+            auto path = get_sdk_path() / "Platforms\\UAP" / match[1].str() / "Platform.xml";
+
+            if (std::filesystem::exists(path))
+            {
+                return match[1].str();
+            }
         }
 
         auto key = open_sdk();

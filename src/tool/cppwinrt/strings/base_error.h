@@ -1,5 +1,5 @@
 
-__declspec(selectany) int32_t (WINRT_CALL *winrt_to_hresult_handler)(void* address) noexcept{};
+__declspec(selectany) int32_t (__stdcall *winrt_to_hresult_handler)(void* address) noexcept{};
 
 namespace winrt::impl
 {
@@ -185,7 +185,7 @@ namespace winrt
 #endif
 
         impl::bstr_handle m_debug_reference;
-        uint32_t const m_debug_magic{ 0xAABBCCDD };
+        uint32_t m_debug_magic{ 0xAABBCCDD };
         hresult m_code{ impl::error_fail };
         com_ptr<impl::IRestrictedErrorInfo> m_info;
 
@@ -278,7 +278,7 @@ namespace winrt
         hresult_canceled(take_ownership_from_abi_t) noexcept : hresult_error(impl::error_canceled, take_ownership_from_abi) {}
     };
 
-    [[noreturn]] inline WINRT_NOINLINE void throw_hresult(hresult const result)
+    [[noreturn]] inline __declspec(noinline) void throw_hresult(hresult const result)
     {
         if (result == impl::error_bad_alloc)
         {
@@ -348,7 +348,7 @@ namespace winrt
         throw hresult_error(result, take_ownership_from_abi);
     }
 
-    inline WINRT_NOINLINE hresult to_hresult() noexcept
+    inline __declspec(noinline) hresult to_hresult() noexcept
     {
         if (winrt_to_hresult_handler)
         {
@@ -363,7 +363,6 @@ namespace winrt
         {
             return e.to_abi();
         }
-        WINRT_EXTERNAL_CATCH_CLAUSE
         catch (std::bad_alloc const&)
         {
             return impl::error_bad_alloc;
@@ -379,10 +378,6 @@ namespace winrt
         catch (std::exception const& e)
         {
             return hresult_error(impl::error_fail, to_hstring(e.what())).to_abi();
-        }
-        catch (...)
-        {
-            std::terminate();
         }
     }
 
@@ -435,5 +430,10 @@ namespace winrt
         }
 
         return pointer;
+    }
+
+    [[noreturn]] inline void terminate() noexcept
+    {
+        WINRT_RoFailFastWithErrorContext(to_hresult());
     }
 }

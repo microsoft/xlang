@@ -17,8 +17,8 @@ namespace xlang
 
     static constexpr cmd::option options[]
     {
-        { "input", 0, cmd::option::no_max, "<spec>", "Windows metadata to include in projection" },
-        { "reference", 0, cmd::option::no_max, "<spec>", "Windows metadata to reference from projection" },
+        { "input", 0, cmd::option::no_max, "<spec>", "Metadata to include in projection" },
+        { "reference", 0, cmd::option::no_max, "<spec>", "Metadata to reference from projection" },
         { "output", 0, 1, "<path>", "Location of generated projection and component templates" },
         { "component", 0, 1, "[<path>]", "Generate component templates, and optional implementation" },
         { "name", 0, 1, "<name>", "Specify explicit name for component files" },
@@ -29,9 +29,9 @@ namespace xlang
         { "include", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to include in input" },
         { "exclude", 0, cmd::option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
         { "base", 0, 0, {}, "Generate base.h unconditionally" },
-        { "opt", 0, 0, {}, "Generate component projection with unified construction support" },
+        { "optimize", 0, 0, {}, "Generate component projection with unified construction support" },
         { "help", 0, cmd::option::no_max, {}, "Show detailed help with examples" },
-        { "lib", 0, 1, "Specify library prefix (defaults to winrt)" },
+        { "library", 0, 1, "<prefix>", "Specify library prefix (defaults to winrt)" },
         { "filter" }, // One or more prefixes to include in input (same as -include)
         { "license", 0, 0 }, // Generate license comment
         { "brackets", 0, 0 }, // Use angle brackets for #includes (defaults to quotes)
@@ -54,10 +54,10 @@ namespace xlang
         };
 
         auto format = R"(
-C++/WinRT v%
+cppxlang v%
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-  cppwinrt.exe [options...]
+  cppxlang.exe [options...]
 
 Options:
 
@@ -94,7 +94,7 @@ Where <spec> is one or more of:
         settings.brackets = args.exists("brackets");
 
         auto output_folder = canonical(args.value("output"));
-        create_directories(output_folder / "winrt/impl");
+        create_directories(output_folder / "xlang/impl");
         output_folder += '/';
         settings.output_folder = output_folder.string();
 
@@ -133,7 +133,7 @@ Where <spec> is one or more of:
 
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
-            settings.component_lib = args.value("lib", "winrt");
+            settings.component_lib = args.value("lib", "xlang");
             settings.component_opt = args.exists("opt");
 
             if (settings.component_pch == ".")
@@ -204,6 +204,13 @@ Where <spec> is one or more of:
 
     }
 
+    static void remove_foundation_types(cache& c)
+    {
+        c.remove_type("Foundation", "DateTime");
+        c.remove_type("Foundation", "EventRegistrationToken");
+        c.remove_type("Foundation", "TimeSpan");
+    }
+
     static int run(int const argc, char** argv)
     {
         int result{};
@@ -214,7 +221,7 @@ Where <spec> is one or more of:
             auto start = get_start_time();
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
-            c.remove_cppwinrt_foundation_types();
+            remove_foundation_types(c);
             build_filters(c);
             settings.base = settings.base || (!settings.component && settings.projection_filter.empty());
 

@@ -25,9 +25,9 @@ namespace xlang
                 ++params.first;
             }
 
-            for (uint32_t i{}; i != m_method.Params().size(); ++i)
+            for (uint32_t i{}; i != size(m_method.Params()); ++i)
             {
-                m_params.emplace_back(params.first + i, m_method.Params().data() + i);
+                m_params.emplace_back(params.first + i, &m_method.Params().first[i]);
             }
         }
 
@@ -56,7 +56,7 @@ namespace xlang
             }
             else
             {
-                name = "winrt_impl_result";
+                name = "xlang_impl_result";
             }
 
             return name;
@@ -174,17 +174,13 @@ namespace xlang
         call(method_signature.return_signature().Type().Type(),
             [&](GenericTypeInstSig const& type)
         {
-            auto generic_type = type.GenericType().TypeRef();
+            auto const&[type_namespace, type_name] = get_type_namespace_and_name(type.GenericType());
 
-            if (generic_type.TypeNamespace() == "Windows.Foundation")
+            if (type_namespace == "Foundation")
             {
-                auto type_name = generic_type.TypeName();
-
                 async =
                     type_name == "IAsyncAction" ||
-                    type_name == "IAsyncOperation`1" ||
-                    type_name == "IAsyncActionWithProgress`1" ||
-                    type_name == "IAsyncOperationWithProgress`2";
+                    type_name == "IAsyncOperation`1";
             }
         },
             [](auto&&) {});
@@ -195,22 +191,17 @@ namespace xlang
     static TypeDef get_base_class(TypeDef const& derived)
     {
         auto extends = derived.Extends();
-
         if (!extends)
         {
             return{};
         }
 
-        auto base = extends.TypeRef();
-        auto type_name = base.TypeName();
-        auto type_namespace = base.TypeNamespace();
-
-        if (type_name == "Object" && type_namespace == "System")
+        auto const&[extends_namespace, extends_name] = get_type_namespace_and_name(extends);
+        if (extends_name == "Object" && extends_namespace == "System")
         {
             return {};
         }
-
-        return find_required(base);
+        return find_required(extends);
     };
 
 
@@ -298,7 +289,7 @@ namespace xlang
 
                 guard = w.push_generic_params(type_signature.GenericTypeInst());
                 auto signature = type_signature.GenericTypeInst();
-                info.type = find_required(signature.GenericType().TypeRef());
+                info.type = find_required(signature.GenericType());
 
                 break;
             }
@@ -462,11 +453,10 @@ namespace xlang
         if (starts_with(name, "struct "))
         {
             auto ref = std::get<coded_index<TypeDefOrRef>>(type.Type());
-            XLANG_ASSERT(ref.type() == TypeDefOrRef::TypeRef);
 
             name = "struct{";
 
-            for (auto&& nested : find_required(ref.TypeRef()).FieldList())
+            for (auto&& nested : find_required(ref).FieldList())
             {
                 name += " " + get_field_abi(w, nested) + " ";
                 name += nested.Name();

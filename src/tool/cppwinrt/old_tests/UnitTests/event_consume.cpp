@@ -113,13 +113,13 @@ TEST_CASE("consuming instance events")
                                   ++count;
                               });
 
-    s.ImageLocation(); // fire event
+    REQUIRE(s.ImageLocation() == Rect{}); // fire event
     REQUIRE(count == 1); // handler was called
 
     revoker.revoke();
     revoker.revoke(); // redundant revoke is harmless
 
-    s.ImageLocation(); // fire event
+    REQUIRE(s.ImageLocation() == Rect{}); // fire event
     REQUIRE(count == 1); // count is unchanged so handler was not called
 
     {
@@ -130,13 +130,13 @@ TEST_CASE("consuming instance events")
             ++count;
         });
 
-        s.ImageLocation(); // fire event
+        REQUIRE(s.ImageLocation() == Rect{}); // fire event
         REQUIRE(count == 2); // handler was called
 
         // destructor revokes automatically
     }
 
-    s.ImageLocation(); // fire event
+    REQUIRE(s.ImageLocation() == Rect{}); // fire event
     REQUIRE(count == 2); // count is unchanged so handler was not called
 }
 

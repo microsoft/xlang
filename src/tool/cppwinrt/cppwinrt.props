@@ -1,11 +1,6 @@
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Copyright (c) Microsoft. All rights reserved.
-Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-This file sets PlatformToolset/WindowsTargetPlatformVersion to allow this project to compile with multiple versions
-of Visual Studio.
--->
+  <!-- Set common MSBuild properties and item metadata for CppWinRT tool and tests -->
 
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '15.0'">
     <PlatformToolset>v141</PlatformToolset>
@@ -17,13 +12,36 @@ of Visual Studio.
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
 
+  <!--
+    Can be used as follows.
+
+    Compile with Visual C++:
+
+        msbuild /m /p:Configuration=Debug,Platform=x64 cppwinrt.sln
+
+    Compile with Clang:
+
+        msbuild /m /p:Configuration=Debug,Platform=x64,Clang=1 cppwinrt.sln
+
+    Optionally add /t:<project> to only build a given a solution project:
+
+        msbuild /m /p:Configuration=Debug,Platform=x64,Clang=1 cppwinrt.sln /t:cppwinrt
+  -->
+
+  <PropertyGroup Condition="'$(Clang)'=='1'">
+    <CLToolExe>clang-cl.exe</CLToolExe>
+    <CLToolPath>C:\Program Files\LLVM\bin</CLToolPath>
+  </PropertyGroup>
+
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 
   <PropertyGroup>
     <XlangBuildVersion Condition="'$(XlangBuildVersion)'==''">2.3.4.5</XlangBuildVersion>
-    <CmakePlatform>x64</CmakePlatform>
+    <CmakePlatform>$(Platform)</CmakePlatform>
     <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
     <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cppwinrt</CmakeOutDir>
+    <CppWinRTDir>$(CmakeOutDir)\</CppWinRTDir>
+    <CppWinRTDir Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'">$(SolutionDir)..\..\..\_build\Windows\x86\$(Configuration)\tool\cppwinrt\</CppWinRTDir>
     <OutDir>$(CmakeOutDir)\</OutDir>
   </PropertyGroup>
 
@@ -37,7 +55,12 @@ of Visual Studio.
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/await /bigobj</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Clang)'=='1'">-Wno-unused-command-line-argument -fno-delayed-template-parsing -Xclang -fcoroutines-ts -mcx16</AdditionalOptions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>onecore.lib</AdditionalDependencies>
+    </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>

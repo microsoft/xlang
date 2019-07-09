@@ -13,13 +13,13 @@ namespace xlang::impl
         constexpr auto max_size = std::numeric_limits<uint32_t>::max();
         if (max_size / sizeof(char_type) < string_length)
         {
-            throw_result(xlang_error_mem_invalid_size);
+            throw_result(xlang_result::invalid_arg, "Insufficient buffer size");
         }
         uint32_t count = sizeof(char_type) * string_length;
 
         if (max_size - (sizeof(class_type) + sizeof(char_type)) < count)
         {
-            throw_result(xlang_error_mem_invalid_size);
+            throw_result(xlang_result::invalid_arg, "Insufficient buffer size");
         }
         count += (sizeof(class_type) + sizeof(char_type));
         return count;

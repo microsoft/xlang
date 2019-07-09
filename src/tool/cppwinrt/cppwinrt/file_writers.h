@@ -9,6 +9,7 @@ namespace xlang
         write_open_file_guard(w, "BASE");
 
         w.write(strings::base_dependencies);
+        w.write(strings::base_coroutine);
         w.write(strings::base_macros);
         w.write(strings::base_types);
         w.write(strings::base_extern);
@@ -36,7 +37,7 @@ namespace xlang
         w.write(strings::base_chrono);
         w.write(strings::base_security);
         w.write(strings::base_std_hash);
-        w.write(strings::base_reflect);
+        w.write(strings::base_coroutine_threadpool);
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
@@ -44,29 +45,22 @@ namespace xlang
         w.flush_to_file(settings.output_folder + "winrt/base.h");
     }
 
-    static void write_coroutine_h()
+    static void write_fast_forward_h(std::vector<TypeDef> const& classes)
     {
         writer w;
         write_preamble(w);
-        write_open_file_guard(w, "COROUTINE");
+        write_open_file_guard(w, "FAST_FORWARD");
 
-        w.write(R"(
-#include <experimental/coroutine>
-#include "winrt/Windows.Foundation.h"
-#include "winrt/Windows.System.h"
-#include "winrt/Windows.UI.Core.h"
-)");
+        auto const fast_abi_size = get_fastabi_size(w, classes);
 
-        w.write(strings::base_coroutine);
-        w.write(strings::base_coroutine_resume);
-        w.write(strings::base_coroutine_action);
-        w.write(strings::base_coroutine_action_with_progress);
-        w.write(strings::base_coroutine_operation);
-        w.write(strings::base_coroutine_operation_with_progress);
-        w.write(strings::base_coroutine_fire_and_forget);
+        w.write(strings::base_fast_forward,
+            fast_abi_size,
+            fast_abi_size,
+            bind<write_component_fast_abi_thunk>(),
+            bind<write_component_fast_abi_vtable>());
 
         write_close_file_guard(w);
-        w.flush_to_file(settings.output_folder + "winrt/coroutine.h");
+        w.flush_to_file(settings.output_folder + "winrt/fast_forward.h");
     }
 
     static void write_namespace_0_h(std::string_view const& ns, cache::namespace_members const& members)
@@ -82,7 +76,6 @@ namespace xlang
         w.write_each<write_forward>(members.delegates);
         write_close_namespace(w);
         write_impl_namespace(w);
-        w.write_each<write_enum_flag>(members.enums);
         w.write_each<write_category>(members.interfaces, "interface_category");
         w.write_each<write_category>(members.classes, "class_category");
         w.write_each<write_category>(members.enums, "enum_category");
@@ -140,7 +133,7 @@ namespace xlang
         w.save_header('1');
     }
 
-    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members, cache const& c)
+    static void write_namespace_2_h(std::string_view const& ns, cache::namespace_members const& members)
     {
         writer w;
         w.type_namespace = ns;
@@ -151,7 +144,6 @@ namespace xlang
         w.write_each<write_class>(members.classes);
         w.write_each<write_interface_override>(members.classes);
         write_close_namespace(w);
-        write_namespace_special(w, ns, c);
 
         write_close_file_guard(w);
         w.swap();
@@ -181,7 +173,9 @@ namespace xlang
         w.write_each<write_dispatch_overridable>(members.classes);
         write_close_namespace(w);
         write_type_namespace(w, ns);
+        w.write_each<write_enum_operators>(members.enums);
         w.write_each<write_class_definitions>(members.classes);
+        w.write_each<write_fast_class_base_definitions>(members.classes);
 
         w.write_each<write_delegate_definition>(members.delegates);
         w.write_each<write_interface_override_methods>(members.classes);
@@ -191,6 +185,7 @@ namespace xlang
         w.write_each<write_std_hash>(members.interfaces);
         w.write_each<write_std_hash>(members.classes);
         write_close_namespace(w);
+        write_namespace_special(w, ns, c);
 
         write_close_file_guard(w);
         w.swap();

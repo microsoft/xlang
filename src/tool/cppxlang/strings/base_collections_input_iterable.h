@@ -1,9 +1,9 @@
 
-namespace winrt::impl
+namespace xlang::impl
 {
     template <typename T, typename Container>
-    struct input_iterable final :
-        implements<input_iterable<T, Container>, non_agile, no_weak_ref, wfc::IIterable<T>>,
+    struct input_iterable :
+        implements<input_iterable<T, Container>, non_agile, no_weak_ref, fc::IIterable<T>>,
         iterable_base<input_iterable<T, Container>, T>
     {
         static_assert(std::is_same_v<Container, std::remove_reference_t<Container>>, "Must be constructed with rvalue.");
@@ -23,9 +23,9 @@ namespace winrt::impl
     };
 
     template <typename T, typename InputIt>
-    struct scoped_input_iterable final :
+    struct scoped_input_iterable :
         input_scope,
-        implements<scoped_input_iterable<T, InputIt>, non_agile, no_weak_ref, wfc::IIterable<T>>,
+        implements<scoped_input_iterable<T, InputIt>, non_agile, no_weak_ref, fc::IIterable<T>>,
         iterable_base<scoped_input_iterable<T, InputIt>, T>
     {
         void abi_enter() const
@@ -42,6 +42,12 @@ namespace winrt::impl
             return range_container<InputIt>{ m_begin, m_end };
         }
 
+#ifdef _DEBUG
+        void use_make_function_to_create_this_object() final
+        {
+        }
+#endif
+
     private:
 
         InputIt const m_begin;
@@ -57,7 +63,7 @@ namespace winrt::impl
     template <typename T, typename InputIt>
     auto make_scoped_input_iterable(InputIt first, InputIt last)
     {
-        using interface_type = wfc::IIterable<T>;
+        using interface_type = fc::IIterable<T>;
         std::pair<interface_type, input_scope*> result;
         auto ptr = new scoped_input_iterable<T, InputIt>(first, last);
         *put_abi(result.first) = to_abi<interface_type>(ptr);
@@ -66,13 +72,13 @@ namespace winrt::impl
     }
 }
 
-namespace winrt::param
+namespace xlang::param
 {
     template <typename T>
     struct iterable
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using interface_type = Foundation::Collections::IIterable<value_type>;
 
         iterable(std::nullptr_t) noexcept
         {
@@ -83,7 +89,7 @@ namespace winrt::param
 
         iterable(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_pair.first, winrt::get_abi(values));
+            attach_abi(m_pair.first, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -129,6 +135,11 @@ namespace winrt::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_pair.first;
+        }
+
     private:
 
         std::pair<interface_type, impl::input_scope*> m_pair;
@@ -136,10 +147,10 @@ namespace winrt::param
     };
 
     template <typename K, typename V>
-    struct iterable<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    struct iterable<Foundation::Collections::IKeyValuePair<K, V>>
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using value_type = Foundation::Collections::IKeyValuePair<K, V>;
+        using interface_type = Foundation::Collections::IIterable<value_type>;
 
         iterable(std::nullptr_t) noexcept
         {
@@ -150,7 +161,7 @@ namespace winrt::param
 
         iterable(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_pair.first, winrt::get_abi(values));
+            attach_abi(m_pair.first, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -201,6 +212,11 @@ namespace winrt::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_pair.first;
+        }
+
     private:
 
         std::pair<interface_type, impl::input_scope*> m_pair;
@@ -217,7 +233,7 @@ namespace winrt::param
     struct async_iterable
     {
         using value_type = T;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using interface_type = Foundation::Collections::IIterable<value_type>;
 
         async_iterable(std::nullptr_t) noexcept
         {
@@ -228,7 +244,7 @@ namespace winrt::param
 
         async_iterable(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -256,6 +272,11 @@ namespace winrt::param
             }
         }
 
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
+        }
+
     private:
 
         interface_type m_interface;
@@ -263,10 +284,10 @@ namespace winrt::param
     };
 
     template <typename K, typename V>
-    struct async_iterable<Windows::Foundation::Collections::IKeyValuePair<K, V>>
+    struct async_iterable<Foundation::Collections::IKeyValuePair<K, V>>
     {
-        using value_type = Windows::Foundation::Collections::IKeyValuePair<K, V>;
-        using interface_type = Windows::Foundation::Collections::IIterable<value_type>;
+        using value_type = Foundation::Collections::IKeyValuePair<K, V>;
+        using interface_type = Foundation::Collections::IIterable<value_type>;
 
         async_iterable(std::nullptr_t) noexcept
         {
@@ -277,7 +298,7 @@ namespace winrt::param
 
         async_iterable(interface_type const& values) noexcept : m_owned(false)
         {
-            attach_abi(m_interface, winrt::get_abi(values));
+            attach_abi(m_interface, xlang::get_abi(values));
         }
 
         template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
@@ -309,6 +330,11 @@ namespace winrt::param
             {
                 detach_abi(m_interface);
             }
+        }
+
+        operator interface_type const& () const noexcept
+        {
+            return m_interface;
         }
 
     private:

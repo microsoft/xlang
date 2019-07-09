@@ -41,12 +41,12 @@ namespace winrt
             array_view(value.data(), static_cast<size_type>(value.size()))
         {}
 
-        template <typename C, size_type N>
+        template <typename C, size_t N>
         array_view(std::array<C, N>& value) noexcept :
             array_view(value.data(), static_cast<size_type>(value.size()))
         {}
 
-        template <typename C, size_type N>
+        template <typename C, size_t N>
         array_view(std::array<C, N> const& value) noexcept :
             array_view(value.data(), static_cast<size_type>(value.size()))
         {}
@@ -242,7 +242,7 @@ namespace winrt
             com_array(value.begin(), value.end())
         {}
 
-        template <size_type N>
+        template <size_t N>
         explicit com_array(std::array<value_type, N> const& value) :
             com_array(value.begin(), value.end())
         {}
@@ -456,7 +456,7 @@ namespace winrt
 
     inline hstring get_class_name(Windows::Foundation::IInspectable const& object)
     {
-        void* value;
+        void* value{};
         check_hresult((*(impl::inspectable_abi**)&object)->GetRuntimeClassName(&value));
         return { value, take_ownership_from_abi };
     }
