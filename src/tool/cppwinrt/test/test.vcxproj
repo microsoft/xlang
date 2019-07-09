@@ -188,6 +188,7 @@
     <ClCompile Include="delegates.cpp" />
     <ClCompile Include="disconnected.cpp" />
     <ClCompile Include="enum.cpp" />
+    <ClCompile Include="fast_iterator.cpp" />
     <ClCompile Include="final_release.cpp" />
     <ClCompile Include="GetMany.cpp" />
     <ClCompile Include="iid_ppv_args.cpp" />
