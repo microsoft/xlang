@@ -154,7 +154,6 @@ Where <spec> is one or more of:
             auto start = get_start_time();
             process_args(argc, argv);
             cache c{ get_files_to_cache() };
-            c.remove_cppwinrt_foundation_types();
             build_filters(c);
             settings.base = settings.base || settings.projection_filter.empty();
 

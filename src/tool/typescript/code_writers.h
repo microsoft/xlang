@@ -61,7 +61,7 @@ namespace xlang
     static void write_enum(writer& w, TypeDef const& type)
     {
         auto format = R"(
-    declare const enum % {
+    const enum % {
 %    }
 )";
 
