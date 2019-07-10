@@ -1,14 +1,14 @@
 #include "pch.h"
 
-bool WINRT_CALL test_can_unload_now() noexcept;
-void* WINRT_CALL test_get_activation_factory(std::wstring_view const& name);
+bool __stdcall test_can_unload_now() noexcept;
+void* __stdcall test_get_activation_factory(std::wstring_view const& name);
 
-int32_t WINRT_CALL DllCanUnloadNow() noexcept
+int32_t __stdcall DllCanUnloadNow() noexcept
 {
     return test_can_unload_now() ? 0 : 1;
 }
 
-int32_t WINRT_CALL DllGetActivationFactory(void* classId, void** factory) noexcept
+int32_t __stdcall DllGetActivationFactory(void* classId, void** factory) noexcept
 {
     try
     {

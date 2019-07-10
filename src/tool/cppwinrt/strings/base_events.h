@@ -22,7 +22,7 @@ namespace winrt
     template <typename I>
     struct event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(winrt::event_token);
+        using method_type = int32_t(__stdcall impl::abi_t<I>::*)(winrt::event_token);
 
         event_revoker() noexcept = default;
         event_revoker(event_revoker const&) = delete;
@@ -77,7 +77,7 @@ namespace winrt
     template <typename I>
     struct factory_event_revoker
     {
-        using method_type = int32_t(WINRT_CALL impl::abi_t<I>::*)(winrt::event_token);
+        using method_type = int32_t(__stdcall impl::abi_t<I>::*)(winrt::event_token);
 
         factory_event_revoker() noexcept = default;
         factory_event_revoker(factory_event_revoker const&) = delete;

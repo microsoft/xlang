@@ -136,7 +136,13 @@ namespace winrt::impl
     template <typename T>
     struct guid_storage
     {
+        // Unlike Visual C++, Clang does not treat __uuidof as a constexpr expression.
+        // This has a ripple effect and impacts both winrt::guid_of and winrt::name_of.
+#ifdef __clang__
+        inline static const guid value{ __uuidof(T) };
+#else
         static constexpr guid value{ __uuidof(T) };
+#endif
     };
 #else
     template <typename T>
@@ -168,7 +174,7 @@ namespace winrt::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_EBO require : require_one<D, I>...
+    struct __declspec(empty_bases) require : require_one<D, I>...
     {};
 
     template <typename D, typename I>
@@ -181,7 +187,7 @@ namespace winrt::impl
     };
 
     template <typename D, typename... I>
-    struct WINRT_EBO base : base_one<D, I>...
+    struct __declspec(empty_bases) base : base_one<D, I>...
     {};
 
     template <typename T>

@@ -169,8 +169,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             DependsOnTargets="ResolvedLinkLib;$(GetCppWinRTDynamicProjectReferencesDependsOn)"
             Returns="@(CppWinRTDynamicProjectReferences)">
         <ItemGroup>
+            <!--Note: only DLL projects that produce import libs have ProjectType == DynamicLibrary.
+            Need to support runtime component projects as well, so we look at the file extension instead.-->
             <CppWinRTDynamicProjectReferences Remove="@(CppWinRTDynamicProjectReferences)"/>
-            <CppWinRTDynamicProjectReferences Include="@(_ResolvedNativeProjectReferencePaths)"/>
+            <CppWinRTDynamicProjectReferences Include="@(_ResolvedNativeProjectReferencePaths)"
+                Condition= "$([System.String]::Copy('%(Identity)').EndsWith('.dll',true,null))"/>
         </ItemGroup>
         <Message Text="CppWinRTDynamicProjectReferences: @(CppWinRTDynamicProjectReferences)" Importance="$(CppWinRTVerbosity)"/>
     </Target>

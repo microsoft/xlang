@@ -112,9 +112,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$safeprojectname$_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="PropertySheet.props" />
     <Text Include="readme.txt">
       <DeploymentContent>false</DeploymentContent>

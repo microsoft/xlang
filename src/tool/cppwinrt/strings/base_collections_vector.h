@@ -185,7 +185,7 @@ namespace winrt::impl
         {
             return base_type::VectorChanged([handler](auto && sender, auto && args)
                 {
-                    handler(sender.try_as<wfc::IObservableVector<Windows::Foundation::IInspectable>>(), args);
+                    handler(sender.template try_as<wfc::IObservableVector<Windows::Foundation::IInspectable>>(), args);
                 });
         }
 

@@ -75,15 +75,8 @@ Where <spec> is one or more of:
         w.write(format, XLANG_VERSION_STRING, bind_each(printOption, options));
     }
 
-    static void process_args(int const argc, char** argv)
+    static void process_args(cmd::reader const& args)
     {
-        cmd::reader args{ argc, argv, options };
-
-        if (!args || args.exists("help"))
-        {
-            throw usage_exception{};
-        }
-
         settings.verbose = args.exists("verbose");
         settings.fastabi = args.exists("fastabi");
 
@@ -96,10 +89,10 @@ Where <spec> is one or more of:
         settings.license = args.exists("license");
         settings.brackets = args.exists("brackets");
 
-        auto output_folder = canonical(args.value("output"));
+        path output_folder = args.value("output");
         create_directories(output_folder / "winrt/impl");
-        output_folder += '/';
-        settings.output_folder = output_folder.string();
+        settings.output_folder = canonical(output_folder).string();
+        settings.output_folder += '\\';
 
         for (auto && include : args.values("include"))
         {
@@ -120,20 +113,6 @@ Where <spec> is one or more of:
         {
             settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
-
-            if (settings.component_name.empty())
-            {
-                // For compatibility with C++/WinRT 1.0, the component_name defaults to the *first*
-                // input, hence the use of values() here that will return the args in input order.
-
-                auto& values = args.values("input");
-
-                if (!values.empty())
-                {
-                    settings.component_name = path(values[0]).filename().replace_extension().string();
-                }
-            }
-
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
             settings.component_lib = args.value("library", "winrt");
@@ -149,10 +128,9 @@ Where <spec> is one or more of:
 
             if (!component.empty())
             {
-                auto component_folder = canonical(component);
-                create_directories(component_folder);
-                component_folder += '/';
-                settings.component_folder = component_folder.string();
+                create_directories(component);
+                settings.component_folder = canonical(component).string();
+                settings.component_folder += '\\';
             }
         }
     }
@@ -257,7 +235,15 @@ Where <spec> is one or more of:
         try
         {
             auto start = get_start_time();
-            process_args(argc, argv);
+
+            cmd::reader args{ argc, argv, options };
+
+            if (!args || args.exists("help"))
+            {
+                throw usage_exception{};
+            }
+
+            process_args(args);
             cache c{ get_files_to_cache() };
             remove_foundation_types(c);
             build_filters(c);
@@ -266,7 +252,7 @@ Where <spec> is one or more of:
 
             if (settings.verbose)
             {
-                w.write(" tool:  %\n", canonical(argv[0]).string());
+                w.write(" tool:  %\n", canonical(path(argv[0]).replace_extension("exe")).string());
                 w.write(" ver:   %\n", XLANG_VERSION_STRING);
 
                 for (auto&& file : settings.input)
@@ -346,6 +332,22 @@ Where <spec> is one or more of:
             if (settings.verbose)
             {
                 w.write(" time:  %ms\n", get_elapsed_time(start));
+            }
+
+            if (settings.component && settings.component_name.empty())
+            {
+                auto& values = args.values("input");
+
+                if (!values.empty())
+                {
+                    // In C++/WinRT 1.0, the component name defaults to the *first* input, hence
+                    // the use of args.values() that will return the args in input order.
+
+                    auto compat_name = path(values[0]).filename().replace_extension().string();
+
+                    w.write("\n warning: Use '-name %' to specify the explicit name for component files.\n",
+                        compat_name);
+                }
             }
         }
         catch (usage_exception const&)

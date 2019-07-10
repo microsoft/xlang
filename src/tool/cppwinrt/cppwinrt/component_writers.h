@@ -138,7 +138,7 @@ namespace xlang
     {
         w.write_root_include("base");
         auto format = R"(%
-bool WINRT_CALL %_can_unload_now() noexcept
+bool __stdcall %_can_unload_now() noexcept
 {
     if (winrt::get_module_lock())
     {
@@ -149,7 +149,7 @@ bool WINRT_CALL %_can_unload_now() noexcept
     return true;
 }
 
-void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
+void* __stdcall %_get_activation_factory([[maybe_unused]] std::wstring_view const& name)
 {
     auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
     {
@@ -172,7 +172,7 @@ void* WINRT_CALL %_get_activation_factory(std::wstring_view const& name)
         }
 
         format = R"(
-int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
+int32_t __stdcall WINRT_CanUnloadNow() noexcept
 {
 #ifdef _WRL_MODULE_H_
     if (!::Microsoft::WRL::Module<::Microsoft::WRL::InProc>::GetModule().Terminate())
@@ -184,7 +184,7 @@ int32_t WINRT_CALL WINRT_CanUnloadNow() noexcept
     return %_can_unload_now() ? 0 : 1;
 }
 
-int32_t WINRT_CALL WINRT_GetActivationFactory(void* classId, void** factory) noexcept try
+int32_t __stdcall WINRT_GetActivationFactory(void* classId, void** factory) noexcept try
 {
     uint32_t length{};
     wchar_t const* const buffer = WINRT_WindowsGetStringRawBuffer(classId, &length);
@@ -255,7 +255,7 @@ catch (...) { return winrt::to_hresult(); }
 
     static void write_component_composable_forwarder(writer& w, MethodDef const& method)
     {
-        auto format = R"(        % %(%)
+        auto format = R"(        auto %(%)
         {
             return impl::composable_factory<T>::template CreateInstance<%>(%);
         }
@@ -268,7 +268,6 @@ catch (...) { return winrt::to_hresult(); }
         w.param_names = true;
 
         w.write(format,
-            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             signature.return_signature(),
@@ -277,7 +276,7 @@ catch (...) { return winrt::to_hresult(); }
 
     static void write_component_constructor_forwarder(writer& w, MethodDef const& method)
     {
-        auto format = R"(        % %(%)
+        auto format = R"(        auto %(%)
         {
             return make<T>(%);
         }
@@ -287,7 +286,6 @@ catch (...) { return winrt::to_hresult(); }
         w.param_names = true;
 
         w.write(format,
-            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             bind<write_consume_args>(signature));
@@ -295,7 +293,7 @@ catch (...) { return winrt::to_hresult(); }
 
     void write_component_static_forwarder(writer& w, MethodDef const& method)
     {
-        auto format = R"(        % %(%)
+        auto format = R"(        auto %(%)
         {
             return T::%(%);
         }
@@ -305,7 +303,6 @@ catch (...) { return winrt::to_hresult(); }
         w.param_names = true;
 
         w.write(format,
-            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             get_name(method),
@@ -481,7 +478,7 @@ catch (...) { return winrt::to_hresult(); }
 
                     if (is_add_overload(method) || is_remove_overload(method))
                     {
-                        auto format = R"(    % %::%(%)
+                        auto format = R"(    auto %::%(%)
     {
         auto f = make<winrt::@::factory_implementation::%>().as<%>();
         return f.%(%);
@@ -490,7 +487,6 @@ catch (...) { return winrt::to_hresult(); }
 
 
                         w.write(format,
-                            signature.return_signature(),
                             type_name,
                             method_name,
                             bind<write_consume_params>(signature),
@@ -634,7 +630,7 @@ catch (...) { return winrt::to_hresult(); }
         auto format = R"(
             if (is_guid_of<%>(id))
             {
-                *result = make_fast_abi_forwarder(static_cast<D const&>(*this).get_abi<class_type>(), guid_of<%>(), %);
+                *result = make_fast_abi_forwarder(static_cast<D const&>(*this).template get_abi<class_type>(), guid_of<%>(), %);
                 return 0;
             }
 )";
@@ -727,7 +723,7 @@ catch (...) { return winrt::to_hresult(); }
         auto format = R"(
         auto base_%() const noexcept
         {
-            return static_cast<D const&>(*this).get_abi<%>();
+            return static_cast<D const&>(*this).template get_abi<%>();
         }
 )";
 
@@ -746,7 +742,7 @@ catch (...) { return winrt::to_hresult(); }
             auto format = R"(namespace winrt::@::implementation
 {
     template <typename D%, typename... I>
-    struct WINRT_EBO %_base : implements<D, @::%%%, %I...>%%%
+    struct __declspec(empty_bases) %_base : implements<D, @::%%%, %I...>%%%
     {
         using base_type = %_base;
         using class_type = @::%;
@@ -838,7 +834,7 @@ catch (...) { return winrt::to_hresult(); }
             auto format = R"(namespace winrt::@::factory_implementation
 {
     template <typename D, typename T, typename... I>
-    struct WINRT_EBO %T : implements<D, Windows::Foundation::IActivationFactory%, I...>
+    struct __declspec(empty_bases) %T : implements<D, Windows::Foundation::IActivationFactory%, I...>
     {
         using instance_type = @::%;
 
@@ -1190,7 +1186,7 @@ namespace winrt::@::implementation
     {
         for (uint32_t slot = 6; slot < 1024; ++slot)
         {
-            auto format = R"(    extern "C" void WINRT_IMPL_CALL winrt_ff_thunk%();
+            auto format = R"(    extern "C" void __stdcall winrt_ff_thunk%();
 )";
 
             w.write(format, slot);

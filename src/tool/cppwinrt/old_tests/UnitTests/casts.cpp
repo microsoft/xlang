@@ -33,7 +33,7 @@ namespace
         void CallIFrameworkElementMethod()
         {
             // This is simply a compile test, to verify that we can convert an "overrides" type to one of its "requires" interfaces.
-            this->Width();
+            [[maybe_unused]] auto result = this->Width();
         }
     };
 }

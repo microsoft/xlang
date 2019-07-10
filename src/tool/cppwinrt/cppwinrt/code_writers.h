@@ -574,27 +574,6 @@ namespace xlang
             s();
             auto param_name = param.Name();
 
-            if (param_signature->Type().is_szarray())
-            {
-                std::string_view format;
-
-                if (param.Flags().In())
-                {
-                    format = "%.size(), get_abi(%)";
-                }
-                else if (param_signature->ByRef())
-                {
-                    format = "impl::put_size_abi(%), put_abi(%)";
-                }
-                else
-                {
-                    format = "%.size(), put_abi(%)";
-                }
-
-                w.write(format, param_name, param_name);
-                continue;
-            }
-
             TypeDef signature_type;
             auto category = get_category(param_signature->Type(), &signature_type);
 
@@ -616,6 +595,9 @@ namespace xlang
                 case param_category::fundamental_type:
                     w.write(param_name);
                     break;
+                case param_category::array_type:
+                    w.write("%.size(), get_abi(%)", param_name, param_name);
+                    break;
                 }
             }
             else
@@ -624,6 +606,16 @@ namespace xlang
                 {
                 case param_category::fundamental_type:
                     w.write("&%", param_name);
+                    break;
+                case param_category::array_type:
+                    if (param_signature->ByRef())
+                    {
+                        w.write("impl::put_size_abi(%), put_abi(%)", param_name, param_name);
+                    }
+                    else
+                    {
+                        w.write("%.size(), put_abi(%)", param_name, param_name);
+                    }
                     break;
                 default:
                     w.write("impl::bind_out(%)", param_name);
@@ -671,7 +663,7 @@ namespace xlang
 
         std::for_each(bases.rbegin(), bases.rend(), [&](auto&& base)
         {
-            auto format = R"(            virtual void* WINRT_CALL base_%() noexcept = 0;
+            auto format = R"(            virtual void* __stdcall base_%() noexcept = 0;
 )";
 
             w.write(format, base.TypeName());
@@ -689,7 +681,7 @@ namespace xlang
                 break;
             }
 
-            auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
+            auto format = R"(            virtual int32_t __stdcall %(%) noexcept = 0;
 )";
 
             for (auto&& method : info.type.MethodList())
@@ -710,7 +702,7 @@ namespace xlang
         {
             auto format = R"(    template <> struct abi<%>
     {
-        struct WINRT_NOVTABLE type : inspectable_abi
+        struct __declspec(novtable) type : inspectable_abi
         {
 )";
 
@@ -720,7 +712,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct abi<%>
     {
-        struct WINRT_NOVTABLE type : inspectable_abi
+        struct __declspec(novtable) type : inspectable_abi
         {
 )";
 
@@ -730,7 +722,7 @@ namespace xlang
         }
 
 
-        auto format = R"(            virtual int32_t WINRT_CALL %(%) noexcept = 0;
+        auto format = R"(            virtual int32_t __stdcall %(%) noexcept = 0;
 )";
 
         for (auto&& method : type.MethodList())
@@ -760,9 +752,9 @@ namespace xlang
     {
         auto format = R"(    template <%> struct abi<%>
     {
-        struct WINRT_NOVTABLE type : unknown_abi
+        struct __declspec(novtable) type : unknown_abi
         {
-            virtual int32_t WINRT_CALL Invoke(%) noexcept = 0;
+            virtual int32_t __stdcall Invoke(%) noexcept = 0;
         };
     };
 )";
@@ -936,8 +928,8 @@ namespace xlang
         auto method_name = get_name(method);
         auto type = method.Parent();
 
-        w.write("        % %(%) const%;\n",
-            signature.return_signature(),
+        w.write("        %auto %(%) const%;\n",
+            is_get_overload(method) ? "[[nodiscard]] " : "",
             method_name,
             bind<write_consume_params>(signature),
             is_noexcept(method) ? " noexcept" : "");
@@ -1036,13 +1028,16 @@ namespace xlang
 
         if (category == param_category::array_type)
         {
-            w.write("\n        return { %, %_impl_size, take_ownership_from_abi };",
+            w.write("\n        return %{ %, %_impl_size, take_ownership_from_abi };",
+                signature.return_signature(),
                 signature.return_param_name(),
                 signature.return_param_name());
         }
         else if (category == param_category::object_type || category == param_category::string_type)
         {
-            w.write("\n        return { %, take_ownership_from_abi };", signature.return_param_name());
+            w.write("\n        return %{ %, take_ownership_from_abi };",
+                signature.return_signature(),
+                signature.return_param_name());
         }
         else
         {
@@ -1071,24 +1066,23 @@ namespace xlang
 
         if (is_noexcept(method))
         {
-            format = R"(    template <typename D%> % consume_%<D%>::%(%) const noexcept
+            format = R"(    template <typename D%> auto consume_%<D%>::%(%) const noexcept
     {%
-        WINRT_VERIFY_(0, WINRT_SHIM(%)->%(%));%
+        WINRT_VERIFY_(0, WINRT_IMPL_SHIM(%)->%(%));%
     }
 )";
         }
         else
         {
-            format = R"(    template <typename D%> % consume_%<D%>::%(%) const
+            format = R"(    template <typename D%> auto consume_%<D%>::%(%) const
     {%
-        check_hresult(WINRT_SHIM(%)->%(%));%
+        check_hresult(WINRT_IMPL_SHIM(%)->%(%));%
     }
 )";
         }
 
         w.write(format,
             bind<write_comma_generic_typenames>(generics),
-            signature.return_signature(),
             type_impl_name,
             bind<write_comma_generic_types>(generics),
             method_name,
@@ -1136,14 +1130,13 @@ namespace xlang
         // return static_cast<% const&>(*this).%(%);
         //
 
-        std::string_view format = R"(    inline % %::%(%) const%
+        std::string_view format = R"(    inline auto %::%(%) const%
     {
         return [&](% const& winrt_impl_base) { return winrt_impl_base.%(%); }(*this);
     }
 )";
 
         w.write(format,
-            signature.return_signature(),
             class_type.TypeName(),
             method_name,
             bind<write_consume_params>(signature),
@@ -1297,7 +1290,7 @@ namespace xlang
             if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -1305,7 +1298,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1323,7 +1316,7 @@ namespace xlang
             if constexpr (std::is_base_of_v<Windows::Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                WINRT_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
+                WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
                 return result;
             }
             else
@@ -1331,7 +1324,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1343,50 +1336,26 @@ namespace xlang
         }
         else if (type_name == "Windows.Foundation.IAsyncAction")
         {
-            w.write(R"(        void get() const
-        {
-            wait_get(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperation`1")
         {
-            w.write(R"(        TResult get() const
-        {
-            return wait_get(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncActionWithProgress`1")
         {
-            w.write(R"(        void get() const
-        {
-            wait_get(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperationWithProgress`2")
         {
-            w.write(R"(        TResult get() const
-        {
-            return wait_get(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
     }
@@ -1747,7 +1716,7 @@ namespace xlang
 
         if (is_noexcept(method))
         {
-            format = R"(        int32_t WINRT_CALL %(%) noexcept final
+            format = R"(        int32_t __stdcall %(%) noexcept final
         {
 %            typename D::abi_guard guard(this->shim());
             %
@@ -1757,7 +1726,7 @@ namespace xlang
         }
         else
         {
-            format = R"(        int32_t WINRT_CALL %(%) noexcept final try
+            format = R"(        int32_t __stdcall %(%) noexcept final try
         {
 %            typename D::abi_guard guard(this->shim());
             %
@@ -1797,7 +1766,7 @@ namespace xlang
 
         std::for_each(bases.rbegin(), bases.rend(), [&](auto && base)
         {
-            auto format = R"(        void* WINRT_CALL base_%() noexcept final
+            auto format = R"(        void* __stdcall base_%() noexcept final
         {
             return this->shim().base_%();
         }
@@ -1844,7 +1813,7 @@ namespace xlang
 
     static void write_dispatch_overridable_method(writer& w, MethodDef const& method)
     {
-        auto format = R"(    % %(%)
+        auto format = R"(    auto %(%)
     {
         if (auto overridable = this->shim_overridable())
         {
@@ -1858,7 +1827,6 @@ namespace xlang
         method_signature signature{ method };
 
         w.write(format,
-            signature.return_signature(),
             get_name(method),
             bind<write_implementation_params>(signature),
             get_name(method),
@@ -1870,7 +1838,7 @@ namespace xlang
     static void write_dispatch_overridable(writer& w, TypeDef const& class_type)
     {
         auto format = R"(template <typename T, typename D>
-struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
+struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     : produce_dispatch_to_overridable_base<T, D, %>
 {
 %};)";
@@ -1889,7 +1857,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
     static void write_interface_override_method(writer& w, MethodDef const& method, std::string_view const& interface_name)
     {
-        auto format = R"(    template <typename D> % %T<D>::%(%) const
+        auto format = R"(    template <typename D> auto %T<D>::%(%) const
     {
         return shim().template try_as<%>().%(%);
     }
@@ -1899,7 +1867,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto method_name = get_name(method);
 
         w.write(format,
-            signature.return_signature(),
             interface_name,
             method_name,
             bind<write_consume_params>(signature),
@@ -2228,7 +2195,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
 
         if (empty(generics))
         {
-            auto format = R"(    struct WINRT_EBO % :
+            auto format = R"(    struct __declspec(empty_bases) % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
     {
@@ -2251,7 +2218,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             type_name = remove_tick(type_name);
 
             auto format = R"(    template <%>
-    struct WINRT_EBO % :
+    struct __declspec(empty_bases) % :
         Windows::Foundation::IInspectable,
         impl::consume_t<%>%
     {%
@@ -2298,7 +2265,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         template <typename O, typename M> %(O* object, M method);
         template <typename O, typename M> %(com_ptr<O>&& object, M method);
         template <typename O, typename M> %(weak_ref<O>&& object, M method);
-        % operator()(%) const;
+        auto operator()(%) const;
     };
 )";
 
@@ -2314,17 +2281,16 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             type_name,
             type_name,
             type_name,
-            signature.return_signature(),
             bind<write_consume_params>(signature));
     }
 
     static void write_delegate_implementation(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <typename H%> struct delegate<%, H> : implements_delegate<%, H>
+        auto format = R"(    template <typename H%> struct delegate<%, H> final : implements_delegate<%, H>
     {
         delegate(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
-        int32_t WINRT_CALL Invoke(%) noexcept final try
+        int32_t __stdcall Invoke(%) noexcept final try
         {
 %            %
             return 0;
@@ -2377,7 +2343,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
     {
     }
-    template <%> % %<%>::operator()(%) const
+    template <%> auto %<%>::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%<%>>**)this)->Invoke(%));%
     }
@@ -2414,7 +2380,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 type_name,
                 type_name,
                 bind<write_generic_typenames>(generics),
-                signature.return_signature(),
                 type_name,
                 bind_list(", ", generics),
                 bind<write_consume_params>(signature),
@@ -2446,7 +2411,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         %([o = std::move(object), method](auto&&... args) { if (auto s = o.get()) { ((*s).*(method))(args...); } })
     {
     }
-    inline % %::operator()(%) const
+    inline auto %::operator()(%) const
     {%
         check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
     }
@@ -2469,7 +2434,6 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
                 type_name,
                 type_name,
                 type_name,
-                signature.return_signature(),
                 type_name,
                 bind<write_consume_params>(signature),
                 bind<write_consume_return_type>(signature),
@@ -2830,7 +2794,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
     }
 
 
-    static void write_static_declaration(writer& w, std::pair<std::string const, factory_info> const& factory)
+    static void write_static_declaration(writer& w, std::pair<std::string const, factory_info> const& factory, TypeDef const& type)
     {
         if (!factory.second.statics)
         {
@@ -2843,10 +2807,21 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             auto method_name = get_name(method);
             w.async_types = is_async(method, signature);
 
-            w.write("        static % %(%);\n",
-                signature.return_signature(),
-                method_name,
-                bind<write_consume_params>(signature));
+            if (settings.component_opt && settings.component_filter.includes(type))
+            {
+                w.write("        %static % %(%);\n",
+                    is_get_overload(method) ? "[[nodiscard]] " : "",
+                    signature.return_signature(),
+                    method_name,
+                    bind<write_consume_params>(signature));
+            }
+            else
+            {
+                w.write("        %static auto %(%);\n",
+                    is_get_overload(method) ? "[[nodiscard]] " : "",
+                    method_name,
+                    bind<write_consume_params>(signature));
+            }
 
             if (is_add_overload(method))
             {
@@ -2873,14 +2848,13 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         w.async_types = is_async(method, signature);
 
         {
-            auto format = R"(    inline % %::%(%)
+            auto format = R"(    inline auto %::%(%)
     {
         %impl::call_factory<%, %>([&](auto&& f) { return f.%(%); });
     }
 )";
 
             w.write(format,
-                signature.return_signature(),
                 type_name,
                 method_name,
                 bind<write_consume_params>(signature),
@@ -2975,7 +2949,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto type_name = type.TypeName();
         auto factories = get_factories(w, type);
 
-        auto format = R"(    struct WINRT_EBO % : %%%
+        auto format = R"(    struct __declspec(empty_bases) % : %%%
     {
         %(std::nullptr_t) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
@@ -2992,7 +2966,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             base_type,
             bind<write_constructor_declarations>(type, factories),
             bind<write_class_usings>(type),
-            bind_each<write_static_declaration>(factories));
+            bind_each<write_static_declaration>(factories, type));
     }
 
     static void write_fast_class(writer& w, TypeDef const& type, coded_index<TypeDefOrRef> const& base_type)
@@ -3000,7 +2974,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         auto type_name = type.TypeName();
         auto factories = get_factories(w, type);
 
-        auto format = R"(    struct WINRT_EBO % : %%
+        auto format = R"(    struct __declspec(empty_bases) % : %%
     {
         %(std::nullptr_t) noexcept {}
         %(void* ptr, take_ownership_from_abi_t) noexcept : %(ptr, take_ownership_from_abi) {}
@@ -3016,7 +2990,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
             base_type,
             bind<write_constructor_declarations>(type, factories),
             bind<write_fast_class_base_declarations>(type),
-            bind_each<write_static_declaration>(factories));
+            bind_each<write_static_declaration>(factories, type));
     }
 
     static void write_static_class(writer& w, TypeDef const& type)
@@ -3033,7 +3007,7 @@ struct WINRT_EBO produce_dispatch_to_overridable<T, D, %>
         w.write(format,
             type_name,
             type_name,
-            bind_each<write_static_declaration>(factories));
+            bind_each<write_static_declaration>(factories, type));
     }
 
     static void write_class(writer& w, TypeDef const& type)

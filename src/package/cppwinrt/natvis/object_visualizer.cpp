@@ -114,7 +114,7 @@ static HRESULT EvaluatePropertyExpression(
     wchar_t wszEvalText[500];
     std::wstring propCast;
     PCWSTR propField;
-	if (prop.category < PropertyCategory::Value)
+    if (prop.category < PropertyCategory::Value)
     {
         propField = g_categoryData[(int)prop.category].propField;
     }
@@ -425,10 +425,24 @@ void GetInterfaceData(
                     }
                     else
                     {
-                        auto fullTypeName = std::string(type.TypeNamespace()) + "::" + std::string(type.TypeName());
+                        auto ns = std::string(type.TypeNamespace());
+                        auto name = std::string(type.TypeName());
+
+                        // Map numeric type names
+                        if (ns == "Windows.Foundation.Numerics")
+                        {
+                            if (name == "Matrix3x2") { name = "float3x2"; }
+                            else if (name == "Matrix4x4") { name = "float4x4"; }
+                            else if (name == "Plane") { name = "plane"; }
+                            else if (name == "Quaternion") { name = "quaternion"; }
+                            else if (name == "Vector2") { name = "float2"; }
+                            else if (name == "Vector3") { name = "float3"; }
+                            else if (name == "Vector4") { name = "float4"; }
+                        }
 
                         // Types come back from winmd files with '.', need to be '::'
                         // Ex. Windows.Foundation.Uri needs to be Windows::Foundation::Uri
+                        auto fullTypeName = ns + "::" + name;
                         wchar_t cppTypename[500];
                         size_t i, j;
                         for (i = 0, j = 0; i < (fullTypeName.length() + 1); i++, j++)
@@ -489,9 +503,14 @@ void object_visualizer::GetPropertyData()
     {
         return;
     }
-    
+
     auto process = m_pVisualizedExpression->RuntimeInstance()->Process();
-    auto type = FindType(process, to_string(pValue->Value()));
+    GetTypeProperties(process, to_string(pValue->Value()));
+}
+
+void object_visualizer::GetTypeProperties(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::string const& type_name)
+{
+    auto type = FindType(process, type_name);
     if (!type)
     {
         return;
@@ -499,6 +518,15 @@ void object_visualizer::GetPropertyData()
 
     if (get_category(type) == category::class_type)
     {
+        auto const& [extends_namespace, extends_name] = get_base_class_namespace_and_name(type);
+        if(!extends_namespace.empty() && !extends_name.empty())
+        {
+            auto base_type = std::string(extends_namespace) + "." + std::string(extends_name);
+            if (base_type != "System.Object")
+            {
+                GetTypeProperties(process, base_type);
+            }
+        }
         auto impls = type.InterfaceImpl();
         for (auto&& impl : impls)
         {

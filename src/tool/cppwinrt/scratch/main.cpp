@@ -2,6 +2,6 @@
 
 using namespace winrt;
 
-TEST_CASE("scratch")
+int main()
 {
 }

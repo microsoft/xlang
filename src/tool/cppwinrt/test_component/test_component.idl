@@ -50,12 +50,19 @@ namespace test_component
         Simple();
 
         void Method();
+        Windows.Foundation.IReference<Int32> Reference(Windows.Foundation.DateTime value);
+        Windows.Foundation.IAsyncOperation<Int32> Operation(Windows.Foundation.DateTime value);
+        Windows.Foundation.IAsyncAction Action(Windows.Foundation.DateTime value);
+        Object Object(Windows.Foundation.DateTime value);
     }
 
     runtimeclass Class
     {
         Class();
         Class(String name);
+        static void StaticTest();
+        static Int32 StaticTestReturn();
+        static Int32 StaticProperty{ get; };
 
         Class(Windows.Foundation.Collections.IIterable<String> arg, Int32 dummy1);
         Class(Windows.Foundation.Collections.IIterable<Windows.Foundation.Collections.IKeyValuePair<String, String> > arg, Int32 dummy1, Int32 dummy2);
