@@ -924,7 +924,7 @@ namespace xlang
     static void write_consume_declaration(writer& w, MethodDef const& method)
     {
         method_signature signature{ method };
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
         auto method_name = get_name(method);
         auto type = method.Parent();
 
@@ -1060,7 +1060,7 @@ namespace xlang
     {
         auto method_name = get_name(method);
         method_signature signature{ method };
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
 
         std::string_view format;
 
@@ -1120,7 +1120,7 @@ namespace xlang
     {
         auto method_name = get_name(method);
         method_signature signature{ method };
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
 
         //
         // Note: this use of a lambda is a workaround for a Visual C++ compiler bug:
@@ -1737,7 +1737,7 @@ namespace xlang
         }
 
         method_signature signature{ method };
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
         std::string upcall = "this->shim().";
         upcall += get_name(method);
 
@@ -2805,7 +2805,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         {
             method_signature signature{ method };
             auto method_name = get_name(method);
-            w.async_types = is_async(method, signature);
+            w.async_types = signature.is_async();
 
             if (settings.component_opt && settings.component_filter.includes(type))
             {
@@ -2845,7 +2845,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     {
         method_signature signature{ method };
         auto method_name = get_name(method);
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
 
         {
             auto format = R"(    inline auto %::%(%)
