@@ -899,7 +899,8 @@ namespace xlang
 
                     auto param_type = std::get_if<ElementType>(&param_signature->Type().Type());
 
-                    if (w.async_types || (param_type && *param_type != ElementType::String && *param_type != ElementType::Object))
+                    if ((!is_put_overload(method_signature.method()) && w.async_types) ||
+                        (param_type && *param_type != ElementType::String && *param_type != ElementType::Object))
                     {
                         w.write("%", param_signature->Type());
                     }

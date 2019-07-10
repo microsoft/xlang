@@ -68,10 +68,10 @@ namespace xlang
             return name;
         }
 
-        //MethodDef const& method() const
-        //{
-        //    return m_method;
-        //}
+        MethodDef const& method() const
+        {
+            return m_method;
+        }
 
         bool is_async() const
         {
