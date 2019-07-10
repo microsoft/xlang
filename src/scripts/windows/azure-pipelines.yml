@@ -44,6 +44,12 @@ steps:
 - script: .\install\test\platform\test_platform.exe -r junit -o TEST-test_platform.xml
   displayName: 'test_platform'
   continueOnError: true
+- script: .\_build\Windows\x86\Release\tool\cppwinrt\test.exe -r junit -o TEST-test_cppwinrt.xml
+  displayName: 'test_cppwinrt'
+  continueOnError: true
+- script: .\_build\Windows\x86\Release\tool\cppwinrt\test_old.exe -r junit -o TEST-test_old_cppwinrt.xml
+  displayName: 'test_old_cppwinrt'
+  continueOnError: true
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'
