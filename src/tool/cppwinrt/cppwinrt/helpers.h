@@ -75,6 +75,12 @@ namespace xlang
 
         bool is_async() const
         {
+            // WinRT parameter passing conventions include the notion that input parameters of collection types may be read
+            // or copied but should not be stored directly since this would lead to instability as the collection is shared
+            // by the caller and callee. The exception to this rule is property setters where the callee may simply store a
+            // reference to the collection. The collection thus becomes async in the sense that it is expected to remain
+            // valid beyond the duration of the call.
+            
             if (is_put_overload(m_method))
             {
                 return true;
