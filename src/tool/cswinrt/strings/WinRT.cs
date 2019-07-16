@@ -74,6 +74,8 @@ namespace WinRT
         public delegate int _put_PropertyAsObject([In] IntPtr thisPtr, [In] IntPtr value);
         public unsafe delegate int _get_PropertyAsGuid([In] IntPtr thisPtr, [Out] Guid* value);
         public delegate int _put_PropertyAsGuid([In] IntPtr thisPtr, [In] Guid value);
+        public unsafe delegate int _get_PropertyAsString([In] IntPtr thisPtr, [Out, MarshalAs(UnmanagedType.HString)] out string value);
+        public delegate int _put_PropertyAsString([In] IntPtr thisPtr, [In, MarshalAs(UnmanagedType.HString)] string value);
         public unsafe delegate int _get_PropertyAsVector3([In] IntPtr thisPtr, [Out] Vector3* value);
         public delegate int _put_PropertyAsVector3([In] IntPtr thisPtr, [In] Vector3 value);
         public unsafe delegate int _get_PropertyAsQuaternion([In] IntPtr thisPtr, [Out] Quaternion* value);
@@ -209,6 +211,12 @@ namespace WinRT
                                                   [Out] IntPtr* hstring);
 
         [DllImport("api-ms-win-core-winrt-string-l1-1-0.dll", CallingConvention = CallingConvention.StdCall)]
+        public static extern unsafe int WindowsCreateStringReference(char* sourceString,
+                                                  int length,
+                                                  [Out] IntPtr* hstring_header,
+                                                  [Out] IntPtr* hstring);
+
+        [DllImport("api-ms-win-core-winrt-string-l1-1-0.dll", CallingConvention = CallingConvention.StdCall)]
         public static extern unsafe int WindowsDuplicateString([In] IntPtr sourceString,
                                                   [Out] IntPtr* hstring);
 
@@ -329,39 +337,91 @@ namespace WinRT
         }
     }
 
-    internal class HString : ICloneable, IDisposable
+    public class HString : ICloneable, IDisposable
     {
         public readonly IntPtr Handle;
 
-        public unsafe HString(string value)
-        {
-            IntPtr handle;
-            Marshal.ThrowExceptionForHR(Platform.WindowsCreateString(value, value.Length, &handle));
-            Handle = handle;
-        }
+        public HString()
+        { }
 
         public HString(IntPtr handle)
         {
             Handle = handle;
         }
 
-        public unsafe override string ToString()
+        public HString(string value)
         {
-            uint length;
-            char* buffer = Platform.WindowsGetStringRawBuffer(Handle, &length);
-            return new string(buffer, 0, (int)length);
+            unsafe
+            {
+                IntPtr handle;
+                Marshal.ThrowExceptionForHR(Platform.WindowsCreateString(value, value.Length, &handle));
+                Handle = handle;
+            }
         }
 
-        public unsafe object Clone()
+        public static implicit operator HString(String value)
         {
-            IntPtr handle;
-            Marshal.ThrowExceptionForHR(Platform.WindowsDuplicateString(Handle, &handle));
-            return new HString(handle);
+            return new HStringReference(value);
         }
 
-        public void Dispose()
+        public static implicit operator String(HString value)
+        {
+            return value.ToString();
+        }
+
+        public override string ToString()
+        {
+            unsafe
+            {
+                uint length;
+                char* buffer = Platform.WindowsGetStringRawBuffer(Handle, &length);
+                return new string(buffer, 0, (int)length);
+            }
+        }
+
+        public object Clone()
+        {
+            unsafe
+            {
+                IntPtr handle;
+                Marshal.ThrowExceptionForHR(Platform.WindowsDuplicateString(Handle, &handle));
+                return new HString(handle);
+            }
+        }
+
+        public virtual void Dispose()
         {
             Marshal.ThrowExceptionForHR(Platform.WindowsDeleteString(Handle));
+        }
+    }
+
+    public class HStringReference : HString
+    {
+        // sizeof(HSTRING_HEADER)
+        private unsafe struct HStringHeader
+        {
+            public fixed byte Reserved[24];
+        };
+        private HStringHeader _header;
+        private GCHandle _gchandle;
+
+        public HStringReference(String value)
+        {
+            _gchandle = GCHandle.Alloc(value);
+            unsafe
+            {
+                fixed (void* chars = value, pHeader = &_header, pHandle = &Handle)
+                {
+                    Marshal.ThrowExceptionForHR(WinRT.Platform.WindowsCreateStringReference(
+                        (char*)chars, value.Length, (IntPtr*)pHeader, (IntPtr*)pHandle));
+                }
+            }
+        }
+
+        public override void Dispose()
+        {
+            // no need to delete hstring reference
+            _gchandle.Free();
         }
     }
 
@@ -510,7 +570,7 @@ namespace WinRT
                 _cache.Remove(_fileName);
             }
 
-            if (!Platform.FreeLibrary(_moduleHandle))
+            if ((_moduleHandle != IntPtr.Zero) && !Platform.FreeLibrary(_moduleHandle))
             {
                 Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
             }
@@ -633,7 +693,7 @@ namespace WinRT
         }
     }
 
-    internal class Delegate
+    public class Delegate
     {
         int _refs = 0;
         public readonly IntPtr ThisPtr;
@@ -758,7 +818,7 @@ namespace WinRT
             }
         }
 
-        Delegate(IntPtr invokePtr, object invoker)
+        public Delegate(IntPtr invokePtr, object invoker)
         {
             _moduleHandle = GCHandle.Alloc(_module);
 
@@ -820,11 +880,11 @@ namespace WinRT
                 {
                     if (_event == null)
                         using (var reference = new Delegate.InitialReference(Marshal.GetFunctionPointerForDelegate(_invoke), new _Invoke(Invoke)))
-                    {
+                        {
                             Interop.EventRegistrationToken token;
-                        unsafe { Marshal.ThrowExceptionForHR(_addHandler(_obj.ThisPtr, reference.DelegatePtr, &token)); }
-                        _token = token;
-                    }
+                            unsafe { Marshal.ThrowExceptionForHR(_addHandler(_obj.ThisPtr, reference.DelegatePtr, &token)); }
+                            _token = token;
+                        }
                     _event += value;
                 }
             }
@@ -890,11 +950,11 @@ namespace WinRT
                 {
                     if (_event == null)
                         using (var reference = new Delegate.InitialReference(Marshal.GetFunctionPointerForDelegate(_invoke), new _Invoke(Invoke)))
-                    {
+                        {
                             Interop.EventRegistrationToken token;
-                        unsafe { Marshal.ThrowExceptionForHR(_addHandler(_obj.ThisPtr, reference.DelegatePtr, &token)); }
-                        _token = token;
-                    }
+                            unsafe { Marshal.ThrowExceptionForHR(_addHandler(_obj.ThisPtr, reference.DelegatePtr, &token)); }
+                            _token = token;
+                        }
                     _event += value;
                 }
             }

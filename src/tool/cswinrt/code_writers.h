@@ -1,6 +1,6 @@
 #pragma once
 
-namespace coolrt
+namespace cswinrt
 {
     using namespace xlang::meta::reader;
 

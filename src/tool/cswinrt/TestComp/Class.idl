@@ -1,0 +1,23 @@
+namespace TestComp
+{
+    delegate String ProvideString();
+
+    [default_interface]
+    runtimeclass Class
+    {
+        Class();
+        
+        Int32 IntProperty;
+        event Windows.Foundation.TypedEventHandler<Class, IInspectable> IntPropertyChanged;
+        
+        String StringProperty;
+        event Windows.Foundation.TypedEventHandler<Class, String> StringPropertyChanged;
+
+        String StringProperty2;
+
+        Windows.Foundation.Collections.IVector<String> StringsProperty;
+
+        void GetString();
+        void SetString(ProvideString provider);
+    }
+}

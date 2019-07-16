@@ -1,6 +1,6 @@
 #pragma once
 
-namespace coolrt
+namespace cswinrt
 {
     using namespace std::literals;
     using namespace std::experimental::filesystem;

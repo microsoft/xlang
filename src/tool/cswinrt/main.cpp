@@ -5,7 +5,7 @@
 #include "type_writers.h"
 #include "code_writers.h"
 
-namespace coolrt
+namespace cswinrt
 {
     using namespace std::literals;
     using namespace std::experimental::filesystem;
@@ -57,7 +57,7 @@ namespace coolrt
 Cool/WinRT v%
 Copyright (c) Microsoft Corporation. All rights reserved.
 
-  coolrt.exe [options...]
+  cswinrt.exe [options...]
 
 Options:
 
@@ -139,6 +139,13 @@ Where <spec> is one or more of:
                 w.flush_to_file(settings.output_folder / "base-interop.cs");
             });
 
+            group.add([]
+            {
+                writer w;
+                w.write(strings::WinRT);
+                w.flush_to_file(settings.output_folder / "WinRT.cs");
+            });
+
             for (auto&&[ns, members] : c.namespaces())
             {
                 for (auto&&[name, type] : members.types)
@@ -177,5 +184,5 @@ Where <spec> is one or more of:
 
 int main(int const argc, char** argv)
 {
-    return coolrt::run(argc, argv);
+    return cswinrt::run(argc, argv);
 }

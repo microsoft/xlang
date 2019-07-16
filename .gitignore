@@ -335,6 +335,10 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 
+# ignore test staging
+src/tool/cswinrt/unittest/winrt.cs
+src/tool/cswinrt/testapp/winrt.cs
+
 # ignore test output
 src/test/output/
 src/test/python/output/

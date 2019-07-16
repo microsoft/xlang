@@ -1,6 +1,6 @@
 #pragma once
 
-namespace coolrt
+namespace cswinrt
 {
     struct settings_type
     {
