@@ -667,7 +667,7 @@ namespace std::experimental
 namespace winrt
 {
     template <typename... T>
-    Windows::Foundation::IAsyncAction when_all(T&&... async)
+    Windows::Foundation::IAsyncAction when_all(T... async)
     {
         (co_await async, ...);
     }
