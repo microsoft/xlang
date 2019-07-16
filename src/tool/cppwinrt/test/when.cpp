@@ -51,7 +51,10 @@ TEST_CASE("when")
         handle first_event{ check_pointer(CreateEventW(nullptr, true, false, nullptr)) };
         handle second_event{ check_pointer(CreateEventW(nullptr, true, false, nullptr)) };
 
-        IAsyncAction any = winrt::when_any(when_signaled(first_event), when_signaled(second_event));
+        IAsyncAction first = when_signaled(first_event);
+        IAsyncAction second = when_signaled(second_event);
+
+        IAsyncAction any = winrt::when_any(first, second);
 
         // Make sure we're still waiting.
         Sleep(100);
@@ -62,6 +65,9 @@ TEST_CASE("when")
 
         // This should now complete.
         any.get();
+
+        REQUIRE(first.Status() == AsyncStatus::Started);
+        REQUIRE(second.Status() == AsyncStatus::Completed);
 
         SetEvent(first_event.get());
     }

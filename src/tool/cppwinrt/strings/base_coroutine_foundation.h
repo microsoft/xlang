@@ -675,7 +675,7 @@ namespace winrt
     template <typename... T>
     Windows::Foundation::IAsyncAction when_any(T&& ... async)
     {
-        static_assert((impl::has_category_v<T> && ...), "Async must be WinRT async type such as IAsyncAction or IAsyncOperation<T>.");
+        static_assert((impl::has_category_v<std::decay_t<T>> && ...), "Async must be WinRT async type such as IAsyncAction or IAsyncOperation<T>.");
 
         handle event{ check_pointer(WINRT_CreateEventW(nullptr, true, false, nullptr)) };
         void* process = WINRT_GetCurrentProcess();
