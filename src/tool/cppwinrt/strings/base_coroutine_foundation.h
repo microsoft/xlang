@@ -666,9 +666,36 @@ namespace std::experimental
 
 namespace winrt
 {
-    template <typename... Args>
-    Windows::Foundation::IAsyncAction when_all(Args&&... args)
+    template <typename... T>
+    Windows::Foundation::IAsyncAction when_all(T&&... async)
     {
-        (co_await args, ...);
+        (co_await async, ...);
+    }
+
+    template <typename... T>
+    Windows::Foundation::IAsyncAction when_any(T&& ... async)
+    {
+        static_assert((impl::has_category_v<T> && ...), "Async must be WinRT async type such as IAsyncAction or IAsyncOperation<T>.");
+
+        handle event{ check_pointer(WINRT_CreateEventW(nullptr, true, false, nullptr)) };
+        void* process = WINRT_GetCurrentProcess();
+
+        auto duplicate = [&](handle const& source) noexcept
+        {
+            void* target{};
+            WINRT_VERIFY(WINRT_DuplicateHandle(process, source.get(), process, &target, 0, false, 2 /* DUPLICATE_SAME_ACCESS */));
+            return handle{ target };
+        };
+
+        auto completed = [&](auto&& async)
+        {
+            async.Completed([event = duplicate(event)](auto&& ...) noexcept
+            {
+                WINRT_VERIFY(WINRT_SetEvent(event.get()));
+            });
+        };
+
+        (completed(async), ...);
+        co_await resume_on_signal(event.get());
     }
 }
