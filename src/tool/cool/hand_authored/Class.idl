@@ -1,0 +1,38 @@
+namespace Sample
+{
+    unsealed runtimeclass Base
+    {
+        void Hello();
+    }
+
+    runtimeclass Derived1 : Base
+    {
+        Int32 Planet();
+    }
+
+    unsealed runtimeclass Derived2 : Base
+    {
+        void World(Int32 value);
+    }
+
+    runtimeclass Grandchild : Derived2
+    {
+        void Galaxy(Int32 value);
+    }
+
+    [default_interface]
+    runtimeclass Class
+    {
+        Class();
+        Int32 MyProperty;
+
+        event Windows.Foundation.TypedEventHandler<Class, IInspectable> MyPropertyChanged;
+        Base Derived1{ get; };
+        Derived2 Derived2{ get; };
+
+        Windows.Foundation.Collections.IVectorView<Class> Children{ get; };
+        void OutBuffer(out Class[] buffer);
+        Class[] ReturnBuffer();
+        void FillBuffer(ref UInt32[] buffer);
+    }
+}
