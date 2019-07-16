@@ -663,3 +663,12 @@ namespace std::experimental
         };
     };
 }
+
+namespace winrt
+{
+    template <typename... Args>
+    Windows::Foundation::IAsyncAction when_all(Args&&... args)
+    {
+        (co_await args, ...);
+    }
+}
