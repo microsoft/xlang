@@ -17,6 +17,8 @@ else()
     target_link_libraries(cswinrt -lpthread)
 endif()
 
+# Note: the test component is built with msbuild, but the xUnit test is built/run with dotnet
+# See TestApp\readme.txt for rationale and other test considerations
 set(build_testcomp msbuild testcomp/TestComp.vcxproj /nologo /m /p:Configuration=${CMAKE_BUILD_TYPE},Platform=$ENV{VSCMD_ARG_TGT_ARCH},SolutionDir=${CMAKE_CURRENT_SOURCE_DIR}/)
 
 if ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86")
@@ -26,6 +28,7 @@ set(ProgramFiles "PROGRAMFILES")
 endif()
 set(dotnet_exe "$ENV{${ProgramFiles}}/dotnet/dotnet.exe")
 
+# Build/Run xUnit tests, generating xml output report for Azure Devops reporting, via XunitXml.TestLogger NuGet
 set(run_unittest ${dotnet_exe} test --logger xunit$<SEMICOLON>LogFilePath=${CMAKE_BINARY_DIR}/test_cswinrt_unittest.xml unittest/UnitTest.csproj /nologo /m /p:Configuration=${CMAKE_BUILD_TYPE},Platform=$ENV{VSCMD_ARG_TGT_ARCH},SolutionDir=${CMAKE_CURRENT_SOURCE_DIR}/)
 
 file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/build_tools/nuget.exe" nuget_exe)
