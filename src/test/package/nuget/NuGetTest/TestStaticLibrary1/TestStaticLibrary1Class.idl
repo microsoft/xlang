@@ -1,0 +1,10 @@
+namespace TestStaticLibrary1
+{
+    [default_interface]
+    runtimeclass TestStaticLibrary1Class 
+    {
+        TestStaticLibrary1Class();
+
+        void Test();
+    }
+}
