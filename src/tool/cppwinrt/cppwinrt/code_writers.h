@@ -938,7 +938,7 @@ namespace xlang
         if (is_add_overload(method))
         {
             auto format = R"(        using %_revoker = impl::event_revoker<%, &impl::abi_t<%>::remove_%>;
-        %_revoker %(auto_revoke_t, %) const;
+        [[nodiscard]] %_revoker %(auto_revoke_t, %) const;
 )";
 
             w.write(format,
@@ -2827,7 +2827,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             if (is_add_overload(method))
             {
                 auto format = R"(        using %_revoker = impl::factory_event_revoker<%, &impl::abi_t<%>::remove_%>;
-        static %_revoker %(auto_revoke_t, %);
+        [[nodiscard]] static %_revoker %(auto_revoke_t, %);
 )";
 
                 w.write(format,
