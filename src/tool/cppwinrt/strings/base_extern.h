@@ -65,7 +65,6 @@ extern "C"
     int32_t __stdcall WINRT_SetEvent(void*) noexcept;
     int32_t  __stdcall WINRT_CloseHandle(void* hObject) noexcept;
     uint32_t __stdcall WINRT_WaitForSingleObject(void* handle, uint32_t milliseconds) noexcept;
-    int32_t __stdcall WINRT_DuplicateHandle(void* sourceProcessHandle, void* sourceHandle, void* targetProcessHandle, void** targetHandle, uint32_t desiredAccess, int32_t inheritHandle, uint32_t options) noexcept;
 
     int32_t  __stdcall WINRT_TrySubmitThreadpoolCallback(void(__stdcall *callback)(void*, void* context), void* context, void*) noexcept;
     winrt::impl::ptp_timer __stdcall WINRT_CreateThreadpoolTimer(void(__stdcall *callback)(void*, void* context, void*), void* context, void*) noexcept;
@@ -159,7 +158,6 @@ WINRT_IMPL_LINK(CreateEventW, 16)
 WINRT_IMPL_LINK(SetEvent, 4)
 WINRT_IMPL_LINK(CloseHandle, 4)
 WINRT_IMPL_LINK(WaitForSingleObject, 8)
-WINRT_IMPL_LINK(DuplicateHandle, 28)
 
 WINRT_IMPL_LINK(TrySubmitThreadpoolCallback, 12)
 WINRT_IMPL_LINK(CreateThreadpoolTimer, 12)

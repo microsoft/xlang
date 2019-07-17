@@ -17,19 +17,15 @@ IAsyncAction async(bool& done)
     done = true;
 }
 
-IAsyncAction when_signaled(handle const& event)
+IAsyncOperation<int> when_signaled(int value, handle const& event)
 {
     co_await resume_on_signal(event.get());
+    co_return value;
 }
 
 IAsyncAction done()
 {
     co_return;
-}
-
-IAsyncOperation<int> done_int()
-{
-    co_return 0;
 }
 
 TEST_CASE("when")
@@ -39,32 +35,36 @@ TEST_CASE("when")
         bool async_done = false;
 
         // Ensures that different async types can be aggregated.
-        winrt::when_all(ppl(ppl_done), async(async_done)).get();
+        when_all(ppl(ppl_done), async(async_done)).get();
 
         REQUIRE(ppl_done);
         REQUIRE(async_done);
     }
     {
-        // Ensures that different WinRT async types can be aggregated.
-        winrt::when_any(done(), done_int()).get();
-
+        // Works with IAsyncAction (with no return value).
+        IAsyncAction result = when_any(done(), done());
+        result.get();
+    }
+    {
         handle first_event{ check_pointer(CreateEventW(nullptr, true, false, nullptr)) };
         handle second_event{ check_pointer(CreateEventW(nullptr, true, false, nullptr)) };
 
-        IAsyncAction first = when_signaled(first_event);
-        IAsyncAction second = when_signaled(second_event);
+        IAsyncOperation<int> first = when_signaled(1, first_event);
+        IAsyncOperation<int> second = when_signaled(2, second_event);
 
-        IAsyncAction any = winrt::when_any(first, second);
+        IAsyncOperation<int> result = when_any(first, second);
 
         // Make sure we're still waiting.
         Sleep(100);
-        REQUIRE(any.Status() == AsyncStatus::Started);
+        REQUIRE(result.Status() == AsyncStatus::Started);
+        REQUIRE(first.Status() == AsyncStatus::Started);
+        REQUIRE(second.Status() == AsyncStatus::Started);
 
         // Allow only one of the async objects to complete.
         SetEvent(second_event.get());
 
         // This should now complete.
-        any.get();
+        REQUIRE(2 == result.get());
 
         REQUIRE(first.Status() == AsyncStatus::Started);
         REQUIRE(second.Status() == AsyncStatus::Completed);
