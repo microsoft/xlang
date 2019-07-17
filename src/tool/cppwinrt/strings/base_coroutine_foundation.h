@@ -510,9 +510,28 @@ namespace winrt::impl
             return{ static_cast<Derived*>(this) };
         }
 
+        struct get_return_object_awaiter
+        {
+            promise_base* promise;
+
+            bool await_ready() const noexcept
+            {
+                return true;
+            }
+
+            void await_suspend(std::experimental::coroutine_handle<>) const noexcept
+            {
+            }
+
+            auto await_resume() const noexcept
+            {
+                return promise->get_return_object();
+            }
+        };
+
         auto await_transform(get_return_object_t) noexcept
         {
-            return get_return_object();
+            return get_return_object_awaiter{ this };
         }
 
         void cancellation_callback(winrt::delegate<>&& cancel) noexcept
