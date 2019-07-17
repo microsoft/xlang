@@ -26,9 +26,9 @@ namespace pywinrt
         return result;
     }
 
-    struct writer : writer_base<writer>
+    struct writer : indented_writer_base<writer>
     {
-        using writer_base<writer>::write;
+        using indented_writer_base<writer>::write;
 
         std::string_view current_namespace{};
         std::set<std::string> needed_namespaces{};
@@ -117,82 +117,6 @@ namespace pywinrt
         }
 
 #pragma endregion
-
-        int32_t indent{ 0 };
-
-        struct indent_guard
-        {
-            explicit indent_guard(writer& w) noexcept : _writer(w)
-            {
-                _writer.indent++;
-            }
-
-            ~indent_guard()
-            {
-                _writer.indent--;
-            }
-
-        private:
-            writer & _writer;
-        };
-
-        void write_indent()
-        {
-            for (int32_t i = 0; i < indent; i++)
-            {
-                writer_base::write_impl("    ");
-            }
-        }
-
-        void write_impl(std::string_view const& value)
-        {
-            if (back() == '\n')
-            {
-                write_indent();
-            }
-
-            std::string_view::size_type current_pos{ 0 };
-            auto pos = value.find('\n', current_pos);
-
-            while(pos != std::string_view::npos)
-            {
-                writer_base::write_impl(value.substr(current_pos, pos + 1 - current_pos));
-                if (pos != value.size() - 1)
-                {
-                    write_indent();
-                }
-                current_pos = pos + 1;
-                pos = value.find('\n', current_pos);
-            }
-
-            if (pos == std::string_view::npos)
-            {
-                writer_base::write_impl(value.substr(current_pos));
-            }
-        }
-
-        void write_impl(char const value)
-        {
-            if (back() == '\n')
-            {
-                write_indent();
-            }
-
-            writer_base::write_impl(value);
-        }
-
-        template <typename... Args>
-        std::string write_temp(std::string_view const& value, Args const&... args)
-        {
-            auto restore_indent = indent;
-            indent = 0;
-
-            auto result = writer_base::write_temp(value, args...);
-
-            indent = restore_indent;
-
-            return result;
-        }
 
         void write_value(bool value)
         {
@@ -382,7 +306,7 @@ namespace pywinrt
                 break;
             }
         }
-        
+
         void register_type_namespace(TypeSig const& type)
         {
             call(type.Type(),

@@ -185,7 +185,7 @@ namespace winrt
 #endif
 
         impl::bstr_handle m_debug_reference;
-        uint32_t const m_debug_magic{ 0xAABBCCDD };
+        uint32_t m_debug_magic{ 0xAABBCCDD };
         hresult m_code{ impl::error_fail };
         com_ptr<impl::IRestrictedErrorInfo> m_info;
 

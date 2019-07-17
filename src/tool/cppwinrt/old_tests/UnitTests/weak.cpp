@@ -92,20 +92,6 @@ TEST_CASE("weak,source")
     }
 }
 
-TEST_CASE("weak,none")
-{
-    Windows::Foundation::IUnknown s = make<NoWeak>().as<Windows::Foundation::IUnknown>();
-
-    REQUIRE_THROWS_AS(make_weak(s), hresult_no_interface);
-
-    try
-    {
-        weak_ref<Windows::Foundation::IUnknown> w = s;
-        REQUIRE(false);
-    }
-    catch (hresult_no_interface const &) {}
-}
-
 TEST_CASE("weak,nullptr")
 {
     IStringable a = nullptr;

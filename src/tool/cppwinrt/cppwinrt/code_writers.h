@@ -574,27 +574,6 @@ namespace xlang
             s();
             auto param_name = param.Name();
 
-            if (param_signature->Type().is_szarray())
-            {
-                std::string_view format;
-
-                if (param.Flags().In())
-                {
-                    format = "%.size(), get_abi(%)";
-                }
-                else if (param_signature->ByRef())
-                {
-                    format = "impl::put_size_abi(%), put_abi(%)";
-                }
-                else
-                {
-                    format = "%.size(), put_abi(%)";
-                }
-
-                w.write(format, param_name, param_name);
-                continue;
-            }
-
             TypeDef signature_type;
             auto category = get_category(param_signature->Type(), &signature_type);
 
@@ -616,6 +595,9 @@ namespace xlang
                 case param_category::fundamental_type:
                     w.write(param_name);
                     break;
+                case param_category::array_type:
+                    w.write("%.size(), get_abi(%)", param_name, param_name);
+                    break;
                 }
             }
             else
@@ -624,6 +606,16 @@ namespace xlang
                 {
                 case param_category::fundamental_type:
                     w.write("&%", param_name);
+                    break;
+                case param_category::array_type:
+                    if (param_signature->ByRef())
+                    {
+                        w.write("impl::put_size_abi(%), put_abi(%)", param_name, param_name);
+                    }
+                    else
+                    {
+                        w.write("%.size(), put_abi(%)", param_name, param_name);
+                    }
                     break;
                 default:
                     w.write("impl::bind_out(%)", param_name);
@@ -907,7 +899,8 @@ namespace xlang
 
                     auto param_type = std::get_if<ElementType>(&param_signature->Type().Type());
 
-                    if (w.async_types || (param_type && *param_type != ElementType::String && *param_type != ElementType::Object))
+                    if ((!is_put_overload(method_signature.method()) && w.async_types) ||
+                        (param_type && *param_type != ElementType::String && *param_type != ElementType::Object))
                     {
                         w.write("%", param_signature->Type());
                     }
@@ -932,7 +925,7 @@ namespace xlang
     static void write_consume_declaration(writer& w, MethodDef const& method)
     {
         method_signature signature{ method };
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
         auto method_name = get_name(method);
         auto type = method.Parent();
 
@@ -945,7 +938,7 @@ namespace xlang
         if (is_add_overload(method))
         {
             auto format = R"(        using %_revoker = impl::event_revoker<%, &impl::abi_t<%>::remove_%>;
-        %_revoker %(auto_revoke_t, %) const;
+        [[nodiscard]] %_revoker %(auto_revoke_t, %) const;
 )";
 
             w.write(format,
@@ -1068,7 +1061,7 @@ namespace xlang
     {
         auto method_name = get_name(method);
         method_signature signature{ method };
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
 
         std::string_view format;
 
@@ -1128,7 +1121,7 @@ namespace xlang
     {
         auto method_name = get_name(method);
         method_signature signature{ method };
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
 
         //
         // Note: this use of a lambda is a workaround for a Visual C++ compiler bug:
@@ -1344,50 +1337,26 @@ namespace xlang
         }
         else if (type_name == "Windows.Foundation.IAsyncAction")
         {
-            w.write(R"(        void get() const
-        {
-            wait_get(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperation`1")
         {
-            w.write(R"(        TResult get() const
-        {
-            return wait_get(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncActionWithProgress`1")
         {
-            w.write(R"(        void get() const
-        {
-            wait_get(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
         else if (type_name == "Windows.Foundation.IAsyncOperationWithProgress`2")
         {
-            w.write(R"(        TResult get() const
-        {
-            return wait_get(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
-        }
-        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const
-        {
-            return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)), timeout);
-        }
+            w.write(R"(        auto get() const;
+        auto wait_for(Windows::Foundation::TimeSpan const& timeout) const;
 )");
         }
     }
@@ -1769,7 +1738,7 @@ namespace xlang
         }
 
         method_signature signature{ method };
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
         std::string upcall = "this->shim().";
         upcall += get_name(method);
 
@@ -2318,7 +2287,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
 
     static void write_delegate_implementation(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <typename H%> struct delegate<%, H> : implements_delegate<%, H>
+        auto format = R"(    template <typename H%> struct delegate<%, H> final : implements_delegate<%, H>
     {
         delegate(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
@@ -2837,7 +2806,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         {
             method_signature signature{ method };
             auto method_name = get_name(method);
-            w.async_types = is_async(method, signature);
+            w.async_types = signature.is_async();
 
             if (settings.component_opt && settings.component_filter.includes(type))
             {
@@ -2858,7 +2827,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             if (is_add_overload(method))
             {
                 auto format = R"(        using %_revoker = impl::factory_event_revoker<%, &impl::abi_t<%>::remove_%>;
-        static %_revoker %(auto_revoke_t, %);
+        [[nodiscard]] static %_revoker %(auto_revoke_t, %);
 )";
 
                 w.write(format,
@@ -2877,7 +2846,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     {
         method_signature signature{ method };
         auto method_name = get_name(method);
-        w.async_types = is_async(method, signature);
+        w.async_types = signature.is_async();
 
         {
             auto format = R"(    inline auto %::%(%)

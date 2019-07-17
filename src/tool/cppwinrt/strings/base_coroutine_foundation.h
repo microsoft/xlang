@@ -115,9 +115,53 @@ namespace winrt::impl
             return async.GetResults();
         }
     };
+
+    template <typename D>
+    auto consume_Windows_Foundation_IAsyncAction<D>::get() const
+    {
+        impl::wait_get(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
+    }
+    template <typename D>
+    auto consume_Windows_Foundation_IAsyncAction<D>::wait_for(Windows::Foundation::TimeSpan const& timeout) const
+    {
+        return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
+    }
+
+    template <typename D, typename TResult>
+    auto consume_Windows_Foundation_IAsyncOperation<D, TResult>::get() const
+    {
+        return impl::wait_get(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
+    }
+    template <typename D, typename TResult>
+    auto consume_Windows_Foundation_IAsyncOperation<D, TResult>::wait_for(Windows::Foundation::TimeSpan const& timeout) const
+    {
+        return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)), timeout);
+    }
+
+    template <typename D, typename TProgress>
+    auto consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::get() const
+    {
+        impl::wait_get(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
+    }
+    template <typename D, typename TProgress>
+    auto consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::wait_for(Windows::Foundation::TimeSpan const& timeout) const
+    {
+        return impl::wait_for(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)), timeout);
+    }
+
+    template <typename D, typename TResult, typename TProgress>
+    auto consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::get() const
+    {
+        return impl::wait_get(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
+    }
+    template <typename D, typename TResult, typename TProgress>
+    auto consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::wait_for(Windows::Foundation::TimeSpan const& timeout) const
+    {
+        return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)), timeout);
+    }
 }
 
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
+#ifdef __cpp_coroutines
 namespace winrt::Windows::Foundation
 {
     inline impl::await_adapter<IAsyncAction> operator co_await(IAsyncAction const& async)
@@ -618,4 +662,13 @@ namespace std::experimental
             ProgressHandler m_progress;
         };
     };
+}
+
+namespace winrt
+{
+    template <typename... Args>
+    Windows::Foundation::IAsyncAction when_all(Args&&... args)
+    {
+        (co_await args, ...);
+    }
 }
