@@ -23,7 +23,7 @@ namespace xlang
         w.write(strings::base_string_operators);
         w.write(strings::base_array);
         w.write(strings::base_weak_ref);
-        w.write(strings::base_error);
+        w.write(strings::base_error, XLANG_VERSION_STRING);
         w.write(strings::base_delegate);
         w.write(strings::base_events);
         w.write(strings::base_activation);

@@ -5,7 +5,7 @@
 
 struct widget : iwidget
 {
-    int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
+    com_interop_result XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
     {
         *object = nullptr;
 
@@ -20,11 +20,11 @@ struct widget : iwidget
         }
         else
         {
-            return xlang_hresult_no_interface;
+            return com_interop_result::no_interface;
         }
 
         AddRef();
-        return 0;
+        return com_interop_result::success;
     }
 
     uint32_t XLANG_CALL AddRef() noexcept final
@@ -54,7 +54,7 @@ struct widget : iwidget
 
 struct widget_factory : iwidget_factory
 {
-    int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
+    com_interop_result XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
     {
         *object = nullptr;
 
@@ -70,11 +70,11 @@ struct widget_factory : iwidget_factory
         else
         {
             *object = nullptr;
-            return xlang_hresult_no_interface;
+            return com_interop_result::no_interface;
         }
 
         AddRef();
-        return 0;
+        return com_interop_result::success;
     }
 
     uint32_t XLANG_CALL AddRef() noexcept final

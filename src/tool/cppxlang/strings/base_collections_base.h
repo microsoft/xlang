@@ -73,7 +73,7 @@ namespace xlang
             {
                 if (m_current == m_end)
                 {
-                    throw hresult_out_of_bounds();
+                    throw out_of_bounds_error();
                 }
 
                 if constexpr (!impl::is_key_value_pair<T>::value)
@@ -124,7 +124,7 @@ namespace xlang
         {
             if (index >= Size())
             {
-                throw hresult_out_of_bounds();
+                throw out_of_bounds_error();
             }
 
             return static_cast<D const&>(*this).unwrap_value(*std::next(static_cast<D const&>(*this).get_container().begin(), index));
@@ -171,7 +171,7 @@ namespace xlang
         {
             if (index >= static_cast<D const&>(*this).get_container().size())
             {
-                throw hresult_out_of_bounds();
+                throw out_of_bounds_error();
             }
 
             this->increment_version();
@@ -182,7 +182,7 @@ namespace xlang
         {
             if (index > static_cast<D const&>(*this).get_container().size())
             {
-                throw hresult_out_of_bounds();
+                throw out_of_bounds_error();
             }
 
             this->increment_version();
@@ -193,7 +193,7 @@ namespace xlang
         {
             if (index >= static_cast<D const&>(*this).get_container().size())
             {
-                throw hresult_out_of_bounds();
+                throw out_of_bounds_error();
             }
 
             this->increment_version();
@@ -210,7 +210,7 @@ namespace xlang
         {
             if (static_cast<D const&>(*this).get_container().empty())
             {
-                throw hresult_out_of_bounds();
+                throw out_of_bounds_error();
             }
 
             this->increment_version();
@@ -263,7 +263,7 @@ namespace xlang
 
             if (pair == static_cast<D const&>(*this).get_container().end())
             {
-                throw hresult_out_of_bounds();
+                throw out_of_bounds_error();
             }
 
             return static_cast<D const&>(*this).unwrap_value(pair->second);

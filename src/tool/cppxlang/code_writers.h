@@ -663,7 +663,7 @@ namespace xlang
         }
 
 
-        auto format = R"(            virtual int32_t XLANG_CALL %(%) noexcept = 0;
+        auto format = R"(            virtual xlang_error_info* XLANG_CALL %(%) noexcept = 0;
 )";
 
         for (auto&& method : type.MethodList())
@@ -683,7 +683,7 @@ namespace xlang
     {
         struct XLANG_NOVTABLE type : unknown_abi
         {
-            virtual int32_t XLANG_CALL Invoke(%) noexcept = 0;
+            virtual xlang_error_info* XLANG_CALL Invoke(%) noexcept = 0;
         };
     };
 )";
@@ -987,7 +987,7 @@ namespace xlang
             {
                 format = R"(    template <typename D%> % consume_%<D%>::%(%) const
     {%
-        check_hresult(XLANG_SHIM(%)->%(%));%
+        check_xlang_error(XLANG_SHIM(%)->%(%));%
     }
 )";
             }
@@ -1074,7 +1074,10 @@ namespace xlang
             if constexpr (std::is_base_of_v<Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result));
+                com_ptr<xlang_error_info> error_info{
+                    XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(result)),
+                    take_ownership_from_abi
+                };
                 return result;
             }
             else
@@ -1082,7 +1085,11 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                com_ptr<xlang_error_info> error_info{
+                    XLANG_SHIM(Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)),
+                    take_ownership_from_abi
+                };
+                if (nullptr == error_info)
                 {
                     result = std::move(value);
                 }
@@ -1100,7 +1107,10 @@ namespace xlang
             if constexpr (std::is_base_of_v<Foundation::IUnknown, V>)
             {
                 V result{ nullptr };
-                XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result));
+                com_ptr<xlang_error_info> error_info{
+                    XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(result)),
+                    take_ownership_from_abi
+                };
                 return result;
             }
             else
@@ -1108,7 +1118,11 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                com_ptr<xlang_error_info> error_info{
+                    XLANG_SHIM(Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)),
+                    take_ownership_from_abi
+                };
+                if (nullptr == error_info)
                 {
                     result = std::move(value);
                 }
@@ -1521,7 +1535,7 @@ namespace xlang
 
         if (is_noexcept(method))
         {
-            format = R"(        int32_t XLANG_CALL %(%) noexcept final
+            format = R"(        xlang_error_info* XLANG_CALL %(%) noexcept final
         {
 %            typename D::abi_guard guard(this->shim());
             %
@@ -1531,13 +1545,13 @@ namespace xlang
         }
         else
         {
-            format = R"(        int32_t XLANG_CALL %(%) noexcept final try
+            format = R"(        xlang_error_info* XLANG_CALL %(%) noexcept final try
         {
 %            typename D::abi_guard guard(this->shim());
             %
-            return 0;
+            return nullptr;
         }
-        catch (...) { return to_hresult(); }
+        catch (...) { return to_xlang_error(); }
 )";
         }
 
@@ -2053,16 +2067,16 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
         {
             type(H&& handler) : implements_delegate<%, H>(std::forward<H>(handler)) {}
 
-            int32_t XLANG_CALL Invoke(%) noexcept final
+            xlang_error_info* XLANG_CALL Invoke(%) noexcept final
             {
                 try
                 {
                     %;
-                    return 0;
+                    return nullptr;
                 }
                 catch (...)
                 {%
-                    return to_hresult();
+                    return to_xlang_error();
                 }
             }
         };
@@ -2115,7 +2129,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
     }
     template <%> % %<%>::operator()(%) const
     {%
-        check_hresult((*(impl::abi_t<%<%>>**)this)->Invoke(%));%
+        check_xlang_error((*(impl::abi_t<%<%>>**)this)->Invoke(%));%
     }
 )";
 
@@ -2184,7 +2198,7 @@ struct XLANG_EBO produce_dispatch_to_overridable<T, D, %>
     }
     inline % %::operator()(%) const
     {%
-        check_hresult((*(impl::abi_t<%>**)this)->Invoke(%));%
+        check_xlang_error((*(impl::abi_t<%>**)this)->Invoke(%));%
     }
 )";
 
