@@ -276,13 +276,6 @@ namespace winrt::impl
         Promise* m_promise;
     };
 
-    struct get_return_object_t {};
-
-    inline get_return_object_t get_return_object() noexcept
-    {
-        return{};
-    }
-
     template <typename Derived, typename AsyncInterface, typename TProgress = void>
     struct promise_base : implements<Derived, AsyncInterface, Windows::Foundation::IAsyncInfo>
     {
@@ -508,30 +501,6 @@ namespace winrt::impl
         progress_token<Derived, TProgress> await_transform(get_progress_token_t) noexcept
         {
             return{ static_cast<Derived*>(this) };
-        }
-
-        struct get_return_object_awaiter
-        {
-            promise_base* promise;
-
-            bool await_ready() const noexcept
-            {
-                return true;
-            }
-
-            void await_suspend(std::experimental::coroutine_handle<>) const noexcept
-            {
-            }
-
-            auto await_resume() const noexcept
-            {
-                return promise->get_return_object();
-            }
-        };
-
-        auto await_transform(get_return_object_t) noexcept
-        {
-            return get_return_object_awaiter{ this };
         }
 
         void cancellation_callback(winrt::delegate<>&& cancel) noexcept
