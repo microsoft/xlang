@@ -7,16 +7,13 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
+            UnitTestClient.CreateDefaultUI();
+            UnitTestClient.Run(args.ToString());
 
+            //var t = new UnitTestConsole.UnitTest1();
+            //t.ConsoleTestShortString();
 
-
-            //UnitTestClient.CreateDefaultUI();
-            //UnitTestClient.Run(args.ToString());
-
-            var t = new UnitTestApp.UnitTest();
-            t.TestAppTestShortString();
-
-            //            while (true) { };
+//            while (true) { };
 
             Console.WriteLine("Press a key to continue: ");
             Console.ReadLine();

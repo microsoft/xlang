@@ -1,10 +1,11 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Xunit;
 
 namespace UnitTest
 {
+    [TestClass]
     public class UnitTest1
     {
         struct StringStats
@@ -115,47 +116,11 @@ namespace UnitTest
 #endif
         }
 
-        [Fact]
-        public void TestShortString()
+        [TestMethod]
+        public void MSTestShortString()
         {
             TestStrings("x");
         }
 
-        [Fact]
-        public void TestLongString()
-        {
-            TestStrings(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-                "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
-                "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi " +
-                "ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in " +
-                "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint " +
-                "occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." +
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-                "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
-                "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi " +
-                "ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in " +
-                "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint " +
-                "occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." +
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-                "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
-                "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi " +
-                "ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in " +
-                "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint " +
-                "occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." +
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-                "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
-                "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi " +
-                "ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in " +
-                "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint " +
-                "occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." +
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-                "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
-                "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi " +
-                "ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in " +
-                "voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint " +
-                "occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-            );
-        }
     }
 }
