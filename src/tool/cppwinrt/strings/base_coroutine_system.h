@@ -43,7 +43,7 @@ namespace winrt
         return awaitable{ dispatcher, priority };
     };
 
-#ifdef WINRT_COROUTINES
+#ifdef __cpp_coroutines
     inline auto operator co_await(Windows::System::DispatcherQueue const& dispatcher)
     {
         return resume_foreground(dispatcher);
