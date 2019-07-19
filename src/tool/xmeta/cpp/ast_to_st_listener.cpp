@@ -164,11 +164,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
      {
          if (new_enum->member_exists(enum_member_id))
          {
-             error_manager.write_enum_member_name_error(
-                 decl_line,
-                 enum_member_id,
-                 new_enum->get_name(),
-                 m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+             error_manager.report_error(idl_error::DUPLICATE_ENUM_FIELD, decl_line, enum_member_id);
              return listener_error::failed;
          }
          std::string str_val = expr->getText();
@@ -213,10 +209,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
              auto const& val = new_enum->get_members().back().get_value();
              if (!val.is_resolved() && val.get_ref_name() == e_member.get_name())
              {
-                 error_manager.write_enum_circular_dependency(
-                     e_member.get_decl_line(),
-                     e_member.get_name(),
-                     new_enum->get_name());
+                 error_manager.report_error(idl_error::CIRCULAR_ENUM_FIELD, e_member.get_decl_line(), e_member.get_name());
                  return listener_error::failed;
              }
              e_member.set_value(val);
@@ -230,11 +223,7 @@ listener_error ast_to_st_listener::extract_enum_member(XlangParser::Enum_member_
 
      if (ec == std::errc::result_out_of_range)
      {
-         error_manager.write_enum_const_expr_range_error(
-             decl_line,
-             expr->getText(),
-             enum_member_id,
-             m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+         error_manager.report_error(idl_error::ENUM_FIELD_OUT_OF_RANGE, decl_line, enum_member_id);
          return listener_error::failed;
      }
      else
@@ -253,18 +242,14 @@ listener_error ast_to_st_listener::resolve_enum_val(enum_member& e_member, std::
     }
     if (dependents.find(e_member.get_name()) != dependents.end())
     {
-        error_manager.write_enum_circular_dependency(
-            e_member.get_decl_line(),
-            e_member.get_name(),
-            new_enum->get_name());
-            return listener_error::failed;
+        error_manager.report_error(idl_error::CIRCULAR_ENUM_FIELD, e_member.get_decl_line(), e_member.get_name());
+        return listener_error::failed;
     }
     dependents.emplace(e_member.get_name());
     auto const& ref_name = val.get_ref_name();
     if (!new_enum->member_exists(ref_name))
     {
-        error_manager.write_enum_member_expr_ref_error(e_member.get_decl_line(), ref_name, new_enum->get_name(), 
-            m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+        error_manager.report_error(idl_error::UNRESOLVED_REFERENCE, e_member.get_decl_line(), ref_name);
         return listener_error::failed;
     }
     auto ref_member = new_enum->get_member(ref_name);
@@ -300,14 +285,14 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
             if ((property_accessor_methods[0]->GET() && property_accessor_methods[1]->GET())
                 || (property_accessor_methods[0]->SET() && property_accessor_methods[1]->SET()))
             {
-                error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
+                error_manager.report_error(idl_error::DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), prop_model->get_name());
                 return listener_error::failed;
             }
         }
         else if (property_accessor_methods.size() > 2)
         {
             // Can't have more than two
-            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
+            error_manager.report_error(idl_error::INVALID_PROPERTY_ACCESSOR, prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
 
@@ -319,7 +304,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), property_accessor->GET()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(prop_model->get_type()), property_method_modifier, method_association::Property);
                 if (get_method && model->add_member(get_method) == semantic_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_qualified_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), get_method->get_name());
                     error = listener_error::failed;
                 }
             }
@@ -330,7 +315,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 set_method->add_formal_parameter(formal_parameter_model{ "value", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == semantic_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_qualified_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), get_method->get_name());
                     error = listener_error::failed;
                 }
             }
@@ -352,12 +337,12 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         listener_error error = listener_error::passed;
         if (get_method && model->add_member(get_method) == semantic_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), get_method->get_name(), model->get_qualified_name());
+            error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), get_method->get_name());
             error = listener_error::failed;
         }
         if (set_method && model->add_member(set_method) == semantic_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), set_method->get_name(), model->get_qualified_name());
+            error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), set_method->get_name());
             error =  listener_error::failed;
         }
         if (error == listener_error::failed)
@@ -374,14 +359,14 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         // Check that the type is the same
         if (existing_property->get_type().get_semantic().get_ref_name() != prop_model->get_type().get_semantic().get_ref_name())
         {
-            error_manager.write_duplicate_property_error(prop_model->get_decl_line(), prop_model->get_name());
+            error_manager.report_error(idl_error::DUPLICATE_PROPERTY, prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
 
         // Set the get property if not declared
         if (existing_property->set_get_method(get_method) == semantic_error::accessor_exists)
         {
-            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
+            error_manager.report_error(idl_error::DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), get_method->get_name());
             return listener_error::failed;
         }
         else
@@ -392,7 +377,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         // Set the set property if not declared
         if (existing_property->set_set_method(set_method) == semantic_error::accessor_exists)
         {
-            error_manager.write_property_accessor_error(prop_model->get_decl_line(), prop_model->get_name());
+            error_manager.report_error(idl_error::DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), set_method->get_name());
             return listener_error::failed;
         }
         else
@@ -407,7 +392,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
 
         if (model->add_member(prop_model) == semantic_error::symbol_exists)
         {
-            error_manager.write_type_member_exists_error(prop_model->get_decl_line(), prop_model->get_name(), model->get_qualified_name());
+            error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
     }
@@ -440,12 +425,12 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     listener_error error = listener_error::passed;
     if (model->add_member(add_method) == semantic_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), add_method->get_name(), model->get_qualified_name());
+        error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, event->get_decl_line(), add_method->get_name());
         error = listener_error::failed;
     }
     if (model->add_member(remove_method) == semantic_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), remove_method->get_name(), model->get_qualified_name());
+        error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, event->get_decl_line(), remove_method->get_name());
         error = listener_error::failed;
     }
     if (error == listener_error::failed)
@@ -454,7 +439,7 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     }
     if (model->add_member(event) == semantic_error::symbol_exists)
     {
-        error_manager.write_type_member_exists_error(event->get_decl_line(), event->get_name(), model->get_qualified_name());
+        error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, event->get_decl_line(), event->get_name());
         return listener_error::failed;
     }
     return listener_error::passed;
@@ -506,7 +491,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
 
     if (xlang_model.symbols.set_symbol(symbol, clss_model) == semantic_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, class_name, m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+        error_manager.report_error(idl_error::DUPLICATE_NAMESPACE_MEMBER, decl_line, class_name);
         return;
     }
 
@@ -578,7 +563,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                  to emit metadata */
                 if (clss_model->add_member(constructor_model) == semantic_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(decl_line, constructor_model->get_name(), clss_model->get_qualified_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, decl_line, constructor_model->get_name());
                 }
             }
             if (class_member->class_method_declaration())
@@ -626,7 +611,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 if (class_sem.is_static && !method_sem.is_static)
                 {
                     // REPORT static class must only have static methods
-                    error_manager.write_static_member_only_error(class_method->IDENTIFIER()->getSymbol()->getLine(),  method_id);
+                    error_manager.report_error(idl_error::STATIC_MEMBER_ONLY, class_method->IDENTIFIER()->getSymbol()->getLine(), method_id);
                 }
 
                 auto met_model = std::make_shared<method_model>(method_id, class_method->IDENTIFIER()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(tr), method_sem, method_association::None);
@@ -657,7 +642,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                      to emit metadata */
                 if (clss_model->add_member(met_model) == semantic_error::symbol_exists)
                 {
-                    error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), clss_model->get_qualified_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, decl_line, met_model->get_name());
                 }
             }
             if (class_member->class_property_declaration())
@@ -701,7 +686,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 if (class_sem.is_static && !property_sem.is_static)
                 {
                     // REPORT static class must only have static methods
-                    error_manager.write_static_member_only_error(prop_model->get_decl_line(), prop_model->get_name());
+                    error_manager.report_error(idl_error::STATIC_MEMBER_ONLY, prop_model->get_decl_line(), prop_model->get_name());
                 }
 
                 /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods
@@ -755,7 +740,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                 if (class_sem.is_static && !event_sem.is_static)
                 {
                     // REPORT static class must only have static methods
-                    error_manager.write_static_member_only_error(event->get_decl_line(), event->get_name());
+                    error_manager.report_error(idl_error::STATIC_MEMBER_ONLY, event->get_decl_line(), event->get_name());
                 }
                 
                 /* TODO: We don't need to update add any members to the class model, the class model can completely be void of methods
@@ -824,7 +809,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
 
     if (xlang_model.symbols.set_symbol(symbol, model) == semantic_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, interface_name, m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+        error_manager.report_error(idl_error::DUPLICATE_NAMESPACE_MEMBER, decl_line, interface_name);
         return;
     }
     auto const& interface_body = ctx->interface_body();
@@ -845,7 +830,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             }
             if (model->add_member(met_model) == semantic_error::symbol_exists)
             {
-                error_manager.write_type_member_exists_error(decl_line, met_model->get_name(), model->get_qualified_name());
+                error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, decl_line, met_model->get_name());
             }
         }
         if (interface_member->interface_property_declaration())
@@ -897,7 +882,7 @@ void ast_to_st_listener::enterDelegate_declaration(XlangParser::Delegate_declara
     }
     if (xlang_model.symbols.set_symbol(symbol, dm) == semantic_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, delegate_name, m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+        error_manager.report_error(idl_error::DUPLICATE_NAMESPACE_MEMBER, decl_line, delegate_name);
         return;
     }
     m_cur_namespace_body->add_delegate(dm);
@@ -940,8 +925,7 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
     }
     if (xlang_model.symbols.set_symbol(symbol, new_enum) == semantic_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, enum_name, 
-            m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+        error_manager.report_error(idl_error::DUPLICATE_NAMESPACE_MEMBER, decl_line, enum_name);
         return;
     }
     m_cur_namespace_body->add_enum(new_enum);
@@ -961,7 +945,7 @@ void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declaration
         std::string field_name{ field->IDENTIFIER()->getText() };
         if (new_struct->member_exists(field_name))
         {
-            error_manager.write_struct_field_error(field->IDENTIFIER()->getSymbol()->getLine(), field_name, struct_name);
+            error_manager.report_error(idl_error::DUPLICATE_FIELD_ID, decl_line, field_name);
         }
         else
         {
@@ -972,7 +956,7 @@ void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declaration
     }
     if (xlang_model.symbols.set_symbol(symbol, new_struct) == semantic_error::symbol_exists)
     {
-        error_manager.write_namespace_member_name_error(decl_line, struct_name, m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+        error_manager.report_error(idl_error::DUPLICATE_NAMESPACE_MEMBER, decl_line, struct_name);
         return;
     }
     m_cur_namespace_body->add_struct(new_struct);
@@ -1025,8 +1009,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
             }
             else
             {
-                error_manager.write_namespace_member_name_error(decl_line, name, 
-                    m_cur_namespace_body->get_containing_namespace()->get_qualified_name());
+                error_manager.report_error(idl_error::INVALID_NAMESPACE_NAME, decl_line, name);
                 return;
             }
         }
@@ -1045,7 +1028,7 @@ void ast_to_st_listener::push_namespace(std::string_view const& name, size_t dec
         if (it1 != xlang_model.namespaces.end())
         {
             // Semantically invalid by check 4 for namespace members.
-            error_manager.write_namespace_name_error(decl_line, name, it1->second->get_name());
+            error_manager.report_error(idl_error::INVALID_NAMESPACE_NAME, decl_line, name);
             return;
         }
 

@@ -8,3 +8,4 @@
 #include "namespace_model.h"
 #include "property_model.h"
 #include "struct_model.h"
+#include "../xlang_error.h"

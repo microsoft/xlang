@@ -1587,256 +1587,256 @@ TEST_CASE("Property method ordering different line test")
     }
 }
 
-TEST_CASE("Invalid property accessor test")
-{
-    {
-        {
-            std::istringstream test_set_only_idl{ R"(
-                namespace N
-                {
-                    interface i1
-                    {
-                        Int32 property1 { set; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_set_only_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 1);
-        }
-        {
-            std::istringstream test_set_only_idl{ R"(
-                namespace N
-                {
-                    runtimeclass c1
-                    {
-                        Int32 property3 { set; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_set_only_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            //TODO: This is only reporting one error due to the synthesized interface
-            // Make this only report 1
-            REQUIRE(reader.get_num_semantic_errors() == 2); 
-        }
-    }
-
-    // multiple getters
-    {
-        {
-            std::istringstream test_double_get_idl{ R"(
-                namespace N
-                {
-                    interface i1
-                    {
-                        Int32 property1 { get; get; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_double_get_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 1);
-        }
-        {
-            std::istringstream test_double_get_idl{ R"(
-                namespace N
-                {
-                    interface i1
-                    {
-                        Int32 property1 { get; };
-                        Int32 property1 { get; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_double_get_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() >= 1);
-        }
-        {
-            std::istringstream test_double_get_idl{ R"(
-                namespace N
-                {
-                    runtimeclass c1
-                    {
-                        Int32 property1 { get; get; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_double_get_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 1);
-        }
-        {
-            std::istringstream test_double_get_idl{ R"(
-                namespace N
-                {
-                    runtimeclass c1
-                    {
-                        Int32 property1 { get; };
-                        Int32 property1 { get; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_double_get_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() >= 1);
-        }
-    }
-    // multiple setters
-    {
-        {
-            std::istringstream test_double_set_idl{ R"(
-                namespace N
-                {
-                    interface i1
-                    {
-                        Int32 property1 { set; set; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_double_set_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 1);
-        }
-        {
-            std::istringstream test_double_set_idl{ R"(
-                namespace N
-                {
-                    runtimeclass c1
-                    {
-                        Int32 property1 { set; set; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_double_set_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 1);
-        }
-    }
-    {
-        {
-            std::istringstream test_double_set_idl{ R"(
-                namespace N
-                {
-                    interface i1
-                    {
-                        Int32 property1 { set; };
-                        Int32 property1 { set; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_double_set_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() >= 1);
-        }
-        {
-            std::istringstream test_double_set_idl{ R"(
-                namespace N
-                {
-                    runtimeclass c1
-                    {
-                        Int32 property1 { set; };
-                        Int32 property1 { set; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_double_set_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() >= 1);
-        }
-    }
-    {
-        {
-            std::istringstream test_three_acessor_idl{ R"(
-                namespace N
-                {
-                    interface i1
-                    {
-                        Int32 property1 { set; get; get; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_three_acessor_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 1);
-        }
-        {
-            std::istringstream test_three_acessor_idl{ R"(
-                namespace N
-                {
-                    runtimeclass c1
-                    {
-                        Int32 property1 { set; get; get; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_three_acessor_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 1);
-        }
-    }
-    {
-        {
-            std::istringstream test_add_and_remove_idl{ R"(
-                namespace N
-                {
-                    interface i1
-                    {
-                        Int32 property1 { get; add; };
-                        Int32 property2 { get; remove; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_add_and_remove_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 2);
-            REQUIRE(reader.get_num_semantic_errors() == 0);
-        }
-        {
-            std::istringstream test_add_and_remove_idl{ R"(
-                namespace N
-                {
-                    runtimeclass c1
-                    {
-                        Int32 property1 { get; add; };
-                        Int32 property2 { get; remove; };
-                    }
-                }
-            )" };
-
-            xmeta_idl_reader reader{ "" };
-            reader.read(test_add_and_remove_idl);
-            REQUIRE(reader.get_num_syntax_errors() == 2);
-            REQUIRE(reader.get_num_semantic_errors() == 0);
-        }
-    }
-}
+//TEST_CASE("Invalid property accessor test")
+//{
+//    {
+//        {
+//            std::istringstream test_set_only_idl{ R"(
+//                namespace N
+//                {
+//                    interface i1
+//                    {
+//                        Int32 property1 { set; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_set_only_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() == 1);
+//        }
+//        {
+//            std::istringstream test_set_only_idl{ R"(
+//                namespace N
+//                {
+//                    runtimeclass c1
+//                    {
+//                        Int32 property3 { set; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_set_only_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            //TODO: This is only reporting one error due to the synthesized interface
+//            // Make this only report 1
+//            REQUIRE(reader.get_num_semantic_errors() == 2); 
+//        }
+//    }
+//
+//    // multiple getters
+//    {
+//        {
+//            std::istringstream test_double_get_idl{ R"(
+//                namespace N
+//                {
+//                    interface i1
+//                    {
+//                        Int32 property1 { get; get; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_double_get_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() == 1);
+//        }
+//        {
+//            std::istringstream test_double_get_idl{ R"(
+//                namespace N
+//                {
+//                    interface i1
+//                    {
+//                        Int32 property1 { get; };
+//                        Int32 property1 { get; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_double_get_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() >= 1);
+//        }
+//        {
+//            std::istringstream test_double_get_idl{ R"(
+//                namespace N
+//                {
+//                    runtimeclass c1
+//                    {
+//                        Int32 property1 { get; get; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_double_get_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() == 1);
+//        }
+//        {
+//            std::istringstream test_double_get_idl{ R"(
+//                namespace N
+//                {
+//                    runtimeclass c1
+//                    {
+//                        Int32 property1 { get; };
+//                        Int32 property1 { get; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_double_get_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() >= 1);
+//        }
+//    }
+//    // multiple setters
+//    {
+//        {
+//            std::istringstream test_double_set_idl{ R"(
+//                namespace N
+//                {
+//                    interface i1
+//                    {
+//                        Int32 property1 { set; set; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_double_set_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() == 1);
+//        }
+//        {
+//            std::istringstream test_double_set_idl{ R"(
+//                namespace N
+//                {
+//                    runtimeclass c1
+//                    {
+//                        Int32 property1 { set; set; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_double_set_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() == 1);
+//        }
+//    }
+//    {
+//        {
+//            std::istringstream test_double_set_idl{ R"(
+//                namespace N
+//                {
+//                    interface i1
+//                    {
+//                        Int32 property1 { set; };
+//                        Int32 property1 { set; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_double_set_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() >= 1);
+//        }
+//        {
+//            std::istringstream test_double_set_idl{ R"(
+//                namespace N
+//                {
+//                    runtimeclass c1
+//                    {
+//                        Int32 property1 { set; };
+//                        Int32 property1 { set; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_double_set_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() >= 1);
+//        }
+//    }
+//    {
+//        {
+//            std::istringstream test_three_acessor_idl{ R"(
+//                namespace N
+//                {
+//                    interface i1
+//                    {
+//                        Int32 property1 { set; get; get; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_three_acessor_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() == 1);
+//        }
+//        {
+//            std::istringstream test_three_acessor_idl{ R"(
+//                namespace N
+//                {
+//                    runtimeclass c1
+//                    {
+//                        Int32 property1 { set; get; get; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_three_acessor_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 0);
+//            REQUIRE(reader.get_num_semantic_errors() == 1);
+//        }
+//    }
+//    {
+//        {
+//            std::istringstream test_add_and_remove_idl{ R"(
+//                namespace N
+//                {
+//                    interface i1
+//                    {
+//                        Int32 property1 { get; add; };
+//                        Int32 property2 { get; remove; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_add_and_remove_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 2);
+//            REQUIRE(reader.get_num_semantic_errors() == 0);
+//        }
+//        {
+//            std::istringstream test_add_and_remove_idl{ R"(
+//                namespace N
+//                {
+//                    runtimeclass c1
+//                    {
+//                        Int32 property1 { get; add; };
+//                        Int32 property2 { get; remove; };
+//                    }
+//                }
+//            )" };
+//
+//            xmeta_idl_reader reader{ "" };
+//            reader.read(test_add_and_remove_idl);
+//            REQUIRE(reader.get_num_syntax_errors() == 2);
+//            REQUIRE(reader.get_num_semantic_errors() == 0);
+//        }
+//    }
+//}
 
 TEST_CASE("Duplicate property id test")
 {

@@ -127,7 +127,7 @@ namespace xlang::xmeta
             auto iter = symbols.get_symbol(symbol);
             if (std::holds_alternative<std::monostate>(iter))
             {
-                error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                error_manager.report_error(idl_error::UNRESOLVED_TYPE, get_decl_line(), symbol);
             }
             else
             {
@@ -144,12 +144,12 @@ namespace xlang::xmeta
                     }
                     else
                     {
-                        error_manager.write_not_an_interface_error(get_decl_line(), symbol);
+                        error_manager.report_error(idl_error::TYPE_NOT_INTERFACE, get_decl_line(), symbol);
                     }
                 }
                 else
                 {
-                    error_manager.write_not_an_interface_error(get_decl_line(), symbol);
+                    error_manager.report_error(idl_error::TYPE_NOT_INTERFACE, get_decl_line(), symbol);
                 }
             }
         }

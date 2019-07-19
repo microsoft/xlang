@@ -52,7 +52,7 @@ namespace xlang::xmeta
     {
         if (!m_get_method)
         {
-            error_manager.write_property_accessor_error(get_decl_line(), get_name());
+            error_manager.report_error(idl_error::INVALID_PROPERTY_ACCESSOR, get_decl_line(), get_name());
         }
     }
 
@@ -68,7 +68,7 @@ namespace xlang::xmeta
             auto const& iter = symbols.get_symbol(symbol);
             if (std::holds_alternative<std::monostate>(iter))
             {
-                error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                error_manager.report_error(idl_error::UNRESOLVED_TYPE, get_decl_line(), symbol);
             }
             else
             {

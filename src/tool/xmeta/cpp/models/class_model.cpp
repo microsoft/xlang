@@ -43,7 +43,7 @@ namespace xlang::xmeta
             {
                 if (member_exists(base_event->get_name()))
                 {
-                    error_manager.write_type_member_exists_error(get_decl_line(), base_event->get_name(), get_qualified_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, get_decl_line(), base_event->get_name());
                     return;
                 }
             }
@@ -52,7 +52,7 @@ namespace xlang::xmeta
             {
                 if (member_exists(base_properties->get_name()))
                 {
-                    error_manager.write_type_member_exists_error(get_decl_line(), base_properties->get_name(), get_qualified_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, get_decl_line(), base_properties->get_name());
                     return;
                 }
             }
@@ -61,7 +61,7 @@ namespace xlang::xmeta
             {
                 if (member_exists(base_method->get_name()))
                 {
-                    error_manager.write_type_member_exists_error(get_decl_line(), base_method->get_name(), get_qualified_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, get_decl_line(), base_method->get_name());
                     return;
                 }
             }
@@ -81,7 +81,7 @@ namespace xlang::xmeta
             auto iter = symbols.get_symbol(symbol);
             if (std::holds_alternative<std::monostate>(iter))
             {
-                error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                error_manager.report_error(idl_error::UNRESOLVED_TYPE, get_decl_line(), symbol);
             }
             else
             {
@@ -98,12 +98,12 @@ namespace xlang::xmeta
                     }
                     else
                     {
-                        error_manager.write_not_an_interface_error(get_decl_line(), symbol);
+                        error_manager.report_error(idl_error::TYPE_NOT_CLASS, get_decl_line(), symbol);
                     }
                 }
                 else
                 {
-                    error_manager.write_not_a_class_error(get_decl_line(), symbol);
+                    error_manager.report_error(idl_error::TYPE_NOT_CLASS, get_decl_line(), symbol);
                 }
             }
         }
@@ -130,7 +130,7 @@ namespace xlang::xmeta
         if (has_circular_inheritance(symbol_set, error_manager))
         {
             contains_itself = true;
-            error_manager.write_struct_field_error(get_decl_line(), std::string(symbol));
+            error_manager.report_error(idl_error::CIRCULAR_STRUCT_FIELD, get_decl_line(), symbol);
         }
         return contains_itself;
     }
