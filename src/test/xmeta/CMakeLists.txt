@@ -55,5 +55,8 @@ if (WIN32)
 endif()
 
 target_sources(test_xmeta PUBLIC main.cpp)
+
+if (WIN32)
 install(TARGETS test_xmeta DESTINATION "test/xmeta")
 install(FILES $<TARGET_PDB_FILE:test_xmeta> DESTINATION "test/xmeta" OPTIONAL)
+endif()
