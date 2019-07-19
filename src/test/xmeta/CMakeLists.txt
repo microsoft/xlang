@@ -5,9 +5,7 @@ project(test_xmeta)
 # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
 set(ANTLR4_WITH_STATIC_CRT ON)
 
-if (WIN32)
-    add_executable(test_xmeta "")
-endif ()
+ add_executable(test_xmeta "")
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/xmeta/example/midl3test")
     add_custom_command(TARGET test_xmeta POST_BUILD
@@ -34,15 +32,17 @@ target_include_directories(test_xmeta
     PUBLIC ${XLANG_TEST_INC_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
 
-target_link_libraries(test_xmeta xmeta_antlr xmeta_model xmeta_windows)
+target_link_libraries(test_xmeta xmeta_model)
 if (WIN32)
-    target_link_libraries(test_xmeta xmeta_windows)
+    target_link_libraries(test_xmeta xmeta_antlr xmeta_windows)
 endif()
 
 
 if (MSVC)
     TARGET_CONFIG_MSVC_PCH(test_xmeta pch.cpp pch.h)
-    target_link_libraries(test_xmeta windowsapp ole32 WindowsApp.lib comsuppw.lib)
+    if (WIN32)
+        target_link_libraries(test_xmeta windowsapp ole32 WindowsApp.lib comsuppw.lib)
+    endif()
 endif()
 
 get_target_property(xmeta_path foundation_metadata Foundation_xmeta)
