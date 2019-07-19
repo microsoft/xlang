@@ -123,3 +123,10 @@ namespace std::experimental
 }
 
 #endif
+
+#ifdef __cpp_coroutines
+#define WINRT_COROUTINES
+#endif
+#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
+#define WINRT_COROUTINES
+#endif
