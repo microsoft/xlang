@@ -8,28 +8,26 @@ if (WIN32)
     )
 endif ()
 
-if (WIN32)
-    add_library(xmeta_model
-        cpp/models/class_model.cpp
-        cpp/models/class_or_interface_model.cpp
-        cpp/models/compilation_unit.cpp
-        cpp/models/delegate_model.cpp
-        cpp/models/enum_model.cpp
-        cpp/models/event_model.cpp
-        cpp/models/formal_parameter_model.cpp
-        cpp/models/interface_model.cpp
-        cpp/models/method_model.cpp
-        cpp/models/model_types.cpp
-        cpp/models/property_model.cpp
-        cpp/models/struct_model.cpp
-        cpp/models/namespace_model.cpp
-        cpp/models/namespace_member_model.cpp
-        cpp/xlang_error.cpp
-        cpp/xmeta_idl_reader.cpp
-        cpp/ast_to_st_listener.cpp
-        cpp/xlang_model_walker.cpp)
-    add_dependencies(xmeta_model foundation_metadata)
-endif ()
+add_library(xmeta_model
+    cpp/models/class_model.cpp
+    cpp/models/class_or_interface_model.cpp
+    cpp/models/compilation_unit.cpp
+    cpp/models/delegate_model.cpp
+    cpp/models/enum_model.cpp
+    cpp/models/event_model.cpp
+    cpp/models/formal_parameter_model.cpp
+    cpp/models/interface_model.cpp
+    cpp/models/method_model.cpp
+    cpp/models/model_types.cpp
+    cpp/models/property_model.cpp
+    cpp/models/struct_model.cpp
+    cpp/models/namespace_model.cpp
+    cpp/models/namespace_member_model.cpp
+    cpp/xlang_error.cpp
+    cpp/xmeta_idl_reader.cpp
+    cpp/ast_to_st_listener.cpp
+    cpp/xlang_model_walker.cpp)
+add_dependencies(xmeta_model foundation_metadata)
 
 target_include_directories(xmeta_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} cpp/models cpp ${XLANG_LIBRARY_PATH})
 
@@ -63,25 +61,23 @@ set(antlr_generated_src
 
 if (WIN32)
     add_library(xmeta_antlr)
-endif ()
 
-add_custom_command(OUTPUT ${antlr_generated_src}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${antlr_generated_dir}
-    COMMAND ${ANTLR_EXECUTABLE} -o ${antlr_generated_dir} -Dlanguage=Cpp ${antlr_inputs}
-    DEPENDS ${antlr_inputs})
+    add_custom_command(OUTPUT ${antlr_generated_src}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${antlr_generated_dir}
+        COMMAND ${ANTLR_EXECUTABLE} -o ${antlr_generated_dir} -Dlanguage=Cpp ${antlr_inputs}
+        DEPENDS ${antlr_inputs})
 
-target_sources(xmeta_antlr PRIVATE ${antlr_generated_src})
-target_include_directories(xmeta_antlr PUBLIC
-    ${antlr_generated_dir}
-    ${ANTLR4_INCLUDE_DIRS} # antlr4cpp artifacts
-)
+    target_sources(xmeta_antlr PRIVATE ${antlr_generated_src})
+    target_include_directories(xmeta_antlr PUBLIC
+        ${antlr_generated_dir}
+        ${ANTLR4_INCLUDE_DIRS} # antlr4cpp artifacts
+    )
 
-target_link_libraries(xmeta_antlr PUBLIC antlr4_static)
+    target_link_libraries(xmeta_antlr PUBLIC antlr4_static)
 
-# required if linking to static library
-target_compile_definitions(xmeta_antlr PUBLIC -DANTLR4CPP_STATIC)
+    # required if linking to static library
+    target_compile_definitions(xmeta_antlr PUBLIC -DANTLR4CPP_STATIC)
 
-if (WIN32)
     target_link_libraries(xmeta_model PUBLIC xmeta_antlr)
 endif ()
 
