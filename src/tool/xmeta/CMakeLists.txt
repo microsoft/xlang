@@ -27,11 +27,11 @@ add_library(xmeta_model
     cpp/xmeta_idl_reader.cpp
     cpp/ast_to_st_listener.cpp
     cpp/xlang_model_walker.cpp)
-add_dependencies(xmeta_model foundation_metadata)
 
 target_include_directories(xmeta_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} cpp/models cpp ${XLANG_LIBRARY_PATH})
 
 if (WIN32)
+    add_dependencies(xmeta_model foundation_metadata)
     add_library(xmeta_windows xmeta_emit.cpp)
     target_include_directories(xmeta_windows PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} cpp/models cpp ${XLANG_LIBRARY_PATH})
     target_link_libraries(xmeta_windows PUBLIC xmeta_model)
