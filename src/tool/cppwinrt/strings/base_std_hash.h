@@ -22,18 +22,12 @@ namespace winrt::impl
         return result;
     }
 
-    inline size_t hash_unknown(Windows::Foundation::IUnknown const& value) noexcept
-    {
-        void* const abi_value = get_abi(value.try_as<Windows::Foundation::IUnknown>());
-        return std::hash<void*>{}(abi_value);
-    }
-
-    template<typename T>
     struct hash_base
     {
-        size_t operator()(T const& value) const noexcept
+        size_t operator()(Windows::Foundation::IUnknown const& value) const noexcept
         {
-            return hash_unknown(value);
+            void* const abi_value = get_abi(value.try_as<Windows::Foundation::IUnknown>());
+            return std::hash<void*>{}(abi_value);
         }
     };
 }
@@ -50,7 +44,7 @@ namespace std
         }
     };
 
-    template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base<winrt::Windows::Foundation::IUnknown> {};
-    template<> struct hash<winrt::Windows::Foundation::IInspectable> : winrt::impl::hash_base<winrt::Windows::Foundation::IInspectable> {};
-    template<> struct hash<winrt::Windows::Foundation::IActivationFactory> : winrt::impl::hash_base<winrt::Windows::Foundation::IActivationFactory> {};
+    template<> struct hash<winrt::Windows::Foundation::IUnknown> : winrt::impl::hash_base {};
+    template<> struct hash<winrt::Windows::Foundation::IInspectable> : winrt::impl::hash_base {};
+    template<> struct hash<winrt::Windows::Foundation::IActivationFactory> : winrt::impl::hash_base {};
 }
