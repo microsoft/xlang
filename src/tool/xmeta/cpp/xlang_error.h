@@ -11,7 +11,7 @@
 
 namespace xlang::xmeta
 {
-    enum idl_error
+    constexpr enum idl_error
     {
         UNRESOLVED_TYPE,
         UNRESOLVED_REFERENCE,
@@ -117,19 +117,5 @@ namespace xlang::xmeta
         size_t m_num_syntax_errors = 0;
         std::vector<error_model> error_list;
         bool printing = true;
-        /* 
-            Prototyping how I would do the errors, I would store each type of error in these vectors.
-            And then they will be used to print out the actual error statements later. These vectors would
-            contain a struct with an error code, the symbol associated with it, and the decl line
-            
-            struct error_model
-            {
-                size error_level;
-                size_t error_code;
-                size_t decl_line;
-                std::string symbol;
-            }
-            std::vector<error_model> errors; 
-        */
     };
 }
