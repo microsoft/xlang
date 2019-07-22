@@ -11,7 +11,7 @@
 
 namespace xlang::xmeta
 {
-    constexpr enum idl_error
+    enum idl_error
     {
         UNRESOLVED_TYPE,
         UNRESOLVED_REFERENCE,
