@@ -19,7 +19,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TestRuntimeComponent2.def" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />

@@ -4,6 +4,7 @@ namespace TestStaticLibrary4
     runtimeclass TestStaticLibrary4Class 
     {
         TestStaticLibrary4Class();
-        Int32 MyProperty;
+
+        void Test();
     }
 }

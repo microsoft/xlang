@@ -8,8 +8,7 @@ namespace winrt::TestStaticLibrary4::implementation
     {
         TestStaticLibrary4Class() = default;
 
-        int32_t MyProperty();
-        void MyProperty(int32_t value);
+        void Test();
     };
 }
 

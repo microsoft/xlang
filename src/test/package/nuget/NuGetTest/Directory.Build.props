@@ -4,10 +4,6 @@
     <!-- This file is automatically imported by MSBuild for each project in under this folder, 
          see https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build -->
 
-    <!-- 
-        Continue importing Directory.Build.props from parent directories.
-        NOTE: Do not remove this as PackageES requires this to import Xes.props.
-    -->
     <Import Condition="Exists($([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../')))" Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
     <PropertyGroup>        
@@ -23,5 +19,7 @@
         <CppWinRTVerbosity>high</CppWinRTVerbosity>
         <CppWinRTPath>..\..\..\..\..\..\_build\Windows\x64\Debug\tool\cppwinrt\</CppWinRTPath>
     </PropertyGroup>
+
+    <Import Project="..\..\..\..\package\cppwinrt\nuget\Microsoft.Windows.CppWinRT.props" />
 
 </Project>
