@@ -666,9 +666,43 @@ namespace std::experimental
 
 namespace winrt
 {
-    template <typename... Args>
-    Windows::Foundation::IAsyncAction when_all(Args&&... args)
+    template <typename... T>
+    Windows::Foundation::IAsyncAction when_all(T... async)
     {
-        (co_await args, ...);
+        (co_await async, ...);
+    }
+
+    template <typename T, typename... Rest>
+    T when_any(T const& first, Rest const& ... rest)
+    {
+        static_assert(impl::has_category_v<T>, "T must be WinRT async type such as IAsyncAction or IAsyncOperation.");
+        static_assert((std::is_same_v<T, Rest> && ...), "All when_any parameters must be the same type.");
+
+        struct shared_type
+        {
+            handle event{ check_pointer(WINRT_CreateEventW(nullptr, true, false, nullptr)) };
+            T result;
+        };
+
+        auto shared = std::make_shared<shared_type>();
+
+        auto completed = [&](T const& async)
+        {
+            async.Completed([shared](T const& sender, Windows::Foundation::AsyncStatus) noexcept
+                {
+                    auto sender_abi = *(impl::unknown_abi**)&sender;
+
+                    if (nullptr == _InterlockedCompareExchangePointer(reinterpret_cast<void**>(&shared->result), sender_abi, nullptr))
+                    {
+                        sender_abi->AddRef();
+                        WINRT_VERIFY(WINRT_SetEvent(shared->event.get()));
+                    }
+                });
+        };
+
+        completed(first);
+        (completed(rest), ...);
+        co_await resume_on_signal(shared->event.get());
+        co_return shared->result.GetResults();
     }
 }
