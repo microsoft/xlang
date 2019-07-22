@@ -27,7 +27,9 @@ namespace xlang::xmeta
         if (disable_error_reporting) {
             lexer.removeErrorListeners();
             parser.removeErrorListeners();
+            m_error_manager.disable_printing();
         }
+
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
         m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());

@@ -413,6 +413,12 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
 listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event_model> const& event,
     std::shared_ptr<class_or_interface_model> const& model)
 {
+    if (model->member_exists(event->get_name()))
+    {
+        error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, event->get_decl_line(), event->get_name());
+        return listener_error::failed; 
+    }
+    
     type_ref event_registration{ "Foundation.EventRegistrationToken" };
     parameter_semantics param_sem = parameter_semantics::in;
     type_ref tr = event->get_type();
@@ -435,12 +441,12 @@ listener_error ast_to_st_listener::extract_event_accessors(std::shared_ptr<event
     listener_error error = listener_error::passed;
     if (model->add_member(add_method) == semantic_error::symbol_exists)
     {
-        error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, event->get_decl_line(), add_method->get_name());
+        error_manager.report_error(idl_error::CONFLICTING_EVENT_ACCESSOR_METHODS, event->get_decl_line(), event->get_name());
         error = listener_error::failed;
     }
     if (model->add_member(remove_method) == semantic_error::symbol_exists)
     {
-        error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, event->get_decl_line(), remove_method->get_name());
+        error_manager.report_error(idl_error::CONFLICTING_EVENT_ACCESSOR_METHODS, event->get_decl_line(), event->get_name());
         error = listener_error::failed;
     }
     if (error == listener_error::failed)

@@ -97,6 +97,29 @@ namespace xlang::xmeta
         return *result;
     }
 
+    bool class_or_interface_model::event_exists(std::shared_ptr<event_model> const& model)
+    {
+        auto same_event = [&model](std::shared_ptr<event_model> containing_model)
+        {
+            return containing_model->get_name() == model->get_name() && containing_model->get_type() == model->get_type();
+        };
+        return std::find_if(m_events.begin(), m_events.end(), same_event) != m_events.end();
+    }
+
+    std::shared_ptr<event_model> class_or_interface_model::get_event_by_name(std::string const& member_id)
+    {
+        auto same_event_name = [&member_id](std::shared_ptr<event_model> containing_model)
+        {
+            return containing_model->get_name() == member_id;
+        };
+        std::vector<std::shared_ptr<event_model>>::iterator result = std::find_if(m_events.begin(), m_events.end(), same_event_name);
+        if (result == m_events.end())
+        {
+            return nullptr;
+        }
+        return *result;
+    }
+
     bool class_or_interface_model::method_exists(std::string_view const& name)
     {
         return contains_id(m_methods, name);

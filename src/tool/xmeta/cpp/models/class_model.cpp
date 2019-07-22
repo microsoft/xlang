@@ -43,7 +43,7 @@ namespace xlang::xmeta
             {
                 if (member_exists(base_event->get_name()))
                 {
-                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, get_decl_line(), base_event->get_name());
+                    error_manager.report_error(idl_error::CONFLICTING_INHERITANCE_MEMBER, get_decl_line(), base_event->get_name());
                     return;
                 }
             }
@@ -52,7 +52,7 @@ namespace xlang::xmeta
             {
                 if (member_exists(base_properties->get_name()))
                 {
-                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, get_decl_line(), base_properties->get_name());
+                    error_manager.report_error(idl_error::CONFLICTING_INHERITANCE_MEMBER, get_decl_line(), base_properties->get_name());
                     return;
                 }
             }
@@ -61,7 +61,7 @@ namespace xlang::xmeta
             {
                 if (member_exists(base_method->get_name()))
                 {
-                    error_manager.report_error(idl_error::CANNOT_OVERLOAD_METHOD, base_method->get_decl_line(), base_method->get_name());
+                    error_manager.report_error(idl_error::CANNOT_OVERLOAD_METHOD, get_decl_line(), base_method->get_name());
                     return;
                 }
             }
@@ -130,7 +130,7 @@ namespace xlang::xmeta
         if (has_circular_inheritance(symbol_set, error_manager))
         {
             contains_itself = true;
-            error_manager.report_error(idl_error::CIRCULAR_STRUCT_FIELD, get_decl_line(), symbol);
+            error_manager.report_error(idl_error::CIRCULAR_INTERFACE_INHERITANCE, get_decl_line(), symbol);
         }
         return contains_itself;
     }

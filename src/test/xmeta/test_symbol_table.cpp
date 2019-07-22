@@ -12,6 +12,9 @@
 using namespace antlr4;
 using namespace xlang::xmeta;
 
+// 1 will print error, 0 will not
+#define PRINT_ERROR_FLAG 1
+
 constexpr method_modifier default_method_modifier = { false, false, false };
 constexpr method_modifier static_method_modifier = { false, true, false };
 constexpr property_modifier default_property_modifier = { false, false };
@@ -630,7 +633,7 @@ TEST_CASE("Duplicate Namespaces")
     )");
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     auto ns = find_namespace(reader, "N");
     REQUIRE(ns->get_namespace_bodies().size() == 2);
@@ -655,7 +658,7 @@ TEST_CASE("Multiple definition error test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 3);
     REQUIRE(reader.error_exists(idl_error::DUPLICATE_NAMESPACE_MEMBER, "E", 5));
@@ -680,7 +683,7 @@ TEST_CASE("Enum test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     
     ExpectedEnumModel expected_enum{ "E", "N.E" , enum_type::Int32, { 
@@ -709,7 +712,7 @@ TEST_CASE("Enum circular implicit dependency")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(implicit_dependency_error_idl);
+    reader.read(implicit_dependency_error_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
     REQUIRE(reader.error_exists(idl_error::CIRCULAR_ENUM_FIELD, "e_member_3", 8));
@@ -729,7 +732,7 @@ TEST_CASE("Enum circular explicit dependency")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(explicit_dependency_error_idl);
+    reader.read(explicit_dependency_error_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
     REQUIRE(reader.error_exists(idl_error::CIRCULAR_ENUM_FIELD, "e_member_1", 6));
@@ -748,7 +751,7 @@ TEST_CASE("Delegate test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedEnumModel E{ "E", "N.E" , enum_type::Int32, {} };
@@ -787,7 +790,7 @@ TEST_CASE("Struct test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(struct_test_idl);
+    reader.read(struct_test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedStructModel expected_struct{ "S", "N.S" , { 
@@ -833,7 +836,7 @@ TEST_CASE("Struct circular test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(struct_test_idl);
+        reader.read(struct_test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() > 0);
         REQUIRE(reader.error_exists(idl_error::CIRCULAR_STRUCT_FIELD, "N.S0", 4));
@@ -864,7 +867,7 @@ TEST_CASE("Struct circular test")
             }
         )" };
         xmeta_idl_reader reader{ "" };
-        reader.read(struct_test_idl);
+        reader.read(struct_test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 0);
     }
@@ -884,7 +887,7 @@ TEST_CASE("Struct duplicate member test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(struct_test_idl);
+    reader.read(struct_test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
     REQUIRE(reader.error_exists(idl_error::DUPLICATE_FIELD_ID, "field_1", 7));
@@ -908,7 +911,7 @@ TEST_CASE("Resolving delegates type ref test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     ExpectedStructModel S1{ "S1", "N.S1", {} };
     ExpectedEnumModel E1{ "E1", "N.E1" , enum_type::Int32, {} };
@@ -941,7 +944,7 @@ TEST_CASE("Resolving struct type ref test")
         }
     )" };
     xmeta_idl_reader reader{ "" };
-    reader.read(struct_test_idl);
+    reader.read(struct_test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     ExpectedStructModel S1{ "S1", "N.S1", {} };
     ExpectedEnumModel E1{ "E1", "N.E1" , enum_type::Int32, {} };
@@ -978,7 +981,7 @@ TEST_CASE("Resolving type ref across namespaces test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedStructModel S1{ "S1", "A.S1", {} };
@@ -1026,7 +1029,7 @@ TEST_CASE("Interface base test")
         }
     )" };
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedInterfaceRef ITextBox{ "N.ITextBox" };
@@ -1056,7 +1059,7 @@ TEST_CASE("Method test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 0);
 
@@ -1092,7 +1095,7 @@ TEST_CASE("Method overloading test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
 
@@ -1127,7 +1130,7 @@ TEST_CASE("Method overloading test with simple types")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
 
@@ -1165,7 +1168,7 @@ TEST_CASE("Method overloading test with type refs")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
 
@@ -1201,7 +1204,7 @@ TEST_CASE("Method invalid overloading test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
         REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 7));
@@ -1225,7 +1228,7 @@ TEST_CASE("Method invalid overloading test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
         REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 7));
@@ -1249,7 +1252,7 @@ TEST_CASE("Method invalid overloading test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
         REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 7));
@@ -1277,7 +1280,7 @@ TEST_CASE("Method invalid overloading test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
         REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 11));
@@ -1305,7 +1308,7 @@ TEST_CASE("Method invalid overloading test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
         REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 11));
@@ -1347,7 +1350,7 @@ TEST_CASE("Resolving method type ref test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedMethodModel Draw{ "Draw", default_method_modifier, ExpectedTypeRefModel{ ExpectedEnumRef{ "N.E1" } }, {
@@ -1382,7 +1385,7 @@ TEST_CASE("Property method ordering test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedMethodModel get_property1{ "get_property1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
@@ -1469,7 +1472,7 @@ TEST_CASE("Property method ordering different line test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedInterfaceModel i1{ "i1", "N.i1",
             { get_property1, set_property1 },
@@ -1502,7 +1505,7 @@ TEST_CASE("Property method ordering different line test")
             }
         )" };
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedInterfaceModel i1{ "i1", "N.i1",
             { set_property1, get_property1 },
@@ -1541,7 +1544,7 @@ TEST_CASE("Property method ordering different line test")
             }
         )" };
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedInterfaceModel i1{ "i1", "N.i1",
             { get_property1, set_property2, draw, set_property1, get_property2 },
@@ -1584,7 +1587,7 @@ TEST_CASE("Property method ordering different line test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl, true);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
 
         ExpectedEventModel Changed{ "Changed", default_event_modifier, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
@@ -1622,7 +1625,7 @@ TEST_CASE("Invalid property accessor set only test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_set_only_idl);
+            reader.read(test_set_only_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
             REQUIRE(reader.error_exists(idl_error::INVALID_PROPERTY_ACCESSOR, "property1", 6));
@@ -1639,7 +1642,7 @@ TEST_CASE("Invalid property accessor set only test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_set_only_idl);
+            reader.read(test_set_only_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             //TODO: This is only reporting one error due to the synthesized interface
             // Make this only report 1
@@ -1666,7 +1669,7 @@ TEST_CASE("Invalid property accessor multiple getters test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_double_get_idl);
+            reader.read(test_double_get_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
             REQUIRE(reader.error_exists(idl_error::DUPLICATE_PROPERTY_ACCESSOR, "property1", 6));
@@ -1684,7 +1687,7 @@ TEST_CASE("Invalid property accessor multiple getters test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_double_get_idl);
+            reader.read(test_double_get_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() >= 1);
             REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
@@ -1701,7 +1704,7 @@ TEST_CASE("Invalid property accessor multiple getters test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_double_get_idl);
+            reader.read(test_double_get_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
             REQUIRE(reader.error_exists(idl_error::DUPLICATE_PROPERTY_ACCESSOR, "property1", 6));
@@ -1719,7 +1722,7 @@ TEST_CASE("Invalid property accessor multiple getters test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_double_get_idl);
+            reader.read(test_double_get_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() >= 1);
             REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
@@ -1741,7 +1744,7 @@ TEST_CASE("Invalid property accessor multiple setters test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_double_set_idl);
+            reader.read(test_double_set_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
             REQUIRE(reader.error_exists(idl_error::DUPLICATE_PROPERTY_ACCESSOR, "property1", 6));
@@ -1758,7 +1761,7 @@ TEST_CASE("Invalid property accessor multiple setters test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_double_set_idl);
+            reader.read(test_double_set_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
             REQUIRE(reader.error_exists(idl_error::DUPLICATE_PROPERTY_ACCESSOR, "property1", 6));
@@ -1778,7 +1781,7 @@ TEST_CASE("Invalid property accessor multiple setters test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_double_set_idl);
+            reader.read(test_double_set_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() >= 1);
             REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
@@ -1796,7 +1799,7 @@ TEST_CASE("Invalid property accessor multiple setters test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_double_set_idl);
+            reader.read(test_double_set_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() >= 1);
             REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
@@ -1819,7 +1822,7 @@ TEST_CASE("Invalid property accessor miscellaneous test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_three_acessor_idl);
+            reader.read(test_three_acessor_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
             REQUIRE(reader.error_exists(idl_error::INVALID_PROPERTY_ACCESSOR, "property1", 6));
@@ -1836,7 +1839,7 @@ TEST_CASE("Invalid property accessor miscellaneous test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_three_acessor_idl);
+            reader.read(test_three_acessor_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
             REQUIRE(reader.error_exists(idl_error::INVALID_PROPERTY_ACCESSOR, "property1", 6));
@@ -1856,7 +1859,7 @@ TEST_CASE("Invalid property accessor miscellaneous test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_add_and_remove_idl);
+            reader.read(test_add_and_remove_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 2);
             REQUIRE(reader.get_num_semantic_errors() == 0);
         }
@@ -1873,7 +1876,7 @@ TEST_CASE("Invalid property accessor miscellaneous test")
             )" };
 
             xmeta_idl_reader reader{ "" };
-            reader.read(test_add_and_remove_idl);
+            reader.read(test_add_and_remove_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 2);
             REQUIRE(reader.get_num_semantic_errors() == 0);
         }
@@ -1895,7 +1898,7 @@ TEST_CASE("Duplicate property id test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_set_only_idl);
+        reader.read(test_set_only_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() >= 1);
         REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "property1", 7));
@@ -1913,7 +1916,7 @@ TEST_CASE("Duplicate property id test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_set_only_idl);
+        reader.read(test_set_only_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() >= 1);
         REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "property1", 7));
@@ -1931,7 +1934,7 @@ TEST_CASE("Duplicate property id test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_set_only_idl);
+        reader.read(test_set_only_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() >= 1);
         REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "property4", 7));
@@ -1955,7 +1958,7 @@ TEST_CASE("Property implicit accessors test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedMethodModel get_property1{ "get_property1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {} };
@@ -2017,7 +2020,7 @@ TEST_CASE("Resolving property type ref test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedMethodModel get_property1{ "get_property1", default_method_modifier, ExpectedTypeRefModel{ ExpectedStructRef{ "N.S1" } }, {} };
@@ -2078,7 +2081,7 @@ TEST_CASE("Event test")
     )" };
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths};
-    reader.read(test_idl, true);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedEventModel Changed{ "Changed", default_event_modifier, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
@@ -2117,7 +2120,7 @@ TEST_CASE("Event explicit accessor not allowed test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() > 0);
     }
     {
@@ -2133,7 +2136,7 @@ TEST_CASE("Event explicit accessor not allowed test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() > 0);
     }
 }
@@ -2155,9 +2158,10 @@ TEST_CASE("Duplicate event test")
             )" };
             std::vector<std::string> paths = { "Foundation.xmeta" };
             xmeta_idl_reader reader{ "" , paths };
-            reader.read(test_idl);
+            reader.read(test_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 2);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "Changed", 8));
         }
         {
             std::istringstream test_idl{ R"(
@@ -2173,9 +2177,10 @@ TEST_CASE("Duplicate event test")
             )" };
             std::vector<std::string> paths = { "Foundation.xmeta" };
             xmeta_idl_reader reader{ "" , paths };
-            reader.read(test_idl);
+            reader.read(test_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 2);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "Changed", 8));
         }
     }
     {
@@ -2194,9 +2199,10 @@ TEST_CASE("Duplicate event test")
             )" };
             std::vector<std::string> paths = { "Foundation.xmeta" };
             xmeta_idl_reader reader{ "" , paths };
-            reader.read(test_idl);
+            reader.read(test_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 2);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "Changed", 8));
         }
         {
             std::istringstream test_idl{ R"(
@@ -2213,9 +2219,10 @@ TEST_CASE("Duplicate event test")
             )" };
             std::vector<std::string> paths = { "Foundation.xmeta" };
             xmeta_idl_reader reader{ "" , paths };
-            reader.read(test_idl);
+            reader.read(test_idl, PRINT_ERROR_FLAG);
             REQUIRE(reader.get_num_syntax_errors() == 0);
-            REQUIRE(reader.get_num_semantic_errors() == 2);
+            REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "Changed", 8));
         }
     }
 }
@@ -2236,9 +2243,10 @@ TEST_CASE("Event and property name collision test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "Changed", 8));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2254,9 +2262,10 @@ TEST_CASE("Event and property name collision test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "Changed", 8));
     }
 }
 
@@ -2277,9 +2286,11 @@ TEST_CASE("Event and method name collision test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_EVENT_ACCESSOR_METHODS, "Changed", 8));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "add_Changed", 9));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2296,9 +2307,11 @@ TEST_CASE("Event and method name collision test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_EVENT_ACCESSOR_METHODS, "Changed", 8));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "remove_Changed", 9));
     }
 }
 
@@ -2318,9 +2331,11 @@ TEST_CASE("Property method name collision test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "put_property1", 8));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2336,9 +2351,11 @@ TEST_CASE("Property method name collision test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "put_property1", 8));
     }
 }
 
@@ -2363,9 +2380,12 @@ TEST_CASE("Interface circular inheritance test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() > 0);
+    REQUIRE(reader.error_exists(idl_error::CIRCULAR_INTERFACE_INHERITANCE, "N.i1", 4));
+    REQUIRE(reader.error_exists(idl_error::CIRCULAR_INTERFACE_INHERITANCE, "N.ITextBox", 8));
+    REQUIRE(reader.error_exists(idl_error::CIRCULAR_INTERFACE_INHERITANCE, "N.IListBox", 12));
 }
 
 TEST_CASE("Interface member declared in inheritance test")
@@ -2386,9 +2406,10 @@ TEST_CASE("Interface member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 4));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2406,9 +2427,10 @@ TEST_CASE("Interface member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "get_value", 4));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2426,9 +2448,10 @@ TEST_CASE("Interface member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "get_value", 4));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2446,9 +2469,10 @@ TEST_CASE("Interface member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_INHERITANCE_MEMBER, "value", 4));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2467,9 +2491,10 @@ TEST_CASE("Interface member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_INHERITANCE_MEMBER, "value", 5));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2488,9 +2513,10 @@ TEST_CASE("Interface member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_INHERITANCE_MEMBER, "value", 5));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2510,9 +2536,10 @@ TEST_CASE("Interface member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_INHERITANCE_MEMBER, "value", 6));
     }
 }
 
@@ -2532,9 +2559,14 @@ TEST_CASE("Unresolved types interface test")
     )" };
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 5);
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.fakebase", 4));
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.StringListEvent", 6));
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.FakeObject", 7));
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.FakeObject2", 8));
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.FakeObject", 8));
 }
 
 TEST_CASE("Runtimeclass circular inheritance test")
@@ -2558,9 +2590,11 @@ TEST_CASE("Runtimeclass circular inheritance test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() > 0);
+    REQUIRE(reader.error_exists(idl_error::CIRCULAR_INTERFACE_INHERITANCE, "N.IListBox", 12));
+    REQUIRE(reader.error_exists(idl_error::CIRCULAR_INTERFACE_INHERITANCE, "N.ITextBox", 8));
 }
 
 TEST_CASE("Runtimeclass member declared in inheritance test")
@@ -2581,9 +2615,10 @@ TEST_CASE("Runtimeclass member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() > 0);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 4));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2601,9 +2636,10 @@ TEST_CASE("Runtimeclass member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "get_value", 4));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2621,9 +2657,10 @@ TEST_CASE("Runtimeclass member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "get_value", 4));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2641,9 +2678,10 @@ TEST_CASE("Runtimeclass member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_INHERITANCE_MEMBER, "value", 4));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2662,9 +2700,10 @@ TEST_CASE("Runtimeclass member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_INHERITANCE_MEMBER, "value", 5));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2683,9 +2722,10 @@ TEST_CASE("Runtimeclass member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_INHERITANCE_MEMBER, "value", 5));
     }
     {
         std::istringstream test_idl{ R"(
@@ -2705,9 +2745,10 @@ TEST_CASE("Runtimeclass member declared in inheritance test")
         )" };
 
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 1);
+        REQUIRE(reader.error_exists(idl_error::CONFLICTING_INHERITANCE_MEMBER, "value", 6));
     }
 }
 
@@ -2726,11 +2767,16 @@ TEST_CASE("Unresolved types Runtimeclass test")
     )" };
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     //TODO: This is only reporting one error due to the synthesized interface
     // Make this only report 5
     REQUIRE(reader.get_num_semantic_errors() >= 5);
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.fakebase", 4));
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.StringListEvent", 6));
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.FakeObject", 7));
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.FakeObject2", 8));
+    REQUIRE(reader.error_exists(idl_error::UNRESOLVED_TYPE, "N.FakeObject", 8));
 }
 
 TEST_CASE("Class methods synthesized test")
@@ -2758,7 +2804,7 @@ TEST_CASE("Class methods synthesized test")
         }
     )" };
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedMethodModel m1{ "m1", default_method_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, {
@@ -2798,7 +2844,7 @@ TEST_CASE("Class static method test")
         }
     )" };
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedMethodModel m0s{ "m0s", static_method_modifier, std::nullopt, {} };
@@ -2843,7 +2889,7 @@ TEST_CASE("Class static property test")
             }
         )" };
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedClassModel c1{ "c1", "N.c1",
             { get_p1, set_p1 },
@@ -2875,7 +2921,7 @@ TEST_CASE("Class static property test")
             }
         )" };
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedClassModel c1{ "c1", "N.c1",
             { get_p1, set_p1 },
@@ -2908,7 +2954,7 @@ TEST_CASE("Class static property test")
             }
         )" };
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedClassModel c1{ "c1", "N.c1",
             { get_p1, set_p1 },
@@ -2940,7 +2986,7 @@ TEST_CASE("Class static property test")
             }
         )" };
         xmeta_idl_reader reader{ "" };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
 
         ExpectedPropertyModel p1g{ "p1", static_property_modifier, ExpectedTypeRefModel{ fundamental_type::Int32 }, get_p1, std::nullopt };
@@ -2980,7 +3026,7 @@ TEST_CASE("Class static events test")
     )" };
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedEventModel e1{ "e1", static_event_modifier, ExpectedTypeRefModel{ ExpectedDelegateRef{ "N.StringListEvent" } } };
@@ -3018,9 +3064,12 @@ TEST_CASE("Static class has static members only test")
         }
     )" };
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 3);
+    REQUIRE(reader.error_exists(idl_error::STATIC_MEMBER_ONLY, "m0s", 7));
+    REQUIRE(reader.error_exists(idl_error::STATIC_MEMBER_ONLY, "p1", 8));
+    REQUIRE(reader.error_exists(idl_error::STATIC_MEMBER_ONLY, "e1", 9));
 }
 
 TEST_CASE("Runtime class synthensized interfaces test")
@@ -3042,7 +3091,7 @@ TEST_CASE("Runtime class synthensized interfaces test")
     
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     ExpectedClassModel c1{ "c1", "N.c1",
         { m0, m1 },
@@ -3099,7 +3148,7 @@ TEST_CASE("Runtime class synthensized instance interface test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedClassModel c1{ "c1", "N.c1",
             { e1.add_method, e1.remove_method, m0, get_p1, set_p1, m1 },
@@ -3139,7 +3188,7 @@ TEST_CASE("Runtime class synthensized instance interface test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
 
         ExpectedClassModel c1{ "c1", "N.c1",
@@ -3191,7 +3240,7 @@ TEST_CASE("Runtime class synthensized static interface test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedClassModel c1{ "c1", "N.c1",
             { e1.add_method, e1.remove_method, m0, get_p1, set_p1, m1 },
@@ -3231,7 +3280,7 @@ TEST_CASE("Runtime class synthensized static interface test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
 
         ExpectedClassModel c1{ "c1", "N.c1",
@@ -3271,7 +3320,7 @@ TEST_CASE("Runtime class constructor test")
 
     std::vector<std::string> paths = { "Foundation.xmeta" };
     xmeta_idl_reader reader{ "" , paths };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
 
     ExpectedMethodModel Area{ ".ctor", default_method_modifier, std::nullopt, {} };
@@ -3344,7 +3393,7 @@ TEST_CASE("Runtime class require interface test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         ExpectedClassModel c1{ "c1", "N.c1",
             {},
@@ -3384,7 +3433,7 @@ TEST_CASE("Runtime class require interface test")
         )" };
         std::vector<std::string> paths = { "Foundation.xmeta" };
         xmeta_idl_reader reader{ "" , paths };
-        reader.read(test_idl);
+        reader.read(test_idl, PRINT_ERROR_FLAG);
         REQUIRE(reader.get_num_syntax_errors() == 0);
 
         ExpectedClassModel c1{ "c1", "N.c1",
@@ -3422,7 +3471,7 @@ TEST_CASE("Array test")
     )" };
 
     xmeta_idl_reader reader{ "" };
-    reader.read(test_idl);
+    reader.read(test_idl, PRINT_ERROR_FLAG);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
 }

@@ -60,6 +60,9 @@ namespace xlang::xmeta
         bool property_exists(std::shared_ptr<property_model> const& model);
         std::shared_ptr<property_model> get_property_by_name(std::string const& member_id);
         
+        bool event_exists(std::shared_ptr<event_model> const& model);
+        std::shared_ptr<event_model> get_event_by_name(std::string const& member_id);
+
         void validate(xlang_error_manager & error_manager);
 
         void resolve(symbol_table & symbols, xlang_error_manager & error_manager);

@@ -31,10 +31,12 @@ namespace xlang::xmeta
         INVALID_PROPERTY_ACCESSOR,
         DUPLICATE_PROPERTY_ACCESSOR,
         INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR,
+        CONFLICTING_EVENT_ACCESSOR_METHODS,
         INVALID_NAMESPACE_NAME,
         DUPLICATE_NAMESPACE_MEMBER,
         STATIC_MEMBER_ONLY,
-        CANNOT_OVERLOAD_METHOD
+        CANNOT_OVERLOAD_METHOD,
+        CONFLICTING_INHERITANCE_MEMBER,
     };
 
     const std::map<idl_error, std::string> errors_message =
@@ -57,10 +59,12 @@ namespace xlang::xmeta
         { INVALID_PROPERTY_ACCESSOR, "Invalid or missing property setter and getter."},
         { DUPLICATE_PROPERTY_ACCESSOR, "Duplicate property setter and getter."},
         { INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "Duplicate or invalid identifier with property setter and getter."},
+        { CONFLICTING_EVENT_ACCESSOR_METHODS, "Conflicting identifier with event setter and getter."},
         { INVALID_NAMESPACE_NAME, "Namespace name is invalid or duplicate."},
         { DUPLICATE_NAMESPACE_MEMBER, "Namespace member already defined"},
         { STATIC_MEMBER_ONLY, "Type member must be static"},
-        { CANNOT_OVERLOAD_METHOD, "Cannot overload method"}
+        { CANNOT_OVERLOAD_METHOD, "Cannot overload method"},
+        { CONFLICTING_INHERITANCE_MEMBER, "Type member is conflicting with inherited members"}
     };
 
     struct error_model
@@ -80,6 +84,8 @@ namespace xlang::xmeta
         void report_error(idl_error error, size_t decl_line, std::string_view const& symbol);
 
         bool error_exists(idl_error code, std::string symbol, size_t decl_line);
+
+        void disable_printing();
 
         size_t get_num_of_errors() const noexcept
         {
@@ -110,6 +116,7 @@ namespace xlang::xmeta
         size_t m_num_semantic_errors = 0;
         size_t m_num_syntax_errors = 0;
         std::vector<error_model> error_list;
+        bool printing = true;
         /* 
             Prototyping how I would do the errors, I would store each type of error in these vectors.
             And then they will be used to print out the actual error statements later. These vectors would
