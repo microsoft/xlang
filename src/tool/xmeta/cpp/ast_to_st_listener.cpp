@@ -315,7 +315,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 set_method->add_formal_parameter(formal_parameter_model{ "value", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == semantic_error::symbol_exists)
                 {
-                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), get_method->get_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), set_method->get_name());
                     error = listener_error::failed;
                 }
             }
