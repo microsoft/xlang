@@ -304,7 +304,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 get_method = std::make_shared<method_model>("get_" + prop_model->get_name(), property_accessor->GET()->getSymbol()->getLine(), xlang_model.m_assembly, std::move(prop_model->get_type()), property_method_modifier, method_association::Property);
                 if (get_method && model->add_member(get_method) == semantic_error::symbol_exists)
                 {
-                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), get_method->get_name());
+                    error_manager.report_error(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), prop_model->get_name());
                     error = listener_error::failed;
                 }
             }
@@ -315,7 +315,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
                 set_method->add_formal_parameter(formal_parameter_model{ "value", prop_model->get_decl_line(), xlang_model.m_assembly, sem, std::move(tr) });
                 if (set_method && model->add_member(set_method) == semantic_error::symbol_exists)
                 {
-                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), set_method->get_name());
+                    error_manager.report_error(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), prop_model->get_name());
                     error = listener_error::failed;
                 }
             }
@@ -337,12 +337,12 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         listener_error error = listener_error::passed;
         if (get_method && model->add_member(get_method) == semantic_error::symbol_exists)
         {
-            error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), get_method->get_name());
+            error_manager.report_error(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), prop_model->get_name());
             error = listener_error::failed;
         }
         if (set_method && model->add_member(set_method) == semantic_error::symbol_exists)
         {
-            error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), set_method->get_name());
+            error_manager.report_error(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), prop_model->get_name());
             error =  listener_error::failed;
         }
         if (error == listener_error::failed)
@@ -366,7 +366,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         // Set the get property if not declared
         if (existing_property->set_get_method(get_method) == semantic_error::accessor_exists)
         {
-            error_manager.report_error(idl_error::DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), get_method->get_name());
+            error_manager.report_error(idl_error::DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
         else
@@ -377,7 +377,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
         // Set the set property if not declared
         if (existing_property->set_set_method(set_method) == semantic_error::accessor_exists)
         {
-            error_manager.report_error(idl_error::DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), set_method->get_name());
+            error_manager.report_error(idl_error::DUPLICATE_PROPERTY_ACCESSOR, prop_model->get_decl_line(), prop_model->get_name());
             return listener_error::failed;
         }
         else
@@ -563,7 +563,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                  to emit metadata */
                 if (clss_model->add_member(constructor_model) == semantic_error::symbol_exists)
                 {
-                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, decl_line, constructor_model->get_name());
+                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, constructor_model->get_decl_line(), constructor_model->get_name());
                 }
             }
             if (class_member->class_method_declaration())
@@ -642,7 +642,7 @@ void ast_to_st_listener::enterClass_declaration(XlangParser::Class_declarationCo
                      to emit metadata */
                 if (clss_model->add_member(met_model) == semantic_error::symbol_exists)
                 {
-                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, decl_line, met_model->get_name());
+                    error_manager.report_error(idl_error::CANNOT_OVERLOAD_METHOD, met_model->get_decl_line(), met_model->get_name());
                 }
             }
             if (class_member->class_property_declaration())
@@ -830,7 +830,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             }
             if (model->add_member(met_model) == semantic_error::symbol_exists)
             {
-                error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, decl_line, met_model->get_name());
+                error_manager.report_error(idl_error::CANNOT_OVERLOAD_METHOD, met_model->get_decl_line(), met_model->get_name());
             }
         }
         if (interface_member->interface_property_declaration())
@@ -945,7 +945,7 @@ void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declaration
         std::string field_name{ field->IDENTIFIER()->getText() };
         if (new_struct->member_exists(field_name))
         {
-            error_manager.report_error(idl_error::DUPLICATE_FIELD_ID, decl_line, field_name);
+            error_manager.report_error(idl_error::DUPLICATE_FIELD_ID, field->IDENTIFIER()->getSymbol()->getLine(), field_name);
         }
         else
         {

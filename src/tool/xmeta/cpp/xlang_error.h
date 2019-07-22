@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <algorithm>
 
 namespace xlang::xmeta
 {
@@ -29,9 +30,11 @@ namespace xlang::xmeta
         ENUM_FIELD_OUT_OF_RANGE,
         INVALID_PROPERTY_ACCESSOR,
         DUPLICATE_PROPERTY_ACCESSOR,
+        INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR,
         INVALID_NAMESPACE_NAME,
         DUPLICATE_NAMESPACE_MEMBER,
-        STATIC_MEMBER_ONLY
+        STATIC_MEMBER_ONLY,
+        CANNOT_OVERLOAD_METHOD
     };
 
     const std::map<idl_error, std::string> errors_message =
@@ -53,9 +56,11 @@ namespace xlang::xmeta
         { ENUM_FIELD_OUT_OF_RANGE, "Enum expression not in range of valid enum expressions."},
         { INVALID_PROPERTY_ACCESSOR, "Invalid or missing property setter and getter."},
         { DUPLICATE_PROPERTY_ACCESSOR, "Duplicate property setter and getter."},
+        { INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "Duplicate or invalid identifier with property setter and getter."},
         { INVALID_NAMESPACE_NAME, "Namespace name is invalid or duplicate."},
         { DUPLICATE_NAMESPACE_MEMBER, "Namespace member already defined"},
-        { STATIC_MEMBER_ONLY, "Type member must be static"}
+        { STATIC_MEMBER_ONLY, "Type member must be static"},
+        { CANNOT_OVERLOAD_METHOD, "Cannot overload method"}
     };
 
     struct error_model
@@ -70,48 +75,11 @@ namespace xlang::xmeta
     public:
         void print_error(error_model const& model);
 
-        //void write_type_member_exists_error(size_t decl_line, std::string_view const& member, std::string_view const& declaration);
-
-        //void write_unresolved_type_error(size_t decl_line, std::string_view const& symbol);
-
-        //void write_struct_field_error(size_t decl_line, std::string_view const& symbol);
-
-        //void write_not_an_interface_error(size_t decl_line, std::string_view const& symbol);
-
-        //void write_not_a_class_error(size_t decl_line, std::string_view const& symbol);
-
-        //void write_not_a_delegate_error(size_t decl_line, std::string_view const& symbol);
-
-        //void write_struct_field_error(size_t decl_line, 
-        //    std::string_view const& invalid_name, std::string_view const& struct_name);
-
-        //void write_enum_member_name_error(size_t decl_line, 
-        //    std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id);
-
-        //void write_enum_member_expr_ref_error(size_t decl_line, 
-        //    std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id);
-
-        //void write_enum_circular_dependency(size_t decl_line, 
-        //    std::string_view const& invalid_member_id, std::string_view const& enum_name);
-
-        //void write_enum_const_expr_range_error(size_t decl_line, 
-        //    std::string_view const& invalid_expr, std::string_view const& enum_name, std::string_view const& namespace_id);
-
-        //void write_namespace_name_error(size_t decl_line, 
-        //    std::string_view const& invalid_name, std::string_view const& original_name);
-
-        //void write_namespace_member_name_error(size_t decl_line, 
-        //    std::string_view const& invalid_name, std::string_view const& namespace_id);
-
-        //void write_property_accessor_error(size_t decl_line, std::string_view const& member);
-
-        //void write_duplicate_property_error(size_t decl_line, std::string_view const& member);
-
-        //void write_static_member_only_error(size_t decl_line, std::string_view const& member);
-        
         void report_error(idl_error error, size_t decl_line);
 
         void report_error(idl_error error, size_t decl_line, std::string_view const& symbol);
+
+        bool error_exists(idl_error code, std::string symbol, size_t decl_line);
 
         size_t get_num_of_errors() const noexcept
         {

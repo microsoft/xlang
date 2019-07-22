@@ -51,6 +51,11 @@ namespace xlang::xmeta
         writer.add_metadata(emitter.save_to_memory());
     }
 
+    bool xmeta_idl_reader::error_exists(idl_error code, std::string symbol, size_t decl_line)
+    {
+        return m_error_manager.error_exists(code, symbol, decl_line);
+    }
+
     void xmeta_idl_reader::pass1_resolving_refs()
     {
         xlang_model_pass_1 pass1_listener(m_xlang_model.symbols, m_error_manager);

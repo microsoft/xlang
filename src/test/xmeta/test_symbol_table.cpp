@@ -658,6 +658,9 @@ TEST_CASE("Multiple definition error test")
     reader.read(test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 3);
+    REQUIRE(reader.error_exists(idl_error::DUPLICATE_NAMESPACE_MEMBER, "E", 5));
+    REQUIRE(reader.error_exists(idl_error::DUPLICATE_NAMESPACE_MEMBER, "D", 8));
+    REQUIRE(reader.error_exists(idl_error::DUPLICATE_NAMESPACE_MEMBER, "S", 11));
 }
 
 TEST_CASE("Enum test")
@@ -709,6 +712,7 @@ TEST_CASE("Enum circular implicit dependency")
     reader.read(implicit_dependency_error_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
+    REQUIRE(reader.error_exists(idl_error::CIRCULAR_ENUM_FIELD, "e_member_3", 8));
 }
 
 TEST_CASE("Enum circular explicit dependency")
@@ -728,6 +732,7 @@ TEST_CASE("Enum circular explicit dependency")
     reader.read(explicit_dependency_error_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
+    REQUIRE(reader.error_exists(idl_error::CIRCULAR_ENUM_FIELD, "e_member_1", 6));
 }
 
 TEST_CASE("Delegate test")
@@ -831,6 +836,10 @@ TEST_CASE("Struct circular test")
         reader.read(struct_test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() > 0);
+        REQUIRE(reader.error_exists(idl_error::CIRCULAR_STRUCT_FIELD, "N.S0", 4));
+        REQUIRE(reader.error_exists(idl_error::CIRCULAR_STRUCT_FIELD, "N.S1", 8));
+        REQUIRE(reader.error_exists(idl_error::CIRCULAR_STRUCT_FIELD, "N.S2", 12));
+        REQUIRE(reader.error_exists(idl_error::CIRCULAR_STRUCT_FIELD, "N.S3", 16));
     }
     {
         std::istringstream struct_test_idl{ R"(
@@ -878,6 +887,7 @@ TEST_CASE("Struct duplicate member test")
     reader.read(struct_test_idl);
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 1);
+    REQUIRE(reader.error_exists(idl_error::DUPLICATE_FIELD_ID, "field_1", 7));
 }
 
 TEST_CASE("Resolving delegates type ref test")
@@ -1194,6 +1204,8 @@ TEST_CASE("Method invalid overloading test")
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 7));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 12));
     }
     {
         std::istringstream test_idl{ R"(
@@ -1216,6 +1228,8 @@ TEST_CASE("Method invalid overloading test")
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 7));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 12));
     }
     {
         std::istringstream test_idl{ R"(
@@ -1238,6 +1252,8 @@ TEST_CASE("Method invalid overloading test")
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 7));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 12));
     }
     {
         std::istringstream test_idl{ R"(
@@ -1264,6 +1280,8 @@ TEST_CASE("Method invalid overloading test")
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 11));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 16));
     }
     {
         std::istringstream test_idl{ R"(
@@ -1290,6 +1308,8 @@ TEST_CASE("Method invalid overloading test")
         reader.read(test_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() == 2);
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 11));
+        REQUIRE(reader.error_exists(idl_error::CANNOT_OVERLOAD_METHOD, "Paint", 16));
     }
 
     // TODO: more examples testing arity on formal parameters
@@ -1605,6 +1625,7 @@ TEST_CASE("Invalid property accessor set only test")
             reader.read(test_set_only_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::INVALID_PROPERTY_ACCESSOR, "property1", 6));
         }
         {
             std::istringstream test_set_only_idl{ R"(
@@ -1623,9 +1644,12 @@ TEST_CASE("Invalid property accessor set only test")
             //TODO: This is only reporting one error due to the synthesized interface
             // Make this only report 1
             REQUIRE(reader.get_num_semantic_errors() == 2);
+            REQUIRE(reader.error_exists(idl_error::INVALID_PROPERTY_ACCESSOR, "property3", 6));
+            REQUIRE(reader.error_exists(idl_error::INVALID_PROPERTY_ACCESSOR, "property3", 6));
         }
     }
 }
+
 TEST_CASE("Invalid property accessor multiple getters test")
 {
     // multiple getters
@@ -1645,6 +1669,7 @@ TEST_CASE("Invalid property accessor multiple getters test")
             reader.read(test_double_get_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::DUPLICATE_PROPERTY_ACCESSOR, "property1", 6));
         }
         {
             std::istringstream test_double_get_idl{ R"(
@@ -1662,6 +1687,7 @@ TEST_CASE("Invalid property accessor multiple getters test")
             reader.read(test_double_get_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() >= 1);
+            REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
         }
         {
             std::istringstream test_double_get_idl{ R"(

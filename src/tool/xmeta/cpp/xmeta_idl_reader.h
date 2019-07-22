@@ -49,6 +49,8 @@ namespace xlang::xmeta
             return m_error_manager.get_num_of_syntax_errors();
         }
 
+        bool error_exists(idl_error code, std::string symbol, size_t decl_line);
+
         std::vector<uint8_t> save_to_memory()
         {
             return writer.save_to_memory();

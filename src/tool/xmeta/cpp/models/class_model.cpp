@@ -61,7 +61,7 @@ namespace xlang::xmeta
             {
                 if (member_exists(base_method->get_name()))
                 {
-                    error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, get_decl_line(), base_method->get_name());
+                    error_manager.report_error(idl_error::CANNOT_OVERLOAD_METHOD, base_method->get_decl_line(), base_method->get_name());
                     return;
                 }
             }
