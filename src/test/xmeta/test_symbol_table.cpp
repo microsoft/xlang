@@ -1704,6 +1704,7 @@ TEST_CASE("Invalid property accessor multiple getters test")
             reader.read(test_double_get_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::DUPLICATE_PROPERTY_ACCESSOR, "property1", 6));
         }
         {
             std::istringstream test_double_get_idl{ R"(
@@ -1721,6 +1722,7 @@ TEST_CASE("Invalid property accessor multiple getters test")
             reader.read(test_double_get_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() >= 1);
+            REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
         }
     }
 }
@@ -1742,6 +1744,7 @@ TEST_CASE("Invalid property accessor multiple setters test")
             reader.read(test_double_set_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::DUPLICATE_PROPERTY_ACCESSOR, "property1", 6));
         }
         {
             std::istringstream test_double_set_idl{ R"(
@@ -1758,6 +1761,7 @@ TEST_CASE("Invalid property accessor multiple setters test")
             reader.read(test_double_set_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::DUPLICATE_PROPERTY_ACCESSOR, "property1", 6));
         }
     }
     {
@@ -1777,6 +1781,7 @@ TEST_CASE("Invalid property accessor multiple setters test")
             reader.read(test_double_set_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() >= 1);
+            REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
         }
         {
             std::istringstream test_double_set_idl{ R"(
@@ -1794,6 +1799,7 @@ TEST_CASE("Invalid property accessor multiple setters test")
             reader.read(test_double_set_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() >= 1);
+            REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
         }
     }
 }
@@ -1816,6 +1822,7 @@ TEST_CASE("Invalid property accessor miscellaneous test")
             reader.read(test_three_acessor_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::INVALID_PROPERTY_ACCESSOR, "property1", 6));
         }
         {
             std::istringstream test_three_acessor_idl{ R"(
@@ -1832,6 +1839,7 @@ TEST_CASE("Invalid property accessor miscellaneous test")
             reader.read(test_three_acessor_idl);
             REQUIRE(reader.get_num_syntax_errors() == 0);
             REQUIRE(reader.get_num_semantic_errors() == 1);
+            REQUIRE(reader.error_exists(idl_error::INVALID_PROPERTY_ACCESSOR, "property1", 6));
         }
     }
     {
@@ -1890,6 +1898,7 @@ TEST_CASE("Duplicate property id test")
         reader.read(test_set_only_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() >= 1);
+        REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
     }
     {
         std::istringstream test_set_only_idl{ R"(
@@ -1907,6 +1916,25 @@ TEST_CASE("Duplicate property id test")
         reader.read(test_set_only_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() >= 1);
+        REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
+    }
+    {
+        std::istringstream test_set_only_idl{ R"(
+            namespace N
+            {
+                runtimeclass c1
+                {
+                    Int32 property4 { get; };
+                    Int64 property4 { set; };
+                }
+            }
+        )" };
+
+        xmeta_idl_reader reader{ "" };
+        reader.read(test_set_only_idl);
+        REQUIRE(reader.get_num_syntax_errors() == 0);
+        REQUIRE(reader.get_num_semantic_errors() >= 1);
+        REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "property4", 7));
     }
 }
 

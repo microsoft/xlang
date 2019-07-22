@@ -265,6 +265,16 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     XlangParser::Property_accessorsContext* property_accessors,
     std::shared_ptr<class_or_interface_model> const& model)
 {
+    //std::shared_ptr<property_model> check = model->get_property_by_name(prop_model->get_name());
+    //if (check != nullptr)
+    //{
+    //    if (!(check->get_type() == prop_model->get_type()));
+    //    {
+    //        error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), prop_model->get_name());
+    //        return listener_error::failed;
+    //    }
+    //}
+
     std::shared_ptr<method_model> get_method = nullptr;
     std::shared_ptr<method_model> set_method = nullptr;
     type_ref tr = prop_model->get_type();
@@ -352,7 +362,7 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     }
     
     // This enables declaration of the property's get and set on two different lines. 
-    if (model->property_exists(prop_model->get_name()))
+    if (model->property_exists(prop_model))
     {
         auto const& existing_property = model->get_property_member(prop_model->get_name());
 
@@ -830,7 +840,7 @@ void ast_to_st_listener::enterInterface_declaration(XlangParser::Interface_decla
             }
             if (model->add_member(met_model) == semantic_error::symbol_exists)
             {
-                error_manager.report_error(idl_error::CANNOT_OVERLOAD_METHOD, met_model->get_decl_line(), met_model->get_name());
+                 error_manager.report_error(idl_error::CANNOT_OVERLOAD_METHOD, met_model->get_decl_line(), met_model->get_name());
             }
         }
         if (interface_member->interface_property_declaration())
