@@ -3034,9 +3034,8 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     {
         auto generics = type.GenericParam();
 
-        w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base<winrt::%> {};\n",
+        w.write("    template<%> struct hash<winrt::%> : winrt::impl::hash_base {};\n",
             bind<write_generic_typenames>(generics),
-            type,
             type);
     }
 
