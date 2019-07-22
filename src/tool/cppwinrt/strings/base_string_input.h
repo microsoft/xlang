@@ -51,7 +51,7 @@ namespace winrt::param
         };
         
         void* m_handle;
-        header m_header;
+        header m_header{};
     };
 
     inline void* get_abi(hstring const& object) noexcept
