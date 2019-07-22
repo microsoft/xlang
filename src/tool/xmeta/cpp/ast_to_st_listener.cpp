@@ -265,15 +265,15 @@ listener_error ast_to_st_listener::extract_property_accessors(std::shared_ptr<pr
     XlangParser::Property_accessorsContext* property_accessors,
     std::shared_ptr<class_or_interface_model> const& model)
 {
-    //std::shared_ptr<property_model> check = model->get_property_by_name(prop_model->get_name());
-    //if (check != nullptr)
-    //{
-    //    if (!(check->get_type() == prop_model->get_type()));
-    //    {
-    //        error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), prop_model->get_name());
-    //        return listener_error::failed;
-    //    }
-    //}
+    std::shared_ptr<property_model> check = model->get_property_by_name(prop_model->get_name());
+    if (check != nullptr)
+    {
+        if (!(check->get_type() == prop_model->get_type()))
+        {
+            error_manager.report_error(idl_error::DUPLICATE_TYPE_MEMBER_ID, prop_model->get_decl_line(), prop_model->get_name());
+            return listener_error::failed;
+        }
+    }
 
     std::shared_ptr<method_model> get_method = nullptr;
     std::shared_ptr<method_model> set_method = nullptr;

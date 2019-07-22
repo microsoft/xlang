@@ -1898,7 +1898,7 @@ TEST_CASE("Duplicate property id test")
         reader.read(test_set_only_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() >= 1);
-        REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
+        REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "property1", 7));
     }
     {
         std::istringstream test_set_only_idl{ R"(
@@ -1916,7 +1916,7 @@ TEST_CASE("Duplicate property id test")
         reader.read(test_set_only_idl);
         REQUIRE(reader.get_num_syntax_errors() == 0);
         REQUIRE(reader.get_num_semantic_errors() >= 1);
-        REQUIRE(reader.error_exists(idl_error::INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "property1", 7));
+        REQUIRE(reader.error_exists(idl_error::DUPLICATE_TYPE_MEMBER_ID, "property1", 7));
     }
     {
         std::istringstream test_set_only_idl{ R"(
