@@ -186,7 +186,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             </CppWinRTDynamicLibraryProjectWinMDReferences>
         </ItemGroup>
         <Message Text="CppWinRTStaticLibraryProjectWinMDReferences: @(CppWinRTStaticLibraryProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
-        <Message Text="CppWinRTStaticLibraryProjectWinMDReferences: @(CppWinRTStaticLibraryProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
         <Message Text="CppWinRTDynamicLibraryProjectWinMDReferences: @(CppWinRTDynamicLibraryProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
@@ -261,7 +260,6 @@ $(XamlMetaDataProviderPch)
         <ItemGroup Condition="'$(CppWinRTModernIDL)' != 'false'">
             <_MidlReferences Remove="@(_MidlReferences)"/>
             <_MidlReferences Include="@(CppWinRTDirectWinMDReferences)"/>
-            <_MidlReferences Include="@(CppWinRTStaticLibraryProjectWinMDReferences)"/>
             <_MidlReferences Include="@(CppWinRTDynamicLibraryProjectWinMDReferences)"/>
             <_MidlReferences Include="@(CppWinRTPlatformWinMDReferences)"/>
             <_MidlReferencesDistinct Remove="@(_MidlReferencesDistinct)" />
@@ -351,7 +349,7 @@ $(XamlMetaDataProviderPch)
     </Target>
 
     <Target Name="CppWinRTMakePlatformProjection"
-            Condition="'$(CppWinRTEnableComponentProjection)' == 'true' AND '$(CppWinRTOverrideSDKReferences)' != 'true'"
+            Condition="'$(CppWinRTEnablePlatformProjection)' == 'true' AND '$(CppWinRTOverrideSDKReferences)' != 'true'"
             DependsOnTargets="GetCppWinRTPlatformWinMDInputs;$(CppWinRTMakePlatformProjectionDependsOn)"
             Inputs="@(CppWinRTPlatformWinMDInputs)"
             Outputs="$(GeneratedFilesDir)winrt\base.h">

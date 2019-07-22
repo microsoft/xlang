@@ -1,0 +1,9 @@
+namespace TestStaticLibrary4
+{
+    [default_interface]
+    runtimeclass TestStaticLibrary4Class 
+    {
+        TestStaticLibrary4Class();
+        Int32 MyProperty;
+    }
+}

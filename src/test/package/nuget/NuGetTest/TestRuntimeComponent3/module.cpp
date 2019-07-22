@@ -12,18 +12,23 @@ bool __stdcall winrt_can_unload_now() noexcept
     return true;
 }
 
-void* __stdcall TestRuntimeComponent2_get_activation_factory(std::wstring_view const& name);
-void* __stdcall TestStaticLibrary2_get_activation_factory(std::wstring_view const& name);
+void* __stdcall TestRuntimeComponent3_get_activation_factory(std::wstring_view const& name);
+void* __stdcall TestStaticLibrary3_get_activation_factory(std::wstring_view const& name);
 
 void* __stdcall winrt_get_activation_factory(std::wstring_view const& name)
 {
-    void* factory = TestRuntimeComponent2_get_activation_factory(name);
-    if (!factory)
+    void* factory = TestStaticLibrary3_get_activation_factory(name);
+    if (factory)
     {
-        factory = TestStaticLibrary2_get_activation_factory(name);
+        return factory;
+    }
+    factory = TestRuntimeComponent3_get_activation_factory(name);
+    if (factory)
+    {
+        return factory;
     }
 
-    return factory;
+    return nullptr;
 }
 
 int32_t __stdcall WINRT_CanUnloadNow() noexcept
