@@ -222,7 +222,12 @@ namespace xlang::meta::reader
         static byte_view open_file(std::string_view const& path)
         {
 #if XLANG_PLATFORM_WINDOWS
-            file_handle file{ CreateFileA(c_str(path), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
+            auto cstr = c_str(path);
+            int len = MultiByteToWideChar(CP_ACP, 0, cstr, path.length() + 1, 0, 0);
+            std::vector<wchar_t> buf = std::vector<wchar_t>(len);
+            MultiByteToWideChar(CP_ACP, 0, cstr, path.length() + 1, buf.data(), len);
+
+            file_handle file{ CreateFile2(buf.data(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, nullptr) };
 
             if (!file)
             {
@@ -237,7 +242,7 @@ namespace xlang::meta::reader
                 return{};
             }
 
-            handle mapping{ CreateFileMappingA(file.value, nullptr, PAGE_READONLY, 0, 0, nullptr) };
+            handle mapping{ CreateFileMapping(file.value, nullptr, PAGE_READONLY, 0, 0, nullptr) };
 
             if (!mapping)
             {
