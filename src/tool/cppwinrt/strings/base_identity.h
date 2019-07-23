@@ -299,7 +299,7 @@ namespace winrt::impl
         uint32_t const K[4] = { 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6 };
         std::array<uint32_t, 80> W = {};
 
-        int t = 0;
+        uint32_t t = 0;
         uint32_t temp = 0;
 
         for (t = 0; t < 16; t++)
