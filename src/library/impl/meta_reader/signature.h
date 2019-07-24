@@ -193,14 +193,16 @@ namespace xlang::meta::reader
             , m_type(ParseType(table, data))
         {}
 
-        explicit TypeSig(ElementType type)
+        explicit TypeSig(ElementType type, bool is_szarray = false)
             : m_element_type{ type }
             , m_type{ type }
+            , m_is_szarray{ is_szarray }
         {}
 
-        explicit TypeSig(ElementType element_type, coded_index<TypeDefOrRef> const& type_ref)
+        explicit TypeSig(ElementType element_type, coded_index<TypeDefOrRef> const& type_ref, bool is_szarray = false)
             : m_element_type{ element_type }
             , m_type{ type_ref }
+            , m_is_szarray{ is_szarray }
         {}
 
         value_type const& Type() const noexcept

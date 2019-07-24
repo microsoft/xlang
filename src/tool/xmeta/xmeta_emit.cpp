@@ -855,11 +855,11 @@ namespace xlang::xmeta
 
                     if (type_def->is_runtime_class() || type_def->is_interface() || type_def->is_delegate())
                     {
-                        return TypeSig{ ElementType::Class, type_ref.coded_index<TypeDefOrRef>() };
+                        return TypeSig{ ElementType::Class, type_ref.coded_index<TypeDefOrRef>(), ref->is_array() };
                     }
                     else
                     {
-                        return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
+                        return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>(), ref->is_array() };
                     }
                 }
                 // else it is either one of the type categories
@@ -869,17 +869,17 @@ namespace xlang::xmeta
                     || std::holds_alternative<std::shared_ptr<interface_model>>(target)
                     || std::holds_alternative<std::shared_ptr<delegate_model>>(target))
                 {
-                    return TypeSig{ ElementType::Class, type_ref.coded_index<TypeDefOrRef>() };
+                    return TypeSig{ ElementType::Class, type_ref.coded_index<TypeDefOrRef>(), ref->is_array() };
                 }
-                return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>() };
+                return TypeSig{ ElementType::ValueType, type_ref.coded_index<TypeDefOrRef>(), ref->is_array() };
             }
             else if (std::holds_alternative<object_type>(semantic))
             {
-                return TypeSig{ ElementType::Object };
+                return TypeSig{ ElementType::Object, ref->is_array() };
             }
             else // holds simple type
             {
-                return TypeSig{ to_ElementType(std::get<fundamental_type>(semantic)) };
+                return TypeSig{ to_ElementType(std::get<fundamental_type>(semantic)), ref->is_array() };
             }
         }
         return std::nullopt;

@@ -50,6 +50,11 @@ namespace xlang::xmeta
             m_is_array = true;
         }
 
+        bool is_array() const noexcept
+        {
+            return m_is_array;
+        }
+
         // To be use for testing purposes only
         bool operator==(type_ref const& right_ref) const;
 
