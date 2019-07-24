@@ -224,7 +224,7 @@ namespace xlang::meta::reader
 #if XLANG_PLATFORM_WINDOWS
             auto input = c_str(path);
 
-			auto const input_length = static_cast<uint32_t>(path.length() + 1);
+            auto const input_length = static_cast<uint32_t>(path.length() + 1);
             int buffer_length = MultiByteToWideChar(CP_UTF8, 0, input, input_length, 0, 0);
             std::vector<wchar_t> output = std::vector<wchar_t>(buffer_length);
             int result = MultiByteToWideChar(CP_UTF8, 0, input, input_length, output.data(), buffer_length);
