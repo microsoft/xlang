@@ -6,6 +6,7 @@
 using namespace Microsoft::VisualStudio::Debugger;
 using namespace Microsoft::VisualStudio::Debugger::Evaluation;
 using namespace Microsoft::VisualStudio::Debugger::Telemetry;
+using namespace Microsoft::VisualStudio::Debugger::DefaultPort;
 using namespace std::filesystem;
 using namespace winrt;
 using namespace xlang;
@@ -15,38 +16,100 @@ using namespace xlang::meta::reader;
 std::vector<std::string> db_files;
 std::unique_ptr<cache> db;
 
+void MetadataDiagnostic(DkmProcess* process, std::wstring const& status, std::filesystem::path const& path)
+{
+    auto path_str = path.string();
+    auto message = status + std::wstring(path_str.begin(), path_str.end());
+    NatvisDiagnostic(process, message, NatvisDiagnosticLevel::Verbose);
+}
+
+HRESULT DownloadMetadata(DkmProcess* process, std::filesystem::path const& remote_path, std::filesystem::path const& local_path)
+{
+    auto conn = process->Connection();
+    if ((conn->Flags() & DkmTransportConnectionFlags_t::LocalComputer) != 0)
+    {
+        return E_FAIL;
+    }
+
+    com_ptr<DkmString> root_dir;
+    IF_FAIL_RET(DkmString::Create(remote_path.parent_path().c_str(), root_dir.put()));
+    com_ptr<DkmString> search_spec;
+    IF_FAIL_RET(DkmString::Create(remote_path.filename().c_str(), search_spec.put()));
+    DkmArray<DkmFileInfo*> results;
+    IF_FAIL_RET(conn->GetFileListing(root_dir.get(), search_spec.get(), false, &results));
+    if (results.Length != 1)
+    {
+        return E_FAIL;
+    }
+
+    auto& remote_listing = results.Members[0];
+    auto remote_file_size = remote_listing->FileSize();
+    file_time_type remote_file_time{ file_time_type::duration(remote_listing->LastWriteTime()) };
+    auto remote_file_path = remote_listing->FilePath();
+    auto remote_file_name = remote_listing->FileName(); remote_file_name;
+    if (exists(local_path))
+    {
+        auto local_file_time = last_write_time(local_path);
+        auto local_file_size = file_size(local_path);
+        if ((local_file_time >= remote_file_time) && (local_file_size == remote_file_size))
+        {
+            return S_OK;
+        }
+    }
+
+    MetadataDiagnostic(process, L"Downloading ", remote_path);
+    com_ptr<DkmString> local_file_path;
+    IF_FAIL_RET(DkmString::Create(local_path.c_str(), local_file_path.put()));
+    IF_FAIL_RET(conn->DownloadFile(remote_file_path, local_file_path.get(), true));
+    last_write_time(local_path, remote_file_time);
+    return S_OK;
+}
+
+// If local file found, use it
+// If newer remote file found, download it to cache
+// If cached file found (downloaded or not), use it
+bool FindMetadata(DkmProcess* process, std::filesystem::path& winmd_path)
+{
+    if (exists(winmd_path))
+    {
+        return true;
+    }
+
+    auto cached_path = winmd_path;
+    cached_path = std::filesystem::temp_directory_path();
+    cached_path.replace_filename(winmd_path.filename().c_str());
+    DownloadMetadata(process, winmd_path, cached_path);
+    if (exists(cached_path))
+    {
+        winmd_path = cached_path;
+        return true;
+    }
+
+    return false;
+}
+
 // If type not indexed, simulate RoGetMetaDataFile's strategy for finding app-local metadata
 // and add to the database dynamically.  RoGetMetaDataFile looks for types in the current process
 // so cannot be called directly.
 void LoadMetadata(DkmProcess* process, WCHAR const* processPath, std::string const& typeName)
 {
     auto winmd_path = path{ processPath };
-    auto probeFileName = typeName;
+    auto probe_file = typeName;
     do
     {
-        winmd_path.replace_filename(probeFileName + ".winmd");
-        if (GetNatvisDiagnosticLevel() == NatvisDiagnosticLevel::Verbose)
+        winmd_path.replace_filename(probe_file + ".winmd");
+        MetadataDiagnostic(process, L"Looking for ", winmd_path);
+        if (FindMetadata(process, winmd_path))
         {
-            auto winmd_path_str = winmd_path.string();
-            auto message = std::wstring(L"Looking for ") + std::wstring(winmd_path_str.begin(), winmd_path_str.end());
-            NatvisDiagnostic(process, message, NatvisDiagnosticLevel::Verbose);
-        }
-        if (exists(winmd_path))
-        {
-            if (GetNatvisDiagnosticLevel() == NatvisDiagnosticLevel::Verbose)
-            {
-                auto winmd_path_str = winmd_path.string();
-                auto message = std::wstring(L"Loaded ") + std::wstring(winmd_path_str.begin(), winmd_path_str.end());
-                NatvisDiagnostic(process, message, NatvisDiagnosticLevel::Verbose);
-            }
+            MetadataDiagnostic(process, L"Loaded ", winmd_path);
             db_files.push_back(winmd_path.string());
         }
-        auto pos = probeFileName.rfind('.');
+        auto pos = probe_file.rfind('.');
         if (pos == std::string::npos)
         {
             break;
         }
-        probeFileName = probeFileName.substr(0, pos);
+        probe_file = probe_file.substr(0, pos);
     } while (true);
     db.reset(new cache(db_files));
 }
