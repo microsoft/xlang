@@ -29,8 +29,7 @@ namespace
         values.Insert(3,30);
         IIterator<IKeyValuePair<int, int>> first = values.First();
         REQUIRE(first.HasCurrent());
-        auto pair = first.Current();
-        pair;
+        [[maybe_unused]] auto pair = first.Current();
         REQUIRE(first.MoveNext());
         REQUIRE(first.GetMany(array) == 2);
 

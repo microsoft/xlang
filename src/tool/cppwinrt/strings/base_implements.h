@@ -535,14 +535,14 @@ namespace winrt::impl
     struct weak_source_producer;
 
     template <bool Agile>
-    struct weak_source : IWeakReferenceSource
+    struct weak_source final : IWeakReferenceSource
     {
         weak_ref<Agile>* that() noexcept
         {
             return static_cast<weak_ref<Agile>*>(reinterpret_cast<weak_source_producer<Agile>*>(this));
         }
 
-        int32_t __stdcall QueryInterface(guid const& id, void** object) noexcept override
+        int32_t __stdcall QueryInterface(guid const& id, void** object) noexcept final
         {
             if (is_guid_of<IWeakReferenceSource>(id))
             {
@@ -554,17 +554,17 @@ namespace winrt::impl
             return that()->m_object->QueryInterface(id, object);
         }
 
-        uint32_t __stdcall AddRef() noexcept override
+        uint32_t __stdcall AddRef() noexcept final
         {
             return that()->increment_strong();
         }
 
-        uint32_t __stdcall Release() noexcept override
+        uint32_t __stdcall Release() noexcept final
         {
             return that()->m_object->Release();
         }
 
-        int32_t __stdcall GetWeakReference(IWeakReference** weakReference) noexcept override
+        int32_t __stdcall GetWeakReference(IWeakReference** weakReference) noexcept final
         {
             *weakReference = that();
             that()->AddRef();
@@ -580,7 +580,7 @@ namespace winrt::impl
     };
 
     template <bool Agile>
-    struct weak_ref : IWeakReference, weak_source_producer<Agile>
+    struct weak_ref final : IWeakReference, weak_source_producer<Agile>
     {
         weak_ref(unknown_abi* object, uint32_t const strong) noexcept :
             m_object(object),
@@ -589,7 +589,7 @@ namespace winrt::impl
             WINRT_ASSERT(object);
         }
 
-        int32_t __stdcall QueryInterface(guid const& id, void** object) noexcept override
+        int32_t __stdcall QueryInterface(guid const& id, void** object) noexcept final
         {
             if (is_guid_of<IWeakReference>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
@@ -617,12 +617,12 @@ namespace winrt::impl
             return error_no_interface;
         }
 
-        uint32_t __stdcall AddRef() noexcept override
+        uint32_t __stdcall AddRef() noexcept final
         {
             return 1 + m_weak.fetch_add(1, std::memory_order_relaxed);
         }
 
-        uint32_t __stdcall Release() noexcept override
+        uint32_t __stdcall Release() noexcept final
         {
             uint32_t const target = m_weak.fetch_sub(1, std::memory_order_relaxed) - 1;
 
@@ -634,7 +634,7 @@ namespace winrt::impl
             return target;
         }
 
-        int32_t __stdcall Resolve(guid const& id, void** objectReference) noexcept override
+        int32_t __stdcall Resolve(guid const& id, void** objectReference) noexcept final
         {
             uint32_t target = m_strong.load(std::memory_order_relaxed);
 
@@ -810,6 +810,11 @@ namespace winrt::impl
 
         void abi_enter() const noexcept {}
         void abi_exit() const noexcept {}
+
+#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
+        // Please use winrt::make<T>(args...) to avoid allocating a C++/WinRT implementation type on the stack.
+        virtual void use_make_function_to_create_this_object() = 0;
+#endif
 
     protected:
 
@@ -1311,11 +1316,6 @@ namespace winrt
 
         using implements_type = implements;
         using IInspectable = Windows::Foundation::IInspectable;
-
-#if defined(_DEBUG) && !defined(WINRT_NO_MAKE_DETECTION)
-        // Please use winrt::make<T>(args...) to avoid allocating a C++/WinRT implementation type on the stack.
-        virtual void use_make_function_to_create_this_object() = 0;
-#endif
 
         weak_ref<D> get_weak()
         {

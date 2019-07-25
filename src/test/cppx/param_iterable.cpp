@@ -19,7 +19,7 @@ namespace
         auto values = make_copy(param);
         REQUIRE(!values.First().HasCurrent());
         REQUIRE(!values.First().MoveNext());
-        REQUIRE_THROWS_AS(values.First().Current(), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.First().Current(), out_of_bounds_error);
 
         std::array<int, 3> copy;
         REQUIRE(0 == values.First().GetMany(copy));
@@ -30,7 +30,7 @@ namespace
         auto values = make_copy(param);
         REQUIRE(!values.First().HasCurrent());
         REQUIRE(!values.First().MoveNext());
-        REQUIRE_THROWS_AS(values.First().Current(), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.First().Current(), out_of_bounds_error);
 
         std::array<IKeyValuePair<int, int>, 3> copy;
         REQUIRE(0 == values.First().GetMany(copy));
@@ -215,9 +215,9 @@ TEST_CASE("test_iterable_pair")
 TEST_CASE("test_iterable_scope")
 {
     IIterable<int> a = test_iterable_scope({1,2,3});
-    REQUIRE_THROWS_AS(a.First(), hresult_illegal_method_call);
+    REQUIRE_THROWS_AS(a.First(), invalid_state_error);
 
     IIterable<IKeyValuePair<int, int>> b = test_iterable_pair_scope({ { 1, 10 },{ 2,20 },{ 3,30 }});
-    REQUIRE_THROWS_AS(b.First(), hresult_illegal_method_call);
+    REQUIRE_THROWS_AS(b.First(), invalid_state_error);
 }
 

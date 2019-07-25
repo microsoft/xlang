@@ -3,10 +3,8 @@ namespace xlang::impl
 {
 #ifdef __IUnknown_INTERFACE_DEFINED__
 #define XLANG_WINDOWS_ABI
-    using hresult_type = long;
     using ref_count_type = unsigned long;
 #else
-    using hresult_type = int32_t;
     using ref_count_type = uint32_t;
 #endif
 
@@ -18,22 +16,6 @@ namespace xlang::impl
 
 namespace xlang
 {
-    struct hresult
-    {
-        int32_t value{};
-
-        constexpr hresult() noexcept = default;
-
-        constexpr hresult(int32_t const value) noexcept : value(value)
-        {
-        }
-
-        constexpr operator int32_t() const noexcept
-        {
-            return value;
-        }
-    };
-
 	using guid = xlang_guid;
 }
 

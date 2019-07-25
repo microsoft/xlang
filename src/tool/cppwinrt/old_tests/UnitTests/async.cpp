@@ -49,7 +49,7 @@ namespace
             throw hresult_error(E_UNEXPECTED);
         }
 
-        return 123;
+        co_return 123;
     }
 
     IAsyncOperationWithProgress<uint64_t, uint64_t> NoSuspend_IAsyncOperationWithProgress()
@@ -63,7 +63,7 @@ namespace
             throw hresult_error(E_UNEXPECTED);
         }
 
-        return 456;
+        co_return 456;
     }
 }
 
@@ -211,7 +211,7 @@ namespace
     IAsyncOperation<uint32_t> Suspend_IAsyncOperation(HANDLE go)
     {
         co_await resume_on_signal(go);
-        return 123;
+        co_return 123;
     }
 
     IAsyncOperationWithProgress<uint64_t, uint64_t> Suspend_IAsyncOperationWithProgress(HANDLE go)
@@ -219,7 +219,7 @@ namespace
         co_await resume_on_signal(go);
         auto progress = co_await get_progress_token();
         progress(987);
-        return 456;
+        co_return 456;
     }
 }
 
@@ -376,14 +376,14 @@ namespace
     {
         co_await resume_on_signal(go);
         throw hresult_invalid_argument(L"Throw_IAsyncOperation");
-        return 123;
+        co_return 123;
     }
 
     IAsyncOperationWithProgress<uint64_t, uint64_t> Throw_IAsyncOperationWithProgress(HANDLE go)
     {
         co_await resume_on_signal(go);
         throw hresult_invalid_argument(L"Throw_IAsyncOperationWithProgress");
-        return 456;
+        co_return 456;
     }
 
 #if defined(_MSC_VER) 
@@ -752,7 +752,7 @@ namespace
 
         REQUIRE(cancel());
         SetEvent(go); // signal cancelation
-        return 123;
+        co_return 123;
     }
 
     IAsyncOperationWithProgress<uint64_t, uint64_t> Cancel_IAsyncOperationWithProgress(HANDLE go)
@@ -763,7 +763,7 @@ namespace
 
         REQUIRE(cancel());
         SetEvent(go); // signal cancelation
-        return 345;
+        co_return 345;
     }
 }
 
@@ -1046,7 +1046,7 @@ namespace
         co_await resume_on_signal(go);
         co_await std::experimental::suspend_never{};
         REQUIRE(false);
-        return 0;
+        co_return 0;
     }
 
     IAsyncOperationWithProgress<uint64_t, uint64_t> AutoCancel_IAsyncOperationWithProgress(HANDLE go)
@@ -1055,7 +1055,7 @@ namespace
         co_await resume_on_signal(go);
         co_await std::experimental::suspend_never{};
         REQUIRE(false);
-        return 0;
+        co_return 0;
     }
 }
 

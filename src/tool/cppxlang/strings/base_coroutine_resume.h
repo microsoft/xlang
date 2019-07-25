@@ -98,7 +98,7 @@ namespace xlang
         {
             impl::com_callback_args args{};
             args.data = handle.address();
-            check_hresult(m_context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
+            check_xlang_error(m_context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
         }
 
     private:

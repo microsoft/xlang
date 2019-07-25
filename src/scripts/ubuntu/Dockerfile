@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:19.04
 
 RUN apt-get update \
     && apt-get install -y \
@@ -26,5 +26,5 @@ RUN apt-get install -y \
         clang \
         cmake \
         ninja-build \
-        libc++-dev \
-        libc++abi-dev
+        libc++-8-dev \
+        libc++abi-8-dev

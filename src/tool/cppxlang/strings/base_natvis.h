@@ -31,11 +31,11 @@ namespace xlang::impl
             }
             value{};
             guid iid{};
-            if (XLANG_IIDFromString(iid_str, &iid) == error_ok)
+            if (XLANG_IIDFromString(iid_str, &iid) == 0)
             {
                 xlang_object_abi* pinsp;
                 typedef int32_t(XLANG_CALL xlang_object_abi::* PropertyAccessor)(void*);
-                if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
+                if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == com_interop_result::success)
                 {
                     auto vtbl = *(PropertyAccessor**)pinsp;
                     static const int IXlangObject_vtbl_size = 5;

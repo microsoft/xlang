@@ -149,7 +149,7 @@ bool __stdcall %_can_unload_now() noexcept
     return true;
 }
 
-void* __stdcall %_get_activation_factory(std::wstring_view const& name)
+void* __stdcall %_get_activation_factory([[maybe_unused]] std::wstring_view const& name)
 {
     auto requal = [](std::wstring_view const& left, std::wstring_view const& right) noexcept
     {
@@ -474,7 +474,7 @@ catch (...) { return winrt::to_hresult(); }
                 {
                     method_signature signature{ method };
                     auto method_name = get_name(method);
-                    w.async_types = is_async(method, signature);
+                    w.async_types = signature.is_async();
 
                     if (is_add_overload(method) || is_remove_overload(method))
                     {
@@ -630,7 +630,7 @@ catch (...) { return winrt::to_hresult(); }
         auto format = R"(
             if (is_guid_of<%>(id))
             {
-                *result = make_fast_abi_forwarder(static_cast<D const&>(*this).get_abi<class_type>(), guid_of<%>(), %);
+                *result = make_fast_abi_forwarder(static_cast<D const&>(*this).template get_abi<class_type>(), guid_of<%>(), %);
                 return 0;
             }
 )";
@@ -723,7 +723,7 @@ catch (...) { return winrt::to_hresult(); }
         auto format = R"(
         auto base_%() const noexcept
         {
-            return static_cast<D const&>(*this).get_abi<%>();
+            return static_cast<D const&>(*this).template get_abi<%>();
         }
 )";
 
@@ -950,7 +950,7 @@ namespace winrt::@::implementation
                 for (auto&& method : factory.type.MethodList())
                 {
                     method_signature signature{ method };
-                    w.async_types = is_async(method, signature);
+                    w.async_types = signature.is_async();
                     auto method_name = get_name(method);
 
                     w.write("        static % %(%)%;\n",
@@ -974,7 +974,7 @@ namespace winrt::@::implementation
             for (auto&& method : info.type.MethodList())
             {
                 method_signature signature{ method };
-                w.async_types = is_async(method, signature);
+                w.async_types = signature.is_async();
                 auto method_name = get_name(method);
 
                 w.write("        % %(%)%;\n",
@@ -1105,7 +1105,7 @@ namespace winrt::@::implementation
                 for (auto&& method : factory.type.MethodList())
                 {
                     method_signature signature{ method };
-                    w.async_types = is_async(method, signature);
+                    w.async_types = signature.is_async();
                     auto method_name = get_name(method);
 
                     w.write(format,
@@ -1136,7 +1136,7 @@ namespace winrt::@::implementation
 )";
 
                 method_signature signature{ method };
-                w.async_types = is_async(method, signature);
+                w.async_types = signature.is_async();
                 auto method_name = get_name(method);
 
                 w.write(format,

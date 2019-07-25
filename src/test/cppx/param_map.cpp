@@ -35,7 +35,7 @@ namespace
         REQUIRE(10 == values.Lookup(1));
         REQUIRE(20 == values.Lookup(2));
         REQUIRE(30 == values.Lookup(3));
-        REQUIRE_THROWS_AS(values.Lookup(4), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.Lookup(4), out_of_bounds_error);
 
         REQUIRE(10 == values.TryLookup(1).value());
         REQUIRE(20 == values.TryLookup(2).value());

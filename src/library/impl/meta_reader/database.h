@@ -41,7 +41,7 @@ namespace xlang::meta::reader
 
             auto dos = file.as<impl::image_dos_header>();
 
-            if (dos.e_magic != 0x5A4D) // IMAGE_DOS_SIGNATURE
+            if (dos.e_signature != 0x5A4D) // IMAGE_DOS_SIGNATURE
             {
                 return false;
             }
@@ -57,19 +57,33 @@ namespace xlang::meta::reader
             {
                 return false;
             }
-
-            auto com = pe.OptionalHeader.DataDirectory[14]; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
-            auto sections = &file.as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32));
+            
+            impl::image_section_header const* sections{};
+            uint32_t com_virtual_address{};
+            if (pe.OptionalHeader.Magic == 0x10B) // PE32
+            {
+                com_virtual_address = pe.OptionalHeader.DataDirectory[14].VirtualAddress; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+                sections = &file.as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32));
+            }
+            else if (pe.OptionalHeader.Magic == 0x20B) // PE32+
+            {
+                auto pe_plus = file.as<impl::image_nt_headers32plus>(dos.e_lfanew);
+                com_virtual_address = pe_plus.OptionalHeader.DataDirectory[14].VirtualAddress; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+                sections = &file.as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32plus));
+            }
+            else
+            {
+                throw_invalid("Invalid optional header magic value");
+            }
             auto sections_end = sections + pe.FileHeader.NumberOfSections;
-
-            auto section = section_from_rva(sections, sections_end, com.VirtualAddress);
+            auto section = section_from_rva(sections, sections_end, com_virtual_address);
 
             if (section == sections_end)
             {
                 return false;
             }
 
-            auto offset = offset_from_rva(*section, com.VirtualAddress);
+            auto offset = offset_from_rva(*section, com_virtual_address);
 
             auto cli = file.as<impl::image_cor20_header>(offset);
 
@@ -216,7 +230,7 @@ namespace xlang::meta::reader
         {
             auto dos = m_view.as<impl::image_dos_header>();
 
-            if (dos.e_magic != 0x5A4D) // IMAGE_DOS_SIGNATURE
+            if (dos.e_signature != 0x5A4D) // IMAGE_DOS_SIGNATURE
             {
                 throw_invalid("Invalid DOS signature");
             }
@@ -228,18 +242,32 @@ namespace xlang::meta::reader
                 throw_invalid("Invalid PE section count");
             }
 
-            auto com = pe.OptionalHeader.DataDirectory[14]; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
-            auto sections = &m_view.as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32));
+            impl::image_section_header const* sections{};
+            uint32_t com_virtual_address{};
+            if (pe.OptionalHeader.Magic == 0x10B) // PE32
+            {
+                com_virtual_address = pe.OptionalHeader.DataDirectory[14].VirtualAddress; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+                sections = &m_view.as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32));
+            }
+            else if (pe.OptionalHeader.Magic == 0x20B) // PE32+
+            {
+                auto pe_plus = m_view.as<impl::image_nt_headers32plus>(dos.e_lfanew);
+                com_virtual_address = pe_plus.OptionalHeader.DataDirectory[14].VirtualAddress; // IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR
+                sections = &m_view.as<impl::image_section_header>(dos.e_lfanew + sizeof(impl::image_nt_headers32plus));
+            }
+            else
+            {
+                throw_invalid("Invalid optional header magic value");
+            }
             auto sections_end = sections + pe.FileHeader.NumberOfSections;
-
-            auto section = section_from_rva(sections, sections_end, com.VirtualAddress);
+            auto section = section_from_rva(sections, sections_end, com_virtual_address);
 
             if (section == sections_end)
             {
                 throw_invalid("PE section containing CLI header not found");
             }
 
-            auto offset = offset_from_rva(*section, com.VirtualAddress);
+            auto offset = offset_from_rva(*section, com_virtual_address);
 
             auto cli = m_view.as<impl::image_cor20_header>(offset);
 
