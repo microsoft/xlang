@@ -188,7 +188,7 @@ namespace xlang::meta::reader
                 return value != 0;
             }
         };
-#endif 
+#endif
 
         struct file_handle
         {
@@ -222,7 +222,27 @@ namespace xlang::meta::reader
         static byte_view open_file(std::string_view const& path)
         {
 #if XLANG_PLATFORM_WINDOWS
-            file_handle file{ CreateFileA(c_str(path), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr) };
+            auto input = c_str(path);
+
+            auto const input_length = static_cast<uint32_t>(path.length() + 1);
+            int buffer_length = MultiByteToWideChar(CP_UTF8, 0, input, input_length, 0, 0);
+            std::vector<wchar_t> output = std::vector<wchar_t>(buffer_length);
+            int result = MultiByteToWideChar(CP_UTF8, 0, input, input_length, output.data(), buffer_length);
+
+            if (result == 0)
+            {
+                switch (GetLastError())
+                {
+                case ERROR_INSUFFICIENT_BUFFER:
+                    throw_invalid("Insufficient buffer size");
+                case ERROR_NO_UNICODE_TRANSLATION:
+                    throw_invalid("Untranslatable path");
+                default:
+                    throw_invalid("Could not convert path");
+                }
+            }
+
+            file_handle file{ CreateFile2(output.data(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, nullptr) };
 
             if (!file)
             {
@@ -237,7 +257,7 @@ namespace xlang::meta::reader
                 return{};
             }
 
-            handle mapping{ CreateFileMappingA(file.value, nullptr, PAGE_READONLY, 0, 0, nullptr) };
+            handle mapping{ CreateFileMappingW(file.value, nullptr, PAGE_READONLY, 0, 0, nullptr) };
 
             if (!mapping)
             {
