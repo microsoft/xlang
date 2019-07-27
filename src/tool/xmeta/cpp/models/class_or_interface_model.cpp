@@ -74,9 +74,50 @@ namespace xlang::xmeta
         return contains_id(m_properties, name) || contains_id(m_events, name);
     }
 
-    bool class_or_interface_model::property_exists(std::string_view const& name)
+    bool class_or_interface_model::property_exists(std::shared_ptr<property_model> const& model)
     {
-        return contains_id(m_properties, name);
+        auto same_property = [&model](std::shared_ptr<property_model> containing_model)
+        {
+            return containing_model->get_name() == model->get_name() && containing_model->get_type() == model->get_type(); 
+        };
+        return std::find_if(m_properties.begin(), m_properties.end(), same_property) != m_properties.end();
+    }
+
+    std::shared_ptr<property_model> class_or_interface_model::get_property_by_name(std::string const& member_id)
+    {
+        auto same_property_name = [&member_id](std::shared_ptr<property_model> containing_model)
+        {
+            return containing_model->get_name() == member_id;
+        };
+        std::vector<std::shared_ptr<property_model>>::iterator result = std::find_if(m_properties.begin(), m_properties.end(), same_property_name);
+        if (result == m_properties.end())
+        {
+            return nullptr;
+        }
+        return *result;
+    }
+
+    bool class_or_interface_model::event_exists(std::shared_ptr<event_model> const& model)
+    {
+        auto same_event = [&model](std::shared_ptr<event_model> containing_model)
+        {
+            return containing_model->get_name() == model->get_name() && containing_model->get_type() == model->get_type();
+        };
+        return std::find_if(m_events.begin(), m_events.end(), same_event) != m_events.end();
+    }
+
+    std::shared_ptr<event_model> class_or_interface_model::get_event_by_name(std::string const& member_id)
+    {
+        auto same_event_name = [&member_id](std::shared_ptr<event_model> containing_model)
+        {
+            return containing_model->get_name() == member_id;
+        };
+        std::vector<std::shared_ptr<event_model>>::iterator result = std::find_if(m_events.begin(), m_events.end(), same_event_name);
+        if (result == m_events.end())
+        {
+            return nullptr;
+        }
+        return *result;
     }
 
     bool class_or_interface_model::method_exists(std::string_view const& name)
@@ -127,7 +168,7 @@ namespace xlang::xmeta
             auto iter = symbols.get_symbol(symbol);
             if (std::holds_alternative<std::monostate>(iter))
             {
-                error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                error_manager.report_error(idl_error::UNRESOLVED_TYPE, get_decl_line(), symbol);
             }
             else
             {
@@ -144,12 +185,12 @@ namespace xlang::xmeta
                     }
                     else
                     {
-                        error_manager.write_not_an_interface_error(get_decl_line(), symbol);
+                        error_manager.report_error(idl_error::TYPE_NOT_INTERFACE, get_decl_line(), symbol);
                     }
                 }
                 else
                 {
-                    error_manager.write_not_an_interface_error(get_decl_line(), symbol);
+                    error_manager.report_error(idl_error::TYPE_NOT_INTERFACE, get_decl_line(), symbol);
                 }
             }
         }

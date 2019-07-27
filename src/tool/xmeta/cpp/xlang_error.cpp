@@ -1,130 +1,46 @@
 
 #include "xlang_error.h"
+
 namespace xlang::xmeta
 {
-    void xlang_error_manager::write_error(size_t decl_line, std::string_view const& msg)
+    void xlang_error_manager::report_error(idl_error error, size_t decl_line)
     {
-        std::cerr << "Semantic error (line " << decl_line << "): " << msg << std::endl;
+        error_list.push_back(error_model{ error, decl_line, "" });
+        print_error(error_list.at(error_list.size() - 1));
         m_num_semantic_errors++;
     }
 
-    void xlang_error_manager::write_type_member_exists_error(size_t decl_line, std::string_view const& member, std::string_view const& declaration)
+    void xlang_error_manager::report_error(idl_error error, size_t decl_line, std::string_view const& symbol)
     {
-        std::ostringstream oss;
-        oss << "Member already exists: " << member << " in declaration: " << declaration;
-        write_error(decl_line, oss.str());
+        error_list.push_back(error_model{ error, decl_line, std::string{ symbol } });
+        print_error(error_list.at(error_list.size() - 1));
+        m_num_semantic_errors++;
     }
 
-    void xlang_error_manager::write_unresolved_type_error(size_t decl_line, std::string_view const&  symbol)
+    void xlang_error_manager::print_error(error_model const& model)
     {
-        std::ostringstream oss;
-        oss << "Unable to resolve type: " << symbol;
-        write_error(decl_line, oss.str());
+        if (printing)
+        {
+            std::cerr << "error XIDL" << model.error_code << " : [line] " << model.decl_line << " [msg] " << errors_message.at(model.error_code);
+            if (model.symbol != "")
+            {
+                std::cerr << " [symbol] " << model.symbol;
+            }
+            std::cerr << std::endl;
+        }
     }
 
-    void xlang_error_manager::write_struct_field_error(size_t decl_line, std::string_view const& symbol)
+    bool xlang_error_manager::error_exists(idl_error code, std::string symbol, size_t decl_line)
     {
-        std::ostringstream oss;
-        oss << "Struct has circular fields: " << symbol;
-        write_error(decl_line, oss.str());
+        auto same_error = [&code, &symbol, &decl_line](error_model const& model)
+        {
+            return model.error_code == code && model.symbol == symbol && model.decl_line == decl_line;
+        };
+        return std::find_if(error_list.begin(), error_list.end(), same_error) != error_list.end();
     }
 
-    void xlang_error_manager::write_struct_field_error(size_t decl_line, 
-        std::string_view const& invalid_name, std::string_view const& struct_name)
+    void xlang_error_manager::disable_printing()
     {
-        std::ostringstream oss;
-        oss << "Struct member " << invalid_name << " already defined in struct " << struct_name;
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_enum_member_name_error(size_t decl_line, 
-        std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id)
-    {
-        std::ostringstream oss;
-        oss << "Enum member '" << invalid_name << "' already defined in enum '" <<namespace_id << "." << enum_name << "'";
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_enum_member_expr_ref_error(size_t decl_line, 
-        std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id)
-    {
-        std::ostringstream oss;
-        oss << "Enum member '" << invalid_name << "' not defined in enum '" << namespace_id << "." << enum_name << "'";
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_enum_circular_dependency(size_t decl_line, 
-        std::string_view const& invalid_member_id, std::string_view const& enum_name)
-    {
-        std::ostringstream oss;
-        oss << "Enum '" << enum_name << "' has a circular depencency, starting at member '" << invalid_member_id << "'";
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_enum_const_expr_range_error(size_t decl_line, 
-        std::string_view const& invalid_expr, std::string_view const& enum_name, std::string_view const& namespace_id)
-    {
-        std::ostringstream oss;
-        oss << "Constant expression '" << invalid_expr << "' not in range of enum '";
-        oss << namespace_id << "." << enum_name << "'";
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_namespace_name_error(size_t decl_line, 
-        std::string_view const& invalid_name, std::string_view const& original_name)
-    {
-        std::ostringstream oss;
-        oss << "Namespace name '" << invalid_name << "' invalid. There already exists a namespace '" << original_name << "', and names cannot differ only by case.";
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_namespace_member_name_error(size_t decl_line, 
-        std::string_view const& invalid_name, std::string_view const& namespace_id)
-    {
-        std::ostringstream oss;
-        oss << "Member name '" << invalid_name << "' already defined in namespace '" << namespace_id << "'";
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_not_an_interface_error(size_t decl_line, std::string_view const& symbol)
-    {
-        std::ostringstream oss;
-        oss << "Member name '" << symbol << "' is not an interface.";
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_not_a_class_error(size_t decl_line, std::string_view const& symbol)
-    {
-        std::ostringstream oss;
-        oss << "Member name '" << symbol << "' is not an class.";
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_not_a_delegate_error(size_t decl_line, std::string_view const& symbol)
-    {
-        std::ostringstream oss;
-        oss << "Member name '" << symbol << "' is not an delegate.";
-        write_error(decl_line, oss.str());
-    }
-    
-    void xlang_error_manager::write_property_accessor_error(size_t decl_line, std::string_view const& member)
-    {
-        std::ostringstream oss;
-        oss << "Invalid property setter and getter: " << member;
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_duplicate_property_error(size_t decl_line, std::string_view const& member)
-    {
-        std::ostringstream oss;
-        oss << "Duplicate property: " << member;
-        write_error(decl_line, oss.str());
-    }
-
-    void xlang_error_manager::write_static_member_only_error(size_t decl_line, std::string_view const& member)
-    {
-        std::ostringstream oss;
-        oss << "Static class can only contain only static members: " << member;
-        write_error(decl_line, oss.str());
+        printing = false;
     }
 }

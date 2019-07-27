@@ -17,7 +17,7 @@ namespace xlang::xmeta
             {
                 if (m_association == method_association::None)
                 {
-                    error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                    error_manager.report_error(idl_error::UNRESOLVED_TYPE, get_decl_line(), symbol);
                 }
             }
             else

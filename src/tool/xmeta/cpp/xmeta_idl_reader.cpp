@@ -27,7 +27,9 @@ namespace xlang::xmeta
         if (disable_error_reporting) {
             lexer.removeErrorListeners();
             parser.removeErrorListeners();
+            m_error_manager.disable_printing();
         }
+
         antlr4::tree::ParseTree *tree = parser.xlang();
         antlr4::tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
         m_error_manager.set_num_syntax_error(parser.getNumberOfSyntaxErrors());
@@ -49,6 +51,11 @@ namespace xlang::xmeta
         walker.walk();
 
         writer.add_metadata(emitter.save_to_memory());
+    }
+
+    bool xmeta_idl_reader::error_exists(idl_error code, std::string symbol, size_t decl_line)
+    {
+        return m_error_manager.error_exists(code, symbol, decl_line);
     }
 
     void xmeta_idl_reader::pass1_resolving_refs()

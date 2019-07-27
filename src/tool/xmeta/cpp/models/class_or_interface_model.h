@@ -56,7 +56,12 @@ namespace xlang::xmeta
         bool member_exists(std::string_view const& name);
         bool event_or_property_exists(std::string_view const& name);
         bool method_exists(std::string_view const& name);
-        bool property_exists(std::string_view const& name);
+
+        bool property_exists(std::shared_ptr<property_model> const& model);
+        std::shared_ptr<property_model> get_property_by_name(std::string const& member_id);
+        
+        bool event_exists(std::shared_ptr<event_model> const& model);
+        std::shared_ptr<event_model> get_event_by_name(std::string const& member_id);
 
         void validate(xlang_error_manager & error_manager);
 

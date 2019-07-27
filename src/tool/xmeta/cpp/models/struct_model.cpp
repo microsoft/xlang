@@ -22,7 +22,7 @@ namespace xlang::xmeta
                 auto const& iter = symbols.get_symbol(symbol);
                 if (std::holds_alternative<std::monostate>(iter))
                 {
-                    error_manager.write_unresolved_type_error(get_decl_line(), symbol);
+                    error_manager.report_error(idl_error::UNRESOLVED_TYPE, get_decl_line(), symbol);
                 }
                 else
                 {
@@ -43,7 +43,7 @@ namespace xlang::xmeta
         if (has_circular_struct_declarations(symbol_set, error_manager))
         {
             contains_itself = true;
-            error_manager.write_struct_field_error(get_decl_line(), std::string(symbol));
+            error_manager.report_error(idl_error::CIRCULAR_STRUCT_FIELD, get_decl_line(), symbol);
         }
         return contains_itself;
     }

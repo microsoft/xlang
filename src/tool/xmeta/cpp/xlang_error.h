@@ -7,53 +7,86 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <algorithm>
 
 namespace xlang::xmeta
 {
+    enum idl_error
+    {
+        UNRESOLVED_TYPE,
+        UNRESOLVED_REFERENCE,
+        DUPLICATE_TYPE_MEMBER_ID,
+        DUPLICATE_PROPERTY,
+        DUPLICATE_EVENT,
+        DUPLICATE_METHOD,
+        DUPLICATE_FIELD_ID,
+        DUPLICATE_ENUM_FIELD,
+        TYPE_NOT_CLASS,
+        TYPE_NOT_INTERFACE,
+        TYPE_NOT_DELEGATE,
+        CIRCULAR_INTERFACE_INHERITANCE,
+        CIRCULAR_STRUCT_FIELD,
+        CIRCULAR_ENUM_FIELD,
+        ENUM_FIELD_OUT_OF_RANGE,
+        INVALID_PROPERTY_ACCESSOR,
+        DUPLICATE_PROPERTY_ACCESSOR,
+        INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR,
+        CONFLICTING_EVENT_ACCESSOR_METHODS,
+        INVALID_NAMESPACE_NAME,
+        DUPLICATE_NAMESPACE_MEMBER,
+        STATIC_MEMBER_ONLY,
+        CANNOT_OVERLOAD_METHOD,
+        CONFLICTING_INHERITANCE_MEMBER,
+    };
+
+    const std::map<idl_error, std::string> errors_message =
+    {
+        { UNRESOLVED_TYPE ,"Unable to resolve type."},
+        { UNRESOLVED_REFERENCE, "Unable to resolve reference." },
+        { DUPLICATE_TYPE_MEMBER_ID, "Duplicate type member identifier." },
+        { DUPLICATE_PROPERTY, "Duplicate property member in type." },
+        { DUPLICATE_EVENT, "Duplicate event member in type." },
+        { DUPLICATE_METHOD, "Duplicate method member in type." },
+        { DUPLICATE_FIELD_ID, "Duplicate field identifier." },
+        { DUPLICATE_ENUM_FIELD, "Duplicate enum identifier." },
+        { TYPE_NOT_CLASS, "Type is needs to be a runtime class type."},
+        { TYPE_NOT_INTERFACE, "Type is needs to be an interface type."},
+        { TYPE_NOT_DELEGATE, "Type is needs to be a delegate type."},
+        { CIRCULAR_INTERFACE_INHERITANCE, "Class or Interface type has circular inheritance."},
+        { CIRCULAR_STRUCT_FIELD, "Struct has circular field types. A struct cannot contain itself."},
+        { CIRCULAR_ENUM_FIELD, "Enum field has circular dependency."},
+        { ENUM_FIELD_OUT_OF_RANGE, "Enum expression not in range of valid enum expressions."},
+        { INVALID_PROPERTY_ACCESSOR, "Invalid or missing property setter and getter."},
+        { DUPLICATE_PROPERTY_ACCESSOR, "Duplicate property setter and getter."},
+        { INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "Duplicate or invalid identifier with property setter and getter."},
+        { CONFLICTING_EVENT_ACCESSOR_METHODS, "Conflicting identifier with event setter and getter."},
+        { INVALID_NAMESPACE_NAME, "Namespace name is invalid or duplicate."},
+        { DUPLICATE_NAMESPACE_MEMBER, "Namespace member already defined"},
+        { STATIC_MEMBER_ONLY, "Type member must be static"},
+        { CANNOT_OVERLOAD_METHOD, "Cannot overload method"},
+        { CONFLICTING_INHERITANCE_MEMBER, "Type member is conflicting with inherited members"}
+    };
+
+    struct error_model
+    {
+        idl_error error_code;
+        size_t decl_line;
+        std::string symbol;
+    };
+
     class xlang_error_manager
     {
     public:
-        void write_error(size_t decl_line, std::string_view const& msg);
+        void print_error(error_model const& model);
 
-        void write_type_member_exists_error(size_t decl_line, std::string_view const& member, std::string_view const& declaration);
+        void report_error(idl_error error, size_t decl_line);
 
-        void write_unresolved_type_error(size_t decl_line, std::string_view const& symbol);
+        void report_error(idl_error error, size_t decl_line, std::string_view const& symbol);
 
-        void write_struct_field_error(size_t decl_line, std::string_view const& symbol);
+        bool error_exists(idl_error code, std::string symbol, size_t decl_line);
 
-        void write_not_an_interface_error(size_t decl_line, std::string_view const& symbol);
+        void disable_printing();
 
-        void write_not_a_class_error(size_t decl_line, std::string_view const& symbol);
-
-        void write_not_a_delegate_error(size_t decl_line, std::string_view const& symbol);
-
-        void write_struct_field_error(size_t decl_line, 
-            std::string_view const& invalid_name, std::string_view const& struct_name);
-
-        void write_enum_member_name_error(size_t decl_line, 
-            std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id);
-
-        void write_enum_member_expr_ref_error(size_t decl_line, 
-            std::string_view const& invalid_name, std::string_view const& enum_name, std::string_view const& namespace_id);
-
-        void write_enum_circular_dependency(size_t decl_line, 
-            std::string_view const& invalid_member_id, std::string_view const& enum_name);
-
-        void write_enum_const_expr_range_error(size_t decl_line, 
-            std::string_view const& invalid_expr, std::string_view const& enum_name, std::string_view const& namespace_id);
-
-        void write_namespace_name_error(size_t decl_line, 
-            std::string_view const& invalid_name, std::string_view const& original_name);
-
-        void write_namespace_member_name_error(size_t decl_line, 
-            std::string_view const& invalid_name, std::string_view const& namespace_id);
-
-        void write_property_accessor_error(size_t decl_line, std::string_view const& member);
-
-        void write_duplicate_property_error(size_t decl_line, std::string_view const& member);
-
-        void write_static_member_only_error(size_t decl_line, std::string_view const& member);
-        
         size_t get_num_of_errors() const noexcept
         {
             return m_num_semantic_errors + m_num_syntax_errors; 
@@ -82,20 +115,7 @@ namespace xlang::xmeta
     private:
         size_t m_num_semantic_errors = 0;
         size_t m_num_syntax_errors = 0;
-
-        /* 
-            Prototyping how I would do the errors, I would store each type of error in these vectors.
-            And then they will be used to print out the actual error statements later. These vectors would
-            contain a struct with an error code, the symbol associated with it, and the decl line
-            
-            struct error_model
-            {
-                size error_level;
-                size_t error_code;
-                size_t decl_line;
-                std::string symbol;
-            }
-            std::vector<error_model> errors; 
-        */
+        std::vector<error_model> error_list;
+        bool printing = true;
     };
 }
