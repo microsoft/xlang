@@ -602,3 +602,35 @@ struct ExpectedNamespaceModel
         }
     }
 };
+
+struct ExpectedAttributeTypeModel
+{
+    std::string id;
+    std::map<std::string, ExpectedTypeRefModel> named_parameter;
+    std::vector<ExpectedTypeRefModel> positonal_parameter;
+
+    ExpectedAttributeTypeModel(std::string const& id,
+        std::map<std::string, ExpectedTypeRefModel> named_parameter,
+        std::vector<ExpectedTypeRefModel> positonal_parameter)
+        : id{ id }, named_parameter{ named_parameter }, positonal_parameter{ positonal_parameter } {}
+
+    void VerifyType(std::shared_ptr<attribute_type_model> const& actual)
+    {
+        REQUIRE(actual->get_name() == id);
+
+        auto const& actual_named_parameter = actual->get_named_parameters();
+        REQUIRE(actual_named_parameter.size() == named_parameter.size());
+        for (auto const&[name, ref] : actual_named_parameter)
+        {
+            REQUIRE(ref.get_semantic().is_resolved());
+            named_parameter.at(name).VerifyType(ref);
+        }
+
+        auto const& actual_positional_parameter = actual->get_positonal_parameters();
+        for (size_t i = 0; i < positonal_parameter.size(); i++)
+        {
+            REQUIRE(actual_positional_parameter.at(i).get_semantic().is_resolved());
+            positonal_parameter.at(i).VerifyType(actual_positional_parameter.at(i));
+        }
+    }
+};

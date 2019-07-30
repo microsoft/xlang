@@ -7,7 +7,6 @@
 
 namespace xlang::xmeta
 {
-
     void struct_model::resolve(symbol_table & symbols, xlang_error_manager & error_manager)
     {
         for (auto & field : m_fields)

@@ -37,6 +37,7 @@ namespace xlang::xmeta
         STATIC_MEMBER_ONLY,
         CANNOT_OVERLOAD_METHOD,
         CONFLICTING_INHERITANCE_MEMBER,
+        DUPLICATE_ATTRIBUTE
     };
 
     const std::map<idl_error, std::string> errors_message =
@@ -61,10 +62,11 @@ namespace xlang::xmeta
         { INVALID_OR_DUPLICATE_PROPERTY_ACCESSOR, "Duplicate or invalid identifier with property setter and getter."},
         { CONFLICTING_EVENT_ACCESSOR_METHODS, "Conflicting identifier with event setter and getter."},
         { INVALID_NAMESPACE_NAME, "Namespace name is invalid or duplicate."},
-        { DUPLICATE_NAMESPACE_MEMBER, "Namespace member already defined"},
-        { STATIC_MEMBER_ONLY, "Type member must be static"},
-        { CANNOT_OVERLOAD_METHOD, "Cannot overload method"},
-        { CONFLICTING_INHERITANCE_MEMBER, "Type member is conflicting with inherited members"}
+        { DUPLICATE_NAMESPACE_MEMBER, "Namespace member already defined."},
+        { STATIC_MEMBER_ONLY, "Type member must be static."},
+        { CANNOT_OVERLOAD_METHOD, "Cannot overload method."},
+        { CONFLICTING_INHERITANCE_MEMBER, "Type member is conflicting with inherited members."},
+        { DUPLICATE_ATTRIBUTE, "An attribute by this name is already defined."}
     };
 
     struct error_model

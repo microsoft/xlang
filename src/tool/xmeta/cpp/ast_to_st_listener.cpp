@@ -944,6 +944,34 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
         error_manager.report_error(idl_error::DUPLICATE_NAMESPACE_MEMBER, decl_line, enum_name);
         return;
     }
+
+    if (ctx->attributes())
+    {
+        XlangParser::AttributesContext * attrs = ctx->attributes();
+        for (XlangParser::Attribute_sectionContext * attr_section : attrs->attribute_section())
+        {
+            for (XlangParser::AttributeContext * attr : attr_section->attribute_list()->attribute())
+            {
+
+                std::string attribute_name = attr->type_name()->getText();
+                XlangParser::Attribute_argumentsContext * attribute_argument = attr->attribute_arguments();
+
+                std::vector<attribute_member> positoned_parameter;
+                std::map<std::string, attribute_member> named_parameter;
+
+                for (XlangParser::Positional_argumentContext * positional_arg : attribute_argument->positional_argument_list()->positional_argument())
+                {
+                    positoned_parameter.emplace_back(attribute_member{ positional_arg->getText() });
+                }
+                for (XlangParser::Named_argumentContext * named_arg : attribute_argument->named_argument_list()->named_argument())
+                {
+                    named_parameter.emplace(named_arg->IDENTIFIER()->getText(), attribute_member{ named_arg->expression()->getText() });
+                }
+                std::shared_ptr<attribute_model> attr_model = attribute_model::create_attribute(xlang_model.attributes.get_attribute_type(attribute_name), positoned_parameter, named_parameter);
+                new_enum->add_attribute(attr_model);
+            }
+        }
+    }
     m_cur_namespace_body->add_enum(new_enum);
 }
 
@@ -976,6 +1004,40 @@ void ast_to_st_listener::enterStruct_declaration(XlangParser::Struct_declaration
         return;
     }
     m_cur_namespace_body->add_struct(new_struct);
+}
+
+void ast_to_st_listener::enterAttribute_declaration(XlangParser::Attribute_declarationContext * ctx)
+{ 
+    auto id = ctx->IDENTIFIER();
+    auto decl_line = id->getSymbol()->getLine();
+    std::string attribute_name{ id->getText() };
+    std::string symbol = m_cur_namespace_body->get_containing_namespace()->get_qualified_name() + "." + attribute_name;
+
+    auto new_attribute = std::make_shared<attribute_type_model>(attribute_name, decl_line, xlang_model.m_assembly);
+    if (ctx->attribute_body()->attribute_constructor_declaration() && ctx->attribute_body()->attribute_constructor_declaration()->attribute_parameter_list())
+    {
+        for (auto const& pos_parameter : ctx->attribute_body()->attribute_constructor_declaration()->attribute_parameter_list()->positional_parameter())
+        {
+            type_ref tr{ pos_parameter->type()->getText() };
+            extract_type(pos_parameter->type(), tr);
+            new_attribute->add_positonal_parameter(std::move(tr));
+        }
+    }
+
+    for (auto const& field : ctx->attribute_body()->field_declaration())
+    {
+        std::string field_name{ field->IDENTIFIER()->getText() };
+
+        type_ref tr{ field->type()->getText() };
+        extract_type(field->type(), tr);
+        new_attribute->add_named_parameter(field_name, std::move(tr));
+    }
+
+    if (xlang_model.attributes.define_attribute_type(attribute_name, new_attribute) == semantic_error::symbol_exists)
+    {
+        error_manager.report_error(idl_error::DUPLICATE_ATTRIBUTE, decl_line, attribute_name);
+    }
+
 }
 
 void ast_to_st_listener::enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx)

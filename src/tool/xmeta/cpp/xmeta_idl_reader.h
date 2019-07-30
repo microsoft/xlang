@@ -39,6 +39,11 @@ namespace xlang::xmeta
             return m_xlang_model.namespaces;
         }
 
+        auto const& get_attributes() const
+        {
+            return m_xlang_model.attributes;
+        }
+
         size_t get_num_semantic_errors()
         {
             return m_error_manager.get_num_of_semantic_errors();
@@ -60,6 +65,7 @@ namespace xlang::xmeta
         {
             return writer.save_to_file(std::filesystem::current_path().append(std::string(m_xlang_model.m_assembly) + ".winmd"));
         }
+
 
     private:
         xlang_error_manager m_error_manager;

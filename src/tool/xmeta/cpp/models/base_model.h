@@ -30,8 +30,9 @@ namespace xlang::xmeta
     struct property_model;
     struct method_model;
     struct event_model;
-
     struct formal_parameter_model;
+    struct attribute_model;
+
     struct symbol_table;
     struct compilation_unit;
     struct type_ref;
@@ -102,7 +103,7 @@ namespace xlang::xmeta
         std::shared_ptr<xlang::meta::reader::TypeDef>,
         fundamental_type,
         object_type>;
-
+    
     struct base_model
     {
         base_model() = delete;
@@ -127,10 +128,17 @@ namespace xlang::xmeta
             return m_assembly_name;
         }
 
+        void add_attribute(std::shared_ptr<attribute_model> const& attribute)
+        {
+            m_attributes.emplace_back(attribute);
+        }
+
     private:
         std::string m_name;
         size_t m_decl_line;
         std::string_view m_assembly_name;
+        std::vector<std::shared_ptr<attribute_model>> m_attributes;
+        
     };
 
     template<class T>

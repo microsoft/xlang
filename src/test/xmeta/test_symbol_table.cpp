@@ -2874,3 +2874,66 @@ TEST_CASE("Array test")
     REQUIRE(reader.get_num_syntax_errors() == 0);
     REQUIRE(reader.get_num_semantic_errors() == 0);
 }
+
+TEST_CASE("Attribute type declaration test")
+{
+    std::istringstream test_idl{ R"(
+        namespace N
+        {
+            attribute HelpAttribute
+            {
+                HelpAttribute(String url);
+
+                String Topic;
+                String url;
+            };
+        }
+    )" };
+
+    xmeta_idl_reader reader{ "" };
+    reader.read(test_idl, 0);
+    REQUIRE(reader.get_num_syntax_errors() == 0);
+    REQUIRE(reader.get_num_semantic_errors() == 0);
+    auto attr = reader.get_attributes();
+    auto type = attr.get_attribute_type("HelpAttribute");
+
+    ExpectedAttributeTypeModel help_attr{ "HelpAttribute",
+        { { "Topic", ExpectedTypeRefModel{ fundamental_type::String } }, { "url", ExpectedTypeRefModel{ fundamental_type::String } } },
+        { ExpectedTypeRefModel{ fundamental_type::String } }
+    };
+
+    help_attr.VerifyType(type);
+}
+
+//TEST_CASE("Attribute attach test")
+//{
+//    std::istringstream test_idl{ R"(
+//        namespace N
+//        {
+//            attribute HelpAttribute
+//            {
+//                HelpAttribute(String url);
+//
+//                String Topic;
+//                String url;
+//            };
+//
+//            [HelpAttribute("Test1", Topic="Test2", url="Test3")]
+//            enum E {}
+//        }
+//    )" };
+//
+//    xmeta_idl_reader reader{ "" };
+//    reader.read(test_idl, 0);
+//    REQUIRE(reader.get_num_syntax_errors() == 0);
+//    REQUIRE(reader.get_num_semantic_errors() == 0);
+//    auto attr = reader.get_attributes();
+//    auto type = attr.get_attribute_type("HelpAttribute");
+//
+//    ExpectedAttributeTypeModel help_attr{ "HelpAttribute",
+//        { { "Topic", ExpectedTypeRefModel{ fundamental_type::String } }, { "url", ExpectedTypeRefModel{ fundamental_type::String } } },
+//        { ExpectedTypeRefModel{ fundamental_type::String } }
+//    };
+//
+//    help_attr.VerifyType(type);
+//}

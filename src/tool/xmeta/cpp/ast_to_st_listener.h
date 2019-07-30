@@ -28,6 +28,8 @@ struct ast_to_st_listener : XlangParserBaseListener
     void enterEnum_declaration(XlangParser::Enum_declarationContext *ctx) override;
     void enterStruct_declaration(XlangParser::Struct_declarationContext *ctx) override;
 
+    void enterAttribute_declaration(XlangParser::Attribute_declarationContext * ctx) override;
+
     void enterNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
     void exitNamespace_declaration(XlangParser::Namespace_declarationContext *ctx) override;
 

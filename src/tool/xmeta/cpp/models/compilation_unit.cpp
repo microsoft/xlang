@@ -158,4 +158,24 @@ namespace xlang::xmeta
         }
     }
 
+
+    semantic_error attributes_table::define_attribute_type(std::string_view name, std::shared_ptr<attribute_type_model> const& attribute_type)
+    {
+        if (!table.insert(std::pair<std::string, std::shared_ptr<attribute_type_model>>(name, attribute_type)).second)
+        {
+            return semantic_error::symbol_exists;
+        }
+        return semantic_error::passed;
+    }
+
+    std::shared_ptr<attribute_type_model> attributes_table::get_attribute_type(std::string const& name)
+    {
+        auto iter = table.find(name);
+        if (iter == table.end())
+        {
+            return nullptr;
+        }
+        return iter->second;
+    }
+
 }

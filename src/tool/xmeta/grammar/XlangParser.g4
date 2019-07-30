@@ -192,7 +192,19 @@ attribute_declaration
     ;
 
 attribute_body
-    : OPEN_BRACE field_declaration* CLOSE_BRACE
+    : OPEN_BRACE attribute_constructor_declaration? field_declaration* CLOSE_BRACE
+    ;
+
+attribute_constructor_declaration
+    : IDENTIFIER OPEN_PARENS attribute_parameter_list? CLOSE_PARENS SEMICOLON
+    ;
+
+attribute_parameter_list
+    : positional_parameter (COMMA positional_parameter)*
+    ;
+
+positional_parameter
+    : type IDENTIFIER
     ;
 
 class_declaration

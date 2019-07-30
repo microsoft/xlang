@@ -5,6 +5,7 @@
 #include <vector>
 #include "base_model.h"
 #include  "meta_reader.h"
+#include "attribute_model.h"
 
 namespace xlang::xmeta
 {
@@ -31,6 +32,16 @@ namespace xlang::xmeta
         void print_metadata(xlang::meta::reader::cache const& cache);
     };
 
+    struct attributes_table
+    {
+        semantic_error define_attribute_type(std::string_view name, std::shared_ptr<attribute_type_model> const& attribute_type);
+
+        std::shared_ptr<attribute_type_model> get_attribute_type(std::string const& name);
+
+    private:
+        std::map<std::string, std::shared_ptr<attribute_type_model>> table;
+    };
+
 
     struct compilation_unit
     {
@@ -42,5 +53,6 @@ namespace xlang::xmeta
         std::string m_assembly;
         std::vector<std::string> m_imported_assembly_names_paths;
         symbol_table symbols;
+        attributes_table attributes;
     };
 }
