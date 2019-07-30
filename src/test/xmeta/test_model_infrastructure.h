@@ -10,6 +10,7 @@
 
 using namespace antlr4;
 using namespace xlang::xmeta;
+using namespace xlang::meta::reader;
 
 constexpr method_modifier default_method_modifier = { false, false, false };
 constexpr method_modifier static_method_modifier = { false, true, false };
@@ -55,7 +56,7 @@ struct ExpectedTypeRefModel
         ExpectedEnumRef,
         ExpectedDelegateRef,
         ExpectedStructRef,
-        fundamental_type,
+        ElementType,
         object_type> type;
 
     bool is_araray;
@@ -78,7 +79,7 @@ struct ExpectedTypeRefModel
     ExpectedTypeRefModel(object_type const& type, bool is_array = false)
         : type{ type }, is_araray{ is_array } {}
 
-    ExpectedTypeRefModel(fundamental_type const& type, bool is_array = false)
+    ExpectedTypeRefModel(ElementType const& type, bool is_array = false)
         : type{ type }, is_araray{ is_array } {}
 
     void VerifyType(type_ref const& actual)
@@ -144,11 +145,11 @@ struct ExpectedTypeRefModel
             auto const& actual_model = std::get<std::shared_ptr<enum_model>>(target);
             REQUIRE(actual_model->get_qualified_name() == model.qualified_name);
         }
-        if (std::holds_alternative<fundamental_type>(target))
+        if (std::holds_alternative<ElementType>(target))
         {
-            REQUIRE(std::holds_alternative<fundamental_type>(type));
-            auto const& model = std::get<fundamental_type>(type);
-            auto const& actual_model = std::get<fundamental_type>(target);
+            REQUIRE(std::holds_alternative<ElementType>(type));
+            auto const& model = std::get<ElementType>(type);
+            auto const& actual_model = std::get<ElementType>(target);
             REQUIRE(actual_model == model);
         }
         if (std::holds_alternative<object_type>(target))
