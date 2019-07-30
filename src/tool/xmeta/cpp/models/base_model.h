@@ -53,23 +53,6 @@ namespace xlang::xmeta
         Constructor
     };
 
-    enum class fundamental_type
-    {
-        Boolean,
-        String,
-        Int8,
-        Int16,
-        Int32,
-        Int64,
-        UInt8,
-        UInt16,
-        UInt32,
-        UInt64,
-        Char16,
-        Single,
-        Double,
-    };
-
     enum class enum_type
     {
         Int8,
@@ -100,7 +83,7 @@ namespace xlang::xmeta
         std::shared_ptr<struct_model>,
         std::shared_ptr<delegate_model>,
         std::shared_ptr<xlang::meta::reader::TypeDef>,
-        fundamental_type,
+        xlang::meta::reader::ElementType,
         object_type>;
 
     struct base_model

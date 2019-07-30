@@ -83,7 +83,7 @@ namespace
         return filename.substr(0, lastdot);
     }
 
-    std::variant<std::string, fundamental_type, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
+    std::variant<std::string, ElementType, object_type> to_simple_type_or_id(model_ref<type_semantics> const& semantic_type)
     {
         assert(semantic_type.is_resolved());
         type_semantics const& ts = semantic_type.get_resolved_target();
@@ -112,9 +112,9 @@ namespace
         {
             return std::get<std::shared_ptr<struct_model>>(ts)->get_qualified_name();
         }
-        if (std::holds_alternative<fundamental_type>(ts))
+        if (std::holds_alternative<ElementType>(ts))
         {
-            return std::get<fundamental_type>(ts);
+            return std::get<ElementType>(ts);
         }
         if (std::holds_alternative<object_type>(ts))
         {
@@ -840,7 +840,7 @@ namespace xlang::xmeta
     {
         if (ref) // Return type is not void
         {
-            std::variant<std::string, fundamental_type, object_type> semantic = to_simple_type_or_id(ref->get_semantic());
+            std::variant<std::string, ElementType, object_type> semantic = to_simple_type_or_id(ref->get_semantic());
             if (std::holds_alternative<std::string>(semantic))
             {
                 std::string name = std::get<std::string>(semantic);
@@ -879,7 +879,7 @@ namespace xlang::xmeta
             }
             else // holds simple type
             {
-                return TypeSig{ to_ElementType(std::get<fundamental_type>(semantic)), ref->is_array() };
+                return TypeSig{ std::get<ElementType>(semantic), ref->is_array() };
             }
         }
         return std::nullopt;

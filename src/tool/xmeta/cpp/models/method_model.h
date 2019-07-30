@@ -17,8 +17,6 @@ namespace xlang::xmeta
         bool is_overridable = false;
     };
 
-    std::shared_ptr<method_model> create_method_from(std::shared_ptr<xlang::meta::reader::MethodDef> method_def);
-
     struct method_model : base_model
     {
         method_model() = delete;

@@ -63,7 +63,7 @@ namespace xlang::xmeta
         m_semantic.resolve(sem);
     }
 
-    void type_ref::set_semantic(fundamental_type st)
+    void type_ref::set_semantic(xlang::meta::reader::ElementType st)
     {
         m_semantic.resolve(st);
     }
@@ -83,9 +83,9 @@ namespace xlang::xmeta
         {
             type_semantics left_type = m_semantic.get_resolved_target();
             type_semantics right_type = right_ref.get_semantic().get_resolved_target();
-            if (std::holds_alternative<fundamental_type>(left_type) && std::holds_alternative<fundamental_type>(right_type))
+            if (std::holds_alternative<xlang::meta::reader::ElementType>(left_type) && std::holds_alternative<xlang::meta::reader::ElementType>(right_type))
             {
-                return std::get<fundamental_type>(left_type) == std::get<fundamental_type>(right_type);
+                return std::get<xlang::meta::reader::ElementType>(left_type) == std::get<xlang::meta::reader::ElementType>(right_type);
             }
             if (std::holds_alternative<object_type>(left_type) && std::holds_alternative<object_type>(right_type))
             {

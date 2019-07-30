@@ -29,23 +29,23 @@ namespace
         return iter->second;
     }
 
-    static const std::map<std::string, fundamental_type> str_to_simple_type_map = {
-        { "Boolean", fundamental_type::Boolean },
-        { "String", fundamental_type::String },
-        { "Int8", fundamental_type::Int8 },
-        { "Int16", fundamental_type::Int16 },
-        { "Int32", fundamental_type::Int32 },
-        { "Int64", fundamental_type::Int64 },
-        { "UInt8", fundamental_type::UInt8 },
-        { "UInt16", fundamental_type::UInt16 },
-        { "UInt32", fundamental_type::UInt32 },
-        { "UInt64", fundamental_type::UInt64 },
-        { "Char16", fundamental_type::Char16 },
-        { "Single", fundamental_type::Single },
-        { "Double", fundamental_type::Double },
+    static const std::map<std::string, xlang::meta::reader::ElementType> str_to_simple_type_map = {
+        { "Boolean", xlang::meta::reader::ElementType::Boolean },
+        { "String", xlang::meta::reader::ElementType::String },
+        { "Int8", xlang::meta::reader::ElementType::I1 },
+        { "Int16", xlang::meta::reader::ElementType::I2 },
+        { "Int32", xlang::meta::reader::ElementType::I4 },
+        { "Int64", xlang::meta::reader::ElementType::I8 },
+        { "UInt8", xlang::meta::reader::ElementType::U1 },
+        { "UInt16", xlang::meta::reader::ElementType::U2 },
+        { "UInt32", xlang::meta::reader::ElementType::U4 },
+        { "UInt64", xlang::meta::reader::ElementType::U8 },
+        { "Char16", xlang::meta::reader::ElementType::Char },
+        { "Single", xlang::meta::reader::ElementType::R4 },
+        { "Double", xlang::meta::reader::ElementType::R8 },
     };
 
-    fundamental_type str_to_simple_type(std::string const& val)
+    xlang::meta::reader::ElementType str_to_simple_type(std::string const& val)
     {
         auto const iter = str_to_simple_type_map.find(val);
         if (str_to_simple_type_map.find(val) == str_to_simple_type_map.end())
