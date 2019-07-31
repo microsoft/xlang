@@ -31,7 +31,7 @@ winrt::com_ptr<T> make_com_ptr(T* ptr)
     return result;
 }
 
-xlang::meta::reader::TypeDef FindType(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::string const& typeName);
+xlang::meta::reader::TypeDef FindType(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::string_view const& typeName);
 
 enum class NatvisDiagnosticLevel
 {
