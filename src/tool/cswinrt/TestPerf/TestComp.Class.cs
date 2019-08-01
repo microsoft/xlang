@@ -16,9 +16,10 @@ namespace TestComp.Projected
             public unsafe delegate int _GetString([In] IntPtr thisPtr);
             public unsafe delegate int _SetString([In] IntPtr thisPtr, IntPtr provider);
 
-#pragma warning disable 0169
+#pragma warning disable 0169 // warning CS0169: The field '...' is never used
             WinRT.Interop.IInspectableVftbl IInspectableVftbl;
 #pragma warning enable 0169
+#pragma warning disable 0649 // warning CS0169: Field '...' is never assigned to
             public WinRT.Interop._get_PropertyAsInt get_IntProperty;
             public WinRT.Interop._put_PropertyAsInt put_IntProperty;
             public WinRT.Interop._add_EventHandler add_IntPropertyChanged;
@@ -33,6 +34,7 @@ namespace TestComp.Projected
             public WinRT.Interop._put_PropertyAsObject put_StringsProperty;
             public _GetString GetString;
             public _SetString SetString;
+#pragma warning enable 0649
         }
 
         public readonly WinRT.ObjectReference<Vftbl> _obj;

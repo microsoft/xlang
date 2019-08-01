@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(CmakeOutDir)\strings.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="code_writers.h" />
+    <ClInclude Include="file_writers.h" />
+    <ClInclude Include="helpers.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="settings.h" />
+    <ClInclude Include="strings\cswinrt.h" />
+    <ClInclude Include="type_writers.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="version.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="strings">
+      <UniqueIdentifier>{22759db3-c622-4dcf-855d-54153084cf6d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="strings\base_interop.cs">
+      <Filter>strings</Filter>
+    </None>
+    <None Include="strings\default_activation.cs">
+      <Filter>strings</Filter>
+    </None>
+    <None Include="strings\dispose_pattern.cs">
+      <Filter>strings</Filter>
+    </None>
+    <None Include="strings\istringable.cs">
+      <Filter>strings</Filter>
+    </None>
+    <None Include="strings\WinRT.cs">
+      <Filter>strings</Filter>
+    </None>
+  </ItemGroup>
+</Project>

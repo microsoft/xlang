@@ -142,7 +142,7 @@ Where <spec> is one or more of:
             group.add([]
             {
                 writer w;
-                w.write(strings::WinRT);
+                w.write(strings::winrt);
                 w.flush_to_file(settings.output_folder / "WinRT.cs");
             });
 

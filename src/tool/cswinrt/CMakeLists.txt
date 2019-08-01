@@ -1,24 +1,21 @@
 # The C# WinRT compiler is only targeted at Visual Studio (on Windows)
 if (WIN32)
 
-project(cswinrt)
+file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/cswinrt.exe" cswinrt_exe)
+file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" CmakeOutDir)
 
-add_executable(cswinrt "")
-target_sources(cswinrt PUBLIC main.cpp pch.cpp "${PROJECT_BINARY_DIR}/strings.cpp")
-target_include_directories(cswinrt PUBLIC ${XLANG_LIBRARY_PATH} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
+set(build msbuild /nologo /m /p:Configuration=${CMAKE_BUILD_TYPE},Platform=$ENV{VSCMD_ARG_TGT_ARCH},XlangBuildVersion=${XLANG_BUILD_VERSION},CmakeOutDir=${CmakeOutDir} ${CMAKE_CURRENT_SOURCE_DIR}/cswinrt.sln)
 
-GENERATE_STRING_LITERAL_FILES("${PROJECT_SOURCE_DIR}/strings/*" "strings" "cswinrt::strings" cswinrt)
+add_custom_command(OUTPUT ${cswinrt_exe}
+    COMMAND ${build} /t:cswinrt
+)
 
-if (WIN32)
-    TARGET_CONFIG_MSVC_PCH(cswinrt pch.cpp pch.h)
-    target_link_libraries(cswinrt windowsapp ole32 shlwapi)
-else()
-    target_link_libraries(cswinrt c++ c++abi c++experimental)
-    target_link_libraries(cswinrt -lpthread)
-endif()
+add_custom_target(cswinrt ALL DEPENDS ${cswinrt_exe})
+
+set_target_properties(cswinrt PROPERTIES "cswinrt_exe" ${cswinrt_exe})
 
 # Note: the test component is built with msbuild, but the xUnit test is built/run with dotnet
-# See TestApp\readme.txt for rationale and other test considerations
+# See TestPerf\readme.txt for rationale and other test considerations
 set(build_testcomp msbuild testcomp/TestComp.vcxproj /nologo /m /p:Configuration=${CMAKE_BUILD_TYPE},Platform=$ENV{VSCMD_ARG_TGT_ARCH},SolutionDir=${CMAKE_CURRENT_SOURCE_DIR}/)
 
 if ("$ENV{VSCMD_ARG_TGT_ARCH}" STREQUAL "x86")
@@ -35,9 +32,9 @@ file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/build_tools/nuget.exe" nuget_exe)
 file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuget_exe})
 
 add_custom_target(cswinrt_test ALL DEPENDS cswinrt
-    COMMAND "${CMAKE_CURRENT_BINARY_DIR}/cswinrt.exe" -input local -output "${CMAKE_CURRENT_BINARY_DIR}/output" -include Windows.Foundation -exclude Windows.Foundation.Metadata -exclude Windows.Foundation.Diagnostics -include Windows.Data.Json.Foundation.Metadata
+    COMMAND ${cswinrt_exe} -verbose -in local -out "${CMAKE_CURRENT_BINARY_DIR}/output" -include Windows.Foundation -exclude Windows.Foundation.Metadata -exclude Windows.Foundation.Diagnostics -include Windows.Data.Json.Foundation.Metadata
     COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} 
-	COMMAND ${nuget_exe} restore
+    COMMAND ${nuget_exe} restore
     COMMAND ${build_testcomp} 
     COMMAND ${run_unittest} 
 )

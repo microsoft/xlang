@@ -826,7 +826,7 @@ internal %(System.IntPtr instance)
 
                     w.write("try\n{\n");
                     {
-                        writer::indent_guard gg{ w };
+                        writer::indent_guard ggg{ w };
                         w.write("System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(%(^@this",
                             bind<write_interop_method_name>(method, "invoke", offset));
                         for (auto&& param : signature.params())
