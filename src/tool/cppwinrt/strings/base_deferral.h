@@ -46,7 +46,7 @@ namespace winrt
                 }
                 if (--m_outstanding_deferrals == 0)
                 {
-                    resume = std::exchange(m_handle, nullptr);
+                    resume = m_handle;
                 }
             }
 
