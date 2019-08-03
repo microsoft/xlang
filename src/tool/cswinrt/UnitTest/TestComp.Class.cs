@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using WinRT;
 
+
 namespace TestComp.Projected
 {
     public delegate String StringProvider();

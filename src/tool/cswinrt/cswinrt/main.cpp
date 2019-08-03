@@ -132,12 +132,12 @@ Where <spec> is one or more of:
 
             task_group group;
 
-            group.add([]
-            {
-                writer w;
-                w.write(strings::base_interop);
-                w.flush_to_file(settings.output_folder / "base-interop.cs");
-            });
+            //group.add([]
+            //{
+            //    writer w;
+            //    w.write(strings::base_interop);
+            //    w.flush_to_file(settings.output_folder / "base-interop.cs");
+            //});
 
             group.add([]
             {

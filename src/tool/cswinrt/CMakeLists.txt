@@ -32,10 +32,10 @@ file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/build_tools/nuget.exe" nuget_exe)
 file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuget_exe})
 
 add_custom_target(cswinrt_test ALL DEPENDS cswinrt
-    COMMAND ${cswinrt_exe} -verbose -in local -out "${CMAKE_CURRENT_BINARY_DIR}/output" -include Windows.Foundation -exclude Windows.Foundation.Metadata -exclude Windows.Foundation.Diagnostics -include Windows.Data.Json.Foundation.Metadata
-    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} 
+#    COMMAND ${cswinrt_exe} -verbose -in local -out "${CMAKE_CURRENT_BINARY_DIR}/output" -include Windows.Foundation -exclude Windows.Foundation.Metadata -exclude Windows.Foundation.Diagnostics -include Windows.Data.Json.Foundation.Metadata
+#    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} 
     COMMAND ${nuget_exe} restore
-    COMMAND ${build_testcomp} 
+#    COMMAND ${build_testcomp} 
     COMMAND ${run_unittest} 
 )
 

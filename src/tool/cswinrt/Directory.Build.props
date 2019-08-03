@@ -1,8 +1,12 @@
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <Import Project="$([MSBuild]::GetPathOfFileAbove('Strings.props', '$(MSBuildThisFileDirectory)'))" />
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- Set common MSBuild properties and item metadata for CsWinRT tool and tests -->
+  <PropertyGroup Label="Globals">
+    <MinimalCoreWin>true</MinimalCoreWin>
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+  </PropertyGroup>
+ 
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '15.0'">
     <PlatformToolset>v141</PlatformToolset>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
@@ -18,10 +22,22 @@
     <XlangLibrary>..\..\..\library</XlangLibrary>
     <CmakePlatform>$(Platform)</CmakePlatform>
     <CmakePlatform Condition="'$(Platform)'=='Win32'">x86</CmakePlatform>
-    <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cswinrt</CmakeOutDir>
-    <CsWinRTDir>$(CmakeOutDir)\</CsWinRTDir>
-    <CsWinRTDir Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'">$(SolutionDir)..\..\..\_build\Windows\x86\$(Configuration)\tool\cswinrt\</CsWinRTDir>
-    <OutDir>$(CmakeOutDir)\</OutDir>
+    <CmakeOutDir Condition="'$(CmakeOutDir)'==''">$([System.IO.Path]::GetFullPath('$(SolutionDir)..\..\..\_build\Windows\$(CmakePlatform)\$(Configuration)\tool\cswinrt\'))</CmakeOutDir>
+    <CsWinRTDir>$(CmakeOutDir)</CsWinRTDir>
+    <CsWinRTDir Condition="'$(Platform)'=='ARM' or '$(Platform)'=='ARM64'">$([System.IO.Path]::GetFullPath('$(SolutionDir)..\..\..\_build\Windows\x86\$(Configuration)\tool\cswinrt'))</CsWinRTDir>
+    <CsWinRTExe>$(CsWinRTDir)cswinrt.exe</CsWinRTExe>
+    <OutDir>$(CmakeOutDir)</OutDir>
+    <IntDir>$(OutDir)$(ProjectName)\</IntDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -35,9 +51,14 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(XlangLibrary);%(AdditionalIncludeDirectories);$(CmakeOutDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(XlangLibrary);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Condition="'$(Configuration)'=='Debug'">
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Condition="'$(Configuration)'=='Release'">
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization >MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -47,5 +68,7 @@
       <PreprocessorDefinitions>XLANG_VERSION_STRING="$(XlangBuildVersion)";XLANG_VERSION_COMMAS=$(XlangBuildVersion.Replace('.', ','));%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Strings.props', '$(MSBuildThisFileDirectory)'))" />
 
 </Project>

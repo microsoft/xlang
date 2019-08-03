@@ -12,27 +12,7 @@
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -45,6 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\cswinrt\cswinrt.vcxproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Windows">
       <HintPath>$(MSBuildProgramFiles32)\Windows Kits\10\UnionMetadata\10.0.17763.0\Windows.winmd</HintPath>
       <IsWinMDFile>true</IsWinMDFile>
@@ -52,11 +36,11 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /D /Y &quot;$(SolutionDir)$(Platform)\$(Configuration)\TestComp\TestComp.dll&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /D /Y &quot;$(SolutionDir)$(Platform)\$(Configuration)\TestComp\TestComp.pdb&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;" />
+    <Exec Command="xcopy /D /Y &quot;$(OutDir)TestComp\TestComp.dll&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /D /Y &quot;$(OutDir)TestComp\TestComp.pdb&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;" />
   </Target>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="xcopy /D /Y &quot;$(SolutionDir)strings\WinRT.cs&quot;" />
+    <Exec Command="$(CsWinrtExe) -verbose -in $(OutDir)TestComp\TestComp.winmd local -out &quot;$(ProjectDir)Generated Files&quot; -include TestComp -exclude Windows.Foundation -exclude Windows.Foundation.Diagnostics" />
   </Target>
 
 </Project>
