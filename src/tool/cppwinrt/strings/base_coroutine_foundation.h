@@ -115,7 +115,7 @@ namespace winrt::impl
                 {
                     if (is_sta())
                     {
-                        resume_background().await_suspend(handle);
+                        impl::resume_background(handle);
                     }
                     else
                     {
