@@ -86,9 +86,9 @@ namespace winrt::impl
     {
         Async const& async;
 
-        bool await_ready() const
+        bool await_ready() const noexcept
         {
-            return async.Status() == Windows::Foundation::AsyncStatus::Completed;
+            return false;
         }
 
         void await_suspend(std::experimental::coroutine_handle<> handle) const
