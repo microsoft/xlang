@@ -56,16 +56,15 @@ namespace winrt
             }
         }
 
-        bool await_suspend(coroutine_handle handle)
+        bool await_suspend(coroutine_handle handle) noexcept
         {
             slim_lock_guard const guard(m_lock);
             m_handle = handle;
             return m_outstanding_deferrals > 0;
         }
 
-    private:
         slim_mutex m_lock;
-        long m_outstanding_deferrals = 0;
+        int32_t m_outstanding_deferrals = 0;
         coroutine_handle m_handle = nullptr;
     };
 #endif
