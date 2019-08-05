@@ -33,7 +33,7 @@ namespace
         co_await resume_foreground(dispatcher);
         REQUIRE(impl::is_sta());
 
-        // This excercises one STA thread waiting on another thus one context callback
+        // This exercises one STA thread waiting on another thus one context callback
         // completing on another.
         uint32_t id = GetCurrentThreadId();
         co_await OtherForegroundAsync();
@@ -63,7 +63,7 @@ namespace
         co_await resume_background();
         REQUIRE(!impl::is_sta());
 
-        // This excercises one MTA thread waiting on another and just completing
+        // This exercises one MTA thread waiting on another and just completing
         // directly without the overhead of a context switch.
         co_await OtherBackgroundAsync();
         REQUIRE(!impl::is_sta());
@@ -72,7 +72,7 @@ namespace
         co_await ForegroundAsync(dispatcher);
 
         // Resumption should automatically switch to a background (MTA) thread
-        // without blocking the Completed handler and thus blocking the foreground thread.
+        // without blocking the Completed handler (which would in turn block the foreground thread).
         REQUIRE(!impl::is_sta());
 
         // Attempt to signal from the foreground thread under the assumption
