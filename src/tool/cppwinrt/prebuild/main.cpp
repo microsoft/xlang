@@ -22,7 +22,6 @@ namespace xlang::strings {
 )");
 
     strings_cpp.write(R"(
-#include "pch.h"
 namespace xlang::strings {
 )");
 

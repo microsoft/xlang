@@ -22,16 +22,24 @@ namespace xlang::impl
             xlang_unknown* execution_trace,
             xlang_unknown* language_information
         ) noexcept :
-            m_result{ result },
-            m_message{ message },
-            m_projection_identifier{ projection_identifier },
-            m_language_error{ language_error }
-        {
+            m_result{ result }
+        {   
             m_execution_trace.copy_from(execution_trace);
             m_language_information.copy_from(language_information);
+
+            try
+            {
+                copy_from_abi(m_message, message);
+                copy_from_abi(m_projection_identifier, projection_identifier);
+                copy_from_abi(m_language_error, language_error);
+            }
+            catch (...)
+            {
+                // Even if any of the string copies fail, we still have a xlang_result to represent the error.
+            }
         }
 
-        int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
+        com_interop_result XLANG_CALL QueryInterface(xlang_guid const& id, void** object) noexcept final
         {
             if (id == xlang_unknown_guid)
             {
@@ -45,10 +53,10 @@ namespace xlang::impl
             else
             {
                 *object = nullptr;
-                return xlang_hresult_no_interface;
+                return com_interop_result::no_interface;
             }
             AddRef();
-            return 0;
+            return com_interop_result::success;
         }
 
         uint32_t XLANG_CALL AddRef() noexcept final
@@ -73,12 +81,14 @@ namespace xlang::impl
 
         void GetMessage(xlang_string* message) noexcept override
         {
-            *message = m_message;
+            *message = nullptr;
+            copy_to_abi(m_message, *message);
         }
 
         void GetLanguageError(xlang_string* language_error) noexcept override
         {
-            *language_error = m_language_error;
+            *language_error = nullptr;
+            copy_to_abi(m_language_error, *language_error);
         }
 
         void GetExecutionTrace(xlang_unknown** execution_trace) noexcept override
@@ -88,7 +98,8 @@ namespace xlang::impl
 
         void GetProjectionIdentifier(xlang_string* projection_identifier) noexcept override
         {
-            *projection_identifier = m_projection_identifier;
+            *projection_identifier = nullptr;
+            copy_to_abi(m_projection_identifier, *projection_identifier);
         }
 
         void GetLanguageInformation(xlang_unknown** language_information) noexcept override
@@ -119,7 +130,7 @@ namespace xlang::impl
             propagated_error.attach(
                 xlang_originate_error(
                     m_result,
-                    m_message,
+                    get_abi(m_message),
                     projection_identifier,
                     language_error,
                     execution_trace,
@@ -135,10 +146,10 @@ namespace xlang::impl
 
     private:
         xlang_result m_result{};
-        xlang_string m_message{ nullptr };
-        xlang_string m_language_error{ nullptr };
+        hstring m_message{};
+        hstring m_language_error{};
         com_ptr<xlang_unknown> m_execution_trace;
-        xlang_string m_projection_identifier{ nullptr };
+        hstring m_projection_identifier{};
         com_ptr<xlang_unknown> m_language_information;
         com_ptr<xlang_error_info> m_next_propagated_error;
         bool m_modifiable{ true };

@@ -14,5 +14,5 @@ void test_auto()
 
     Class::StaticTestReturn();
 
-    auto discarded = Class::StaticProperty(); discarded;
+    [[maybe_unused]] auto discarded = Class::StaticProperty();
 }

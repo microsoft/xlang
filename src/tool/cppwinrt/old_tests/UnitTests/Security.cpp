@@ -14,7 +14,8 @@ namespace
         access_token duplicate;
         check_bool(DuplicateTokenEx(token.get(), TOKEN_ADJUST_PRIVILEGES | TOKEN_IMPERSONATE, nullptr, SecurityImpersonation, TokenImpersonation, duplicate.put()));
 
-        TOKEN_PRIVILEGES privileges{ 1 };
+        TOKEN_PRIVILEGES privileges{};
+        privileges.PrivilegeCount = 1;
         privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
         check_bool(LookupPrivilegeValueW(nullptr, L"SeShutdownPrivilege", &privileges.Privileges[0].Luid));
         check_bool(AdjustTokenPrivileges(duplicate.get(), FALSE, &privileges, sizeof(TOKEN_PRIVILEGES), nullptr, nullptr));
@@ -33,7 +34,8 @@ namespace
             return false;
         }
 
-        PRIVILEGE_SET privileges{ 1 };
+        PRIVILEGE_SET privileges{};
+        privileges.PrivilegeCount = 1;
         privileges.Privilege[0].Attributes = SE_PRIVILEGE_ENABLED;
         check_bool(LookupPrivilegeValueW(nullptr, L"SeShutdownPrivilege", &privileges.Privilege[0].Luid));
 

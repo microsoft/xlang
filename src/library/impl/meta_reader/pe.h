@@ -4,7 +4,7 @@ namespace xlang::impl
 {
     struct image_dos_header
     {
-        uint16_t e_magic;
+        uint16_t e_signature;
         uint16_t e_cblp;
         uint16_t e_cp;
         uint16_t e_crlc;
@@ -82,6 +82,47 @@ namespace xlang::impl
         uint32_t Signature;
         image_file_header FileHeader;
         image_optional_header32 OptionalHeader;
+    };
+
+    struct image_optional_header32plus
+    {
+        uint16_t Magic;
+        uint8_t MajorLinkerVersion;
+        uint8_t MinorLinkerVersion;
+        uint32_t SizeOfCode;
+        uint32_t SizeOfInitializedData;
+        uint32_t SizeOfUninitializedData;
+        uint32_t AddressOfEntryPoint;
+        uint32_t BaseOfCode;
+        uint64_t ImageBase;
+        uint32_t SectionAlignment;
+        uint32_t FileAlignment;
+        uint16_t MajorOperatingSystemVersion;
+        uint16_t MinorOperatingSystemVersion;
+        uint16_t MajorImageVersion;
+        uint16_t MinorImageVersion;
+        uint16_t MajorSubsystemVersion;
+        uint16_t MinorSubsystemVersion;
+        uint32_t Win32VersionValue;
+        uint32_t SizeOfImage;
+        uint32_t SizeOfHeaders;
+        uint32_t CheckSum;
+        uint16_t Subsystem;
+        uint16_t DllCharacteristics;
+        uint64_t SizeOfStackReserve;
+        uint64_t SizeOfStackCommit;
+        uint64_t SizeOfHeapReserve;
+        uint64_t SizeOfHeapCommit;
+        uint32_t LoaderFlags;
+        uint32_t NumberOfRvaAndSizes;
+        image_data_directory DataDirectory[16];
+    };
+
+    struct image_nt_headers32plus
+    {
+        uint32_t Signature;
+        image_file_header FileHeader;
+        image_optional_header32plus OptionalHeader;
     };
 
     struct image_section_header {

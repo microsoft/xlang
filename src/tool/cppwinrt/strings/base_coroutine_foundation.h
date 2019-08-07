@@ -86,28 +86,43 @@ namespace winrt::impl
     {
         Async const& async;
 
-        bool await_ready() const
+        bool await_ready() const noexcept
         {
-            return async.Status() == Windows::Foundation::AsyncStatus::Completed;
+            return false;
         }
 
         void await_suspend(std::experimental::coroutine_handle<> handle) const
         {
-            auto context = capture<IContextCallback>(WINRT_CoGetObjectContext);
-
-            async.Completed([handle, context = std::move(context)](auto const&, Windows::Foundation::AsyncStatus)
+            if (is_sta())
             {
-                com_callback_args args{};
-                args.data = handle.address();
-
-                auto callback = [](com_callback_args* args) noexcept -> int32_t
+                async.Completed([handle, context = capture<IContextCallback>(WINRT_CoGetObjectContext)](auto&&...)
                 {
-                    std::experimental::coroutine_handle<>::from_address(args->data)();
-                    return error_ok;
-                };
+                    com_callback_args args{};
+                    args.data = handle.address();
 
-                check_hresult(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
-            });
+                    auto callback = [](com_callback_args* args) noexcept -> int32_t
+                    {
+                        std::experimental::coroutine_handle<>::from_address(args->data)();
+                        return error_ok;
+                    };
+
+                    check_hresult(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
+                });
+            }
+            else
+            {
+                async.Completed([handle](auto&& ...)
+                {
+                    if (is_sta())
+                    {
+                        impl::resume_background(handle);
+                    }
+                    else
+                    {
+                        handle();
+                    }
+                });
+            }
         }
 
         auto await_resume() const
@@ -115,9 +130,53 @@ namespace winrt::impl
             return async.GetResults();
         }
     };
+
+    template <typename D>
+    auto consume_Windows_Foundation_IAsyncAction<D>::get() const
+    {
+        impl::wait_get(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)));
+    }
+    template <typename D>
+    auto consume_Windows_Foundation_IAsyncAction<D>::wait_for(Windows::Foundation::TimeSpan const& timeout) const
+    {
+        return impl::wait_for(static_cast<Windows::Foundation::IAsyncAction const&>(static_cast<D const&>(*this)), timeout);
+    }
+
+    template <typename D, typename TResult>
+    auto consume_Windows_Foundation_IAsyncOperation<D, TResult>::get() const
+    {
+        return impl::wait_get(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)));
+    }
+    template <typename D, typename TResult>
+    auto consume_Windows_Foundation_IAsyncOperation<D, TResult>::wait_for(Windows::Foundation::TimeSpan const& timeout) const
+    {
+        return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperation<TResult> const&>(static_cast<D const&>(*this)), timeout);
+    }
+
+    template <typename D, typename TProgress>
+    auto consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::get() const
+    {
+        impl::wait_get(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)));
+    }
+    template <typename D, typename TProgress>
+    auto consume_Windows_Foundation_IAsyncActionWithProgress<D, TProgress>::wait_for(Windows::Foundation::TimeSpan const& timeout) const
+    {
+        return impl::wait_for(static_cast<Windows::Foundation::IAsyncActionWithProgress<TProgress> const&>(static_cast<D const&>(*this)), timeout);
+    }
+
+    template <typename D, typename TResult, typename TProgress>
+    auto consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::get() const
+    {
+        return impl::wait_get(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)));
+    }
+    template <typename D, typename TResult, typename TProgress>
+    auto consume_Windows_Foundation_IAsyncOperationWithProgress<D, TResult, TProgress>::wait_for(Windows::Foundation::TimeSpan const& timeout) const
+    {
+        return impl::wait_for(static_cast<Windows::Foundation::IAsyncOperationWithProgress<TResult, TProgress> const&>(static_cast<D const&>(*this)), timeout);
+    }
 }
 
-#ifdef _RESUMABLE_FUNCTIONS_SUPPORTED
+#ifdef __cpp_coroutines
 namespace winrt::Windows::Foundation
 {
     inline impl::await_adapter<IAsyncAction> operator co_await(IAsyncAction const& async)
@@ -618,4 +677,47 @@ namespace std::experimental
             ProgressHandler m_progress;
         };
     };
+}
+
+namespace winrt
+{
+    template <typename... T>
+    Windows::Foundation::IAsyncAction when_all(T... async)
+    {
+        (co_await async, ...);
+    }
+
+    template <typename T, typename... Rest>
+    T when_any(T const& first, Rest const& ... rest)
+    {
+        static_assert(impl::has_category_v<T>, "T must be WinRT async type such as IAsyncAction or IAsyncOperation.");
+        static_assert((std::is_same_v<T, Rest> && ...), "All when_any parameters must be the same type.");
+
+        struct shared_type
+        {
+            handle event{ check_pointer(WINRT_CreateEventW(nullptr, true, false, nullptr)) };
+            T result;
+        };
+
+        auto shared = std::make_shared<shared_type>();
+
+        auto completed = [&](T const& async)
+        {
+            async.Completed([shared](T const& sender, Windows::Foundation::AsyncStatus) noexcept
+                {
+                    auto sender_abi = *(impl::unknown_abi**)&sender;
+
+                    if (nullptr == _InterlockedCompareExchangePointer(reinterpret_cast<void**>(&shared->result), sender_abi, nullptr))
+                    {
+                        sender_abi->AddRef();
+                        WINRT_VERIFY(WINRT_SetEvent(shared->event.get()));
+                    }
+                });
+        };
+
+        completed(first);
+        (completed(rest), ...);
+        co_await resume_on_signal(shared->event.get());
+        co_return shared->result.GetResults();
+    }
 }

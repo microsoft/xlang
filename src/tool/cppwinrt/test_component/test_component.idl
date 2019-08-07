@@ -56,6 +56,12 @@ namespace test_component
         Object Object(Windows.Foundation.DateTime value);
     }
 
+    runtimeclass DeferrableEventArgs
+    {
+        Windows.Foundation.Deferral GetDeferral();
+        void IncrementCounter();
+    }
+
     runtimeclass Class
     {
         Class();
@@ -137,6 +143,9 @@ namespace test_component
         [noexcept2] void NoexceptVoid();
         [noexcept2] Int32 NoexceptInt32();
         [noexcept2] String NoexceptString();
+
+        event Windows.Foundation.TypedEventHandler<Class, DeferrableEventArgs> DeferrableEvent;
+        Windows.Foundation.IAsyncOperation<Int32> RaiseDeferrableEventAsync();
     }
 
     namespace Structs

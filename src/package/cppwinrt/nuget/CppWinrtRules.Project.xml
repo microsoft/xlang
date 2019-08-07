@@ -46,6 +46,11 @@
                Description="Overrides the depth of mdmerge.exe namespace merging (Xaml apps require 1)"
                Category="General" />
 
+  <BoolProperty Name="CppWinRTRootNamespaceAutoMerge"
+                DisplayName="Use Root Namespace Merge Depth"
+                Description="Use the Root Namespace as the default merge depth"
+                Category="General" />
+
   <BoolProperty Name="CppWinRTUsePrefixes"
                 DisplayName="Use Prefixes"
                 Description="Uses a dotted prefix namespace convention (versus a nested folder convention)"

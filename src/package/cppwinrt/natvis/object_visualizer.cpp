@@ -196,6 +196,21 @@ static HRESULT EvaluatePropertyString(
     return S_OK;
 }
 
+static std::string GetRuntimeClass(
+    _In_ DkmVisualizedExpression* pExpression,
+    _In_ DkmPointerValueHome* pObject,
+    bool isAbiObject
+)
+{
+    com_ptr<DkmString> pValue;
+    EvaluatePropertyString({ IID_IInspectable, -2, PropertyCategory::String }, pExpression, pObject, isAbiObject, pValue);
+    if (!pValue || pValue->Length() == 0)
+    {
+        return "";
+    }
+    return to_string(pValue->Value());
+}
+
 static HRESULT ObjectToString(
     _In_ DkmVisualizedExpression* pExpression,
     _In_ DkmPointerValueHome* pObject,
@@ -205,18 +220,23 @@ static HRESULT ObjectToString(
 {
     if (SUCCEEDED(EvaluatePropertyString({ IID_IStringable, 0, PropertyCategory::String }, pExpression, pObject, isAbiObject, pValue)))
     {
-        if (!pValue || pValue->Length() == 0)
+        if (pValue && pValue->Length() > 0)
         {
-            pValue = nullptr;
-            IF_FAIL_RET(DkmString::Create(L"<Expand object to view properties>", pValue.put()));
+            return S_OK;
+        }
+        pValue = nullptr;
+        
+        // WINRT_abi_val returned 0, which may be success or failure (due to VirtualQuery validation)
+        // Call back for the runtime class name to determine which it was
+        if (!GetRuntimeClass(pExpression, pObject, isAbiObject).empty())
+        {
+            return DkmString::Create(L"<Expand object to view properties>", pValue.put());
         }
     }
-    else
-    {
-        IF_FAIL_RET(DkmString::Create(L"<Object uninitialized or information unavailable>", pValue.put()));
-    }
 
-    return S_OK;
+    // VirtualQuery validation failed (as determined by no runtime class name) or an
+    // exception escaped WINRT_abi_val (e.g, bad pointer, which we try to avoid via VirtualQuery)
+    return DkmString::Create(L"<Object uninitialized or information unavailable>", pValue.put());
 }
 
 static HRESULT CreateChildVisualizedExpression(
@@ -496,19 +516,19 @@ void GetInterfaceData(
 
 void object_visualizer::GetPropertyData()
 {
-    com_ptr<DkmString> pValue;
-    com_ptr<DkmChildVisualizedExpression> pPropertyVisualized;
-    if (FAILED(CreateChildVisualizedExpression({ IID_IInspectable, -2, PropertyCategory::String }, m_pVisualizedExpression.get(), m_isAbiObject, pPropertyVisualized.put())) ||
-        FAILED(pPropertyVisualized->GetUnderlyingString(pValue.put())))
+    auto valueHome = make_com_ptr(m_pVisualizedExpression->ValueHome());
+    com_ptr<DkmPointerValueHome> pObject = valueHome.as<DkmPointerValueHome>();
+    auto rc = GetRuntimeClass(m_pVisualizedExpression.get(), pObject.get(), m_isAbiObject);
+    if (rc.empty())
     {
         return;
     }
-
     auto process = m_pVisualizedExpression->RuntimeInstance()->Process();
-    GetTypeProperties(process, to_string(pValue->Value()));
+    // runtime class name is delimited by L"..."
+    GetTypeProperties(process, std::string_view{ rc.data() + 2, rc.length() - 3 });
 }
 
-void object_visualizer::GetTypeProperties(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::string const& type_name)
+void object_visualizer::GetTypeProperties(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::string_view const& type_name)
 {
     auto type = FindType(process, type_name);
     if (!type)
