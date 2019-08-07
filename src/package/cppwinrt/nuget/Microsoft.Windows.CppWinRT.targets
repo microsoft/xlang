@@ -434,16 +434,13 @@ $(XamlMetaDataProviderPch)
         </PropertyGroup>
         <ItemGroup>
             <_CppwinrtCompInputs Remove="@(_CppwinrtCompInputs)"/>
-            <_CppwinrtCompInputs Include="@(Midl)">
-                <WinMDPath>%(Midl.OutputDirectory)%(Midl.MetadataFileName)</WinMDPath>
+            <_CppwinrtCompInputs Include="@(MdMergeOutput)">
+                <WinMDPath>%(MdMergeOutput.FullPath)</WinMDPath>
             </_CppwinrtCompInputs>
             <_CppwinrtCompRefs Remove="@(_CppwinrtCompRefs)"/>
             <_CppwinrtCompRefs Include="@(CppWinRTDirectWinMDReferences)"/>
             <_CppwinrtCompRefs Include="@(CppWinRTDynamicWinMDReferences)"/>
             <_CppwinrtCompRefs Include="@(CppWinRTPlatformWinMDReferences)"/>
-            <_CppwinrtCompRefs Include="@(MdMergeOutput)">
-                <WinMDPath>%(MdMergeOutput.FullPath)</WinMDPath>
-            </_CppwinrtCompRefs>
         </ItemGroup>
         <PropertyGroup>
             <_CppwinrtParameters>$(CppWinRTCommandVerbosity) $(CppWinRTParameters) -overwrite -name $(RootNamespace) $(CppWinRTCommandPrecompiledHeader) $(CppWinRTCommandUsePrefixes) -comp &quot;$(GeneratedFilesDir)sources&quot;</_CppwinrtParameters>
