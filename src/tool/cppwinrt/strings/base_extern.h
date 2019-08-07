@@ -41,6 +41,7 @@ extern "C"
     uint32_t __stdcall WINRT_FormatMessageW(uint32_t flags, void const* source, uint32_t code, uint32_t language, wchar_t* buffer, uint32_t size, va_list* arguments) noexcept;
     uint32_t __stdcall WINRT_GetLastError() noexcept;
     void     __stdcall WINRT_GetSystemTimePreciseAsFileTime(void* result) noexcept;
+    uintptr_t __stdcall WINRT_VirtualQuery(void* address, void* buffer, uintptr_t length) noexcept;
 
     int32_t  __stdcall WINRT_OpenProcessToken(void* process, uint32_t access, void** token) noexcept;
     void*    __stdcall WINRT_GetCurrentProcess() noexcept;
@@ -134,6 +135,7 @@ WINRT_IMPL_LINK(GetProcessHeap, 0)
 WINRT_IMPL_LINK(FormatMessageW, 28)
 WINRT_IMPL_LINK(GetLastError, 0)
 WINRT_IMPL_LINK(GetSystemTimePreciseAsFileTime, 4)
+WINRT_IMPL_LINK(VirtualQuery, 12)
 
 WINRT_IMPL_LINK(OpenProcessToken, 12)
 WINRT_IMPL_LINK(GetCurrentProcess, 0)

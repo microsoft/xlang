@@ -450,25 +450,12 @@ namespace xlang
             {
                 for (delegate_type const& element : *temp_targets)
                 {
-                    bool remove_delegate = false;
-
                     try
                     {
                         element(args...);
                     }
-                    catch (hresult_error const& e)
+                    catch (xlang_error const& e)
                     {
-                        if (e.code() == static_cast<int32_t>(0x80010108) || // RPC_E_DISCONNECTED
-                            e.code() == static_cast<int32_t>(0x800706BA) || // HRESULT_FROM_WIN32(RPC_S_SERVER_UNAVAILABLE)
-                            e.code() ==  static_cast<int32_t>(0x89020001))  // JSCRIPT_E_CANTEXECUTE
-                        {
-                            remove_delegate = true;
-                        }
-                    }
-
-                    if (remove_delegate)
-                    {
-                        remove(get_token(element));
                     }
                 }
             }

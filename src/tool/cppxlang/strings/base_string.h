@@ -33,7 +33,7 @@ namespace xlang::impl
     inline xlang_string duplicate_string(xlang_string other)
     {
         xlang_string result = nullptr;
-        check_hresult(xlang_duplicate_string(other, &result));
+        check_xlang_error(xlang_duplicate_string(other, &result));
         return result;
     }
 
@@ -45,11 +45,11 @@ namespace xlang::impl
         auto const length = static_cast<uint32_t>(normalized.size());
         if constexpr (sizeof(char_type) == sizeof(xlang_char8))
         {
-            check_hresult(xlang_create_string_utf8(normalized.data(), length, &result));
+            check_xlang_error(xlang_create_string_utf8(normalized.data(), length, &result));
         }
         else
         {
-            check_hresult(xlang_create_string_utf16(normalized.data(), length, &result));
+            check_xlang_error(xlang_create_string_utf16(normalized.data(), length, &result));
         }
         return result;
     }
@@ -209,7 +209,7 @@ namespace xlang
         {
             uint32_t size;
             xlang_char8 const* data;
-            check_hresult(xlang_get_string_raw_buffer_utf8(m_handle.get(), &data, &size));
+            check_xlang_error(xlang_get_string_raw_buffer_utf8(m_handle.get(), &data, &size));
             return { data, size };
         }
 
@@ -400,14 +400,14 @@ namespace xlang::impl
         explicit hstring_builder(uint32_t const size)
             : m_size(size)
         {
-            check_hresult(xlang_preallocate_string_buffer_utf8(m_size, &m_data, &m_buffer));
+            check_xlang_error(xlang_preallocate_string_buffer_utf8(m_size, &m_data, &m_buffer));
         }
 
         ~hstring_builder() noexcept
         {
             if (m_buffer != nullptr)
             {
-                check_hresult(xlang_delete_string_buffer(m_buffer));
+                check_xlang_error(xlang_delete_string_buffer(m_buffer));
             }
         }
 
@@ -421,7 +421,7 @@ namespace xlang::impl
         {
             XLANG_ASSERT(m_buffer != nullptr);
             xlang_string result;
-            check_hresult(xlang_promote_string_buffer(m_buffer, &result, m_size));
+            check_xlang_error(xlang_promote_string_buffer(m_buffer, &result, m_size));
             m_buffer = nullptr;
             return { result, take_ownership_from_abi };
         }

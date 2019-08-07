@@ -5,9 +5,8 @@ namespace xlang
     impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
         void* result;
-        auto hr = xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result);
+        check_xlang_error(xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result));
 
-        check_hresult(hr);
         return { result, take_ownership_from_abi };
     }
 }
@@ -56,17 +55,21 @@ namespace xlang::impl
     }
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
-    impl::com_ref<Interface> try_get_activation_factory(hresult_error* exception = nullptr) noexcept
+    impl::com_ref<Interface> try_get_activation_factory(xlang_error* exception = nullptr) noexcept
     {
         param::hstring const name{ name_of<Class>() };
         void* result;
-        auto const hr = xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result);
+        com_ptr<xlang_error_info> error_info{
+            xlang_get_activation_factory(get_abi(name), guid_of<Interface>(), &result),
+            take_ownership_from_abi
+        };
 
-        if (hr != nullptr)
+        if (error_info != nullptr)
         {
-            // Ensure that the IRestrictedErrorInfo is not left on the thread.
-            hresult_error local_exception{ hr->error_code(), take_ownership_from_abi };
+            xlang_result error;
+            error_info->GetError(&error);
 
+            xlang_error local_exception{ error , error_info };
             if (exception)
             {
                 // Optionally transfer ownership to the caller.
@@ -81,7 +84,7 @@ namespace xlang::impl
     {
         struct XLANG_NOVTABLE type : xlang_object_abi
         {
-            virtual int32_t XLANG_CALL ActivateInstance(void** instance) noexcept = 0;
+            virtual xlang_error_info* XLANG_CALL ActivateInstance(void** instance) noexcept = 0;
         };
     };
 
@@ -92,14 +95,14 @@ namespace xlang::impl
 
     template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
     {
-        int32_t XLANG_CALL ActivateInstance(void** instance) noexcept final try
+        xlang_error_info* XLANG_CALL ActivateInstance(void** instance) noexcept final try
         {
             *instance = nullptr;
             typename D::abi_guard guard(this->shim());
             *instance = detach_abi(this->shim().ActivateInstance());
-            return error_ok;
+            return nullptr;
         }
-        catch (...) { return to_hresult(); }
+        catch (...) { return to_xlang_error(); }
     };
 }
 
@@ -124,7 +127,7 @@ namespace xlang
     }
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
-    auto try_get_activation_factory(hresult_error& exception) noexcept
+    auto try_get_activation_factory(xlang_error& exception) noexcept
     {
         return impl::try_get_activation_factory<Class, Interface>(&exception);
     }
@@ -140,7 +143,7 @@ namespace xlang
             T ActivateInstance() const
             {
                 IXlangObject instance;
-                check_hresult((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
+                check_xlang_error((*(impl::abi_t<IActivationFactory>**)this)->ActivateInstance(put_abi(instance)));
                 return instance.try_as<T>();
             }
         };

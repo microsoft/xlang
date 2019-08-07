@@ -40,7 +40,7 @@ namespace
         REQUIRE(10 == values.Lookup(1));
         REQUIRE(20 == values.Lookup(2));
         REQUIRE(30 == values.Lookup(3));
-        REQUIRE_THROWS_AS(values.Lookup(4), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.Lookup(4), out_of_bounds_error);
 
         REQUIRE(10 == values.TryLookup(1).value());
         REQUIRE(20 == values.TryLookup(2).value());
@@ -99,6 +99,6 @@ TEST_CASE("test_map_view_scope")
 {
     std::map<int, int> local{ { 1, 10 },{ 2,20 },{ 3,30 } };
     IMapView<int, int> a = test_map_view_scope(local);
-    REQUIRE_THROWS_AS(a.First(), hresult_illegal_method_call);
+    REQUIRE_THROWS_AS(a.First(), invalid_state_error);
 }
 

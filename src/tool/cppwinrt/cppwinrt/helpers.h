@@ -12,22 +12,28 @@ namespace xlang
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
     }
 
+    static bool is_put_overload(MethodDef const& method)
+    {
+        return method.SpecialName() && starts_with(method.Name(), "put_");
+    }
+
     struct method_signature
     {
         explicit method_signature(MethodDef const& method) :
-            m_method(method.Signature())
+            m_method(method),
+            m_signature(method.Signature())
         {
             auto params = method.ParamList();
 
-            if (m_method.ReturnType() && params.first != params.second && params.first.Sequence() == 0)
+            if (m_signature.ReturnType() && params.first != params.second && params.first.Sequence() == 0)
             {
                 m_return = params.first;
                 ++params.first;
             }
 
-            for (uint32_t i{}; i != size(m_method.Params()); ++i)
+            for (uint32_t i{}; i != size(m_signature.Params()); ++i)
             {
-                m_params.emplace_back(params.first + i, &m_method.Params().first[i]);
+                m_params.emplace_back(params.first + i, &m_signature.Params().first[i]);
             }
         }
 
@@ -43,7 +49,7 @@ namespace xlang
 
         auto const& return_signature() const
         {
-            return m_method.ReturnType();
+            return m_signature.ReturnType();
         }
 
         auto return_param_name() const
@@ -62,9 +68,58 @@ namespace xlang
             return name;
         }
 
+        MethodDef const& method() const
+        {
+            return m_method;
+        }
+
+        bool is_async() const
+        {
+            // WinRT parameter passing conventions include the notion that input parameters of collection types may be read
+            // or copied but should not be stored directly since this would lead to instability as the collection is shared
+            // by the caller and callee. The exception to this rule is property setters where the callee may simply store a
+            // reference to the collection. The collection thus becomes async in the sense that it is expected to remain
+            // valid beyond the duration of the call.
+            
+            if (is_put_overload(m_method))
+            {
+                return true;
+            }
+
+            if (!m_signature.ReturnType())
+            {
+                return false;
+            }
+
+            bool async{};
+
+            call(m_signature.ReturnType().Type().Type(),
+                [&](coded_index<TypeDefOrRef> const& type)
+                {
+                    auto const& [type_namespace, type_name] = get_type_namespace_and_name(type);
+                    async = type_namespace == "Windows.Foundation" && type_name == "IAsyncAction";
+                },
+                [&](GenericTypeInstSig const& type)
+                {
+                    auto const& [type_namespace, type_name] = get_type_namespace_and_name(type.GenericType());
+
+                    if (type_namespace == "Windows.Foundation")
+                    {
+                        async =
+                            type_name == "IAsyncOperation`1" ||
+                            type_name == "IAsyncActionWithProgress`1" ||
+                            type_name == "IAsyncOperationWithProgress`2";
+                    }
+                },
+                    [](auto&&) {});
+
+            return async;
+        }
+
     private:
 
-        MethodDefSig m_method;
+        MethodDef m_method;
+        MethodDefSig m_signature;
         std::vector<std::pair<Param, ParamSig const*>> m_params;
         Param m_return;
     };
@@ -133,11 +188,6 @@ namespace xlang
         return method.SpecialName() && starts_with(method.Name(), "add_");
     }
 
-    static bool is_put_overload(MethodDef const& method)
-    {
-        return method.SpecialName() && starts_with(method.Name(), "put_");
-    }
-
     static bool is_get_overload(MethodDef const& method)
     {
         return method.SpecialName() && starts_with(method.Name(), "get_");
@@ -202,43 +252,6 @@ namespace xlang
         }
 
         return {};
-    }
-
-    static bool is_async(MethodDef const& method, method_signature const& method_signature)
-    {
-        if (is_put_overload(method))
-        {
-            return true;
-        }
-
-        if (!method_signature.return_signature())
-        {
-            return false;
-        }
-
-        bool async{};
-
-        call(method_signature.return_signature().Type().Type(),
-            [&](coded_index<TypeDefOrRef> const& type)
-            {
-                auto const& [type_namespace, type_name] = get_type_namespace_and_name(type);
-                async = type_namespace == "Windows.Foundation" && type_name == "IAsyncAction";
-            },
-            [&](GenericTypeInstSig const& type)
-            {
-                auto const& [type_namespace, type_name] = get_type_namespace_and_name(type.GenericType());
-
-                if (type_namespace == "Windows.Foundation")
-                {
-                    async =
-                        type_name == "IAsyncOperation`1" ||
-                        type_name == "IAsyncActionWithProgress`1" ||
-                        type_name == "IAsyncOperationWithProgress`2";
-                }
-            },
-            [](auto&&) {});
-
-        return async;
     }
 
     static TypeDef get_base_class(TypeDef const& derived)

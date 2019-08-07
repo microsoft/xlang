@@ -10,6 +10,7 @@ if (WIN32)
     target_sources(test_cppx
         PRIVATE
         collection_base.cpp
+        error.cpp
     #    param_iterable.cpp
     #    param_map.cpp
     #    param_map_view.cpp

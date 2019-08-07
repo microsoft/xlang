@@ -25,7 +25,7 @@ namespace xlang::impl
         }
 
         void* result{};
-        check_hresult(ptr->QueryInterface(guid_of<To>(), &result));
+        check_com_interop_error(ptr->QueryInterface(guid_of<To>(), &result));
         return wrap_as_result<To>(result);
     }
 
@@ -128,7 +128,7 @@ namespace xlang::Windows::Foundation
             return static_cast<bool>(to);
         }
 
-        hresult as(guid const& id, void** result) const noexcept
+        com_interop_result as(guid const& id, void** result) const noexcept
         {
             return m_ptr->QueryInterface(id, result);
         }

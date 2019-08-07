@@ -67,7 +67,7 @@ object_visualizer : winrt::implements<object_visualizer, ::IUnknown>
 
 private:
     void GetPropertyData();
-    void GetTypeProperties(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::string const& type_name);
+    void GetTypeProperties(Microsoft::VisualStudio::Debugger::DkmProcess* process, std::string_view const& type_name);
     winrt::com_ptr<Microsoft::VisualStudio::Debugger::Evaluation::DkmVisualizedExpression> m_pVisualizedExpression;
     bool m_isAbiObject;
     std::vector<PropertyData> m_propertyData;

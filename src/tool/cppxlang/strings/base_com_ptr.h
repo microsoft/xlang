@@ -137,7 +137,7 @@ namespace xlang
             return static_cast<bool>(to);
         }
 
-        hresult as(guid const& id, void** result) const noexcept
+        com_interop_result as(guid const& id, void** result) const noexcept
         {
             return m_ptr->QueryInterface(id, result);
         }
@@ -156,13 +156,13 @@ namespace xlang
         template <typename F, typename...Args>
         void capture(F function, Args&&...args)
         {
-            check_hresult(function(args..., guid_of<T>(), put_void()));
+            check_xlang_error(function(args..., guid_of<T>(), put_void()));
         }
 
         template <typename O, typename M, typename...Args>
         void capture(com_ptr<O> const& object, M method, Args&&...args)
         {
-            check_hresult((object.get()->*(method))(args..., guid_of<T>(), put_void()));
+            check_xlang_error((object.get()->*(method))(args..., guid_of<T>(), put_void()));
         }
 
     private:
@@ -208,14 +208,14 @@ namespace xlang
     impl::com_ref<T> capture(F function, Args&& ...args)
     {
         void* result{};
-        check_hresult(function(args..., guid_of<T>(), &result));
+        check_xlang_error(function(args..., guid_of<T>(), &result));
         return { result, take_ownership_from_abi };
     }
     template <typename T, typename O, typename M, typename...Args>
     impl::com_ref<T> capture(com_ptr<O> const& object, M method, Args && ...args)
     {
         void* result{};
-        check_hresult((object.get()->*(method))(args..., guid_of<T>(), &result));
+        check_xlang_error((object.get()->*(method))(args..., guid_of<T>(), &result));
         return { result, take_ownership_from_abi };
     }
 

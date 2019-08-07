@@ -411,4 +411,22 @@ namespace winrt::test_component::implementation
     {
         return L"123";
     }
+
+    event_token Class::DeferrableEvent(TypedEventHandler<test_component::Class, test_component::DeferrableEventArgs> const& handler)
+    {
+        return m_deferrableEvent.add(handler);
+    }
+
+    void Class::DeferrableEvent(event_token const& token)
+    {
+        return m_deferrableEvent.remove(token);
+    }
+
+    IAsyncOperation<int32_t> Class::RaiseDeferrableEventAsync()
+    {
+        auto args = make_self<DeferrableEventArgs>();
+        m_deferrableEvent(*this, *args);
+        co_await args->wait_for_deferrals();
+        co_return args->m_counter;
+    }
 }

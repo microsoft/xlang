@@ -7,13 +7,8 @@ namespace xlang
 {
     [[noreturn]] inline void throw_result(xlang_result result, xlang_char8 const* const message = nullptr)
     {
-        xlang_string abi_message{ nullptr };
-        if (message != nullptr)
-        {
-            abi_message = detach_abi(message);
-        }
-
-        throw xlang_originate_error(result, abi_message);
+        hstring error_message = to_hstring(message);
+        throw xlang_originate_error(result, get_abi(error_message));
     }
 
     [[noreturn]] inline void throw_result(xlang_error_info* result)

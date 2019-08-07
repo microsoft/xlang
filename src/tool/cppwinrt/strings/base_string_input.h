@@ -3,11 +3,13 @@ namespace winrt::param
 {
     struct hstring
     {
+#pragma warning(suppress: 26495)
         hstring() noexcept : m_handle(nullptr) {}
         hstring(hstring const& values) = delete;
         hstring& operator=(hstring const& values) = delete;
         hstring(std::nullptr_t) = delete;
 
+#pragma warning(suppress: 26495)
         hstring(winrt::hstring const& value) noexcept : m_handle(get_abi(value))
         {
         }

@@ -27,7 +27,7 @@ namespace xlang::impl
                     return error_ok;
                 };
 
-                check_hresult(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
+                check_xlang_error(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
             });
         }
 
@@ -180,7 +180,7 @@ namespace xlang::impl
 
                 if (m_completed_assigned)
                 {
-                    throw hresult_illegal_delegate_assignment();
+                    throw invalid_state_error();
                 }
 
                 m_completed_assigned = true;
@@ -217,17 +217,18 @@ namespace xlang::impl
             return m_status;
         }
 
-        hresult ErrorCode() noexcept
+        xlang_result ErrorCode() noexcept
         {
             try
             {
                 std::lock_guard const guard(m_lock);
                 rethrow_if_failed();
-                return error_ok;
+                return xlang_result::success;
             }
             catch (...)
             {
-                return to_hresult();
+                com_ptr<xlang_error_info*> error_info(to_xlang_error());
+                return error_info->code();
             }
         }
 
@@ -241,7 +242,7 @@ namespace xlang::impl
                 if (m_status == AsyncStatus::Started)
                 {
                     m_status = AsyncStatus::Canceled;
-                    m_exception = std::make_exception_ptr(hresult_canceled());
+                    m_exception = std::make_exception_ptr(cancelled_error());
                     cancel = std::move(m_cancel);
                 }
             }
@@ -267,7 +268,7 @@ namespace xlang::impl
 
             rethrow_if_failed();
             XLANG_ASSERT(m_status == AsyncStatus::Started);
-            throw hresult_illegal_method_call();
+            throw invalid_state_error();
         }
 
         AsyncInterface get_return_object() const noexcept
@@ -349,7 +350,7 @@ namespace xlang::impl
             {
                 std::rethrow_exception(m_exception);
             }
-            catch (hresult_canceled const&)
+            catch (cancelled_error const&)
             {
                 m_status = AsyncStatus::Canceled;
             }
@@ -364,7 +365,7 @@ namespace xlang::impl
         {
             if (Status() == AsyncStatus::Canceled)
             {
-                throw xlang::hresult_canceled();
+                throw xlang::cancelled_error();
             }
 
             return std::forward<Expression>(expression);
