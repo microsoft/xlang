@@ -91,10 +91,10 @@ bool FindMetadata(DkmProcess* process, std::filesystem::path& winmd_path)
 // If type not indexed, simulate RoGetMetaDataFile's strategy for finding app-local metadata
 // and add to the database dynamically.  RoGetMetaDataFile looks for types in the current process
 // so cannot be called directly.
-void LoadMetadata(DkmProcess* process, WCHAR const* processPath, std::string const& typeName)
+void LoadMetadata(DkmProcess* process, WCHAR const* processPath, std::string_view const& typeName)
 {
     auto winmd_path = path{ processPath };
-    auto probe_file = typeName;
+    auto probe_file = std::string{ typeName };
     do
     {
         winmd_path.replace_filename(probe_file + ".winmd");
@@ -114,7 +114,7 @@ void LoadMetadata(DkmProcess* process, WCHAR const* processPath, std::string con
     db.reset(new cache(db_files));
 }
 
-TypeDef FindType(DkmProcess* process, std::string const& typeName)
+TypeDef FindType(DkmProcess* process, std::string_view const& typeName)
 {
     auto type = db->find(typeName);
     if (!type)

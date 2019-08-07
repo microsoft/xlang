@@ -29,25 +29,55 @@ namespace winrt::impl
                 void* s;
                 uint8_t v[1024];
             }
-            value{};
-            guid iid{};
+            value;
+            value.s = 0;
+            guid iid;
             if (WINRT_IIDFromString(iid_str, &iid) == error_ok)
             {
-                inspectable_abi* pinsp;
-                typedef int32_t(__stdcall inspectable_abi::* PropertyAccessor)(void*);
-                if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
+                struct memory_basic_information
                 {
-                    auto vtbl = *(PropertyAccessor**)pinsp;
-                    static const int IInspectable_vtbl_size = 6;
-                    auto get_Property = vtbl[method + IInspectable_vtbl_size];
-                    (pinsp->*get_Property)(&value);
-                    pinsp->Release();
+                    void* base_address;
+                    void* allocation_base;
+                    uint32_t allocation_protect;
+#ifdef _WIN64
+                    uint32_t __alignment1;
+#endif
+                    uintptr_t region_size;
+                    uint32_t state;
+                    uint32_t protect;
+                    uint32_t type;
+#ifdef _WIN64
+                    uint32_t __alignment2;
+#endif
+                };
+                memory_basic_information info;
+                // validate object pointer is readable
+                if ((WINRT_VirtualQuery(object, &info, sizeof(info)) != 0) && ((info.protect & 0xEE) != 0))
+                {
+                    inspectable_abi* pinsp;
+                    if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
+                    {
+                        static const int IInspectable_vtbl_size = 6;
+                        auto vtbl = *(void***)pinsp;
+                        // validate vtbl pointer is readable
+                        if ((WINRT_VirtualQuery(vtbl, &info, sizeof(info)) != 0) && ((info.protect & 0xEE) != 0))
+                        {
+                            auto vfunc = vtbl[method + IInspectable_vtbl_size];
+                            // validate method pointer is executable
+                            if ((WINRT_VirtualQuery(vfunc, &info, sizeof(info)) != 0) && ((info.protect & 0xF0) != 0))
+                            {
+                                typedef int32_t(__stdcall inspectable_abi:: * PropertyAccessor)(void*);
+                                (pinsp->**(PropertyAccessor*)&vfunc)(&value);
+                                pinsp->Release();
+                            }
+                        }
+                    }
                 }
             }
             return value;
         }
 
-        static auto __stdcall get_val(winrt::Windows::Foundation::IInspectable* object, wchar_t const * iid_str, int method)
+        static auto __stdcall get_val(winrt::Windows::Foundation::IInspectable* object, wchar_t const* iid_str, int method)
         {
             return abi_val(static_cast<unknown_abi*>(get_abi(*object)), iid_str, method);
         }
