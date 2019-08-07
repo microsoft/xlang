@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Class.g.h"
+#include "DeferrableEventArgs.g.h"
 
 namespace winrt::test_component::implementation
 {
@@ -107,10 +108,22 @@ namespace winrt::test_component::implementation
         int32_t NoexceptInt32() noexcept;
         hstring NoexceptString() noexcept;
 
+        event_token DeferrableEvent(Windows::Foundation::TypedEventHandler<test_component::Class, test_component::DeferrableEventArgs> const& handler);
+        void DeferrableEvent(event_token const& token);
+        Windows::Foundation::IAsyncOperation<int> RaiseDeferrableEventAsync();
     private:
 
         bool m_fail{};
+        event<Windows::Foundation::TypedEventHandler<test_component::Class, test_component::DeferrableEventArgs>> m_deferrableEvent;
     };
+
+    struct DeferrableEventArgs : DeferrableEventArgsT<DeferrableEventArgs>, deferrable_event_args<DeferrableEventArgs>
+    {
+        DeferrableEventArgs() = default;
+        void IncrementCounter() { ++m_counter; }
+        std::atomic<int> m_counter = 0;
+    };
+
 }
 namespace winrt::test_component::factory_implementation
 {

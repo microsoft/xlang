@@ -98,7 +98,7 @@ namespace
     }
 }
 
-TEST_CASE("asycn_check_cancel")
+TEST_CASE("async_check_cancel")
 {
     Check(Action);
     Check(ActionWithProgress);
