@@ -116,7 +116,7 @@ namespace xlang::cmd
                 {
                     if (std::filesystem::is_regular_file(file))
                     {
-                        auto filename = std::filesystem::canonical(file.path()).string();
+                        auto filename = file.path().string();
 
                         if (directory_filter(filename))
                         {
