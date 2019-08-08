@@ -3047,6 +3047,10 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             {
                 w.write(strings::base_reference_produce);
             }
+            if (c.find("Windows.Foundation.Deferral"))
+            {
+                w.write(strings::base_deferral);
+            }
 
             w.write(strings::base_coroutine_foundation);
         }

@@ -1,4 +1,20 @@
 
+namespace winrt::impl
+{
+    inline auto resume_background(std::experimental::coroutine_handle<> handle)
+    {
+        auto callback = [](void*, void* context) noexcept
+        {
+            std::experimental::coroutine_handle<>::from_address(context)();
+        };
+
+        if (!WINRT_TrySubmitThreadpoolCallback(callback, handle.address(), nullptr))
+        {
+            throw_last_error();
+        }
+    }
+}
+
 namespace winrt
 {
     [[nodiscard]] inline auto resume_background() noexcept
@@ -16,17 +32,7 @@ namespace winrt
 
             void await_suspend(std::experimental::coroutine_handle<> handle) const
             {
-                if (!WINRT_TrySubmitThreadpoolCallback(callback, handle.address(), nullptr))
-                {
-                    throw_last_error();
-                }
-            }
-
-        private:
-
-            static void __stdcall callback(void*, void* context) noexcept
-            {
-                std::experimental::coroutine_handle<>::from_address(context)();
+                impl::resume_background(handle);
             }
         };
 

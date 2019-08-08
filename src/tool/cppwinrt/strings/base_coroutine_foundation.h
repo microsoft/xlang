@@ -86,28 +86,43 @@ namespace winrt::impl
     {
         Async const& async;
 
-        bool await_ready() const
+        bool await_ready() const noexcept
         {
-            return async.Status() == Windows::Foundation::AsyncStatus::Completed;
+            return false;
         }
 
         void await_suspend(std::experimental::coroutine_handle<> handle) const
         {
-            auto context = capture<IContextCallback>(WINRT_CoGetObjectContext);
-
-            async.Completed([handle, context = std::move(context)](auto const&, Windows::Foundation::AsyncStatus)
+            if (is_sta())
             {
-                com_callback_args args{};
-                args.data = handle.address();
-
-                auto callback = [](com_callback_args* args) noexcept -> int32_t
+                async.Completed([handle, context = capture<IContextCallback>(WINRT_CoGetObjectContext)](auto&&...)
                 {
-                    std::experimental::coroutine_handle<>::from_address(args->data)();
-                    return error_ok;
-                };
+                    com_callback_args args{};
+                    args.data = handle.address();
 
-                check_hresult(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
-            });
+                    auto callback = [](com_callback_args* args) noexcept -> int32_t
+                    {
+                        std::experimental::coroutine_handle<>::from_address(args->data)();
+                        return error_ok;
+                    };
+
+                    check_hresult(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
+                });
+            }
+            else
+            {
+                async.Completed([handle](auto&& ...)
+                {
+                    if (is_sta())
+                    {
+                        impl::resume_background(handle);
+                    }
+                    else
+                    {
+                        handle();
+                    }
+                });
+            }
         }
 
         auto await_resume() const

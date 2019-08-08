@@ -9,8 +9,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTVerbosity Condition="'$(CppWinRTVerbosity)' == ''">normal</CppWinRTVerbosity>
         <CppWinRTCommandVerbosity Condition="'$(CppWinRTVerbosity)' == 'high'">-verbose</CppWinRTCommandVerbosity>
         <CppWinRTProjectWinMD>$(OutDir)$(RootNamespace).winmd</CppWinRTProjectWinMD>
-        <CppWinRTMergedDir>$(OutDir)Merged</CppWinRTMergedDir>
-        <CppWinRTUnmergedDir>$(OutDir)Unmerged</CppWinRTUnmergedDir>
+        <CppWinRTMergedDir>$(OutDir)Merged\</CppWinRTMergedDir>
+        <CppWinRTUnmergedDir>$(OutDir)Unmerged\</CppWinRTUnmergedDir>
         <CppWinRTWriteOnlyWhenDifferent Condition="('$(CppWinRTWriteOnlyWhenDifferent)' == '') And (('$(MSBuildToolsVersion)' == 'Current') Or ('$(MSBuildToolsVersion)' &gt;= '15'))">true</CppWinRTWriteOnlyWhenDifferent>
         <CppWinRTWriteOnlyWhenDifferent Condition="'$(CppWinRTWriteOnlyWhenDifferent)' != 'true'">false</CppWinRTWriteOnlyWhenDifferent>
         <CppWinRTPackageDir Condition="'$(CppWinRTPackage)' == 'true' and '$(CppWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\</CppWinRTPackageDir>
@@ -63,13 +63,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Target Name="CppWinRTClean">
         <ItemGroup>
             <_FilesToDelete Remove="@(_FilesToDelete)"/>
-            <_FilesToDelete Include="$(GeneratedFilesDir)\**"/>
+            <_FilesToDelete Include="$(GeneratedFilesDir)**"/>
             <_FilesToDelete Include="$(OutDir)*.winmd"/>
             <_FilesToDelete Include="$(IntDir)*.winmd"/>
             <_FilesToDelete Include="$(IntDir)*.idl"/>
             <_FilesToDelete Include="$(IntDir)*.rsp"/>
-            <_FilesToDelete Include="$(CppWinRTMergedDir)\**"/>
-            <_FilesToDelete Include="$(CppWinRTUnmergedDir)\**"/>
+            <_FilesToDelete Include="$(CppWinRTMergedDir)**"/>
+            <_FilesToDelete Include="$(CppWinRTUnmergedDir)**"/>
         </ItemGroup>
         <Delete Files="@(_FilesToDelete)"/>
     </Target>
@@ -330,7 +330,7 @@ $(XamlMetaDataProviderPch)
         </ItemGroup>
         <PropertyGroup>
           <_MdMergeParameters>-v @(_MdMergeRefsDistinct->'-metadata_dir &quot;%(RelativeDir).&quot;', '&#x0d;&#x0a;')</_MdMergeParameters>
-          <_MdMergeParameters>$(_MdMergeParameters) -o &quot;$(CppWinRTMergedDir)&quot; -i &quot;$(CppWinRTUnmergedDir)&quot; -partial $(_MdMergeDepth)</_MdMergeParameters>
+          <_MdMergeParameters>$(_MdMergeParameters) -o &quot;$(CppWinRTMergedDir.TrimEnd('\'))&quot; -i &quot;$(CppWinRTUnmergedDir.TrimEnd('\'))&quot; -partial $(_MdMergeDepth)</_MdMergeParameters>
         </PropertyGroup>
         <WriteLinesToFile Condition="!$(CppWinRTWriteOnlyWhenDifferent)"
             File="$(IntDir)mdmerge.rsp" Lines="$(_MdMergeParameters)"
@@ -339,12 +339,12 @@ $(XamlMetaDataProviderPch)
             File="$(IntDir)mdmerge.rsp" Lines="$(_MdMergeParameters)"
             ContinueOnError="true" Overwrite="true"
             WriteOnlyWhenDifferent="true" />
-        <Copy SourceFiles="@(_MdMergeInputs->'%(WinMDPath)')" DestinationFolder="$(CppWinRTUnmergedDir)\" />
+        <Copy SourceFiles="@(_MdMergeInputs->'%(WinMDPath)')" DestinationFolder="$(CppWinRTUnmergedDir)" />
         <Message Text="$(_MdMergeCommand)" Importance="$(CppWinRTVerbosity)"/>
         <Exec Command="$(_MdMergeCommand)" />
         <ItemGroup>
             <_MdMergedOutput Remove="@(_MdMergedOutput)"/>
-            <_MdMergedOutput Include="$(CppWinRTMergedDir)\*.winmd"/>
+            <_MdMergedOutput Include="$(CppWinRTMergedDir)*.winmd"/>
         </ItemGroup>
         <Copy SourceFiles="@(_MdMergedOutput)" DestinationFolder="$(OutDir)" />
         <ItemGroup>
@@ -435,16 +435,13 @@ $(XamlMetaDataProviderPch)
         </PropertyGroup>
         <ItemGroup>
             <_CppwinrtCompInputs Remove="@(_CppwinrtCompInputs)"/>
-            <_CppwinrtCompInputs Include="@(Midl)">
-                <WinMDPath>%(Midl.OutputDirectory)%(Midl.MetadataFileName)</WinMDPath>
+            <_CppwinrtCompInputs Include="@(MdMergeOutput)">
+                <WinMDPath>%(MdMergeOutput.FullPath)</WinMDPath>
             </_CppwinrtCompInputs>
             <_CppwinrtCompRefs Remove="@(_CppwinrtCompRefs)"/>
             <_CppwinrtCompRefs Include="@(CppWinRTDirectWinMDReferences)"/>
             <_CppwinrtCompRefs Include="@(CppWinRTDynamicWinMDReferences)"/>
             <_CppwinrtCompRefs Include="@(CppWinRTPlatformWinMDReferences)"/>
-            <_CppwinrtCompRefs Include="@(MdMergeOutput)">
-                <WinMDPath>%(MdMergeOutput.FullPath)</WinMDPath>
-            </_CppwinrtCompRefs>
         </ItemGroup>
         <PropertyGroup>
             <_CppwinrtParameters>$(CppWinRTCommandVerbosity) $(CppWinRTParameters) -overwrite -name $(RootNamespace) $(CppWinRTCommandPrecompiledHeader) $(CppWinRTCommandUsePrefixes) -comp &quot;$(GeneratedFilesDir)sources&quot;</_CppwinrtParameters>
