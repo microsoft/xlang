@@ -23,6 +23,12 @@ namespace winrt::TestApp::implementation
 
         TestRuntimeComponentCXClass c3{};
         c3.Test();
+
+        TestStaticLibrary1Class cStatic1{};
+        cStatic1.Test()
+
+        TestStaticLibrary4Class cStatic4{};
+        cStatic4.Test()
     }
 
     int32_t MainPage::MyProperty()

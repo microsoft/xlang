@@ -1,4 +1,4 @@
-namespace TestStaticLibrary1
+namespace TestApp
 {
     [default_interface]
     runtimeclass TestStaticLibrary1Class 

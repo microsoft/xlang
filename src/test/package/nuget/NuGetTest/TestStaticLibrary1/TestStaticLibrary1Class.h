@@ -1,7 +1,7 @@
 #pragma once
 #include "TestStaticLibrary1Class.g.h"
 
-namespace winrt::TestStaticLibrary1::implementation
+namespace winrt::TestApp::implementation
 {
     struct TestStaticLibrary1Class : TestStaticLibrary1ClassT<TestStaticLibrary1Class>
     {
@@ -10,7 +10,7 @@ namespace winrt::TestStaticLibrary1::implementation
         void Test();
     };
 }
-namespace winrt::TestStaticLibrary1::factory_implementation
+namespace winrt::TestApp::factory_implementation
 {
     struct TestStaticLibrary1Class : TestStaticLibrary1ClassT<TestStaticLibrary1Class, implementation::TestStaticLibrary1Class>
     {

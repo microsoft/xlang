@@ -28,10 +28,11 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <CppWinRTOptimized>true</CppWinRTOptimized>
+    <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <MinimalCoreWin>true</MinimalCoreWin>
     <ProjectGuid>{432068a4-b206-4468-9254-446cceb15a2c}</ProjectGuid>
     <Keyword>StaticLibrary</Keyword>
-    <RootNamespace>TestStaticLibrary4</RootNamespace>
+    <RootNamespace>TestApp</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>

@@ -2,11 +2,12 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
     <CppWinRTOptimized>true</CppWinRTOptimized>
+    <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <MinimalCoreWin>true</MinimalCoreWin>
     <ProjectGuid>{2158F418-CA97-4599-8103-EFC133850BAA}</ProjectGuid>
     <Keyword>StaticLibrary</Keyword>
     <ProjectName>TestStaticLibrary1</ProjectName>
-    <RootNamespace>TestStaticLibrary1</RootNamespace>
+    <RootNamespace>TestApp</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>

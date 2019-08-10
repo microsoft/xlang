@@ -6,7 +6,7 @@
 
 using namespace winrt;
 
-namespace winrt::TestStaticLibrary4::implementation
+namespace winrt::TestApp::implementation
 {
     void TestStaticLibrary4Class::Test()
     {
