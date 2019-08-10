@@ -404,9 +404,9 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct guid_storage<%>
+            auto format = R"(    template <> constexpr guid guid_storage<%>
     {
-        static constexpr guid value{ % };
+        %
     };
 )";
 
@@ -423,9 +423,9 @@ namespace xlang
         }
         else
         {
-            auto format = R"(    template <%> struct guid_storage<%>
+            auto format = R"(    template <%> constexpr guid guid_storage<%>
     {
-        static constexpr guid value{ pinterface_guid<%>::value };
+        pinterface_guid<%>::value
     };
 )";
 

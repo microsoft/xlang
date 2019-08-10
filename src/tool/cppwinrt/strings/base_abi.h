@@ -27,9 +27,9 @@ namespace winrt::impl
             virtual uint32_t __stdcall Release() noexcept = 0;
         };
     };
-    template <> struct guid_storage<Windows::Foundation::IUnknown>
+    template <> constexpr guid guid_storage<Windows::Foundation::IUnknown>
     {
-        static constexpr guid value{ 0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+        0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
     using unknown_abi = abi_t<Windows::Foundation::IUnknown>;
 
@@ -42,9 +42,9 @@ namespace winrt::impl
             virtual int32_t __stdcall GetTrustLevel(Windows::Foundation::TrustLevel* level) noexcept = 0;
         };
     };
-    template <> struct guid_storage<Windows::Foundation::IInspectable>
+    template <> constexpr guid guid_storage<Windows::Foundation::IInspectable>
     {
-        static constexpr guid value{ 0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
+        0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 }
     };
     template <> struct name<Windows::Foundation::IInspectable>
     {
@@ -60,9 +60,9 @@ namespace winrt::impl
     struct __declspec(novtable) IAgileObject : unknown_abi
     {
     };
-    template <> struct guid_storage<IAgileObject>
+    template <> constexpr guid guid_storage<IAgileObject>
     {
-        static constexpr guid value{ 0x94EA2B94,0xE9CC,0x49E0,{ 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 } };
+        0x94EA2B94,0xE9CC,0x49E0,{ 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 }
     };
 
     struct __declspec(novtable) IAgileReference : unknown_abi
@@ -79,9 +79,9 @@ namespace winrt::impl
         virtual int32_t __stdcall ReleaseMarshalData(void* pStm) noexcept = 0;
         virtual int32_t __stdcall DisconnectObject(uint32_t dwReserved) noexcept = 0;
     };
-    template <> struct guid_storage<IMarshal>
+    template <> constexpr guid guid_storage<IMarshal>
     {
-        static constexpr guid value{ 0x00000003,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+        0x00000003,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
 
     struct __declspec(novtable) IStaticLifetime : inspectable_abi
@@ -89,9 +89,9 @@ namespace winrt::impl
         virtual int32_t __stdcall unused() noexcept = 0;
         virtual int32_t __stdcall GetCollection(void** value) noexcept = 0;
     };
-    template <> struct guid_storage<IStaticLifetime>
+    template <> constexpr guid guid_storage<IStaticLifetime>
     {
-        static constexpr guid value{ 0x17b0e613,0x942a,0x422d,{ 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae } };
+        0x17b0e613,0x942a,0x422d,{ 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae }
     };
 
     struct __declspec(novtable) IStaticLifetimeCollection : inspectable_abi
@@ -104,27 +104,27 @@ namespace winrt::impl
         virtual int32_t __stdcall unused4() noexcept = 0;
         virtual int32_t __stdcall unused5() noexcept = 0;
     };
-    template <> struct guid_storage<IStaticLifetimeCollection>
+    template <> constexpr guid guid_storage<IStaticLifetimeCollection>
     {
-        static constexpr guid value{ 0x1b0d3570,0x0877,0x5ec2,{ 0x8a,0x2c,0x3b,0x95,0x39,0x50,0x6a,0xca } };
+        0x1b0d3570,0x0877,0x5ec2,{ 0x8a,0x2c,0x3b,0x95,0x39,0x50,0x6a,0xca }
     };
 
     struct __declspec(novtable) IWeakReference : unknown_abi
     {
         virtual int32_t __stdcall Resolve(guid const& iid, void** objectReference) noexcept = 0;
     };
-    template <> struct guid_storage<IWeakReference>
+    template <> constexpr guid guid_storage<IWeakReference>
     {
-        static constexpr guid value{ 0x00000037,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+        0x00000037,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
 
     struct __declspec(novtable) IWeakReferenceSource : unknown_abi
     {
         virtual int32_t __stdcall GetWeakReference(IWeakReference** weakReference) noexcept = 0;
     };
-    template <> struct guid_storage<IWeakReferenceSource>
+    template <> constexpr guid guid_storage<IWeakReferenceSource>
     {
-        static constexpr guid value{ 0x00000038,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+        0x00000038,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
 
     struct __declspec(novtable) IRestrictedErrorInfo : unknown_abi
@@ -140,9 +140,9 @@ namespace winrt::impl
         virtual int32_t __stdcall CapturePropagationContext(void* exception) noexcept = 0;
         virtual int32_t __stdcall GetPropagationContextHead(ILanguageExceptionErrorInfo2** head) noexcept = 0;
     };
-    template <> struct guid_storage<ILanguageExceptionErrorInfo2>
+    template <> constexpr guid guid_storage<ILanguageExceptionErrorInfo2>
     {
-        static constexpr guid value{ 0x5746E5C4,0x5B97,0x424C,{ 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD } };
+        0x5746E5C4,0x5B97,0x424C,{ 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD }
     };
 
     struct com_callback_args
@@ -153,18 +153,18 @@ namespace winrt::impl
     };
 
     struct ICallbackWithNoReentrancyToApplicationSTA;
-    template <> struct guid_storage<ICallbackWithNoReentrancyToApplicationSTA>
+    template <> constexpr guid guid_storage<ICallbackWithNoReentrancyToApplicationSTA>
     {
-        static constexpr guid value{ 0x0A299774,0x3E4E,0xFC42,{ 0x1D,0x9D,0x72,0xCE,0xE1,0x05,0xCA,0x57 } };
+        0x0A299774,0x3E4E,0xFC42,{ 0x1D,0x9D,0x72,0xCE,0xE1,0x05,0xCA,0x57 }
     };
 
     struct __declspec(novtable) IContextCallback : unknown_abi
     {
         virtual int32_t __stdcall ContextCallback(int32_t(__stdcall *callback)(com_callback_args*), com_callback_args* args, guid const& iid, int method, void* reserved) noexcept = 0;
     };
-    template <> struct guid_storage<IContextCallback>
+    template <> constexpr guid guid_storage<IContextCallback>
     {
-        static constexpr guid value{ 0x000001da,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+        0x000001da,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
 
     struct __declspec(novtable) IServerSecurity : unknown_abi
@@ -174,17 +174,17 @@ namespace winrt::impl
         virtual int32_t __stdcall RevertToSelf() noexcept = 0;
         virtual int32_t __stdcall IsImpersonating() noexcept = 0;
     };
-    template <> struct guid_storage<IServerSecurity>
+    template <> constexpr guid guid_storage<IServerSecurity>
     {
-        static constexpr guid value{ 0x0000013E,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+        0x0000013E,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
 
     struct __declspec(novtable) IBufferByteAccess : unknown_abi
     {
         virtual int32_t __stdcall Buffer(uint8_t** value) noexcept = 0;
     };
-    template <> struct guid_storage<IBufferByteAccess>
+    template <> constexpr guid guid_storage<IBufferByteAccess>
     {
-        static constexpr guid value{ 0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda } };
+        0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda }
     };
 }

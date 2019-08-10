@@ -121,32 +121,10 @@ namespace winrt::impl
     };
 
     template <typename T>
-    struct missing_guid_of
-    {
-        static constexpr bool value{};
-    };
-
-    template <typename T>
-    struct missing_guid
-    {
-        static_assert(missing_guid_of<T>::value, "Support for non-WinRT interfaces is disabled. To enable, simply #include <unknwn.h> before any C++/WinRT headers.");
-    };
-
-#ifdef WINRT_WINDOWS_ABI
-    template <typename T>
-    struct guid_storage
-    {
-        // Unlike Visual C++, Clang does not treat __uuidof as a constexpr expression.
-        // This has a ripple effect and impacts both winrt::guid_of and winrt::name_of.
 #ifdef __clang__
-        inline static const guid value{ __uuidof(T) };
+    const guid guid_storage{ __uuidof(T) };
 #else
-        static constexpr guid value{ __uuidof(T) };
-#endif
-    };
-#else
-    template <typename T>
-    struct guid_storage : missing_guid<T> {};
+    constexpr guid guid_storage{ __uuidof(T) };
 #endif
 
     template <typename T>

@@ -327,9 +327,9 @@ namespace winrt::impl
         };
     };
 
-    template <> struct guid_storage<Windows::Foundation::IActivationFactory>
+    template <> constexpr guid guid_storage<Windows::Foundation::IActivationFactory>
     {
-        static constexpr guid value{ 0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+        0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
 
     template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
