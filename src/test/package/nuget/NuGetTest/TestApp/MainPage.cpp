@@ -25,10 +25,10 @@ namespace winrt::TestApp::implementation
         c3.Test();
 
         TestStaticLibrary1Class cStatic1{};
-        cStatic1.Test()
+        cStatic1.Test();
 
         TestStaticLibrary4Class cStatic4{};
-        cStatic4.Test()
+        cStatic4.Test();
     }
 
     int32_t MainPage::MyProperty()
