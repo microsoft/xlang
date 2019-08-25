@@ -34,6 +34,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <PrepareForBuildDependsOn>
             $(PrepareForBuildDependsOn);CppWinRTVerifyKitVersion
         </PrepareForBuildDependsOn>
+        <ResolveAssemblyReferencesDependsOn>
+            $(ResolveAssemblyReferencesDependsOn);GetCppWinRTProjectWinMDReferences;CppWinRTRemoveStaticLibraries
+        </ResolveAssemblyReferencesDependsOn>
         <ComputeCompileInputsTargets>
             $(ComputeCompileInputsTargets);
             CppWinRTHeapEnforcementOptOut;
@@ -92,7 +95,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Target>
 
     <Target Name="CppWinRTCalculateEnabledProjections"
-            DependsOnTargets="GetCppWinRTProjectWinMDReferences"
+            DependsOnTargets="GetCppWinRTProjectWinMDReferences;GetCppWinRTMdMergeInputs"
             BeforeTargets="CppWinRTGetTargetPath;CppWinRTMergeProjectWinMDInputs;CppWinRTMakePlatformProjection;CppWinRTMakeComponentProjection;CppWinRTMakeReferenceProjection"
             Returns="$(CppWinRTEnableComponentProjection);$(CppWinRTEnablePlatformProjection);$(CppWinRTEnableReferenceProjection)">
         <PropertyGroup>
@@ -101,7 +104,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <CppWinRTEnableComponentProjection Condition="'$(CppWinRTEnableComponentProjection)' == '' AND '$(XamlLanguage)' == 'C++' ">false</CppWinRTEnableComponentProjection>
             <!-- Turn on component projection if not turned off and:
                  1. @(Midl) is not empty or
-                 2. project has static library references and is not a static library itself
+                 2. project has static library references
             -->
             <CppWinRTEnableComponentProjection Condition="'$(CppWinRTEnableComponentProjection)' == '' AND '@(Midl)' != ''">true</CppWinRTEnableComponentProjection>
             <CppWinRTEnableComponentProjection Condition="'$(CppWinRTEnableComponentProjection)' == '' AND '@(CppWinRTProjectMdMergeInputs)' != ''">true</CppWinRTEnableComponentProjection>
@@ -132,13 +135,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Target>
 
     <!-- Static library reference files are merged into the project that
-         references it, so we don't want to copy them to the output folder. -->
-    <Target Name="CppWinRTRemoveStaticLibraryCopyLocal"
-            AfterTargets="ResolveReferences"
-            BeforeTargets="CopyFilesToOutputDirectory;CopyLocalFilesOutputGroup"
-            Returns="@(ReferenceCopyLocalPaths)">
+         references it. They shouldn't be included as actual project references.
+         Make sure that we've ran the GetCppWinRTProjectWinMDReferences target
+         and then remove them. -->
+    <Target Name="CppWinRTRemoveStaticLibraries"
+            AfterTargets="ResolveProjectReferences"
+            DependsOnTargets="GetCppWinRTProjectWinMDReferences"
+            BeforeTargets="ResolveAssemblyReferences"
+            Returns="@(_ResolvedProjectReferencePaths)">
         <ItemGroup>
-            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.ProjectType)' == 'StaticLibrary'" />
+            <_ResolvedProjectReferencePaths Remove="@(_ResolvedProjectReferencePaths)" Condition="'%(_ResolvedProjectReferencePaths.ProjectType)' == 'StaticLibrary'" />
         </ItemGroup>
     </Target>
 
@@ -193,7 +199,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--Get direct WinMD project references for projections, IDL processing, and AppX packaging-->
     <Target Name="GetCppWinRTProjectWinMDReferences"
             DependsOnTargets="ResolveProjectReferences;$(GetCppWinRTProjectWinMDReferencesDependsOn)"
-            Returns="@(CppWinRTProjectMdMergeInputs);@(CppWinRTProjectWinMDReferences)">
+            Returns="@(CppWinRTStaticProjectWinMDReferences);@(CppWinRTDynamicProjectWinMDReferences)">
         <ItemGroup>
             <!-- Get static library project references -->
             <_CppWinRTStaticProjectReferences Remove="@(_CppWinRTStaticProjectReferences)"/>
@@ -206,24 +212,44 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                 Condition= "'%(_ResolvedProjectReferencePaths.ProjectType)'!='StaticLibrary'  AND '%(_ResolvedProjectReferencePaths.WinMDFile)' == 'true'"/>
         </ItemGroup>
         <ItemGroup>
-            <CppWinRTProjectMdMergeInputs Remove="@(CppWinRTProjectMdMergeInputs)"/>
-            <!-- If this project is not a static library itself, all static library references will be merged
-                 into a single winmd. -->
-            <CppWinRTProjectMdMergeInputs Include="@(_CppWinRTStaticProjectReferences)" Condition="'$(ConfigurationType)' != 'StaticLibrary'">
+            <CppWinRTStaticProjectWinMDReferences Remove="@(CppWinRTStaticProjectWinMDReferences)" />
+            <CppWinRTStaticProjectWinMDReferences Include="@(_CppWinRTStaticProjectReferences)">
                 <WinMDPath>%(FullPath)</WinMDPath>
-            </CppWinRTProjectMdMergeInputs>
-            <CppWinRTProjectWinMDReferences Remove="@(CppWinRTProjectWinMDReferences)"/>
-            <!-- If this project is a static library itself, all static library references will be used
-                 as normal references. -->
-            <CppWinRTProjectWinMDReferences Include="@(_CppWinRTStaticProjectReferences)" Condition="'$(ConfigurationType)' == 'StaticLibrary'">
+            </CppWinRTStaticProjectWinMDReferences>
+            <CppWinRTDynamicProjectWinMDReferences Remove="@(CppWinRTDynamicProjectWinMDReferences)" />
+            <CppWinRTDynamicProjectWinMDReferences Include="@(_CppWinRTDynamicProjectReferences)">
                 <WinMDPath>%(FullPath)</WinMDPath>
-            </CppWinRTProjectWinMDReferences>
-            <CppWinRTProjectWinMDReferences Include="@(_CppWinRTDynamicProjectReferences)">
-                <WinMDPath>%(FullPath)</WinMDPath>
-            </CppWinRTProjectWinMDReferences>
+            </CppWinRTDynamicProjectWinMDReferences>
         </ItemGroup>
-        <Message Text="CppWinRTProjectMdMergeInputs: @(CppWinRTProjectMdMergeInputs->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
-        <Message Text="CppWinRTProjectWinMDReferences: @(CppWinRTProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
+        <Message Text="CppWinRTStaticProjectWinMDReferences: @(CppWinRTStaticProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
+        <Message Text="CppWinRTDynamicProjectWinMDReferences: @(CppWinRTDynamicProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
+    </Target>
+
+    <Target Name="GetCppWinRTMdMergeInputs"
+                DependsOnTargets="Midl;GetCppWinRTPlatformWinMDReferences;GetCppWinRTDirectWinMDReferences;GetCppWinRTProjectWinMDReferences"
+                Returns="@(CppWinRTMdMergeMetadataDirectories);@(CppWinRTMdMergeInputs)">
+        <ItemGroup>
+            <_MdMergeInputs Remove="@(_MdMergeInputs)"/>
+            <_MdMergeInputs Include="@(Midl)">
+                <WinMDPath>%(Midl.OutputDirectory)%(Midl.MetadataFileName)</WinMDPath>
+                <MdMergeOutputFile>$(CppWinRTProjectWinMD)</MdMergeOutputFile>
+            </_MdMergeInputs>
+            <!-- Static libraries don't mdmerge other static libraries.
+                 Instead they are passed independent inputs for the compoenent projection. -->
+            <_MdMergeInputs Include="@(CppWinRTStaticProjectWinMDReferences)" Condition="'$(ConfigurationType)' != 'StaticLibrary'">
+                <MdMergeOutputFile>$(CppWinRTProjectWinMD)</MdMergeOutputFile>
+            </_MdMergeInputs>
+            <_MdMergeReferences Remove="@(_MdMergeReferences)" />
+            <_MdMergeReferences Include="@(CppWinRTDirectWinMDReferences)" />
+            <_MdMergeReferences Include="@(CppWinRTDynamicProjectWinMDReferences)" />
+            <_MdMergeReferences Include="@(CppWinRTPlatformWinMDReferences)" />
+            <CppWinRTMdMergeMetadataDirectories Remove="@(CppWinRTMdMergeMetadataDirectories)" />
+            <CppWinRTMdMergeMetadataDirectories Include="@(_MdMergeReferences->'%(RelativeDir)'->Distinct())" />
+            <CppWinRTMdMergeInputs Remove="@(CppWinRTMdMergeInputs)" />
+            <CppWinRTMdMergeInputs Include="@(_MdMergeInputs->'%(WinMDPath)'->Distinct())" />
+        </ItemGroup>
+        <Message Text="CppWinRTMdMergeInputs: @(CppWinRTMdMergeInputs)" Importance="$(CppWinRTVerbosity)"/>
+        <Message Text="CppWinRTMdMergeMetadataDirectories: @(CppWinRTMdMergeMetadataDirectories)" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
     <!--If building any Xaml content, include XamlMetaDataProvider in project metadata-->
@@ -297,7 +323,8 @@ $(XamlMetaDataProviderPch)
         <ItemGroup Condition="'$(CppWinRTModernIDL)' != 'false'">
             <_MidlReferences Remove="@(_MidlReferences)"/>
             <_MidlReferences Include="@(CppWinRTDirectWinMDReferences)"/>
-            <_MidlReferences Include="@(CppWinRTProjectWinMDReferences)"/>
+            <_MidlReferences Include="@(CppWinRTStaticProjectWinMDReferences)"/>
+            <_MidlReferences Include="@(CppWinRTDynamicProjectWinMDReferences)"/>
             <_MidlReferences Include="@(CppWinRTPlatformWinMDReferences)"/>
             <_MidlReferencesDistinct Remove="@(_MidlReferencesDistinct)" />
             <_MidlReferencesDistinct Include="@(_MidlReferences->'%(WinMDPath)'->Distinct())" />
@@ -324,33 +351,10 @@ $(XamlMetaDataProviderPch)
       <Message Text="CppWinRTMidlReferences: @(_MidlReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
-    <Target Name="CppWinRTComputeMdMergeWinMDInputs"
-            DependsOnTargets="Midl;GetCppWinRTPlatformWinMDReferences;GetCppWinRTDirectWinMDReferences;GetCppWinRTProjectWinMDReferences"
-            Returns="@(CppWinRTMdMergeMetadataDirectories);@(CppWinRTMdMergeInputs)">
-        <ItemGroup>
-            <_MdMergeInputs Remove="@(_MdMergeInputs)"/>
-            <_MdMergeInputs Include="@(Midl)">
-                <WinMDPath>%(Midl.OutputDirectory)%(Midl.MetadataFileName)</WinMDPath>
-                <MdMergeOutputFile>$(CppWinRTProjectWinMD)</MdMergeOutputFile>
-            </_MdMergeInputs>
-            <_MdMergeInputs Include="@(CppWinRTProjectMdMergeInputs)">
-                <MdMergeOutputFile>$(CppWinRTProjectWinMD)</MdMergeOutputFile>
-            </_MdMergeInputs>
-            <_MdMergeReferences Remove="@(_MdMergeReferences)" />
-            <_MdMergeReferences Include="@(CppWinRTDirectWinMDReferences)" />
-            <_MdMergeReferences Include="@(CppWinRTProjectWinMDReferences)" Condition="'%(ProjectType)' != 'StaticLibrary'" />
-            <_MdMergeReferences Include="@(CppWinRTPlatformWinMDReferences)" />
-            <CppWinRTMdMergeMetadataDirectories Remove="@(CppWinRTMdMergeMetadataDirectories)" />
-            <CppWinRTMdMergeMetadataDirectories Include="@(_MdMergeReferences->'%(RelativeDir)'->Distinct())" />
-            <CppWinRTMdMergeInputs Remove="@(CppWinRTMdMergeInputs)" />
-            <CppWinRTMdMergeInputs Include="@(_MdMergeInputs->'%(WinMDPath)'->Distinct())" />
-        </ItemGroup>
-    </Target>
-
     <!--Merge project-generated WinMDs and project-referenced static library WinMDs into project WinMD-->
     <Target Name="CppWinRTMergeProjectWinMDInputs"
             Condition="'$(CppWinRTEnableComponentProjection)' == 'true'"
-            DependsOnTargets="CppWinRTComputeMdMergeWinMDInputs;$(CppWinRTMergeProjectWinMDInputsDependsOn)"
+            DependsOnTargets="GetCppWinRTMdMergeInputs;$(CppWinRTMergeProjectWinMDInputsDependsOn)"
             Inputs="@(CppWinRTMdMergeInputs)"
             Outputs="@(CppWinRTMdMergeInputs->'%(MdMergeOutputFile)'"
             Returns="$(CppWinRTProjectWinMD)">
@@ -425,15 +429,15 @@ $(XamlMetaDataProviderPch)
   <Target Name="CppWinRTMakeReferenceProjection"
           Condition="'$(CppWinRTEnableReferenceProjection)' == 'true'"
           DependsOnTargets="GetCppWinRTDirectWinMDReferences;GetCppWinRTProjectWinMDReferences;GetCppWinRTPlatformWinMDReferences;$(CppWinRTMakeReferenceProjectionDependsOn)"
-          Inputs="@(CppWinRTDirectWinMDReferences);@(CppWinRTProjectWinMDReferences);@(CppWinRTPlatformWinMDReferences)"
-          Outputs="@(CppWinRTDirectWinMDReferences->'$(GeneratedFilesDir)winrt\%(Filename).h');@(CppWinRTProjectWinMDReferences->'$(GeneratedFilesDir)winrt\%(Filename).h')">
+          Inputs="@(CppWinRTDirectWinMDReferences);@(CppWinRTDynamicProjectWinMDReferences);@(CppWinRTPlatformWinMDReferences)"
+          Outputs="@(CppWinRTDirectWinMDReferences->'$(GeneratedFilesDir)winrt\%(Filename).h');@(CppWinRTDynamicProjectWinMDReferences->'$(GeneratedFilesDir)winrt\%(Filename).h')">
     <PropertyGroup>
       <CppWinRTCommand>$(CppWinRTPath)cppwinrt %40"$(IntDir)cppwinrt_ref.rsp"</CppWinRTCommand>
     </PropertyGroup>
     <ItemGroup>
       <_CppwinrtRefInputs Remove="@(_CppwinrtRefInputs)"/>
       <_CppwinrtRefInputs Include="@(CppWinRTDirectWinMDReferences)"/>
-      <_CppwinrtRefInputs Include="@(CppWinRTProjectWinMDReferences)"/>
+      <_CppwinrtRefInputs Include="@(CppWinRTDynamicProjectWinMDReferences)"/>
       <_CppwinrtRefRefs Remove="@(_CppwinrtRefRefs)"/>
       <_CppwinrtRefRefs Include="@(CppWinRTPlatformWinMDReferences)"/>
     </ItemGroup>
@@ -458,7 +462,7 @@ $(XamlMetaDataProviderPch)
     <Target Name="CppWinRTMakeComponentProjection"
             Condition="'$(CppWinRTEnableComponentProjection)' == 'true'"
             DependsOnTargets="GetCppWinRTPlatformWinMDReferences;CppWinRTMergeProjectWinMDInputs;GetCppWinRTProjectWinMDReferences;$(CppWinRTMakeComponentProjectionDependsOn)"
-            Inputs="@(MdMergeOutput->'%(FullPath)')"
+            Inputs="@(MdMergeOutput->'%(FullPath)');@(CppWinRTStaticProjectWinMDReferences)"
             Outputs="$(GeneratedFilesDir)winrt\$(RootNamespace).h">
         <PropertyGroup>
             <_PCH>@(ClCompile->Metadata('PrecompiledHeaderFile')->Distinct())</_PCH>
@@ -479,9 +483,15 @@ $(XamlMetaDataProviderPch)
             <_CppwinrtCompInputs Include="@(MdMergeOutput)">
                 <WinMDPath>%(MdMergeOutput.FullPath)</WinMDPath>
             </_CppwinrtCompInputs>
+            <!-- If this is a static library with statis library references,
+                 pass those to cppwinrt.exe for the component projection individually
+                 as we don't merge those.-->
+            <_CppwinrtCompInputs Include="@(CppWinRTStaticProjectWinMDReferences)" Condition="'$(ConfigurationType)' == 'StaticLibrary'">
+                <WinMDPath>%(CppWinRTStaticProjectWinMDReferences.FullPath)</WinMDPath>
+            </_CppwinrtCompInputs>
             <_CppwinrtCompRefs Remove="@(_CppwinrtCompRefs)"/>
             <_CppwinrtCompRefs Include="@(CppWinRTDirectWinMDReferences)"/>
-            <_CppwinrtCompRefs Include="@(CppWinRTProjectWinMDReferences)"/>
+            <_CppwinrtCompRefs Include="@(CppWinRTDynamicProjectWinMDReferences)"/>
             <_CppwinrtCompRefs Include="@(CppWinRTPlatformWinMDReferences)"/>
         </ItemGroup>
         <PropertyGroup>
