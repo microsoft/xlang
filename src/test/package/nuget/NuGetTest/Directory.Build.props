@@ -4,7 +4,7 @@
     <!-- This file is automatically imported by MSBuild for each project in under this folder, 
          see https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build -->
 
-    <Import Condition="Exists($([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../')))" Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+    <Import Condition="Exists($([MSBuild]::GetPathOfFileAbove('Directory.Build.props')))" Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props'))" />
 
     <PropertyGroup>        
         <!-- Consistent output directory for AppContainer and non-AppContainer projects -->
@@ -17,7 +17,7 @@
         <IntDir>$(IntDirRoot)$(MSBuildProjectName)\</IntDir>
         <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
         <CppWinRTVerbosity>high</CppWinRTVerbosity>
-        <CppWinRTPath>..\..\..\..\..\..\_build\Windows\x64\Debug\tool\cppwinrt\</CppWinRTPath>
+        <CppWinRTPath>..\..\..\..\..\..\_build\Windows\$(Platform)\$(Configuration)\tool\cppwinrt\</CppWinRTPath>
     </PropertyGroup>
 
     <Import Project="..\..\..\..\package\cppwinrt\nuget\Microsoft.Windows.CppWinRT.props" />
