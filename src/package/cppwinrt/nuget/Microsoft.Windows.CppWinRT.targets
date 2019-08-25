@@ -481,9 +481,9 @@ $(XamlMetaDataProviderPch)
             <_CppwinrtCompInputs Include="@(MdMergeOutput)">
                 <WinMDPath>%(MdMergeOutput.FullPath)</WinMDPath>
             </_CppwinrtCompInputs>
-            <!-- If this is a static library with statis library references,
-                 pass those to cppwinrt.exe for the component projection individually
-                 as we don't merge those.-->
+            <!-- If this is a static library with static library references,
+                 pass the individual static library references to cppwinrt.exe 
+                 for the component projection as they are not merged.-->
             <_CppwinrtCompInputs Include="@(CppWinRTStaticProjectWinMDReferences)" Condition="'$(ConfigurationType)' == 'StaticLibrary'">
                 <WinMDPath>%(CppWinRTStaticProjectWinMDReferences.FullPath)</WinMDPath>
             </_CppwinrtCompInputs>
