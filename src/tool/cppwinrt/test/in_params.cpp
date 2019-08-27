@@ -43,4 +43,10 @@ TEST_CASE("in_params")
     REQUIRE(object.InStringableArray({ make<Value>(1), make<Value>(2) }) == L"12");
     REQUIRE(object.InStructArray({ {L"1",L"2"}, {L"3",L"4"} }) == L"1234");
     REQUIRE(object.InEnumArray({ Signed::First, Signed::Second }) == L"FirstSecond");
+
+    // params::hstring optimizations
+    REQUIRE(object.InString(L"") == L"");
+    REQUIRE(object.InString({}) == L"");
+    wchar_t non_const_string[1] = { L'\0' };
+    REQUIRE(object.InString(non_const_string) == L"");
 }
