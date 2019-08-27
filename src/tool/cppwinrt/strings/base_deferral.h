@@ -52,7 +52,7 @@ namespace winrt
 
             if (resume)
             {
-                resume_background().await_suspend(resume);
+                impl::resume_background(resume);
             }
         }
 
