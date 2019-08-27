@@ -379,6 +379,10 @@ namespace winrt
         {
             return hresult_error(impl::error_fail, to_hstring(e.what())).to_abi();
         }
+        catch (...)
+        {
+            return impl::error_fail;
+        }
     }
 
     [[noreturn]] inline void throw_last_error()
