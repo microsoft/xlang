@@ -8,7 +8,7 @@ namespace winrt::TestApp::implementation
     {
         TestStaticLibrary4Class() = default;
 
-        void Test();
+        Windows::UI::Xaml::Core::Direct::XamlDirect Test();
     };
 }
 

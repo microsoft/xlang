@@ -5,10 +5,12 @@
 #endif
 
 using namespace winrt;
+using namespace winrt::Windows::UI::Xaml::Core::Direct;
 
 namespace winrt::TestApp::implementation
 {
-    void TestStaticLibrary4Class::Test()
+    XamlDirect TestStaticLibrary4Class::Test()
     {
+        return XamlDirect::GetDefault();
     }
 }
