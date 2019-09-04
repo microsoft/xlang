@@ -5,6 +5,6 @@ namespace TestApp
     {
         TestStaticLibrary4Class();
 
-        void Test();
+        Windows.UI.Xaml.Core.Direct.XamlDirect Test();
     }
 }

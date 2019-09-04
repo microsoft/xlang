@@ -29,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestRuntimeComponentCX", "T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestStaticLibrary4", "TestStaticLibrary4\TestStaticLibrary4.vcxproj", "{432068A4-B206-4468-9254-446CCEB15A2C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestRuntimeComponentEmpty", "TestRuntimeComponentEmpty\TestRuntimeComponentEmpty.vcxproj", "{8456C55F-BF01-4798-B79B-7388681C398F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -171,6 +173,20 @@ Global
 		{432068A4-B206-4468-9254-446CCEB15A2C}.Release|x64.Build.0 = Release|x64
 		{432068A4-B206-4468-9254-446CCEB15A2C}.Release|x86.ActiveCfg = Release|Win32
 		{432068A4-B206-4468-9254-446CCEB15A2C}.Release|x86.Build.0 = Release|Win32
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Debug|ARM.ActiveCfg = Debug|ARM
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Debug|ARM.Build.0 = Debug|ARM
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Debug|x64.ActiveCfg = Debug|x64
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Debug|x64.Build.0 = Debug|x64
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Debug|x86.ActiveCfg = Debug|Win32
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Debug|x86.Build.0 = Debug|Win32
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Release|ARM.ActiveCfg = Release|ARM
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Release|ARM.Build.0 = Release|ARM
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Release|ARM64.ActiveCfg = Release|Win32
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Release|x64.ActiveCfg = Release|x64
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Release|x64.Build.0 = Release|x64
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Release|x86.ActiveCfg = Release|Win32
+		{8456C55F-BF01-4798-B79B-7388681C398F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,3 +7,4 @@
 #endif
 
 #include <winrt/base.h>
+#include <winrt/Windows.UI.Xaml.Core.Direct.h>
