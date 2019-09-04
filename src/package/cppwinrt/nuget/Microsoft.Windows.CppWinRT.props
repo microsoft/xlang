@@ -13,7 +13,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTPackage Condition="'$(CppWinRTPackage)' != 'true'">false</CppWinRTPackage>
         <XamlLanguage>CppWinRT</XamlLanguage>
         <IsNativeLanguage>true</IsNativeLanguage>
-        <!-- This causes VS to add the platform WinMD refetrences for the target SDK -->
+        <!-- This causes VS to add the platform WinMD references for the target SDK -->
         <WinMDAssembly>true</WinMDAssembly>
     </PropertyGroup>
 
