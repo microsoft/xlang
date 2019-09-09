@@ -123,8 +123,8 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TestStaticLibrary4\TestStaticLibrary4.vcxproj">
-      <Project>{432068a4-b206-4468-9254-446cceb15a2c}</Project>
+    <ProjectReference Include="..\TestStaticLibrary5\TestStaticLibrary5.vcxproj">
+      <Project>{dc435c3f-c38e-43d1-b702-dc03f530a3cb}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
