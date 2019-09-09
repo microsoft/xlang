@@ -150,7 +150,7 @@ namespace winrt::impl
         size_t& m_count;
     };
 
-    struct factory_cache_typeless_entry
+    struct factory_cache_entry_base
     {
         struct alignas(sizeof(void*) * 2) object_and_count
         {
@@ -188,6 +188,8 @@ namespace winrt::impl
         }
     };
 
+    static_assert(std::is_standard_layout_v<factory_cache_entry_base>);
+
 #if !defined _M_IX86 && !defined _M_X64 && !defined _M_ARM && !defined _M_ARM64
 #error Unsupported architecture: verify that zero-initialization of SLIST_HEADER is still safe
 #endif
@@ -198,7 +200,7 @@ namespace winrt::impl
         factory_cache& operator=(factory_cache const&) = delete;
         factory_cache() noexcept = default;
 
-        void add(factory_cache_typeless_entry* const entry) noexcept
+        void add(factory_cache_entry_base* const entry) noexcept
         {
             WINRT_ASSERT(entry);
             WINRT_InterlockedPushEntrySList(&m_list, &entry->m_next);
@@ -213,7 +215,7 @@ namespace winrt::impl
                 // entry->next must be read before entry->clear() is called since the InterlockedCompareExchange
                 // inside clear() will allow another thread to add the entry back to the cache.
                 slist_entry* next = entry->next;
-                reinterpret_cast<factory_cache_typeless_entry*>(reinterpret_cast<uint8_t*>(entry) - offsetof(factory_cache_typeless_entry, m_next))->clear();
+                reinterpret_cast<factory_cache_entry_base*>(reinterpret_cast<uint8_t*>(entry) - offsetof(factory_cache_entry_base, m_next))->clear();
                 entry = next;
             }
         }
@@ -230,7 +232,7 @@ namespace winrt::impl
     }
 
     template <typename Class, typename Interface>
-    struct factory_cache_entry : factory_cache_typeless_entry
+    struct factory_cache_entry : factory_cache_entry_base
     {
         template <typename F>
         auto call(F&& callback)
@@ -277,11 +279,6 @@ namespace winrt::impl
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
     auto call_factory(F&& callback)
     {
-        static_assert(sizeof(factory_cache_typeless_entry) == sizeof(factory_cache_entry<Class, Interface>));
-        static_assert(std::alignment_of_v<factory_cache_typeless_entry> == std::alignment_of_v<factory_cache_entry<Class, Interface>>);
-        static_assert(std::is_standard_layout_v<factory_cache_typeless_entry>);
-        static_assert(std::is_standard_layout_v<factory_cache_entry<Class, Interface>>);
-
         static factory_cache_entry<Class, Interface> factory;
         return factory.call(callback);
     }
