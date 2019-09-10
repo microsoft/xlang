@@ -260,7 +260,7 @@ namespace winrt
         return Windows::Foundation::IReference<hstring>(*(hstring*)(&value));
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_convertible_v<T, param::hstring>>>
+    template <typename T, std::enable_if_t<!std::is_convertible_v<T, param::hstring>, int> = 0>
     Windows::Foundation::IInspectable box_value(T const& value)
     {
         if constexpr (std::is_base_of_v<Windows::Foundation::IInspectable, T>)
@@ -311,7 +311,7 @@ namespace winrt
         return *(hstring*)(&default_value);
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_same_v<T, hstring>>>
+    template <typename T, std::enable_if_t<!std::is_same_v<T, hstring>, int> = 0>
     T unbox_value_or(Windows::Foundation::IInspectable const& value, T const& default_value)
     {
         if (value)

@@ -54,7 +54,7 @@ namespace winrt::param
             attach_abi(m_interface, winrt::get_abi(values));
         }
 
-        template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>>* = nullptr>
+        template <typename Collection, std::enable_if_t<std::is_convertible_v<Collection, interface_type>, int> = 0>
         map(Collection const& values) noexcept
         {
             m_interface = values;

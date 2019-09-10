@@ -240,13 +240,13 @@ namespace winrt::Windows::Foundation
 
 namespace winrt
 {
-    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
+    template <typename T, std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>, int> = 0>
     auto get_abi(T const& object) noexcept
     {
         return reinterpret_cast<impl::abi_t<T> const&>(object);
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
+    template <typename T, std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>, int> = 0>
     auto put_abi(T& object) noexcept
     {
         if constexpr (!std::is_trivially_destructible_v<T>)
@@ -257,19 +257,19 @@ namespace winrt
         return reinterpret_cast<impl::abi_t<T>*>(&object);
     }
 
-    template <typename T, typename V, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
+    template <typename T, typename V, std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>, int> = 0>
     void copy_from_abi(T& object, V&& value)
     {
         object = reinterpret_cast<T const&>(value);
     }
 
-    template <typename T, typename V, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>>>
+    template <typename T, typename V, std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, T>, int> = 0>
     void copy_to_abi(T const& object, V& value)
     {
         reinterpret_cast<T&>(value) = object;
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, std::decay_t<T>> && !std::is_convertible_v<T, std::wstring_view>>>
+    template <typename T, std::enable_if_t<!std::is_base_of_v<Windows::Foundation::IUnknown, std::decay_t<T>> && !std::is_convertible_v<T, std::wstring_view>, int> = 0>
     auto detach_abi(T&& object)
     {
         impl::abi_t<T> result{};

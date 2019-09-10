@@ -98,7 +98,7 @@ namespace winrt::impl
         static constexpr bool value = get_value<T>(0);
     };
 
-    template <typename T, std::enable_if_t<!has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<!has_GetAt<T>::value, int> = 0>
     auto begin(T const& collection) -> decltype(collection.First())
     {
         auto result = collection.First();
@@ -111,31 +111,31 @@ namespace winrt::impl
         return result;
     }
 
-    template <typename T, std::enable_if_t<!has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<!has_GetAt<T>::value, int> = 0>
     auto end([[maybe_unused]] T const& collection) noexcept -> decltype(collection.First())
     {
         return {};
     }
 
-    template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<has_GetAt<T>::value, int> = 0>
     fast_iterator<T> begin(T const& collection) noexcept
     {
         return { collection, 0 };
     }
 
-    template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<has_GetAt<T>::value, int> = 0>
     fast_iterator<T> end(T const& collection)
     {
         return { collection, collection.Size() };
     }
 
-    template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<has_GetAt<T>::value, int> = 0>
     rfast_iterator<T> rbegin(T const& collection) noexcept
     {
         return { collection, collection.Size() - 1 };
     }
 
-    template <typename T, std::enable_if_t<has_GetAt<T>::value>* = nullptr>
+    template <typename T, std::enable_if_t<has_GetAt<T>::value, int> = 0>
     rfast_iterator<T> rend(T const& collection)
     {
         return { collection, -1 };
