@@ -18,6 +18,9 @@
 // Note: this is a workaround for a false-positive warning produced by the Visual C++ 15.9 compiler.
 #pragma warning(disable : 5046)
 
+// Note: this is a workaround for a false-positive warning produced by the Visual C++ 16.3 compiler.
+#pragma warning(disable : 4268)
+
 #if defined(_RESUMABLE_FUNCTIONS_SUPPORTED) && !defined(__cpp_coroutines)
 #define __cpp_coroutines
 #endif
