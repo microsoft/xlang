@@ -122,20 +122,48 @@ namespace winrt::impl
     };
 #endif
 
-    struct factory_cache_typeless_entry
+    struct factory_count_guard
+    {
+        factory_count_guard(factory_count_guard const&) = delete;
+        factory_count_guard& operator=(factory_count_guard const&) = delete;
+
+        explicit factory_count_guard(size_t& count) noexcept : m_count(count)
+        {
+#ifdef _WIN64
+            _InterlockedIncrement64((int64_t*)&m_count);
+#else
+            _InterlockedIncrement((long*)&m_count);
+#endif
+        }
+
+        ~factory_count_guard() noexcept
+        {
+#ifdef _WIN64
+            _InterlockedDecrement64((int64_t*)&m_count);
+#else
+            _InterlockedDecrement((long*)&m_count);
+#endif
+        }
+
+    private:
+
+        size_t& m_count;
+    };
+
+    struct factory_cache_entry_base
     {
         struct alignas(sizeof(void*) * 2) object_and_count
         {
-            unknown_abi* pointer;
+            unknown_abi* object;
             size_t count;
         };
 
-        object_and_count value;
-        alignas(memory_allocation_alignment) slist_entry next {};
+        object_and_count m_value;
+        alignas(memory_allocation_alignment) slist_entry m_next;
 
         void clear() noexcept
         {
-            unknown_abi* pointer_value = interlocked_read_pointer(&value.pointer);
+            unknown_abi* pointer_value = interlocked_read_pointer(&m_value.object);
 
             if (pointer_value == nullptr)
             {
@@ -160,6 +188,8 @@ namespace winrt::impl
         }
     };
 
+    static_assert(std::is_standard_layout_v<factory_cache_entry_base>);
+
 #if !defined _M_IX86 && !defined _M_X64 && !defined _M_ARM && !defined _M_ARM64
 #error Unsupported architecture: verify that zero-initialization of SLIST_HEADER is still safe
 #endif
@@ -170,10 +200,10 @@ namespace winrt::impl
         factory_cache& operator=(factory_cache const&) = delete;
         factory_cache() noexcept = default;
 
-        void add(factory_cache_typeless_entry* const entry) noexcept
+        void add(factory_cache_entry_base* const entry) noexcept
         {
             WINRT_ASSERT(entry);
-            WINRT_InterlockedPushEntrySList(&m_list, &entry->next);
+            WINRT_InterlockedPushEntrySList(&m_list, &entry->m_next);
         }
 
         void clear() noexcept
@@ -182,10 +212,10 @@ namespace winrt::impl
 
             while (entry != nullptr)
             {
-                // entry->Next must be read before entry->clear() is called since the InterlockedCompareExchange
+                // entry->next must be read before entry->clear() is called since the InterlockedCompareExchange
                 // inside clear() will allow another thread to add the entry back to the cache.
                 slist_entry* next = entry->next;
-                reinterpret_cast<factory_cache_typeless_entry*>(reinterpret_cast<uint8_t*>(entry) - offsetof(factory_cache_typeless_entry, next))->clear();
+                reinterpret_cast<factory_cache_entry_base*>(reinterpret_cast<uint8_t*>(entry) - offsetof(factory_cache_entry_base, m_next))->clear();
                 entry = next;
             }
         }
@@ -202,7 +232,7 @@ namespace winrt::impl
     }
 
     template <typename Class, typename Interface>
-    struct factory_cache_entry
+    struct factory_cache_entry : factory_cache_entry_base
     {
         template <typename F>
         auto call(F&& callback)
@@ -212,7 +242,7 @@ namespace winrt::impl
 #endif
 
             {
-                count_guard const guard(m_value.count);
+                factory_count_guard const guard(m_value.count);
 
                 if (m_value.object)
                 {
@@ -232,67 +262,23 @@ namespace winrt::impl
             }
 
             {
-                count_guard const guard(m_value.count);
+                factory_count_guard const guard(m_value.count);
 
                 if (nullptr == _InterlockedCompareExchangePointer((void**)&m_value.object, get_abi(object), nullptr))
                 {
                     detach_abi(object);
-                    get_factory_cache().add(reinterpret_cast<factory_cache_typeless_entry*>(this));
+                    get_factory_cache().add(this);
                 }
 
                 return callback(*reinterpret_cast<com_ref<Interface> const*>(&m_value.object));
             }
         }
-
-    private:
-
-        struct count_guard
-        {
-            count_guard(count_guard const&) = delete;
-            count_guard& operator=(count_guard const&) = delete;
-
-            explicit count_guard(size_t& count) noexcept : m_count(count)
-            {
-#ifdef _WIN64
-                _InterlockedIncrement64((int64_t*)&m_count);
-#else
-                _InterlockedIncrement((long*)&m_count);
-#endif
-            }
-
-            ~count_guard() noexcept
-            {
-#ifdef _WIN64
-                _InterlockedDecrement64((int64_t*)&m_count);
-#else
-                _InterlockedDecrement((long*)&m_count);
-#endif
-            }
-
-        private:
-
-            size_t& m_count;
-        };
-
-        struct alignas(sizeof(void*) * 2) object_and_count
-        {
-            void* object;
-            size_t count;
-        };
-
-        object_and_count m_value;
-        alignas(memory_allocation_alignment) slist_entry m_next;
     };
 
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
     auto call_factory(F&& callback)
     {
-        static_assert(sizeof(factory_cache_typeless_entry) == sizeof(factory_cache_entry<Class, Interface>));
-        static_assert(std::alignment_of_v<factory_cache_typeless_entry> == std::alignment_of_v<factory_cache_entry<Class, Interface>>);
-        static_assert(std::is_standard_layout_v<factory_cache_typeless_entry>);
-        static_assert(std::is_standard_layout_v<factory_cache_entry<Class, Interface>>);
-
         static factory_cache_entry<Class, Interface> factory;
         return factory.call(callback);
     }
@@ -374,7 +360,7 @@ namespace winrt
         // Normally, the callback avoids having to return a ref-counted object and the resulting AddRef/Release bump.
         // In this case we do want a unique reference, so we use the lambda to return one and thus produce an
         // AddRef'd object that is returned to the caller. 
-        return impl::call_factory<Class, Interface>([](auto&& factory)
+        return impl::call_factory<Class, Interface>([](Interface const& factory)
         {
             return factory;
         });
