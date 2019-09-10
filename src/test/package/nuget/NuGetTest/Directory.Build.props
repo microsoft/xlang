@@ -17,7 +17,9 @@
         <IntDir>$(IntDirRoot)$(MSBuildProjectName)\</IntDir>
         <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
         <CppWinRTVerbosity>high</CppWinRTVerbosity>
-        <CppWinRTPath>..\..\..\..\..\..\_build\Windows\$(Platform)\$(Configuration)\tool\cppwinrt\</CppWinRTPath>
+        <CppWinRTPlatform>$(Platform)</CppWinRTPlatform>
+        <CppWinRTPlatform Condition="'$(Platform)'=='Win32' or '$(Platform)'=='ARM' or '$(Platform)'=='ARM64'">x86</CppWinRTPlatform>
+        <CppWinRTPath>$(SolutionDir)..\..\..\..\..\_build\Windows\$(CppWinRTPlatform)\$(Configuration)\tool\cppwinrt\</CppWinRTPath>
     </PropertyGroup>
 
     <Import Project="..\..\..\..\package\cppwinrt\nuget\Microsoft.Windows.CppWinRT.props" />
