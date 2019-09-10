@@ -16,7 +16,7 @@ namespace winrt::param
 
         hstring(std::wstring_view const& value) noexcept
         {
-            if (impl::error_ok != WINRT_WindowsCreateStringReference(value.data(), static_cast<uint32_t>(value.size()), &m_header, &m_handle))
+            if (impl::error_ok != create_string_reference(value.data(), value.size()))
             {
                 std::terminate();
             }
@@ -24,12 +24,12 @@ namespace winrt::param
 
         hstring(std::wstring const& value) noexcept
         {
-            WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value.data(), static_cast<uint32_t>(value.size()), &m_header, &m_handle));
+            WINRT_VERIFY_(impl::error_ok, create_string_reference(value.data(), value.size()));
         }
 
         hstring(wchar_t const* const value) noexcept
         {
-            WINRT_VERIFY_(impl::error_ok, WINRT_WindowsCreateStringReference(value, static_cast<uint32_t>(wcslen(value)), &m_header, &m_handle));
+            WINRT_VERIFY_(impl::error_ok, create_string_reference(value, wcslen(value)));
         }
 
         operator winrt::hstring const&() const noexcept
@@ -38,6 +38,19 @@ namespace winrt::param
         }
 
     private:
+        int32_t create_string_reference(wchar_t const* const data, size_t size) noexcept
+        {
+            auto size32 = static_cast<uint32_t>(size);
+            if (size32 == 0)
+            {
+                m_handle = nullptr;
+                return impl::error_ok;
+            }
+            else
+            {
+                return WINRT_WindowsCreateStringReference(data, size32, &m_header, &m_handle);
+            }
+        }
 
         struct header
         {

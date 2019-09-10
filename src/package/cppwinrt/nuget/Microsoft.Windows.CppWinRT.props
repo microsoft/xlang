@@ -13,6 +13,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTPackage Condition="'$(CppWinRTPackage)' != 'true'">false</CppWinRTPackage>
         <XamlLanguage>CppWinRT</XamlLanguage>
         <IsNativeLanguage>true</IsNativeLanguage>
+        <!-- This causes VS to add the platform WinMD references for the target SDK -->
+        <WinMDAssembly>true</WinMDAssembly>
+    </PropertyGroup>
+
+    <!-- For a static library we don't want the winmd/lib/pdb to be packaged -->
+    <PropertyGroup Condition="'$(ConfigurationType)' == 'StaticLibrary'">
+        <IncludeCopyWinMDArtifactsOutputGroup>false</IncludeCopyWinMDArtifactsOutputGroup>
+        <IncludeBuiltProjectOutputGroup>false</IncludeBuiltProjectOutputGroup>
+        <IncludeDebugSymbolsProjectOutputGroup>false</IncludeDebugSymbolsProjectOutputGroup>
     </PropertyGroup>
 
     <ItemDefinitionGroup>
