@@ -2741,6 +2741,33 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         }
     }
 
+    static void write_call_factory(writer& w, std::string_view const& class_name, TypeDef const& factory, method_signature const& signature)
+    {
+        if (signature.params().empty())
+        {
+            auto format = "impl::call_factory<%, %>(static_cast<%(*)(% const&)>([](% const& f) { return f.%(); }))";
+
+            w.write(format,
+                class_name,
+                factory,
+                signature.return_signature(),
+                factory,
+                factory,
+                get_name(signature.method()));
+        }
+        else
+        {
+            auto format = "impl::call_factory<%, %>([&](% const& f) { return f.%(%); })";
+
+            w.write(format,
+                class_name,
+                factory,
+                factory,
+                get_name(signature.method()),
+                bind<write_consume_args>(signature));
+        }
+    }
+
     static void write_constructor_definition(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
     {
         w.async_types = false;
@@ -2748,7 +2775,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         method_signature signature{ method };
 
         auto format = R"(    inline %::%(%) :
-        %(impl::call_factory<%, %>([&](% const& f) { return f.%(%); }))
+        %(%)
     {
     }
 )";
@@ -2758,11 +2785,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             type_name,
             bind<write_consume_params>(signature),
             type_name,
-            type_name,
-            factory,
-            factory,
-            get_name(method),
-            bind<write_consume_args>(signature));
+            bind<write_call_factory>(type_name, factory, signature));
     }
 
     static void write_composable_constructor_definition(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
@@ -2854,7 +2877,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         {
             auto format = R"(    inline auto %::%(%)
     {
-        %impl::call_factory<%, %>([&](% const& f) { return f.%(%); });
+        %%;
     }
 )";
 
@@ -2863,11 +2886,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                 method_name,
                 bind<write_consume_params>(signature),
                 signature.return_signature() ? "return " : "",
-                type_name,
-                factory,
-                factory,
-                method_name,
-                bind<write_consume_args>(signature));
+                bind<write_call_factory>(type_name, factory, signature));
         }
 
         if (is_add_overload(method))
@@ -2912,7 +2931,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     if (has_fastabi(type))
                     {
                         format = R"(    inline %::%() :
-        %(impl::call_factory<%>([](Windows::Foundation::IActivationFactory const& f) { return impl::fast_activate<%>(f); }))
+        %(impl::call_factory<%>(static_cast<%(*)(Windows::Foundation::IActivationFactory const&)>([](Windows::Foundation::IActivationFactory const& f) { return impl::fast_activate<%>(f); })))
     {
     }
 )";
@@ -2920,13 +2939,14 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     else
                     {
                         format = R"(    inline %::%() :
-        %(impl::call_factory<%>([](Windows::Foundation::IActivationFactory const& f) { return f.template ActivateInstance<%>(); }))
+        %(impl::call_factory<%>(static_cast<%(*)(Windows::Foundation::IActivationFactory const&)>([](Windows::Foundation::IActivationFactory const& f) { return f.template ActivateInstance<%>(); })))
     {
     }
 )";
                     }
 
                     w.write(format,
+                        type_name,
                         type_name,
                         type_name,
                         type_name,

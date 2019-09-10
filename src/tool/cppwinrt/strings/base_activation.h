@@ -360,10 +360,10 @@ namespace winrt
         // Normally, the callback avoids having to return a ref-counted object and the resulting AddRef/Release bump.
         // In this case we do want a unique reference, so we use the lambda to return one and thus produce an
         // AddRef'd object that is returned to the caller. 
-        return impl::call_factory<Class, Interface>([](Interface const& factory)
+        return impl::call_factory<Class, Interface>(static_cast<Interface(*)(Interface const&)>([](Interface const& factory)
         {
             return factory;
-        });
+        }));
     }
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
