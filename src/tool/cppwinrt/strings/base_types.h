@@ -19,7 +19,7 @@ namespace winrt::impl
     using bstr = wchar_t*;
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     struct hresult
     {
@@ -84,7 +84,7 @@ namespace winrt
     }
 }
 
-namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace winrt::Windows::Foundation
 {
     enum class TrustLevel : int32_t
     {

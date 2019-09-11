@@ -15,7 +15,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     [[nodiscard]] inline auto resume_background() noexcept
     {

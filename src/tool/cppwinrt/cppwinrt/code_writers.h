@@ -118,7 +118,7 @@ namespace xlang
 
     static void write_type_namespace(writer& w, std::string_view const& ns)
     {
-        auto format = R"(namespace winrt::@
+        auto format = R"(WINRT_EXPORT namespace winrt::@
 {
 )";
 

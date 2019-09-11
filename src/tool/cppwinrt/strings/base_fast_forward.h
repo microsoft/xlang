@@ -117,7 +117,7 @@ namespace winrt::impl
     static_assert(offsetof(fast_abi_forwarder, m_offset) == sizeof(fast_abi_forwarder::m_vfptr) + sizeof(fast_abi_forwarder::m_owner));
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template<typename TGuid>
     auto make_fast_abi_forwarder(void* owner, TGuid const& guid, size_t offset)

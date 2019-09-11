@@ -1,5 +1,5 @@
 
-namespace winrt::param
+WINRT_EXPORT namespace winrt::param
 {
     struct hstring
     {

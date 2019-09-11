@@ -228,7 +228,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace winrt::Windows::Foundation
 {
     template <typename T>
     bool operator==(IReference<T> const& left, IReference<T> const& right)
@@ -253,7 +253,7 @@ namespace winrt::Windows::Foundation
     }
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     inline Windows::Foundation::IInspectable box_value(param::hstring const& value)
     {
@@ -346,10 +346,7 @@ namespace winrt
 
         return default_value;
     }
-}
 
-namespace winrt
-{
     template <typename T>
     using optional = Windows::Foundation::IReference<T>;
 }
