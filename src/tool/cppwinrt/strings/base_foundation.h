@@ -1,5 +1,5 @@
 
-namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace winrt::Windows::Foundation
 {
     struct Point
     {
@@ -12,7 +12,7 @@ namespace winrt::Windows::Foundation
             : X(X), Y(Y)
         {}
 
-#ifdef WINRT_NUMERICS
+#ifdef WINRT_IMPL_NUMERICS
 
         constexpr Point(Numerics::float2 const& value) noexcept
             : X(value.x), Y(value.y)
@@ -47,7 +47,7 @@ namespace winrt::Windows::Foundation
             : Width(Width), Height(Height)
         {}
 
-#ifdef WINRT_NUMERICS
+#ifdef WINRT_IMPL_NUMERICS
 
         constexpr Size(Numerics::float2 const& value) noexcept
             : Width(value.x), Height(value.y)
@@ -132,7 +132,7 @@ namespace winrt::impl
         using type = struct_category<float, float, float, float>;
     };
 
-#ifdef WINRT_NUMERICS
+#ifdef WINRT_IMPL_NUMERICS
 
     template <> struct name<Windows::Foundation::Numerics::float2>
     {

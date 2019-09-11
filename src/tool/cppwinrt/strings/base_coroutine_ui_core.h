@@ -1,5 +1,5 @@
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     [[nodiscard]] inline auto resume_foreground(
         Windows::UI::Core::CoreDispatcher const& dispatcher,

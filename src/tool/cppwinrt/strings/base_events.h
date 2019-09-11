@@ -1,5 +1,5 @@
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     struct event_token
     {
@@ -360,7 +360,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename Delegate>
     struct event

@@ -177,7 +177,7 @@ namespace winrt::impl
 }
 
 #ifdef __cpp_coroutines
-namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace winrt::Windows::Foundation
 {
     inline impl::await_adapter<IAsyncAction> operator co_await(IAsyncAction const& async)
     {
@@ -204,7 +204,7 @@ namespace winrt::Windows::Foundation
 }
 #endif
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     struct get_progress_token_t {};
 
@@ -679,7 +679,7 @@ namespace std::experimental
     };
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename... T>
     Windows::Foundation::IAsyncAction when_all(T... async)

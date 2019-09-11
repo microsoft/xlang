@@ -28,7 +28,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename K, typename V, typename Compare = std::less<K>, typename Allocator = std::allocator<std::pair<K const, V>>>
     Windows::Foundation::Collections::IMap<K, V> single_threaded_map()

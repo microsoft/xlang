@@ -28,7 +28,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt::param
+WINRT_EXPORT namespace winrt::param
 {
     template <typename T>
     struct vector

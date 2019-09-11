@@ -257,7 +257,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename T, typename Allocator = std::allocator<T>>
     Windows::Foundation::Collections::IVector<T> single_threaded_vector(std::vector<T, Allocator>&& values = {})

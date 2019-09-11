@@ -1,5 +1,5 @@
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     struct access_token : handle
     {

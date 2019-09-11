@@ -7,7 +7,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     struct non_agile : impl::marker {};
     struct no_weak_ref : impl::marker {};
@@ -227,7 +227,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename D, typename I>
     D* get_self(I const& from) noexcept
@@ -1255,7 +1255,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename D, typename... Args>
     auto make(Args&&... args)

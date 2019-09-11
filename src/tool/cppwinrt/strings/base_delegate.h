@@ -187,16 +187,16 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename... Args>
-    struct __declspec(empty_bases)delegate : impl::delegate_base<void, Args...>
+    struct __declspec(empty_bases) delegate : impl::delegate_base<void, Args...>
     {
         using impl::delegate_base<void, Args...>::delegate_base;
     };
 
     template <typename R, typename... Args>
-    struct __declspec(empty_bases)delegate<R(Args...)> : impl::delegate_base<R, Args...>
+    struct __declspec(empty_bases) delegate<R(Args...)> : impl::delegate_base<R, Args...>
     {
         using impl::delegate_base<R, Args...>::delegate_base;
     };
