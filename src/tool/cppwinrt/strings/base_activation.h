@@ -264,9 +264,9 @@ namespace winrt::impl
             {
                 factory_count_guard const guard(m_value.count);
 
-                if (nullptr == _InterlockedCompareExchangePointer((void**)&m_value.object, get_abi(object), nullptr))
+                if (nullptr == _InterlockedCompareExchangePointer(reinterpret_cast<void**>(&m_value.object), *reinterpret_cast<void**>(&object), nullptr))
                 {
-                    detach_abi(object);
+                    *reinterpret_cast<void**>(&object) = nullptr;
                     get_factory_cache().add(this);
                 }
 
