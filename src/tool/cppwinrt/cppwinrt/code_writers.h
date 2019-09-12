@@ -1953,11 +1953,34 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_class_override_constructors(writer& w, std::string_view const& type_name, std::map<std::string, factory_info> const& factories)
+    static void write_call_factory(writer& w, TypeDef const& type, TypeDef const& factory)
     {
+        std::string factory_name;
+
+        if (type.TypeNamespace() == factory.TypeNamespace())
+        {
+            factory_name = factory.TypeName();
+        }
+        else
+        {
+            factory_name = w.write_temp("%", factory);
+        }
+
+        auto format = "impl::call_factory<%, %>([&](% const& f)";
+
+        w.write(format,
+            type.TypeName(),
+            factory_name,
+            factory_name);
+    }
+
+    static void write_class_override_constructors(writer& w, TypeDef const& type, std::map<std::string, factory_info> const& factories)
+    {
+        auto type_name = type.TypeName();
+
         auto format = R"(        %T(%)
         {
-            impl::call_factory<%, %>([&](% const& f) { f.%(%%*this, this->m_inner); });
+            % { f.%(%%*this, this->m_inner); });
         }
 )";
 
@@ -1977,9 +2000,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                 w.write(format,
                     type_name,
                     bind<write_consume_params>(signature),
-                    type_name,
-                    factory_name,
-                    factory_name,
+                    bind<write_call_factory>(type, factory.type),
                     get_name(method),
                     bind<write_consume_args>(signature),
                     signature.params().empty() ? "" : ", ");
@@ -2083,7 +2104,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             bind<write_class_override_bases>(type),
             bind<write_class_override_defaults>(interfaces),
             type_name,
-            bind<write_class_override_constructors>(type_name, factories),
+            bind<write_class_override_constructors>(type, factories),
             bind<write_class_override_usings>(interfaces));
     }
 
@@ -2741,14 +2762,15 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_constructor_definition(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
+    static void write_constructor_definition(writer& w, MethodDef const& method, TypeDef const& type, TypeDef const& factory)
     {
         w.async_types = false;
 
+        auto type_name = type.TypeName();
         method_signature signature{ method };
 
         auto format = R"(    inline %::%(%) :
-        %(impl::call_factory<%, %>([&](% const& f) { return f.%(%); }))
+        %(% { return f.%(%); }))
     {
     }
 )";
@@ -2758,15 +2780,14 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             type_name,
             bind<write_consume_params>(signature),
             type_name,
-            type_name,
-            factory,
-            factory,
+            bind<write_call_factory>(type, factory),
             get_name(method),
             bind<write_consume_args>(signature));
     }
 
-    static void write_composable_constructor_definition(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
+    static void write_composable_constructor_definition(writer& w, MethodDef const& method, TypeDef const& type, TypeDef const& factory)
     {
+        auto type_name = type.TypeName();
         method_signature signature{ method };
         auto& params = signature.params();
         auto inner_param = params.back().first.Name();
@@ -2777,7 +2798,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         auto format = R"(    inline %::%(%)
     {
         Windows::Foundation::IInspectable %, %;
-        *this = impl::call_factory<%, %>([&](% const& f) { return f.%(%%%, %); });
+        *this = % { return f.%(%%%, %); });
     }
 )";
 
@@ -2787,9 +2808,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             bind<write_consume_params>(signature),
             base_param,
             inner_param,
-            type_name,
-            factory,
-            factory,
+            bind<write_call_factory>(type, factory),
             get_name(method),
             bind<write_consume_args>(signature),
             params.empty() ? "" : ", ",
@@ -2845,8 +2864,9 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         }
     }
 
-    static void write_static_definitions(writer& w, MethodDef const& method, std::string_view const& type_name, TypeDef const& factory)
+    static void write_static_definitions(writer& w, MethodDef const& method, TypeDef const& type, TypeDef const& factory)
     {
+        auto type_name = type.TypeName();
         method_signature signature{ method };
         auto method_name = get_name(method);
         w.async_types = signature.is_async();
@@ -2854,7 +2874,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         {
             auto format = R"(    inline auto %::%(%)
     {
-        %impl::call_factory<%, %>([&](% const& f) { return f.%(%); });
+        %% { return f.%(%); });
     }
 )";
 
@@ -2863,9 +2883,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                 method_name,
                 bind<write_consume_params>(signature),
                 signature.return_signature() ? "return " : "",
-                type_name,
-                factory,
-                factory,
+                bind<write_call_factory>(type, factory),
                 method_name,
                 bind<write_consume_args>(signature));
         }
@@ -2935,16 +2953,16 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                 }
                 else
                 {
-                    w.write_each<write_constructor_definition>(factory.type.MethodList(), type_name, factory.type);
+                    w.write_each<write_constructor_definition>(factory.type.MethodList(), type, factory.type);
                 }
             }
             else if (factory.composable && factory.visible)
             {
-                w.write_each<write_composable_constructor_definition>(factory.type.MethodList(), type_name, factory.type);
+                w.write_each<write_composable_constructor_definition>(factory.type.MethodList(), type, factory.type);
             }
             else if (factory.statics)
             {
-                w.write_each<write_static_definitions>(factory.type.MethodList(), type_name, factory.type);
+                w.write_each<write_static_definitions>(factory.type.MethodList(), type, factory.type);
             }
         }
     }
