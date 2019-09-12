@@ -38,7 +38,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     struct hstring
     {
@@ -384,7 +384,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     inline bool embedded_null(hstring const& value) noexcept
     {
@@ -452,7 +452,7 @@ namespace winrt
         return value;
     }
 
-    template <typename T, typename = std::enable_if_t<std::is_same_v<T, bool>>>
+    template <typename T, std::enable_if_t<std::is_same_v<T, bool>, int> = 0>
     hstring to_hstring(T const value)
     {
         if (value)
@@ -475,7 +475,7 @@ namespace winrt
         return hstring{ buffer };
     }
 
-    template <typename T, typename = std::enable_if_t<std::is_convertible_v<T, std::string_view>>>
+    template <typename T, std::enable_if_t<std::is_convertible_v<T, std::string_view>, int> = 0>
     hstring to_hstring(T const& value)
     {
         std::string_view const view(value);

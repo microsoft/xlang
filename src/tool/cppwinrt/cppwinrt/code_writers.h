@@ -118,7 +118,7 @@ namespace xlang
 
     static void write_type_namespace(writer& w, std::string_view const& ns)
     {
-        auto format = R"(namespace winrt::@
+        auto format = R"(WINRT_EXPORT namespace winrt::@
 {
 )";
 
@@ -1957,7 +1957,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     {
         auto format = R"(        %T(%)
         {
-            impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
+            impl::call_factory<%, %>([&](% const& f) { f.%(%%*this, this->m_inner); });
         }
 )";
 
@@ -1978,6 +1978,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     type_name,
                     bind<write_consume_params>(signature),
                     type_name,
+                    factory_name,
                     factory_name,
                     get_name(method),
                     bind<write_consume_args>(signature),
@@ -2747,7 +2748,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         method_signature signature{ method };
 
         auto format = R"(    inline %::%(%) :
-        %(impl::call_factory<%, %>([&](auto&& f) { return f.%(%); }))
+        %(impl::call_factory<%, %>([&](% const& f) { return f.%(%); }))
     {
     }
 )";
@@ -2758,6 +2759,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             bind<write_consume_params>(signature),
             type_name,
             type_name,
+            factory,
             factory,
             get_name(method),
             bind<write_consume_args>(signature));
@@ -2775,7 +2777,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         auto format = R"(    inline %::%(%)
     {
         Windows::Foundation::IInspectable %, %;
-        *this = impl::call_factory<%, %>([&](auto&& f) { return f.%(%%%, %); });
+        *this = impl::call_factory<%, %>([&](% const& f) { return f.%(%%%, %); });
     }
 )";
 
@@ -2786,6 +2788,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             base_param,
             inner_param,
             type_name,
+            factory,
             factory,
             get_name(method),
             bind<write_consume_args>(signature),
@@ -2851,7 +2854,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         {
             auto format = R"(    inline auto %::%(%)
     {
-        %impl::call_factory<%, %>([&](auto&& f) { return f.%(%); });
+        %impl::call_factory<%, %>([&](% const& f) { return f.%(%); });
     }
 )";
 
@@ -2861,6 +2864,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                 bind<write_consume_params>(signature),
                 signature.return_signature() ? "return " : "",
                 type_name,
+                factory,
                 factory,
                 method_name,
                 bind<write_consume_args>(signature));
@@ -2908,7 +2912,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     if (has_fastabi(type))
                     {
                         format = R"(    inline %::%() :
-        %(impl::call_factory<%>([](auto&& f) { return impl::fast_activate<%>(f); }))
+        %(impl::call_factory<%>([](Windows::Foundation::IActivationFactory const& f) { return impl::fast_activate<%>(f); }))
     {
     }
 )";
@@ -2916,7 +2920,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     else
                     {
                         format = R"(    inline %::%() :
-        %(impl::call_factory<%>([](auto&& f) { return f.template ActivateInstance<%>(); }))
+        %(impl::call_factory<%>([](Windows::Foundation::IActivationFactory const& f) { return f.template ActivateInstance<%>(); }))
     {
     }
 )";

@@ -97,7 +97,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <CustomBuildStep>
-      <Command>$(OutputPath)cppwinrt.exe -in $(OutputPath)Component.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk $(OutputPath)Composable.winmd -verbose -name Component</Command>
+      <Command>$(OutputPath)cppwinrt.exe -in $(OutputPath)Component.winmd -comp $(ProjectDir) -out "$(ProjectDir)Generated Files" -ref sdk $(OutputPath)Composable.winmd -verbose</Command>
       <Message>C++/WinRT compiler</Message>
       <Outputs>Generated Files\module.g.cpp</Outputs>
       <Inputs>$(OutputPath)Component.winmd</Inputs>

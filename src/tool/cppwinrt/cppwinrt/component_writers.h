@@ -609,7 +609,7 @@ catch (...) { return winrt::to_hresult(); }
 
                 auto format = R"(        %_base(%)
         {
-            impl::call_factory<%, %>([&](auto&& f) { f.%(%%*this, this->m_inner); });
+            impl::call_factory<%, %>([&](% const& f) { f.%(%%*this, this->m_inner); });
         }
 )";
 
@@ -617,6 +617,7 @@ catch (...) { return winrt::to_hresult(); }
                     type_name,
                     bind<write_consume_params>(signature),
                     base_type,
+                    factory_name,
                     factory_name,
                     get_name(method),
                     bind<write_consume_args>(signature),

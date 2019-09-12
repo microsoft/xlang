@@ -113,6 +113,20 @@ Where <spec> is one or more of:
         {
             settings.component_overwrite = args.exists("overwrite");
             settings.component_name = args.value("name");
+
+            if (settings.component_name.empty())
+            {
+                // For compatibility with C++/WinRT 1.0, the component_name defaults to the *first*
+                // input, hence the use of values() here that will return the args in input order.
+
+                auto& values = args.values("input");
+
+                if (!values.empty())
+                {
+                    settings.component_name = path(values[0]).filename().replace_extension().string();
+                }
+            }
+
             settings.component_pch = args.value("pch", "pch.h");
             settings.component_prefix = args.exists("prefix");
             settings.component_lib = args.value("library", "winrt");
@@ -332,22 +346,6 @@ Where <spec> is one or more of:
             if (settings.verbose)
             {
                 w.write(" time:  %ms\n", get_elapsed_time(start));
-            }
-
-            if (settings.component && settings.component_name.empty())
-            {
-                auto& values = args.values("input");
-
-                if (!values.empty())
-                {
-                    // In C++/WinRT 1.0, the component name defaults to the *first* input, hence
-                    // the use of args.values() that will return the args in input order.
-
-                    auto compat_name = path(values[0]).filename().replace_extension().string();
-
-                    w.write("\n warning: Use '-name %' to specify the explicit name for component files.\n",
-                        compat_name);
-                }
             }
         }
         catch (usage_exception const&)

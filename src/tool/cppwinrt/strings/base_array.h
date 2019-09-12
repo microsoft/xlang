@@ -1,5 +1,5 @@
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename T>
     struct array_view
@@ -446,7 +446,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename T>
     auto detach_abi(uint32_t* __valueSize, impl::arg_out<T>* value) noexcept

@@ -1,5 +1,5 @@
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     void check_hresult(hresult const result);
     hresult to_hresult() noexcept;

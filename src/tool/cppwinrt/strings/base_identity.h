@@ -1,5 +1,5 @@
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename T>
     using default_interface = typename impl::default_interface<T>::type;
@@ -789,7 +789,7 @@ namespace winrt::impl
     }
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     template <typename T>
     constexpr auto name_of() noexcept

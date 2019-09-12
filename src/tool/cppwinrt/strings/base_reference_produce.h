@@ -228,7 +228,7 @@ namespace winrt::impl
     };
 }
 
-namespace winrt::Windows::Foundation
+WINRT_EXPORT namespace winrt::Windows::Foundation
 {
     template <typename T>
     bool operator==(IReference<T> const& left, IReference<T> const& right)
@@ -253,14 +253,14 @@ namespace winrt::Windows::Foundation
     }
 }
 
-namespace winrt
+WINRT_EXPORT namespace winrt
 {
     inline Windows::Foundation::IInspectable box_value(param::hstring const& value)
     {
         return Windows::Foundation::IReference<hstring>(*(hstring*)(&value));
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_convertible_v<T, param::hstring>>>
+    template <typename T, std::enable_if_t<!std::is_convertible_v<T, param::hstring>, int> = 0>
     Windows::Foundation::IInspectable box_value(T const& value)
     {
         if constexpr (std::is_base_of_v<Windows::Foundation::IInspectable, T>)
@@ -311,7 +311,7 @@ namespace winrt
         return *(hstring*)(&default_value);
     }
 
-    template <typename T, typename = std::enable_if_t<!std::is_same_v<T, hstring>>>
+    template <typename T, std::enable_if_t<!std::is_same_v<T, hstring>, int> = 0>
     T unbox_value_or(Windows::Foundation::IInspectable const& value, T const& default_value)
     {
         if (value)
@@ -346,10 +346,7 @@ namespace winrt
 
         return default_value;
     }
-}
 
-namespace winrt
-{
     template <typename T>
     using optional = Windows::Foundation::IReference<T>;
 }

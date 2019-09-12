@@ -1,4 +1,5 @@
-namespace winrt
+
+WINRT_EXPORT namespace winrt
 {
 #ifdef __cpp_coroutines
     template<typename D>
@@ -7,6 +8,7 @@ namespace winrt
         Windows::Foundation::Deferral GetDeferral()
         {
             slim_lock_guard const guard(m_lock);
+
             if (m_handle)
             {
                 // Cannot ask for deferral after the event handler returned.
@@ -29,10 +31,12 @@ namespace winrt
 
                 deferrable_event_args& m_deferrable;
             };
+
             co_await awaitable{ {}, *this };
         }
 
     private:
+
         using coroutine_handle = std::experimental::coroutine_handle<>;
 
         void one_deferral_completed()
@@ -40,10 +44,12 @@ namespace winrt
             coroutine_handle resume = nullptr;
             {
                 slim_lock_guard const guard(m_lock);
+
                 if (m_outstanding_deferrals <= 0)
                 {
                     throw hresult_illegal_method_call();
                 }
+
                 if (--m_outstanding_deferrals == 0)
                 {
                     resume = m_handle;
