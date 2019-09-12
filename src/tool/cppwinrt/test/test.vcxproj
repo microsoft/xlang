@@ -193,6 +193,7 @@
     <ClCompile Include="fast_iterator.cpp" />
     <ClCompile Include="final_release.cpp" />
     <ClCompile Include="GetMany.cpp" />
+    <ClCompile Include="get_activation_factory.cpp" />
     <ClCompile Include="iid_ppv_args.cpp" />
     <ClCompile Include="interop.cpp" />
     <ClCompile Include="invalid_events.cpp" />
