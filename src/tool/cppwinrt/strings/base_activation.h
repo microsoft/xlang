@@ -5,13 +5,13 @@ WINRT_EXPORT namespace winrt
     impl::com_ref<Interface> get_activation_factory(param::hstring const& name)
     {
         void* result{};
-        hresult hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
+        hresult hr = WINRT_RoGetActivationFactory(*(void**)(&name), guid_of<Interface>(), &result);
 
         if (hr == impl::error_not_initialized)
         {
             void* cookie;
             WINRT_CoIncrementMTAUsage(&cookie);
-            hr = WINRT_RoGetActivationFactory(get_abi(name), guid_of<Interface>(), &result);
+            hr = WINRT_RoGetActivationFactory(*(void**)(&name), guid_of<Interface>(), &result);
         }
 
         check_hresult(hr);
