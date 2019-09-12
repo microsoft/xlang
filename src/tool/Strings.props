@@ -104,7 +104,10 @@
       <Source>$([System.String]::Copy('$(IntDir)strings\%(RecursiveDir)%(Filename).cpp').ToLower())</Source>
       <Global>$([System.String]::Copy('%(Filename)').ToLower())</Global>
     </StaticStrings>
-    <ClCompile Include="@(StaticStrings->'%(Source)')"/>
+    <Filter Include="strings" />
+    <ClCompile Include="@(StaticStrings->'%(Source)')">
+      <Filter>strings</Filter>
+    </ClCompile>
   </ItemGroup>
 
   <Target Name="UpdateStringSources" BeforeTargets="Build;PrepareForBuild;ClCompile"
@@ -114,7 +117,10 @@
     <WriteLinesToFile Encoding="Unicode"
       File="$(TLogLocation)strings.read.1.tlog"
       Lines="@(StaticStrings->'^%(Source)');@(StaticStrings->'%(Identity)')"/>
-    <!--<Message Text="Static strings:&#x0d;&#x0a;@(StaticStrings->'%(Global): %(Content), %(Source)','&#x0d;&#x0a;')" Importance="High"/>-->
+    <WriteLinesToFile Encoding="Unicode"
+      File="$(TLogLocation)strings.write.1.tlog"
+      Lines="@(StaticStrings->'^%(Identity)');@(StaticStrings->'%(Source)')"/>
+    <Message Text="Static strings:&#x0d;&#x0a;@(StaticStrings->'%(Global): %(Content), %(Source)','&#x0d;&#x0a;')" Importance="High"/>
     <WriteStringSources Input="@(StaticStrings)" Namespace="$(RootNamespace)"/>
   </Target>
 
@@ -122,9 +128,15 @@
          Condition="@(StaticStrings->Count()) > 1"
          Inputs="@(StaticStringDirs)"
          Outputs="$(IntDir)strings.h">
+    <PropertyGroup>
+      <StaticStringDirList>@(StaticStringDirs,'|')</StaticStringDirList>
+    </PropertyGroup>
     <WriteLinesToFile Encoding="Unicode"
       File="$(TLogLocation)strings.read.1.tlog"
       Lines="^$(IntDir)strings.h;@(StaticStringDirs)"/>
+    <WriteLinesToFile Encoding="Unicode"
+      File="$(TLogLocation)strings.write.1.tlog"
+      Lines="^$(StaticStringDirList);$(IntDir)strings.h"/>
     <WriteStringsHeader Input="@(StaticStrings)" Header="$(IntDir)strings.h" Namespace="$(RootNamespace)"/>
     <ItemGroup>
       <ClCompile>

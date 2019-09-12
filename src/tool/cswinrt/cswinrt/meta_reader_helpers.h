@@ -182,46 +182,48 @@ namespace xlang::meta::reader
         return std::visit(
             impl::overloaded{
             [](ElementType type) -> type_semantics
-        {
-            switch (type)
             {
-            case ElementType::Boolean:
-                return fundamental_type::Boolean;
-            case ElementType::Char:
-                return fundamental_type::Char;
-            case ElementType::I1:
-                return fundamental_type::Int8;
-            case ElementType::U1:
-                return fundamental_type::UInt8;
-            case ElementType::I2:
-                return fundamental_type::Int16;
-            case ElementType::U2:
-                return fundamental_type::UInt16;
-            case ElementType::I4:
-                return fundamental_type::Int32;
-            case ElementType::U4:
-                return fundamental_type::UInt32;
-            case ElementType::I8:
-                return fundamental_type::Int64;
-            case ElementType::U8:
-                return fundamental_type::UInt64;
-            case ElementType::R4:
-                return fundamental_type::Float;
-            case ElementType::R8:
-                return fundamental_type::Double;
-            case ElementType::String:
-                return fundamental_type::String;
-            case ElementType::Object:
-                return object_type{};
-            }
-            throw_invalid("element type not supported");
-        },
+                switch (type)
+                {
+                case ElementType::Boolean:
+                    return fundamental_type::Boolean;
+                case ElementType::Char:
+                    return fundamental_type::Char;
+                case ElementType::I1:
+                    return fundamental_type::Int8;
+                case ElementType::U1:
+                    return fundamental_type::UInt8;
+                case ElementType::I2:
+                    return fundamental_type::Int16;
+                case ElementType::U2:
+                    return fundamental_type::UInt16;
+                case ElementType::I4:
+                    return fundamental_type::Int32;
+                case ElementType::U4:
+                    return fundamental_type::UInt32;
+                case ElementType::I8:
+                    return fundamental_type::Int64;
+                case ElementType::U8:
+                    return fundamental_type::UInt64;
+                case ElementType::R4:
+                    return fundamental_type::Float;
+                case ElementType::R8:
+                    return fundamental_type::Double;
+                case ElementType::String:
+                    return fundamental_type::String;
+                case ElementType::Object:
+                    return object_type{};
+                }
+                throw_invalid("element type not supported");
+            },
             [](coded_index<TypeDefOrRef> type) -> type_semantics
-        {
-            return get_type_semantics(type);
-        },
-            [](GenericTypeIndex var) -> type_semantics { return generic_type_index{ var.index }; },
-            [](GenericTypeInstSig sig) -> type_semantics { return get_type_semantics(sig); },
+            {
+                return get_type_semantics(type);
+            },
+            [](GenericTypeIndex var) -> type_semantics { 
+                return generic_type_index{ var.index }; },
+            [](GenericTypeInstSig sig) -> type_semantics { 
+                return get_type_semantics(sig); },
             [](GenericMethodTypeIndex) -> type_semantics { throw_invalid("Generic methods not supported"); }
             }, signature.Type());
     }
@@ -474,14 +476,14 @@ namespace xlang::meta::reader
 		return std::move(result);
 	}
 
-	/*static auto get_default_interface(TypeDef const& type)
+    static coded_index<TypeDefOrRef> get_default_interface(TypeDef const& type)
 	{
 		auto impls = type.InterfaceImpl();
 
 		for (auto&& impl : impls)
 		{
 			if (has_attribute(impl, "Windows.Foundation.Metadata", "DefaultAttribute"))
-			{
+ 			{
 				return impl.Interface();
 			}
 		}
@@ -493,5 +495,5 @@ namespace xlang::meta::reader
 
 		return {};
 	}
-*/
+
 }

@@ -1,5 +1,19 @@
 namespace TestComp
 {
+    // Event handlers
+    delegate void EventHandler0();
+    delegate void EventHandler1(Class sender);
+    delegate void EventHandler2(Class sender, Int32 arg0);
+    delegate void EventHandler3(Class sender, Int32 arg0, String arg1);
+    delegate void EventHandlerCollection(Class sender, Windows.Foundation.Collections.IVector<Int32> arg0, Windows.Foundation.Collections.IMap<Int32, String> arg1);
+
+    // todo: 
+    // structs 
+    // in, out, const ref
+    // arrays - fill, receive, pass, of struct
+    // object/IInspectable
+    // generics
+
     delegate String ProvideString();
 
     [default_interface]
@@ -7,8 +21,23 @@ namespace TestComp
     {
         Class();
         
+        event EventHandler0 Event0;
+        void InvokeEvent0();
+        event EventHandler1 Event1;
+        void InvokeEvent1(Class sender);
+        event EventHandler2 Event2;
+        void InvokeEvent2(Class sender, Int32 arg0);
+        event EventHandler3 Event3;
+        void InvokeEvent3(Class sender, Int32 arg0, String arg1);
+        event EventHandlerCollection CollectionEvent;
+        void InvokeCollectionEvent(Class sender, Windows.Foundation.Collections.IVector<Int32> arg0, Windows.Foundation.Collections.IMap<Int32, String> arg1);
+        event Windows.Foundation.EventHandler<Windows.Foundation.Collections.IVector<Int32> > NestedEvent;
+        void InvokeNestedEvent(Class sender, Windows.Foundation.Collections.IVector<Int32> arg0);
+        event Windows.Foundation.TypedEventHandler<Class, Windows.Foundation.Collections.IVector<String> > NestedTypedEvent;
+        void InvokeNestedTypedEvent(Class sender, Windows.Foundation.Collections.IVector<String> arg0);
+
         Int32 IntProperty;
-        event Windows.Foundation.TypedEventHandler<Class, IInspectable> IntPropertyChanged;
+        event Windows.Foundation.EventHandler<Int32> IntPropertyChanged;
         
         String StringProperty;
         event Windows.Foundation.TypedEventHandler<Class, String> StringPropertyChanged;
@@ -18,6 +47,6 @@ namespace TestComp
         Windows.Foundation.Collections.IVector<String> StringsProperty;
 
         void GetString();
-        void SetString(ProvideString provider);
+        void SetString(ProvideString provideString);
     }
 }

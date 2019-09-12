@@ -53,6 +53,10 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <ModuleDefinitionFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TestComp.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TestComp.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TestComp.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TestComp.def</ModuleDefinitionFile>
       <!-- <GenerateWindowsMetadata>true</GenerateWindowsMetadata>
       <ModuleDefinitionFile>TestComp.def</ModuleDefinitionFile> -->
     </Link>

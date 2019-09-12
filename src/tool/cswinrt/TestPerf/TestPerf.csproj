@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <!-- <TargetFramework>netstandard2.1</TargetFramework> -->
     <ApplicationManifest>app1.manifest</ApplicationManifest>
     <Platforms>AnyCPU;x64;x86</Platforms>
@@ -57,11 +57,11 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="xcopy /D /Y ..\strings\WinRT.cs" />
+    <Exec Command="rem xcopy /D /Y ..\strings\WinRT.cs" />
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /D /Y &quot;$(SolutionDir)$(Platform)\$(Configuration)\TestComp\TestComp.dll&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /D /Y &quot;$(SolutionDir)$(Platform)\$(Configuration)\TestComp\TestComp.pdb&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;" />
+    <Exec Command="xcopy /D /Y &quot;$(OutDir)TestComp\TestComp.dll&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /D /Y &quot;$(OutDir)TestComp\TestComp.pdb&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;" />
   </Target>
 
 </Project>

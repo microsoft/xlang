@@ -16,6 +16,30 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NoWarn>1701;1702;0436;1658</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;0436;1658</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;0436;1658</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <NoWarn>1701;1702;0436;1658</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NoWarn>1701;1702;0436;1658</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <NoWarn>1701;1702;0436;1658</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="Microsoft.VCRTForwarders.140" Version="1.0.1-rc" />
@@ -26,6 +50,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\cswinrt\cswinrt.vcxproj" />
+    <ProjectReference Include="..\TestComp\TestComp.vcxproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,12 +60,16 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Generated Files\" />
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy /D /Y &quot;$(OutDir)TestComp\TestComp.dll&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;xcopy /D /Y &quot;$(OutDir)TestComp\TestComp.pdb&quot; &quot;$(TargetDir)&quot;&#xD;&#xA;" />
   </Target>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(CsWinrtExe) -verbose -in $(OutDir)TestComp\TestComp.winmd local -out &quot;$(ProjectDir)Generated Files&quot; -include TestComp -exclude Windows.Foundation -exclude Windows.Foundation.Diagnostics" />
+    <Exec Command="echo $(CsWinrtExe) -verbose -in $(OutDir)TestComp\TestComp.winmd local -out &quot;$(ProjectDir)Generated Files&quot; -include TestComp -exclude Windows.Foundation -exclude Windows.Foundation.Diagnostics&#xD;&#xA;echo $(CsWinrtExe) -verbose -in $(OutDir)TestComp\TestComp.winmd local -out &quot;$(ProjectDir)Generated Files&quot; -include TestComp -exclude Windows.Foundation -exclude Windows.Foundation.Diagnostics" />
   </Target>
 
 </Project>

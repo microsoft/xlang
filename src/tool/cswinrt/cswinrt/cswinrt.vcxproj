@@ -47,11 +47,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="code_writers.h" />
-    <ClInclude Include="file_writers.h" />
-    <ClInclude Include="helpers.h" />
+    <ClInclude Include="meta_reader_helpers.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="settings.h" />
-    <ClInclude Include="strings\cswinrt.h" />
     <ClInclude Include="type_writers.h" />
   </ItemGroup>
   <ItemGroup>
