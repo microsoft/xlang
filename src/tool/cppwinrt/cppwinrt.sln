@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.28606.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cppwinrt", "cppwinrt\cppwinrt.vcxproj", "{D613FB39-5035-4043-91E2-BAB323908AF4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FB239623-7D19-4025-BCEA-B43298D4A315} = {FB239623-7D19-4025-BCEA-B43298D4A315}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "prebuild", "prebuild\prebuild.vcxproj", "{FB239623-7D19-4025-BCEA-B43298D4A315}"
 EndProject
