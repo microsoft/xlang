@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
 
 // Defining WINRT_CUSTOM_MODULE_LOCK means you need to provide your own winrt::get_module_lock implementation.
@@ -55,4 +56,9 @@ TEST_CASE("module_lock_custom")
     // Just validates that you can still construct an implementation with a custom module lock.
 
     winrt::make<CustomStringable>();
+}
+
+int main(int const argc, char** argv)
+{
+    return Catch::Session().run(argc, argv);
 }

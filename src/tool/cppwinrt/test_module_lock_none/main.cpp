@@ -1,3 +1,4 @@
+#define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
 
 // Defining WINRT_NO_MODULE_LOCK means that winrt::get_module_lock is not defined and calls to it are elided from C++/WinRT.
@@ -28,4 +29,9 @@ TEST_CASE("module_lock_none")
     // Just validates that you can still construct an implementation without a module lock.
 
     winrt::make<FastStringable>();
+}
+
+int main(int const argc, char** argv)
+{
+    return Catch::Session().run(argc, argv);
 }
