@@ -33,7 +33,7 @@ of the languages xlang is considering at this time include (but is not limited t
 
 These languages represent a wide variety of philosophical differences in type system design.
 Strong vs. weak types. Compiled vs interpreted languages. Static vs dynamic typing. Gradual typing.
-Designing a single type system that can work is such varied environments inevitably leads to
+Designing a single type system that can work in such varied environments inevitably leads to
 compromises that an individual language designer would never face.
 
 ## Type Categories
@@ -201,7 +201,7 @@ often (but not exclusively) used to declare the signature for xlang event handle
 xlang delegates are named types and define a method signature. Delegate method signatures follow the
 same rules for parameters as interface methods do.
 
-Like interfaces, delegates require a GUID identifier. THis identifier can be provided explicitly or
+Like interfaces, delegates require a GUID identifier. This identifier can be provided explicitly or
 generated implicitly from the type's name.
 
 Like interfaces, delegates can be parameterized. Parameterized delegates may declare arguments
@@ -278,15 +278,15 @@ enumerations, delegates, interfaces, and classes. Arrays of other arrays are not
 
 WinRT supports three different array-passing styles.
 
-- PassArray. This style is used when the caller provides an array for the the member read from.
-- FillArray. This style is used when the caller provides an array for the member to fill, up to a
+- `PassArray` style is used when the caller provides an array for the the member read from.
+- `FillArray` style is used when the caller provides an array for the member to fill, up to a
   maximum array size.
-- ReceiveArray. This style is used when the caller receives an array that was allocated by the member.
+- `ReceiveArray` style is used when the caller receives an array that was allocated by the member.
 
 For the purposes of determining a method's arity (described in the method overloading section below),
-only PassArray and FillArray are considered input parameters.
+only `PassArray` and `FillArray` are considered input parameters.
 
-Array return values may only use the ReceiveArray style.
+Array return values may only use the `ReceiveArray` style.
 
 Arrays may not be used as stand-alone types, struct fields types or as type parameters for
 parameterized types.
