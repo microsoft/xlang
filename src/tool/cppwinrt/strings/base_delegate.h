@@ -26,7 +26,7 @@ WINRT_EXPORT namespace winrt
 
 #elif defined (WINRT_CUSTOM_MODULE_LOCK)
 
-    // When WINRT_CUSTOM_MODULE_LOCK is defined, you must provide an implementaiton of winrt::get_module_lock()
+    // When WINRT_CUSTOM_MODULE_LOCK is defined, you must provide an implementation of winrt::get_module_lock()
     // that returns an object that implements operator++ and operator--.
 
 #else
