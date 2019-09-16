@@ -33,10 +33,31 @@ WINRT_EXPORT namespace winrt
 
     // This is the default implementation for use with DllCanUnloadNow.
 
-    inline std::atomic<uint32_t>& get_module_lock() noexcept
+    inline auto get_module_lock() noexcept
     {
         static std::atomic<uint32_t> s_lock;
-        return s_lock;
+
+        struct lock
+        {
+            std::atomic<uint32_t>& value;
+
+            uint32_t operator++() noexcept
+            {
+                return 1 + value.fetch_add(1, std::memory_order_relaxed);
+            }
+
+            uint32_t operator--() noexcept
+            {
+                return value.fetch_sub(1, std::memory_order_release) - 1;
+            }
+
+            operator uint32_t() const noexcept
+            {
+                return value;
+            }
+        };
+
+        return lock{ s_lock };
     }
 
 #endif
