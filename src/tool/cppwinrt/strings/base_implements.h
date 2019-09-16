@@ -21,12 +21,6 @@ WINRT_EXPORT namespace winrt
 
     template <typename D, typename... I>
     struct implements;
-
-    inline std::atomic<uint32_t>& get_module_lock() noexcept
-    {
-        static std::atomic<uint32_t> s_lock;
-        return s_lock;
-    }
 }
 
 namespace winrt::impl

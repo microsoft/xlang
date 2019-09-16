@@ -1,10 +1,99 @@
 
 namespace winrt::impl
 {
+    struct atomic_ref_count
+    {
+        atomic_ref_count() noexcept = default;
+
+        explicit atomic_ref_count(uint32_t count) noexcept : m_count(count)
+        {
+        }
+
+        uint32_t operator++() noexcept
+        {
+            return m_count.fetch_add(1, std::memory_order_relaxed) + 1;
+        }
+
+        uint32_t operator--() noexcept
+        {
+            auto const remaining = m_count.fetch_sub(1, std::memory_order_release) - 1;
+
+            if (remaining == 0)
+            {
+                std::atomic_thread_fence(std::memory_order_acquire);
+            }
+
+            return remaining;
+        }
+
+        operator uint32_t() const noexcept
+        {
+            return m_count;
+        }
+
+    private:
+
+        std::atomic<uint32_t> m_count;
+    };
+}
+
+WINRT_EXPORT namespace winrt
+{
+#if defined (WINRT_NO_MODULE_LOCK)
+
+    // Defining WINRT_NO_MODULE_LOCK is appropriate for apps (executables) that don't implement something like DllCanUnloadNow
+    // and can thus avoid the synchronization overhead imposed by the default module lock.
+
+    constexpr auto get_module_lock() noexcept
+    {
+        struct lock
+        {
+            constexpr uint32_t operator++() noexcept
+            {
+                return 1;
+            }
+
+            constexpr uint32_t operator--() noexcept
+            {
+                return 0;
+            }
+        };
+
+        return lock{};
+    }
+
+#elif defined (WINRT_CUSTOM_MODULE_LOCK)
+
+    // When WINRT_CUSTOM_MODULE_LOCK is defined, you must provide an implementation of winrt::get_module_lock()
+    // that returns an object that implements operator++ and operator--.
+
+#else
+
+    // This is the default implementation for use with DllCanUnloadNow.
+
+    inline impl::atomic_ref_count& get_module_lock() noexcept
+    {
+        static impl::atomic_ref_count s_lock;
+        return s_lock;
+    }
+
+#endif
+}
+
+namespace winrt::impl
+{
     template <typename T, typename H>
     struct implements_delegate : abi_t<T>, H
     {
-        implements_delegate(H&& handler) : H(std::forward<H>(handler)) {}
+        implements_delegate(H&& handler) : H(std::forward<H>(handler))
+        {
+            ++get_module_lock();
+        }
+
+        ~implements_delegate() noexcept
+        {
+            --get_module_lock();
+        }
 
         int32_t __stdcall QueryInterface(guid const& id, void** result) noexcept final
         {
@@ -26,25 +115,24 @@ namespace winrt::impl
 
         uint32_t __stdcall AddRef() noexcept final
         {
-            return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
+            return ++m_references;
         }
 
         uint32_t __stdcall Release() noexcept final
         {
-            uint32_t const target = m_references.fetch_sub(1, std::memory_order_release) - 1;
+            auto const remaining = --m_references;
 
-            if (target == 0)
+            if (remaining == 0)
             {
-                std::atomic_thread_fence(std::memory_order_acquire);
                 delete static_cast<delegate<T, H>*>(this);
             }
 
-            return target;
+            return remaining;
         }
 
     private:
 
-        std::atomic<uint32_t> m_references{ 1 };
+        atomic_ref_count m_references{ 1 };
     };
 
     template <typename T, typename H>
@@ -93,7 +181,15 @@ namespace winrt::impl
     template <typename H, typename R, typename... Args>
     struct variadic_delegate final : variadic_delegate_abi<R, Args...>, H
     {
-        variadic_delegate(H&& handler) : H(std::forward<H>(handler)) {}
+        variadic_delegate(H&& handler) : H(std::forward<H>(handler))
+        {
+            ++get_module_lock();
+        }
+
+        ~variadic_delegate() noexcept
+        {
+            --get_module_lock();
+        }
 
         R invoke(Args const& ... args) final
         {
@@ -122,25 +218,24 @@ namespace winrt::impl
 
         uint32_t __stdcall AddRef() noexcept final
         {
-            return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
+            return ++m_references;
         }
 
         uint32_t __stdcall Release() noexcept final
         {
-            uint32_t const target = m_references.fetch_sub(1, std::memory_order_release) - 1;
+            auto const remaining = --m_references;
 
-            if (target == 0)
+            if (remaining == 0)
             {
-                std::atomic_thread_fence(std::memory_order_acquire);
                 delete this;
             }
 
-            return target;
+            return remaining;
         }
 
     private:
 
-        std::atomic<uint32_t> m_references{ 1 };
+        atomic_ref_count m_references{ 1 };
     };
 
     template <typename R, typename... Args>
