@@ -6,7 +6,7 @@ WINRT_EXPORT namespace winrt
     // Defining WINRT_NO_MODULE_LOCK is appropriate for apps (executables) that don't implement something like DllCanUnloadNow
     // and can thus avoid the synchronization overhead imposed by the default module lock.
 
-    inline auto get_module_lock() noexcept
+    constexpr auto get_module_lock() noexcept
     {
         struct lock
         {
