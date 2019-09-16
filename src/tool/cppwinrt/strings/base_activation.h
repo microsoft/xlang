@@ -241,15 +241,6 @@ namespace winrt::impl
             get_diagnostics_info().add_factory<Class>();
 #endif
 
-            {
-                factory_count_guard const guard(m_value.count);
-
-                if (m_value.object)
-                {
-                    return callback(*reinterpret_cast<com_ref<Interface> const*>(&m_value.object));
-                }
-            }
-
             auto object = get_activation_factory<Interface>(name_of<Class>());
 
             if (!object.template try_as<IAgileObject>())
@@ -280,6 +271,16 @@ namespace winrt::impl
     auto call_factory(F&& callback)
     {
         static factory_cache_entry<Class, Interface> factory;
+
+        {
+            factory_count_guard const guard(factory.m_value.count);
+
+            if (factory.m_value.object)
+            {
+                return callback(*reinterpret_cast<com_ref<Interface> const*>(&factory.m_value.object));
+            }
+        }
+
         return factory.call(callback);
     }
 
