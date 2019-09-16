@@ -95,13 +95,10 @@ WINRT_EXPORT namespace winrt
 
         hresult_error(hresult const code, take_ownership_from_abi_t) noexcept : m_code(code)
         {
-            WINRT_GetRestrictedErrorInfo(m_info.put_void());
+            com_ptr<impl::IErrorInfo> info;
+            WINRT_GetErrorInfo(0, info.put_void());
 
-            if (m_info == nullptr)
-            {
-                originate(code, nullptr);
-            }
-            else
+            if (m_info = info.try_as<impl::IRestrictedErrorInfo>())
             {
                 WINRT_VERIFY_(impl::error_ok, m_info->GetReference(m_debug_reference.put()));
 
@@ -109,6 +106,24 @@ WINRT_EXPORT namespace winrt
                 {
                     WINRT_VERIFY_(impl::error_ok, info2->CapturePropagationContext(nullptr));
                 }
+            }
+            else
+            {
+                impl::bstr_handle legacy;
+
+                if (info)
+                {
+                    info->GetDescription(legacy.put());
+                }
+
+                hstring message;
+
+                if (legacy)
+                {
+                    message = impl::trim_hresult_message(legacy.get(), WINRT_SysStringLen(legacy.get()));
+                }
+
+                originate(code, get_abi(message));
             }
         }
 
