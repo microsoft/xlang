@@ -323,7 +323,7 @@ namespace winrt::impl
             return reinterpret_cast<pointer>(this + 1);
         }
 
-        atomic_ref_count m_references;
+        atomic_ref_count m_references{ 1 };
         uint32_t m_size{ 0 };
     };
 

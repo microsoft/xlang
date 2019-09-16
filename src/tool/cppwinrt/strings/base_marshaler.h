@@ -111,7 +111,7 @@ namespace winrt::impl
 
             com_ptr<unknown_abi> m_object;
             com_ptr<IMarshal> m_marshaler{ get_marshaler() };
-            atomic_ref_count m_references;
+            atomic_ref_count m_references{ 1 };
         };
 
         *result = new (std::nothrow) marshaler(outer);

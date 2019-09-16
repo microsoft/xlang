@@ -3,6 +3,12 @@ namespace winrt::impl
 {
     struct atomic_ref_count
     {
+        atomic_ref_count() noexcept = default;
+
+        explicit atomic_ref_count(uint32_t count) noexcept : m_count(count)
+        {
+        }
+
         uint32_t operator++() noexcept
         {
             return m_count.fetch_add(1, std::memory_order_relaxed) + 1;
@@ -22,12 +28,12 @@ namespace winrt::impl
 
         operator uint32_t() const noexcept
         {
-            return value;
+            return m_count;
         }
 
     private:
 
-        std::atomic<uint32_t> m_count{ 1 };
+        std::atomic<uint32_t> m_count;
     };
 }
 
@@ -67,7 +73,7 @@ WINRT_EXPORT namespace winrt
 
     inline impl::atomic_ref_count& get_module_lock() noexcept
     {
-        static atomic_ref_count s_lock;
+        static impl::atomic_ref_count s_lock;
         return s_lock;
     }
 
@@ -126,7 +132,7 @@ namespace winrt::impl
 
     private:
 
-        atomic_ref_count m_references;
+        atomic_ref_count m_references{ 1 };
     };
 
     template <typename T, typename H>
@@ -229,7 +235,7 @@ namespace winrt::impl
 
     private:
 
-        atomic_ref_count m_references;
+        atomic_ref_count m_references{ 1 };
     };
 
     template <typename R, typename... Args>
