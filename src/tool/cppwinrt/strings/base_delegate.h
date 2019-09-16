@@ -1,10 +1,61 @@
 
+WINRT_EXPORT namespace winrt
+{
+#if defined (WINRT_NO_MODULE_LOCK)
+
+    // Defining WINRT_NO_MODULE_LOCK is appropriate for apps (executables) that don't implement something like DllCanUnloadNow
+    // and can thus avoid the synchronization overhead imposed by the default module lock.
+
+    inline auto get_module_lock() noexcept
+    {
+        struct lock
+        {
+            constexpr uint32_t operator++() noexcept
+            {
+                return 1;
+            }
+
+            constexpr uint32_t operator--() noexcept
+            {
+                return 0;
+            }
+        };
+
+        return lock{};
+    }
+
+#elif defined (WINRT_CUSTOM_MODULE_LOCK)
+
+    // When WINRT_CUSTOM_MODULE_LOCK is defined, you must provide an implementaiton of winrt::get_module_lock()
+    // that returns an object that implements operator++ and operator--.
+
+#else
+
+    // This is the default implementation for use with DllCanUnloadNow.
+
+    inline std::atomic<uint32_t>& get_module_lock() noexcept
+    {
+        static std::atomic<uint32_t> s_lock;
+        return s_lock;
+    }
+
+#endif
+}
+
 namespace winrt::impl
 {
     template <typename T, typename H>
     struct implements_delegate : abi_t<T>, H
     {
-        implements_delegate(H&& handler) : H(std::forward<H>(handler)) {}
+        implements_delegate(H&& handler) : H(std::forward<H>(handler))
+        {
+            ++get_module_lock();
+        }
+
+        ~implements_delegate() noexcept
+        {
+            --get_module_lock();
+        }
 
         int32_t __stdcall QueryInterface(guid const& id, void** result) noexcept final
         {
@@ -93,7 +144,15 @@ namespace winrt::impl
     template <typename H, typename R, typename... Args>
     struct variadic_delegate final : variadic_delegate_abi<R, Args...>, H
     {
-        variadic_delegate(H&& handler) : H(std::forward<H>(handler)) {}
+        variadic_delegate(H&& handler) : H(std::forward<H>(handler))
+        {
+            ++get_module_lock();
+        }
+
+        ~variadic_delegate() noexcept
+        {
+            --get_module_lock();
+        }
 
         R invoke(Args const& ... args) final
         {

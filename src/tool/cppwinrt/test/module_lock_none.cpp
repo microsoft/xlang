@@ -19,6 +19,12 @@ namespace
 
 TEST_CASE("module_lock_none")
 {
+    REQUIRE(++winrt::get_module_lock() == 1);
+    REQUIRE(++winrt::get_module_lock() == 1);
+
+    REQUIRE(--winrt::get_module_lock() == 0);
+    REQUIRE(--winrt::get_module_lock() == 0);
+
     // Just validates that you can still construct an implementation without a module lock.
 
     winrt::make<FastStringable>();

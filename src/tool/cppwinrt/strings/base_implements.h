@@ -21,23 +21,6 @@ WINRT_EXPORT namespace winrt
 
     template <typename D, typename... I>
     struct implements;
-
-#if defined (WINRT_CUSTOM_MODULE_LOCK)
-
-    // When WINRT_CUSTOM_MODULE_LOCK is defined, you must provide an implementaiton of winrt::get_module_lock()
-    // that returns an object that implements operator++ and operator--.
-
-#else if !defined(WINRT_NO_MODULE_LOCK)
-
-    // This is the default implementation for use with DllCanUnloadNow.
-
-    inline std::atomic<uint32_t>& get_module_lock() noexcept
-    {
-        static std::atomic<uint32_t> s_lock;
-        return s_lock;
-    }
-
-#endif
 }
 
 namespace winrt::impl
@@ -836,12 +819,10 @@ namespace winrt::impl
 
         root_implements() noexcept
         {
-#if !defined(WINRT_NO_MODULE_LOCK)
             if constexpr (use_module_lock::value)
             {
                 ++get_module_lock();
             }
-#endif
         }
 
         virtual ~root_implements() noexcept
@@ -849,12 +830,10 @@ namespace winrt::impl
             // If a weak reference is created during destruction, this ensures that it is also destroyed.
             subtract_reference();
 
-#if !defined(WINRT_NO_MODULE_LOCK)
             if constexpr (use_module_lock::value)
             {
                 --get_module_lock();
             }
-#endif
         }
 
         int32_t __stdcall GetIids(uint32_t* count, guid** array) noexcept
