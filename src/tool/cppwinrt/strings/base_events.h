@@ -274,16 +274,15 @@ namespace winrt::impl
 
         unsigned long AddRef() noexcept
         {
-            return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
+            return ++m_references;
         }
 
         unsigned long Release() noexcept
         {
-            uint32_t const remaining = m_references.fetch_sub(1, std::memory_order_release) - 1;
+            auto const remaining = --m_references;
 
             if (remaining == 0)
             {
-                std::atomic_thread_fence(std::memory_order_acquire);
                 this->~event_array();
                 ::operator delete(static_cast<void*>(this));
             }
@@ -324,7 +323,7 @@ namespace winrt::impl
             return reinterpret_cast<pointer>(this + 1);
         }
 
-        std::atomic<uint32_t> m_references{ 1 };
+        atomic_ref_count m_references{ 1 };
         uint32_t m_size{ 0 };
     };
 
