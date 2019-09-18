@@ -1974,6 +1974,44 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             factory_name);
     }
 
+    static void write_optimized_call_factory(writer& w, TypeDef const& type, TypeDef const& factory, method_signature const& signature)
+    {
+        std::string factory_name;
+
+        if (type.TypeNamespace() == factory.TypeNamespace())
+        {
+            factory_name = factory.TypeName();
+        }
+        else
+        {
+            factory_name = w.write_temp("%", factory);
+        }
+
+        if (signature.params().empty())
+        {
+            auto format = "impl::call_factory_cast<%(*)(% const&), %, %>([](% const& f) { return f.%(); })";
+
+            w.write(format,
+                signature.return_signature(),
+                factory_name,
+                type.TypeName(),
+                factory_name,
+                factory_name,
+                get_name(signature.method()));
+        }
+        else
+        {
+            auto format = "impl::call_factory<%, %>([&](% const& f) { return f.%(%); })";
+
+            w.write(format,
+                type.TypeName(),
+                factory_name,
+                factory_name,
+                get_name(signature.method()),
+                bind<write_consume_args>(signature));
+        }
+    }
+
     static void write_class_override_constructors(writer& w, TypeDef const& type, std::map<std::string, factory_info> const& factories)
     {
         auto type_name = type.TypeName();
@@ -2770,7 +2808,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         method_signature signature{ method };
 
         auto format = R"(    inline %::%(%) :
-        %(% { return f.%(%); }))
+        %(%)
     {
     }
 )";
@@ -2780,9 +2818,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
             type_name,
             bind<write_consume_params>(signature),
             type_name,
-            bind<write_call_factory>(type, factory),
-            get_name(method),
-            bind<write_consume_args>(signature));
+            bind<write_optimized_call_factory>(type, factory, signature));
     }
 
     static void write_composable_constructor_definition(writer& w, MethodDef const& method, TypeDef const& type, TypeDef const& factory)
@@ -2874,7 +2910,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
         {
             auto format = R"(    inline auto %::%(%)
     {
-        %% { return f.%(%); });
+        %%;
     }
 )";
 
@@ -2883,9 +2919,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                 method_name,
                 bind<write_consume_params>(signature),
                 signature.return_signature() ? "return " : "",
-                bind<write_call_factory>(type, factory),
-                method_name,
-                bind<write_consume_args>(signature));
+                bind<write_optimized_call_factory>(type, factory, signature));
         }
 
         if (is_add_overload(method))
@@ -2930,7 +2964,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     if (has_fastabi(type))
                     {
                         format = R"(    inline %::%() :
-        %(impl::call_factory<%>([](Windows::Foundation::IActivationFactory const& f) { return impl::fast_activate<%>(f); }))
+        %(impl::call_factory_cast<%(*)(Windows::Foundation::IActivationFactory const&), %>([](Windows::Foundation::IActivationFactory const& f) { return impl::fast_activate<%>(f); }))
     {
     }
 )";
@@ -2938,13 +2972,14 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     else
                     {
                         format = R"(    inline %::%() :
-        %(impl::call_factory<%>([](Windows::Foundation::IActivationFactory const& f) { return f.template ActivateInstance<%>(); }))
+        %(impl::call_factory_cast<%(*)(Windows::Foundation::IActivationFactory const&), %>([](Windows::Foundation::IActivationFactory const& f) { return f.template ActivateInstance<%>(); }))
     {
     }
 )";
                     }
 
                     w.write(format,
+                        type_name,
                         type_name,
                         type_name,
                         type_name,
