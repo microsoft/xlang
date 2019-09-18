@@ -235,7 +235,7 @@ namespace winrt::impl
     struct factory_cache_entry : factory_cache_entry_base
     {
         template <typename F>
-        auto call(F&& callback)
+        __declspec(noinline) auto call(F&& callback)
         {
 #ifdef WINRT_DIAGNOSTICS
             get_diagnostics_info().add_factory<Class>();
@@ -266,11 +266,13 @@ namespace winrt::impl
         }
     };
 
+    template <typename Class, typename Interface>
+    factory_cache_entry<Class, Interface> factory_cache_entry_v{};
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
     auto call_factory(F&& callback)
     {
-        static factory_cache_entry<Class, Interface> factory;
+        auto& factory = factory_cache_entry_v<Class, Interface>;
 
         {
             factory_count_guard const guard(factory.m_value.count);
@@ -282,6 +284,23 @@ namespace winrt::impl
         }
 
         return factory.call(callback);
+    }
+
+    template <typename CastType, typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
+    auto call_factory_cast(F&& callback)
+    {
+        auto& factory = factory_cache_entry_v<Class, Interface>;
+
+        {
+            factory_count_guard const guard(factory.m_value.count);
+
+            if (factory.m_value.object)
+            {
+                return callback(*reinterpret_cast<com_ref<Interface> const*>(&factory.m_value.object));
+            }
+        }
+
+        return factory.call(static_cast<CastType>(callback));
     }
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
