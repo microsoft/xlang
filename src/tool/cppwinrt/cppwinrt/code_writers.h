@@ -2964,7 +2964,7 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     if (has_fastabi(type))
                     {
                         format = R"(    inline %::%() :
-        %(impl::call_factory<%>([](Windows::Foundation::IActivationFactory const& f) { return impl::fast_activate<%>(f); }))
+        %(impl::call_factory_cast<%(*)(Windows::Foundation::IActivationFactory const&), %>([](Windows::Foundation::IActivationFactory const& f) { return impl::fast_activate<%>(f); }))
     {
     }
 )";
@@ -2972,13 +2972,14 @@ struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
                     else
                     {
                         format = R"(    inline %::%() :
-        %(impl::call_factory<%>([](Windows::Foundation::IActivationFactory const& f) { return f.template ActivateInstance<%>(); }))
+        %(impl::call_factory_cast<%(*)(Windows::Foundation::IActivationFactory const&), %>([](Windows::Foundation::IActivationFactory const& f) { return f.template ActivateInstance<%>(); }))
     {
     }
 )";
                     }
 
                     w.write(format,
+                        type_name,
                         type_name,
                         type_name,
                         type_name,
