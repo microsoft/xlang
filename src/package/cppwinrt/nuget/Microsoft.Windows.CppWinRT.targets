@@ -132,7 +132,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          Make sure that we've ran the GetCppWinRTProjectWinMDReferences target
          and then remove them. -->
     <Target Name="CppWinRTRemoveStaticLibraries"
-            DependsOnTargets="GetCppWinRTProjectWinMDReferences;"
+            DependsOnTargets="GetCppWinRTProjectWinMDReferences"
             Returns="@(_ResolvedProjectReferencePaths)">
         <ItemGroup>
             <_ResolvedProjectReferencePaths Remove="@(_ResolvedProjectReferencePaths)" Condition="'%(_ResolvedProjectReferencePaths.ProjectType)' == 'StaticLibrary'" />
