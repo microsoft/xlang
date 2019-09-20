@@ -746,6 +746,14 @@ namespace xlang
         w.write(R"(        };
     };
 )");
+
+        w.abi_types = false;
+        auto forward_produce_format = R"(    template <typename D%> struct produce<D, %>;
+)";
+
+        w.write(forward_produce_format,
+            bind<write_comma_generic_typenames>(generics),
+            type);
     }
 
     static void write_delegate_abi(writer& w, TypeDef const& type)
