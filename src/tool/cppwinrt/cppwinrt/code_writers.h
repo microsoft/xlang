@@ -607,6 +607,9 @@ namespace xlang
                 case param_category::fundamental_type:
                     w.write("&%", param_name);
                     break;
+                case param_category::enum_type:
+                    w.write("reinterpret_cast<%*>(&%)", signature_type.FieldList().first.Signature().Type(), param_name);
+                    break;
                 case param_category::array_type:
                     if (param_signature->ByRef())
                     {
