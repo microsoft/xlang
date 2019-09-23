@@ -230,7 +230,7 @@ WINRT_EXPORT namespace winrt
     }
 
     template <typename D, typename I>
-    D* from_abi(I const& from) noexcept
+    [[deprecated]] D* from_abi(I const& from) noexcept
     {
         return get_self<D>(from);
     }
