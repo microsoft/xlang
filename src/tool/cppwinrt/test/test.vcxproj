@@ -193,6 +193,7 @@
     <ClCompile Include="enum.cpp" />
     <ClCompile Include="fast_iterator.cpp" />
     <ClCompile Include="final_release.cpp" />
+    <ClCompile Include="generic_types.cpp" />
     <ClCompile Include="GetMany.cpp" />
     <ClCompile Include="get_activation_factory.cpp" />
     <ClCompile Include="iid_ppv_args.cpp" />
