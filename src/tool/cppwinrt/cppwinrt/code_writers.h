@@ -628,15 +628,20 @@ namespace xlang
         {
             s();
             auto param_name = method_signature.return_param_name();
-            auto category = get_category(method_signature.return_signature().Type());
+            TypeDef signature_type;
+            auto category = get_category(method_signature.return_signature().Type(), &signature_type);
 
             if (category == param_category::array_type)
             {
                 w.write("&%_impl_size, &%", param_name, param_name);
             }
-            else if (category == param_category::struct_type || category == param_category::enum_type || category == param_category::generic_type)
+            else if (category == param_category::struct_type || category == param_category::generic_type)
             {
                 w.write("put_abi(%)", param_name);
+            }
+            else if (category == param_category::enum_type)
+            {
+                w.write("reinterpret_cast<%*>(&%)", signature_type.FieldList().first.Signature().Type(), param_name);
             }
             else
             {
