@@ -225,7 +225,10 @@ namespace winrt::impl
     struct produce_base;
 
     template <typename D, typename I>
-    struct produce : produce_base<D, I>
+    struct produce;
+
+    template <typename D>
+    struct produce<D, Windows::Foundation::IInspectable> : produce_base<D, Windows::Foundation::IInspectable>
     {
     };
 
