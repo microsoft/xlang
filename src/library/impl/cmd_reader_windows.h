@@ -184,10 +184,11 @@ namespace xlang::impl
         auto module_path = get_module_path();
         std::regex rx(R"(((\d+)\.(\d+)\.(\d+)\.(\d+)))");
         std::cmatch match;
+        auto sdk_path = get_sdk_path();
 
         if (std::regex_search(module_path.c_str(), match, rx))
         {
-            auto path = get_sdk_path() / "Platforms\\UAP" / match[1].str() / "Platform.xml";
+            auto path = sdk_path / "Platforms\\UAP" / match[1].str() / "Platform.xml";
 
             if (std::filesystem::exists(path))
             {
@@ -208,15 +209,27 @@ namespace xlang::impl
                 continue;
             }
 
+            auto path = sdk_path / "Platforms\\UAP" / match[1].str() / "Platform.xml";
+            if (!std::filesystem::exists(path))
+            {
+                continue;
+            }
+
             char* next_part = subkey.data();
+            bool force_newer = false;
 
             for (size_t i = 0; ; ++i)
             {
                 auto version_part = strtoul(next_part, &next_part, 10);
 
-                if (version_part < version_parts[i])
+                if ((version_part < version_parts[i]) && !force_newer)
                 {
                     break;
+                }
+                else if (version_part > version_parts[i])
+                {
+                    // E.g. ensure something like '2.1' is considered newer than '1.2'
+                    force_newer = true;
                 }
 
                 version_parts[i] = version_part;
