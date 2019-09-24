@@ -1,15 +1,6 @@
 
 namespace winrt::impl
 {
-#ifdef __IUnknown_INTERFACE_DEFINED__
-#define WINRT_WINDOWS_ABI
-    using hresult_type = long;
-    using ref_count_type = unsigned long;
-#else
-    using hresult_type = int32_t;
-    using ref_count_type = uint32_t;
-#endif
-
     using ptp_io = struct tp_io*;
     using ptp_timer = struct tp_timer*;
     using ptp_wait = struct tp_wait*;
@@ -54,7 +45,7 @@ WINRT_EXPORT namespace winrt
         {
         }
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef __IUnknown_INTERFACE_DEFINED__
 
         constexpr guid(GUID const& value) noexcept :
             Data1(value.Data1),
@@ -96,4 +87,25 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     struct IUnknown;
     struct IInspectable;
     struct IActivationFactory;
+}
+
+namespace winrt::impl
+{
+#ifdef __IUnknown_INTERFACE_DEFINED__
+    using hresult_type = long;
+    using count_type = unsigned long;
+    using guid_type = GUID;
+#else
+    using hresult_type = int32_t;
+    using count_type = uint32_t;
+    using guid_type = guid;
+#endif
+
+#ifdef __IInspectable_INTERFACE_DEFINED__
+    using hstring_type = HSTRING;
+    using trust_level_type = ::TrustLevel;
+#else
+    using hstring_type = void*;
+    using trust_level_type = Windows::Foundation::TrustLevel;
+#endif
 }

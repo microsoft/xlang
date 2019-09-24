@@ -132,7 +132,7 @@ namespace winrt::impl
         static_assert(missing_guid_of<T>::value, "Support for non-WinRT interfaces is disabled. To enable, simply #include <unknwn.h> before any C++/WinRT headers.");
     };
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef __IUnknown_INTERFACE_DEFINED__
     template <typename T>
     struct guid_storage
     {
