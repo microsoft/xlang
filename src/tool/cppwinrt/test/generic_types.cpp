@@ -105,7 +105,9 @@ TEST_CASE("generic_types")
     REQUIRE_EQUAL_GUID("FA0B7D80-7EFA-52DF-9B69-0574CE57ADA4", EventHandler<A>);
     REQUIRE_EQUAL_GUID("EDB31843-B4CF-56EB-925A-D4D0CE97A08D", TypedEventHandler<A, B>);
 
+    //
     // Generated Windows.Foundation.Collections GUIDs
+    //
 
     REQUIRE_EQUAL_GUID("96565EB9-A692-59C8-BCB5-647CDE4E6C4D", IIterable<A>);
     REQUIRE_EQUAL_GUID("3C9B1E27-8357-590B-8828-6E917F172390", IIterator<A>);
@@ -119,6 +121,34 @@ TEST_CASE("generic_types")
     REQUIRE_EQUAL_GUID("0E3F106F-A266-50A1-8043-C90FCF3844F6", IVector<A>);
     REQUIRE_EQUAL_GUID("19046F0B-CF81-5DEC-BBB2-7CC250DA8B8B", MapChangedEventHandler<A, B>);
     REQUIRE_EQUAL_GUID("A1E9ACD7-E4DF-5A79-AEFA-DE07934AB0FB", VectorChangedEventHandler<A>);
+
+    //
+    // Generated primitive GUIDs
+    //
+
+    REQUIRE_EQUAL_GUID("3C00FD60-2950-5939-A21A-2D12C5A01B8A", IReference<bool>);
+    REQUIRE_EQUAL_GUID("95500129-FBF6-5AFC-89DF-70642D741990", IReference<int8_t>);
+    REQUIRE_EQUAL_GUID("6EC9E41B-6709-5647-9918-A1270110FC4E", IReference<int16_t>);
+    REQUIRE_EQUAL_GUID("548CEFBD-BC8A-5FA0-8DF2-957440FC8BF4", IReference<int32_t>);
+    REQUIRE_EQUAL_GUID("4DDA9E24-E69F-5C6A-A0A6-93427365AF2A", IReference<int64_t>);
+    REQUIRE_EQUAL_GUID("e5198cc8-2873-55f5-b0a1-84ff9e4aad62", IReference<uint8_t>);
+    REQUIRE_EQUAL_GUID("5AB7D2C3-6B62-5E71-A4B6-2D49C4F238FD", IReference<uint16_t>);
+    REQUIRE_EQUAL_GUID("513ef3af-e784-5325-a91e-97c2b8111cf3", IReference<uint32_t>);
+    REQUIRE_EQUAL_GUID("6755e376-53bb-568b-a11d-17239868309e", IReference<uint64_t>);
+    REQUIRE_EQUAL_GUID("719CC2BA-3E76-5DEF-9F1A-38D85A145EA8", IReference<float>);
+    REQUIRE_EQUAL_GUID("2F2D6C29-5473-5F3E-92E7-96572BB990E2", IReference<double>);
+    REQUIRE_EQUAL_GUID("FB393EF3-BBAC-5BD5-9144-84F23576F415", IReference<char16_t>);
+    REQUIRE_EQUAL_GUID("7D50F649-632C-51F9-849A-EE49428933EA", IReference<guid>);
+    REQUIRE_EQUAL_GUID("6FF27A1E-4B6A-59B7-B2C3-D1F2EE474593", IReference<hresult>);
+    REQUIRE_EQUAL_GUID("A9B18291-CE2A-5DAE-8A23-B7F7388416DB", IReference<event_token>);
+
+    // Enums, structs, IInspectable, classes, and delegates
+
+    REQUIRE_EQUAL_GUID("ECEBDE54-FAC0-5AEB-9BA9-9E1FE17E31D5", IReference<PropertyType>);
+    REQUIRE_EQUAL_GUID("84F14C22-A00A-5272-8D3D-82112E66DF00", IReference<Point>);
+    REQUIRE_EQUAL_GUID("B32BDCA4-5E52-5B27-BC5D-D66A1A268C2A", IVector<IInspectable>);
+    REQUIRE_EQUAL_GUID("0D82BD8D-FE62-5D67-A7B9-7886DD75BC4E", IVector<Uri>);
+    REQUIRE_EQUAL_GUID("5DAFE591-86DC-59AA-BFDA-07F5D59FC708", IVector<AsyncActionCompletedHandler>);
 
     //
     // Generated Windows.Foundation names
@@ -177,4 +207,52 @@ TEST_CASE("generic_types")
         MapChangedEventHandler<A, B>);
     REQUIRE_EQUAL_NAME(L"Windows.Foundation.Collections.VectorChangedEventHandler`1<Windows.Foundation.Collections.IIterable`1<Windows.Foundation.IStringable>>",
         VectorChangedEventHandler<A>);
+
+    //
+    // Generated primitive names
+    //
+
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Boolean>",
+        IReference<bool>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Int8>",
+        IReference<int8_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Int16>",
+        IReference<int16_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Int32>",
+        IReference<int32_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Int64>",
+        IReference<int64_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<UInt8>",
+        IReference<uint8_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<UInt16>",
+        IReference<uint16_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<UInt32>",
+        IReference<uint32_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<UInt64>",
+        IReference<uint64_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Single>",
+        IReference<float>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Double>",
+        IReference<double>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Char16>",
+        IReference<char16_t>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Guid>",
+        IReference<guid>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.HResult>",
+        IReference<hresult>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.EventRegistrationToken>",
+        IReference<event_token>);
+
+    // Enums, structs, IInspectable, classes, and delegates
+
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.PropertyType>",
+        IReference<PropertyType>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Point>",
+        IReference<Point>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.Collections.IVector`1<Object>",
+        IVector<IInspectable>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.Collections.IVector`1<Windows.Foundation.Uri>",
+        IVector<Uri>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.Collections.IVector`1<Windows.Foundation.AsyncActionCompletedHandler>",
+        IVector<AsyncActionCompletedHandler>);
 }
