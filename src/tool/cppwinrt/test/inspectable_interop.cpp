@@ -50,6 +50,9 @@ TEST_CASE("inspectable_interop")
     Windows::Foundation::IActivationFactory d = c.as<Windows::Foundation::IActivationFactory>();
     REQUIRE(a == d);
 
+    Windows::Foundation::IInspectable f = c.as<Windows::Foundation::IInspectable>();
+    REQUIRE(f != nullptr);
+
     Windows::Foundation::IInspectable e(c.detach(), take_ownership_from_abi);
 
     REQUIRE(winrt::get_class_name(e) == L"Sample");
@@ -58,7 +61,4 @@ TEST_CASE("inspectable_interop")
     auto interfaces = winrt::get_interfaces(e);
     REQUIRE(interfaces.size() == 1);
     REQUIRE(interfaces[0] == guid_of<Windows::Foundation::IActivationFactory>());
-
-    Windows::Foundation::IInspectable f = c.as<Windows::Foundation::IInspectable>();
-    REQUIRE(f != nullptr);
 }
