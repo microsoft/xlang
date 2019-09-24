@@ -1,8 +1,8 @@
 #include "winrt/Windows.Foundation.h"
 #include "catch.hpp"
 
-#ifdef WINRT_WINDOWS_ABI
-#error WINRT_WINDOWS_ABI must not be defined for this test.
+#ifdef __IUnknown_INTERFACE_DEFINED__
+#error __IUnknown_INTERFACE_DEFINED__ must not be defined for this test.
 #endif
 
 using namespace winrt;
@@ -11,7 +11,7 @@ using namespace Windows::Foundation;
 namespace
 {
     // This is a variation of conditional_implements.cpp that builds without the Windows headers
-    // and validates that the conditional logic still works when WINRT_WINDOWS_ABI is not defined
+    // and validates that the conditional logic still works when __IUnknown_INTERFACE_DEFINED__ is not defined
     // is_interface is defined more simply.
 
     struct Base : implements<Base, IActivationFactory>
