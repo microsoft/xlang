@@ -106,7 +106,7 @@ namespace winrt::impl
     inline constexpr bool has_category_v = !std::is_same_v<category_t<T>, void>;
 
     template <typename... Args>
-    struct pinterface_category;
+    struct generic_category;
 
     template <typename... Fields>
     struct struct_category;
@@ -117,7 +117,7 @@ namespace winrt::impl
     template <typename T>
     struct signature
     {
-        static constexpr auto data{ category_signature<typename category<T>::type, T>::data };
+        static constexpr auto data{ category_signature<category_t<T>, T>::data };
     };
 
     template <typename T>

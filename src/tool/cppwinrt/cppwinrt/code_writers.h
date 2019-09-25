@@ -328,7 +328,7 @@ namespace xlang
         {
             auto format = R"(    template <%> struct category<%>
     {
-        using type = pinterface_category<%>;
+        using type = generic_category<%>;
     };
 )";
 

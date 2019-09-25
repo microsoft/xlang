@@ -768,7 +768,7 @@ namespace winrt::impl
     };
 
     template <typename... Args, typename T>
-    struct category_signature<pinterface_category<Args...>, T>
+    struct category_signature<generic_category<Args...>, T>
     {
         constexpr static auto data{ combine("pinterface(", to_array<char>(generic_guid_v<T>), ";", arg_collection<Args...>::data, ")") };
     };
