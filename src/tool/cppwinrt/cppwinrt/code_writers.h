@@ -402,7 +402,7 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> constexpr guid guid_storage<%>
+            auto format = R"(    template <> constexpr guid guid_v<%>
     {
         %
     };
@@ -414,7 +414,7 @@ namespace xlang
         }
         else
         {
-            auto format = R"(    template <%> constexpr guid guid_storage<%>
+            auto format = R"(    template <%> constexpr guid guid_v<%>
     {
         pinterface_guid<%>::value
     };

@@ -7,7 +7,7 @@ WINRT_EXPORT namespace winrt
     template <typename T>
     constexpr guid const& guid_of() noexcept
     {
-        return impl::guid_storage<default_interface<T>>;
+        return impl::guid_v<default_interface<T>>;
     }
 
     template <typename... T>

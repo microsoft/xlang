@@ -122,9 +122,9 @@ namespace winrt::impl
 
     template <typename T>
 #ifdef __clang__
-    const guid guid_storage{ __uuidof(T) };
+    const guid guid_v{ __uuidof(T) };
 #else
-    constexpr guid guid_storage{ __uuidof(T) };
+    constexpr guid guid_v{ __uuidof(T) };
 #endif
 
     template <typename T>

@@ -333,7 +333,7 @@ namespace winrt::impl
         };
     };
 
-    template <> constexpr guid guid_storage<Windows::Foundation::IActivationFactory>
+    template <> constexpr guid guid_v<Windows::Foundation::IActivationFactory>
     {
         0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };

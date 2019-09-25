@@ -27,7 +27,7 @@ namespace winrt::impl
             virtual uint32_t __stdcall Release() noexcept = 0;
         };
     };
-    template <> constexpr guid guid_storage<Windows::Foundation::IUnknown>
+    template <> constexpr guid guid_v<Windows::Foundation::IUnknown>
     {
         0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
@@ -42,7 +42,7 @@ namespace winrt::impl
             virtual int32_t __stdcall GetTrustLevel(Windows::Foundation::TrustLevel* level) noexcept = 0;
         };
     };
-    template <> constexpr guid guid_storage<Windows::Foundation::IInspectable>
+    template <> constexpr guid guid_v<Windows::Foundation::IInspectable>
     {
         0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 }
     };
@@ -59,7 +59,7 @@ namespace winrt::impl
     struct __declspec(novtable) IAgileObject : unknown_abi
     {
     };
-    template <> constexpr guid guid_storage<IAgileObject>
+    template <> constexpr guid guid_v<IAgileObject>
     {
         0x94EA2B94,0xE9CC,0x49E0,{ 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 }
     };
@@ -78,7 +78,7 @@ namespace winrt::impl
         virtual int32_t __stdcall ReleaseMarshalData(void* pStm) noexcept = 0;
         virtual int32_t __stdcall DisconnectObject(uint32_t dwReserved) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IMarshal>
+    template <> constexpr guid guid_v<IMarshal>
     {
         0x00000003,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
@@ -88,7 +88,7 @@ namespace winrt::impl
         virtual int32_t __stdcall unused() noexcept = 0;
         virtual int32_t __stdcall GetCollection(void** value) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IStaticLifetime>
+    template <> constexpr guid guid_v<IStaticLifetime>
     {
         0x17b0e613,0x942a,0x422d,{ 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae }
     };
@@ -103,7 +103,7 @@ namespace winrt::impl
         virtual int32_t __stdcall unused4() noexcept = 0;
         virtual int32_t __stdcall unused5() noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IStaticLifetimeCollection>
+    template <> constexpr guid guid_v<IStaticLifetimeCollection>
     {
         0x1b0d3570,0x0877,0x5ec2,{ 0x8a,0x2c,0x3b,0x95,0x39,0x50,0x6a,0xca }
     };
@@ -112,7 +112,7 @@ namespace winrt::impl
     {
         virtual int32_t __stdcall Resolve(guid const& iid, void** objectReference) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IWeakReference>
+    template <> constexpr guid guid_v<IWeakReference>
     {
         0x00000037,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
@@ -121,7 +121,7 @@ namespace winrt::impl
     {
         virtual int32_t __stdcall GetWeakReference(IWeakReference** weakReference) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IWeakReferenceSource>
+    template <> constexpr guid guid_v<IWeakReferenceSource>
     {
         0x00000038,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
@@ -131,7 +131,7 @@ namespace winrt::impl
         virtual int32_t __stdcall GetErrorDetails(bstr* description, int32_t* error, bstr* restrictedDescription, bstr* capabilitySid) noexcept = 0;
         virtual int32_t __stdcall GetReference(bstr* reference) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IRestrictedErrorInfo>
+    template <> constexpr guid guid_v<IRestrictedErrorInfo>
     {
         0x82BA7092,0x4C88,0x427D,{ 0xA7,0xBC,0x16,0xDD,0x93,0xFE,0xB6,0x7E }
     };
@@ -144,7 +144,7 @@ namespace winrt::impl
         virtual int32_t __stdcall GetHelpFile(bstr* value) noexcept = 0;
         virtual int32_t __stdcall GetHelpContext(uint32_t* value) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IErrorInfo>
+    template <> constexpr guid guid_v<IErrorInfo>
     {
         0x1CF2B120,0x547D,0x101B,{ 0x8E,0x65,0x08,0x00,0x2B,0x2B,0xD1,0x19 }
     };
@@ -156,7 +156,7 @@ namespace winrt::impl
         virtual int32_t __stdcall CapturePropagationContext(void* exception) noexcept = 0;
         virtual int32_t __stdcall GetPropagationContextHead(ILanguageExceptionErrorInfo2** head) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<ILanguageExceptionErrorInfo2>
+    template <> constexpr guid guid_v<ILanguageExceptionErrorInfo2>
     {
         0x5746E5C4,0x5B97,0x424C,{ 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD }
     };
@@ -169,7 +169,7 @@ namespace winrt::impl
     };
 
     struct ICallbackWithNoReentrancyToApplicationSTA;
-    template <> constexpr guid guid_storage<ICallbackWithNoReentrancyToApplicationSTA>
+    template <> constexpr guid guid_v<ICallbackWithNoReentrancyToApplicationSTA>
     {
         0x0A299774,0x3E4E,0xFC42,{ 0x1D,0x9D,0x72,0xCE,0xE1,0x05,0xCA,0x57 }
     };
@@ -178,7 +178,7 @@ namespace winrt::impl
     {
         virtual int32_t __stdcall ContextCallback(int32_t(__stdcall *callback)(com_callback_args*), com_callback_args* args, guid const& iid, int method, void* reserved) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IContextCallback>
+    template <> constexpr guid guid_v<IContextCallback>
     {
         0x000001da,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
@@ -190,7 +190,7 @@ namespace winrt::impl
         virtual int32_t __stdcall RevertToSelf() noexcept = 0;
         virtual int32_t __stdcall IsImpersonating() noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IServerSecurity>
+    template <> constexpr guid guid_v<IServerSecurity>
     {
         0x0000013E,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
@@ -199,7 +199,7 @@ namespace winrt::impl
     {
         virtual int32_t __stdcall Buffer(uint8_t** value) noexcept = 0;
     };
-    template <> constexpr guid guid_storage<IBufferByteAccess>
+    template <> constexpr guid guid_v<IBufferByteAccess>
     {
         0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda }
     };
