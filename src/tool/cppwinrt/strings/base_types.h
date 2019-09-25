@@ -12,6 +12,7 @@ namespace winrt::impl
 
 WINRT_EXPORT namespace winrt
 {
+    struct event_token;
     struct hstring;
 
     struct hresult

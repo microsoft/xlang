@@ -15,8 +15,6 @@ WINRT_EXPORT namespace winrt
     {
         return ((id == guid_of<T>()) || ...);
     }
-
-    struct event_token;
 }
 
 namespace winrt::impl
