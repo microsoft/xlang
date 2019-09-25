@@ -3,6 +3,7 @@
 using namespace winrt;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::Foundation::Numerics;
 using namespace std::literals;
 
 namespace
@@ -126,6 +127,9 @@ TEST_CASE("generic_types")
     // Generated primitive GUIDs
     //
 
+    GUID g1 = guid_of< IReference<plane>>();
+    guid g2 = guid_of< IReference<plane>>();
+
     REQUIRE_EQUAL_GUID("3C00FD60-2950-5939-A21A-2D12C5A01B8A", IReference<bool>);
     REQUIRE_EQUAL_GUID("95500129-FBF6-5AFC-89DF-70642D741990", IReference<int8_t>);
     REQUIRE_EQUAL_GUID("6EC9E41B-6709-5647-9918-A1270110FC4E", IReference<int16_t>);
@@ -142,6 +146,18 @@ TEST_CASE("generic_types")
     REQUIRE_EQUAL_GUID("6FF27A1E-4B6A-59B7-B2C3-D1F2EE474593", IReference<hresult>);
     REQUIRE_EQUAL_GUID("FD416DFB-2A07-52EB-AAE3-DFCE14116C05", IReference<hstring>);
     REQUIRE_EQUAL_GUID("A9B18291-CE2A-5DAE-8A23-B7F7388416DB", IReference<event_token>);
+    REQUIRE_EQUAL_GUID("604D0C4C-91DE-5C2A-935F-362F13EAF800", IReference<TimeSpan>);
+    REQUIRE_EQUAL_GUID("5541D8A7-497C-5AA4-86FC-7713ADBF2A2C", IReference<DateTime>);
+    REQUIRE_EQUAL_GUID("84F14C22-A00A-5272-8D3D-82112E66DF00", IReference<Point>);
+    REQUIRE_EQUAL_GUID("80423F11-054F-5EAC-AFD3-63B6CE15E77B", IReference<Rect>);
+    REQUIRE_EQUAL_GUID("61723086-8e53-5276-9f36-2a4bb93e2b75", IReference<Size>);
+    REQUIRE_EQUAL_GUID("48F6A69E-8465-57AE-9400-9764087F65AD", IReference<float2>);
+    REQUIRE_EQUAL_GUID("1EE770FF-C954-59CA-A754-6199A9BE282C", IReference<float3>);
+    REQUIRE_EQUAL_GUID("A5E843C9-ED20-5339-8F8D-9FE404CF3654", IReference<float4>);
+    REQUIRE_EQUAL_GUID("76358CFD-2CBD-525B-A49E-90EE18247B71", IReference<float3x2>);
+    REQUIRE_EQUAL_GUID("DACBFFDC-68EF-5FD0-B657-782D0AC9807E", IReference<float4x4>);
+    REQUIRE_EQUAL_GUID("B27004BB-C014-5DCE-9A21-799C5A3C1461", IReference<quaternion>);
+    REQUIRE_EQUAL_GUID("46D542A1-52F7-58E7-ACFC-9A6D364DA022", IReference<plane>);
 
     // Enums, structs, IInspectable, classes, and delegates
 
@@ -247,6 +263,30 @@ TEST_CASE("generic_types")
         IReference<hstring>);
     REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.EventRegistrationToken>",
         IReference<event_token>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.TimeSpan>",
+        IReference<TimeSpan>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.DateTime>",
+        IReference<DateTime>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Point>",
+        IReference<Point>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Rect>",
+        IReference<Rect>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Size>",
+        IReference<Size>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Numerics.Vector2>",
+        IReference<float2>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Numerics.Vector3>",
+        IReference<float3>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Numerics.Vector4>",
+        IReference<float4>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Numerics.Matrix3x2>",
+        IReference<float3x2>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Numerics.Matrix4x4>",
+        IReference<float4x4>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Numerics.Quaternion>",
+        IReference<quaternion>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.Numerics.Plane>",
+        IReference<plane>);
 
     // Enums, structs, IInspectable, classes, and delegates
 
