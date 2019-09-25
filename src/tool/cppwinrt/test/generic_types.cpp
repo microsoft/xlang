@@ -164,8 +164,6 @@ TEST_CASE("generic_types")
     REQUIRE_EQUAL_GUID("0D82BD8D-FE62-5D67-A7B9-7886DD75BC4E", IVector<Uri>);
     REQUIRE_EQUAL_GUID("5DAFE591-86DC-59AA-BFDA-07F5D59FC708", IVector<AsyncActionCompletedHandler>);
 
-    // TODO: add numerics, chrono, rect, size, point, and anything else that is hardcoded
-
     //
     // Generated Windows.Foundation names
     //
