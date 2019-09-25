@@ -127,9 +127,6 @@ TEST_CASE("generic_types")
     // Generated primitive GUIDs
     //
 
-    GUID g1 = guid_of< IReference<plane>>();
-    guid g2 = guid_of< IReference<plane>>();
-
     REQUIRE_EQUAL_GUID("3C00FD60-2950-5939-A21A-2D12C5A01B8A", IReference<bool>);
     REQUIRE_EQUAL_GUID("95500129-FBF6-5AFC-89DF-70642D741990", IReference<int8_t>);
     REQUIRE_EQUAL_GUID("6EC9E41B-6709-5647-9918-A1270110FC4E", IReference<int16_t>);
