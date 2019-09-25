@@ -219,27 +219,6 @@ namespace winrt::impl
         };
     }
 
-    template <typename T>
-    struct name
-    {
-#ifdef __clang__
-        inline static const auto value
-#else
-#pragma warning(suppress: 4307)
-        static constexpr auto value
-#endif
-        {
-            combine
-            (
-                to_array<wchar_t>(guid_of<T>()),
-                std::array<wchar_t, 1>{ L'\0' }
-            )
-        };
-    };
-
-    template <typename T>
-    inline constexpr auto& name_v = name<T>::value;
-
     constexpr uint32_t endian_swap(uint32_t value) noexcept
     {
         return (value & 0xFF000000) >> 24 | (value & 0x00FF0000) >> 8 | (value & 0x0000FF00) << 8 | (value & 0x000000FF) << 24;
@@ -473,6 +452,21 @@ namespace winrt::impl
         static constexpr guid value{ generate_guid(signature<T>::data) };
     };
 
+    template <typename T>
+#ifdef __clang__
+    static const auto value
+#else
+#pragma warning(suppress: 4307)
+    constexpr auto name_v
+#endif
+    {
+        combine
+        (
+            to_array<wchar_t>(guid_of<T>()),
+            std::array<wchar_t, 1>{ L'\0' }
+        )
+    };
+
     constexpr size_t to_utf8_size(wchar_t const value) noexcept
     {
         if (value <= 0x7F)
@@ -560,11 +554,25 @@ namespace winrt::impl
     template <> constexpr auto& basic_signature_v<hstring>{"string"};
     template <> constexpr auto& basic_signature_v<Windows::Foundation::IInspectable>{"cinterface(IInspectable)"};
 
-    template <>
-    struct name<bool>
-    {
-        static constexpr auto & value{ L"Boolean" };
-    };
+    template <> constexpr auto& name_v<bool>{ L"Boolean" };
+    template <> constexpr auto& name_v<int8_t>{ L"Int8" };
+    template <> constexpr auto& name_v<int16_t>{ L"Int16" };
+    template <> constexpr auto& name_v<int32_t>{ L"Int32" };
+    template <> constexpr auto& name_v<int64_t>{ L"Int64" };
+    template <> constexpr auto& name_v<uint8_t>{ L"UInt8" };
+    template <> constexpr auto& name_v<uint16_t>{ L"UInt16" };
+    template <> constexpr auto& name_v<uint32_t>{ L"UInt32" };
+    template <> constexpr auto& name_v<uint64_t>{ L"UInt64" };
+    template <> constexpr auto& name_v<float>{ L"Single" };
+    template <> constexpr auto& name_v<double>{ L"Double" };
+    template <> constexpr auto& name_v<char16_t>{ L"Char16" };
+    template <> constexpr auto& name_v<guid>{ L"Guid" };
+    template <> constexpr auto& name_v<hstring>{ L"String" };
+    template <> constexpr auto& name_v<hresult>{ L"Windows.Foundation.HResult" };
+    template <> constexpr auto& name_v<event_token>{ L"Windows.Foundation.EventRegistrationToken" };
+    template <> constexpr auto& name_v<Windows::Foundation::IInspectable>{ L"Object" };
+    template <> constexpr auto& name_v<Windows::Foundation::TimeSpan>{ L"Windows.Foundation.TimeSpan" };
+    template <> constexpr auto& name_v<Windows::Foundation::DateTime>{ L"Windows.Foundation.DateTime" };
 
     template <>
     struct category<bool>
@@ -572,22 +580,11 @@ namespace winrt::impl
         using type = basic_category;
     };
 
-    template <>
-    struct name<int8_t>
-    {
-        static constexpr auto & value{ L"Int8" };
-    };
 
     template <>
     struct category<int8_t>
     {
         using type = basic_category;
-    };
-
-    template <>
-    struct name<int16_t>
-    {
-        static constexpr auto & value{ L"Int16" };
     };
 
     template <>
@@ -597,21 +594,9 @@ namespace winrt::impl
     };
 
     template <>
-    struct name<int32_t>
-    {
-        static constexpr auto & value{ L"Int32" };
-    };
-
-    template <>
     struct category<int32_t>
     {
         using type = basic_category;
-    };
-
-    template <>
-    struct name<int64_t>
-    {
-        static constexpr auto & value{ L"Int64" };
     };
 
     template <>
@@ -621,21 +606,9 @@ namespace winrt::impl
     };
 
     template <>
-    struct name<uint8_t>
-    {
-        static constexpr auto & value{ L"UInt8" };
-    };
-
-    template <>
     struct category<uint8_t>
     {
         using type = basic_category;
-    };
-
-    template <>
-    struct name<uint16_t>
-    {
-        static constexpr auto & value{ L"UInt16" };
     };
 
     template <>
@@ -645,21 +618,9 @@ namespace winrt::impl
     };
 
     template <>
-    struct name<uint32_t>
-    {
-        static constexpr auto & value{ L"UInt32" };
-    };
-
-    template <>
     struct category<uint32_t>
     {
         using type = basic_category;
-    };
-
-    template <>
-    struct name<uint64_t>
-    {
-        static constexpr auto & value{ L"UInt64" };
     };
 
     template <>
@@ -669,21 +630,9 @@ namespace winrt::impl
     };
 
     template <>
-    struct name<float>
-    {
-        static constexpr auto & value{ L"Single" };
-    };
-
-    template <>
     struct category<float>
     {
         using type = basic_category;
-    };
-
-    template <>
-    struct name<double>
-    {
-        static constexpr auto & value{ L"Double" };
     };
 
     template <>
@@ -693,22 +642,12 @@ namespace winrt::impl
     };
 
     template <>
-    struct name<char16_t>
-    {
-        static constexpr auto & value{ L"Char16" };
-    };
-
-    template <>
     struct category<char16_t>
     {
         using type = basic_category;
     };
 
-    template <>
-    struct name<guid>
-    {
-        static constexpr auto & value{ L"Guid" };
-    };
+
 
     template <>
     struct category<guid>
@@ -716,11 +655,7 @@ namespace winrt::impl
         using type = basic_category;
     };
 
-    template <>
-    struct name<hresult>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.HResult" };
-    };
+
 
     template <>
     struct category<hresult>
@@ -728,11 +663,7 @@ namespace winrt::impl
         using type = struct_category<int32_t>;
     };
 
-    template <>
-    struct name<event_token>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.EventRegistrationToken" };
-    };
+
 
     template <>
     struct category<event_token>

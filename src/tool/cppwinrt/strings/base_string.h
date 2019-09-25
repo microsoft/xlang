@@ -261,11 +261,6 @@ namespace winrt::impl
         using type = void*;
     };
 
-    template <> struct name<hstring>
-    {
-        static constexpr auto & value{ L"String" };
-    };
-
     template <> struct category<hstring>
     {
         using type = basic_category;

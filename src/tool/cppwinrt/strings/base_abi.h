@@ -46,10 +46,7 @@ namespace winrt::impl
     {
         0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 }
     };
-    template <> struct name<Windows::Foundation::IInspectable>
-    {
-        static constexpr auto & value{ L"Object" };
-    };
+
     template <> struct category<Windows::Foundation::IInspectable>
     {
         using type = basic_category;

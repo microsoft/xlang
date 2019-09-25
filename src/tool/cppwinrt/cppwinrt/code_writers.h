@@ -316,20 +316,14 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct category<%>
-    {
-        using type = %;
-    };
+            auto format = R"(    template <> struct category<%>{ using type = %; };
 )";
 
             w.write(format, type, category);
         }
         else
         {
-            auto format = R"(    template <%> struct category<%>
-    {
-        using type = generic_category<%>;
-    };
+            auto format = R"(    template <%> struct category<%>{ using type = generic_category<%>; };
 )";
 
             w.write(format,
@@ -364,20 +358,14 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct name<%>
-    {
-        static constexpr auto & value{ L"%.%" };
-    };
+            auto format = R"(    template <> constexpr auto& name_v<%>{ L"%.%" };
 )";
 
             w.write(format, type, type_name.name_space, type_name.name);
         }
         else
         {
-            auto format = R"(    template <%> struct name<%>
-    {
-        static constexpr auto value{ zcombine(L"%.%<"%, L">") };
-    };
+            auto format = R"(    template <%> constexpr auto name_v<%>{ zcombine(L"%.%<"%, L">") };
 )";
 
             w.write(format,
@@ -402,10 +390,7 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> constexpr guid guid_v<%>
-    {
-        %
-    };
+            auto format = R"(    template <> constexpr guid guid_v<%>{ % };
 )";
 
             w.write(format,
@@ -414,14 +399,8 @@ namespace xlang
         }
         else
         {
-            auto format = R"(    template <%> constexpr guid guid_v<%>
-    {
-        pinterface_guid<%>::value
-    };
-    template <%> constexpr guid generic_guid_v<%>
-    {
-        %
-    };
+            auto format = R"(    template <%> constexpr guid guid_v<%>{ pinterface_guid<%>::value };
+    template <%> constexpr guid generic_guid_v<%>{ % };
 )";
 
             w.write(format,
@@ -438,10 +417,7 @@ namespace xlang
     {
         if (auto default_interface = get_default_interface(type))
         {
-            auto format = R"(    template <> struct default_interface<%>
-    {
-        using type = %;
-    };
+            auto format = R"(    template <> struct default_interface<%>{ using type = %; };
 )";
             w.write(format, type, default_interface);
         }
@@ -449,10 +425,7 @@ namespace xlang
 
     static void write_struct_category(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <> struct category<%>
-    {
-        using type = struct_category<%>;
-    };
+        auto format = R"(    template <> struct category<%>{ using type = struct_category<%>; };
 )";
 
         w.write(format, type, bind_list(", ", type.FieldList()));

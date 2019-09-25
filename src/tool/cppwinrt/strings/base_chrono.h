@@ -1,22 +1,6 @@
 
 namespace winrt::impl
 {
-    using filetime_period = std::ratio_multiply<std::ratio<100>, std::nano>;
-}
-
-WINRT_EXPORT namespace winrt
-{
-    struct clock;
-
-    namespace Windows::Foundation
-    {
-        using TimeSpan = std::chrono::duration<int64_t, impl::filetime_period>;
-        using DateTime = std::chrono::time_point<clock, TimeSpan>;
-    }
-}
-
-namespace winrt::impl
-{
     template <> struct abi<Windows::Foundation::TimeSpan>
     {
         using type = int64_t;
@@ -27,19 +11,9 @@ namespace winrt::impl
         using type = int64_t;
     };
 
-    template <> struct name<Windows::Foundation::TimeSpan>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.TimeSpan" };
-    };
-
     template <> struct category<Windows::Foundation::TimeSpan>
     {
         using type = struct_category<int64_t>;
-    };
-
-    template <> struct name<Windows::Foundation::DateTime>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.DateTime" };
     };
 
     template <> struct category<Windows::Foundation::DateTime>

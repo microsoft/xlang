@@ -415,7 +415,7 @@ namespace winrt::impl
     };
 
     template <typename I>
-    struct runtime_class_name<I, std::void_t<decltype(name<I>::value)>>
+    struct runtime_class_name<I, std::void_t<decltype(name_v<I>)>>
     {
         static hstring get()
         {
