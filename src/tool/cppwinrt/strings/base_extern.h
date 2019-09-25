@@ -2,6 +2,7 @@
 extern "C"
 {
     int32_t __stdcall WINRT_GetRestrictedErrorInfo(void** info) noexcept;
+    int32_t __stdcall WINRT_GetErrorInfo(uint32_t reserved, void** info) noexcept;
     int32_t __stdcall WINRT_RoGetActivationFactory(void* classId, winrt::guid const& iid, void** factory) noexcept;
     int32_t __stdcall WINRT_RoInitialize(uint32_t type) noexcept;
     int32_t __stdcall WINRT_RoOriginateLanguageException(int32_t error, void* message, void* exception) noexcept;
@@ -96,6 +97,7 @@ extern "C"
 #endif
 
 WINRT_IMPL_LINK(GetRestrictedErrorInfo, 4)
+WINRT_IMPL_LINK(GetErrorInfo, 8)
 WINRT_IMPL_LINK(RoGetActivationFactory, 12)
 WINRT_IMPL_LINK(RoInitialize, 4)
 WINRT_IMPL_LINK(RoOriginateLanguageException, 12)

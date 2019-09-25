@@ -235,20 +235,11 @@ namespace winrt::impl
     struct factory_cache_entry : factory_cache_entry_base
     {
         template <typename F>
-        auto call(F&& callback)
+        __declspec(noinline) auto call(F&& callback)
         {
 #ifdef WINRT_DIAGNOSTICS
             get_diagnostics_info().add_factory<Class>();
 #endif
-
-            {
-                factory_count_guard const guard(m_value.count);
-
-                if (m_value.object)
-                {
-                    return callback(*reinterpret_cast<com_ref<Interface> const*>(&m_value.object));
-                }
-            }
 
             auto object = get_activation_factory<Interface>(name_of<Class>());
 
@@ -275,12 +266,41 @@ namespace winrt::impl
         }
     };
 
+    template <typename Class, typename Interface>
+    factory_cache_entry<Class, Interface> factory_cache_entry_v{};
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
     auto call_factory(F&& callback)
     {
-        static factory_cache_entry<Class, Interface> factory;
+        auto& factory = factory_cache_entry_v<Class, Interface>;
+
+        {
+            factory_count_guard const guard(factory.m_value.count);
+
+            if (factory.m_value.object)
+            {
+                return callback(*reinterpret_cast<com_ref<Interface> const*>(&factory.m_value.object));
+            }
+        }
+
         return factory.call(callback);
+    }
+
+    template <typename CastType, typename Class, typename Interface = Windows::Foundation::IActivationFactory, typename F>
+    auto call_factory_cast(F&& callback)
+    {
+        auto& factory = factory_cache_entry_v<Class, Interface>;
+
+        {
+            factory_count_guard const guard(factory.m_value.count);
+
+            if (factory.m_value.object)
+            {
+                return callback(*reinterpret_cast<com_ref<Interface> const*>(&factory.m_value.object));
+            }
+        }
+
+        return factory.call(static_cast<CastType>(callback));
     }
 
     template <typename Class, typename Interface = Windows::Foundation::IActivationFactory>
@@ -360,7 +380,7 @@ WINRT_EXPORT namespace winrt
         // Normally, the callback avoids having to return a ref-counted object and the resulting AddRef/Release bump.
         // In this case we do want a unique reference, so we use the lambda to return one and thus produce an
         // AddRef'd object that is returned to the caller. 
-        return impl::call_factory<Class, Interface>([](Interface const& factory)
+        return impl::call_factory<Class, Interface>([](auto&& factory)
         {
             return factory;
         });

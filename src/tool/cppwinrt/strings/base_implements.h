@@ -21,12 +21,6 @@ WINRT_EXPORT namespace winrt
 
     template <typename D, typename... I>
     struct implements;
-
-    inline std::atomic<uint32_t>& get_module_lock() noexcept
-    {
-        static std::atomic<uint32_t> s_lock;
-        return s_lock;
-    }
 }
 
 namespace winrt::impl
@@ -43,7 +37,7 @@ namespace winrt::impl
     template <template <typename> typename Condition, typename T>
     using tuple_if = typename tuple_if_base<Condition, T>::type;
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef __IUnknown_INTERFACE_DEFINED__
 
     template <typename T>
     struct is_interface : std::disjunction<std::is_base_of<Windows::Foundation::IInspectable, T>, std::conjunction<std::is_base_of<::IUnknown, T>, std::negation<is_implements<T>>>> {};
@@ -236,7 +230,7 @@ WINRT_EXPORT namespace winrt
     }
 
     template <typename D, typename I>
-    D* from_abi(I const& from) noexcept
+    [[deprecated]] D* from_abi(I const& from) noexcept
     {
         return get_self<D>(from);
     }
@@ -461,7 +455,7 @@ namespace winrt::impl
 
         int32_t __stdcall GetIids(uint32_t* count, guid** array) noexcept override
         {
-            return shim().GetIids(count, array);
+            return shim().GetIids(reinterpret_cast<count_type*>(count), reinterpret_cast<guid_type**>(array));
         }
 
         int32_t __stdcall GetRuntimeClassName(void** name) noexcept override
@@ -475,7 +469,7 @@ namespace winrt::impl
         }
     };
 
-#ifdef WINRT_WINDOWS_ABI
+#ifdef __IUnknown_INTERFACE_DEFINED__
 
     template <typename D, typename I>
     struct producer<D, I, std::enable_if_t<std::is_base_of_v< ::IUnknown, I> && !is_implements_v<I>>> : I
@@ -1043,6 +1037,11 @@ namespace winrt::impl
             return result;
         }
 
+        virtual Windows::Foundation::TrustLevel GetTrustLevel() const noexcept
+        {
+            return Windows::Foundation::TrustLevel::BaseTrust;
+        }
+
         using is_factory = std::disjunction<std::is_same<Windows::Foundation::IActivationFactory, I>...>;
 
     private:
@@ -1182,11 +1181,6 @@ namespace winrt::impl
         virtual hstring GetRuntimeClassName() const = 0;
         virtual void* find_interface(guid const&) const noexcept = 0;
         virtual inspectable_abi* find_inspectable() const noexcept = 0;
-
-        virtual Windows::Foundation::TrustLevel GetTrustLevel() const noexcept
-        {
-            return Windows::Foundation::TrustLevel::BaseTrust;
-        }
 
         template <typename, typename, typename>
         friend struct impl::produce_base;
@@ -1348,28 +1342,36 @@ WINRT_EXPORT namespace winrt
             return result;
         }
 
-        impl::hresult_type __stdcall QueryInterface(guid const& id, void** object) noexcept
-        {
-            return root_implements_type::QueryInterface(id, object);
-        }
-
-#ifdef WINRT_WINDOWS_ABI
-
-        impl::hresult_type __stdcall QueryInterface(GUID const& id, void** object) noexcept
+        impl::hresult_type __stdcall QueryInterface(impl::guid_type const& id, void** object) noexcept
         {
             return root_implements_type::QueryInterface(reinterpret_cast<guid const&>(id), object);
         }
 
-#endif
-
-        impl::ref_count_type __stdcall AddRef() noexcept
+        impl::count_type __stdcall AddRef() noexcept
         {
             return root_implements_type::AddRef();
         }
 
-        impl::ref_count_type __stdcall Release() noexcept
+        impl::count_type __stdcall Release() noexcept
         {
             return root_implements_type::Release();
+        }
+
+        impl::hresult_type __stdcall GetIids(impl::count_type* count, impl::guid_type** iids) noexcept
+        {
+            return root_implements_type::GetIids(reinterpret_cast<uint32_t*>(count), reinterpret_cast<guid**>(iids));
+        }
+
+        impl::hresult_type __stdcall GetRuntimeClassName(impl::hstring_type* value) noexcept
+        {
+            return root_implements_type::abi_GetRuntimeClassName(reinterpret_cast<void**>(value));
+        }
+
+        using root_implements_type::GetTrustLevel;
+
+        impl::hresult_type __stdcall GetTrustLevel(impl::trust_level_type* value) noexcept
+        {
+            return root_implements_type::abi_GetTrustLevel(reinterpret_cast<Windows::Foundation::TrustLevel*>(value));
         }
 
         void* find_interface(guid const& id) const noexcept override

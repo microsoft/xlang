@@ -132,6 +132,23 @@ namespace winrt::impl
         virtual int32_t __stdcall GetErrorDetails(bstr* description, int32_t* error, bstr* restrictedDescription, bstr* capabilitySid) noexcept = 0;
         virtual int32_t __stdcall GetReference(bstr* reference) noexcept = 0;
     };
+    template <> struct guid_storage<IRestrictedErrorInfo>
+    {
+        static constexpr guid value{ 0x82BA7092,0x4C88,0x427D,{ 0xA7,0xBC,0x16,0xDD,0x93,0xFE,0xB6,0x7E } };
+    };
+
+    struct __declspec(novtable) IErrorInfo : unknown_abi
+    {
+        virtual int32_t __stdcall GetGUID(guid* value) noexcept = 0;
+        virtual int32_t __stdcall GetSource(bstr* value) noexcept = 0;
+        virtual int32_t __stdcall GetDescription(bstr* value) noexcept = 0;
+        virtual int32_t __stdcall GetHelpFile(bstr* value) noexcept = 0;
+        virtual int32_t __stdcall GetHelpContext(uint32_t* value) noexcept = 0;
+    };
+    template <> struct guid_storage<IErrorInfo>
+    {
+        static constexpr guid value{ 0x1CF2B120,0x547D,0x101B,{ 0x8E,0x65,0x08,0x00,0x2B,0x2B,0xD1,0x19 } };
+    };
 
     struct __declspec(novtable) ILanguageExceptionErrorInfo2 : unknown_abi
     {

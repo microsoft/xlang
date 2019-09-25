@@ -24,12 +24,12 @@ namespace winrt::impl
 
             uint32_t __stdcall AddRef() noexcept final
             {
-                return 1 + m_references.fetch_add(1, std::memory_order_relaxed);
+                return ++m_references;
             }
 
             uint32_t __stdcall Release() noexcept final
             {
-                uint32_t const remaining = m_references.fetch_sub(1, std::memory_order_relaxed) - 1;
+                auto const remaining = --m_references;
 
                 if (remaining == 0)
                 {
@@ -111,7 +111,7 @@ namespace winrt::impl
 
             com_ptr<unknown_abi> m_object;
             com_ptr<IMarshal> m_marshaler{ get_marshaler() };
-            std::atomic<uint32_t> m_references{ 1 };
+            atomic_ref_count m_references{ 1 };
         };
 
         *result = new (std::nothrow) marshaler(outer);
