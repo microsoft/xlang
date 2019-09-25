@@ -358,14 +358,14 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> constexpr auto& name_v<%>{ L"%.%" };
+            auto format = R"(    template <> inline constexpr auto& name_v<%>{ L"%.%" };
 )";
 
             w.write(format, type, type_name.name_space, type_name.name);
         }
         else
         {
-            auto format = R"(    template <%> constexpr auto name_v<%>{ zcombine(L"%.%<"%, L">") };
+            auto format = R"(    template <%> inline constexpr auto name_v<%>{ zcombine(L"%.%<"%, L">") };
 )";
 
             w.write(format,
@@ -390,7 +390,7 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> constexpr guid guid_v<%>{ % };
+            auto format = R"(    template <> inline constexpr guid guid_v<%>{ % };
 )";
 
             w.write(format,
@@ -399,8 +399,8 @@ namespace xlang
         }
         else
         {
-            auto format = R"(    template <%> constexpr guid guid_v<%>{ pinterface_guid<%>::value };
-    template <%> constexpr guid generic_guid_v<%>{ % };
+            auto format = R"(    template <%> inline constexpr guid guid_v<%>{ pinterface_guid<%>::value };
+    template <%> inline constexpr guid generic_guid_v<%>{ % };
 )";
 
             w.write(format,
