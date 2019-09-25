@@ -16,7 +16,7 @@ WINRT_EXPORT namespace winrt::param
 
         hstring(std::wstring_view const& value) noexcept
         {
-            if (impl::error_ok != create_string_reference(value.data(), value.size()))
+            if (0 != create_string_reference(value.data(), value.size()))
             {
                 std::terminate();
             }
@@ -24,12 +24,12 @@ WINRT_EXPORT namespace winrt::param
 
         hstring(std::wstring const& value) noexcept
         {
-            WINRT_VERIFY_(impl::error_ok, create_string_reference(value.data(), value.size()));
+            WINRT_VERIFY_(0, create_string_reference(value.data(), value.size()));
         }
 
         hstring(wchar_t const* const value) noexcept
         {
-            WINRT_VERIFY_(impl::error_ok, create_string_reference(value, wcslen(value)));
+            WINRT_VERIFY_(0, create_string_reference(value, wcslen(value)));
         }
 
         operator winrt::hstring const&() const noexcept
@@ -44,7 +44,7 @@ WINRT_EXPORT namespace winrt::param
             if (size32 == 0)
             {
                 m_handle = nullptr;
-                return impl::error_ok;
+                return 0;
             }
             else
             {

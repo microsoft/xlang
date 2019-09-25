@@ -7,7 +7,7 @@ WINRT_EXPORT namespace winrt
     template <typename T>
     constexpr guid const& guid_of() noexcept
     {
-        return impl::guid_storage<default_interface<T>>::value;
+        return impl::guid_v<default_interface<T>>;
     }
 
     template <typename... T>
@@ -15,8 +15,6 @@ WINRT_EXPORT namespace winrt
     {
         return ((id == guid_of<T>()) || ...);
     }
-
-    struct event_token;
 }
 
 namespace winrt::impl
@@ -220,27 +218,6 @@ namespace winrt::impl
         { arr[8], arr[9], arr[10], arr[11], arr[12], arr[13], arr[14], arr[15] }
         };
     }
-
-    template <typename T>
-    struct name
-    {
-#ifdef __clang__
-        inline static const auto value
-#else
-#pragma warning(suppress: 4307)
-        static constexpr auto value
-#endif
-        {
-            combine
-            (
-                to_array<wchar_t>(guid_of<T>()),
-                std::array<wchar_t, 1>{ L'\0' }
-            )
-        };
-    };
-
-    template <typename T>
-    inline constexpr auto& name_v = name<T>::value;
 
     constexpr uint32_t endian_swap(uint32_t value) noexcept
     {
@@ -475,6 +452,21 @@ namespace winrt::impl
         static constexpr guid value{ generate_guid(signature<T>::data) };
     };
 
+    template <typename T>
+#ifdef __clang__
+    static const auto value
+#else
+#pragma warning(suppress: 4307)
+    constexpr auto name_v
+#endif
+    {
+        combine
+        (
+            to_array<wchar_t>(guid_of<T>()),
+            std::array<wchar_t, 1>{ L'\0' }
+        )
+    };
+
     constexpr size_t to_utf8_size(wchar_t const value) noexcept
     {
         if (value <= 0x7F)
@@ -540,203 +532,71 @@ namespace winrt::impl
         return output;
     }
 
-    template <>
-    struct name<bool>
-    {
-        static constexpr auto & value{ L"Boolean" };
-        static constexpr auto & data{ "b1" };
-    };
+    template <typename T>
+    constexpr guid generic_guid_v{};
 
-    template <>
-    struct category<bool>
-    {
-        using type = basic_category;
-    };
+    template <typename T>
+    constexpr auto& basic_signature_v{""};
 
-    template <>
-    struct name<int8_t>
-    {
-        static constexpr auto & value{ L"Int8" };
-        static constexpr auto & data{ "i1" };
-    };
+    template <> constexpr auto& basic_signature_v<bool>{"b1"};
+    template <> constexpr auto& basic_signature_v<int8_t>{"i1"};
+    template <> constexpr auto& basic_signature_v<int16_t>{"i2"};
+    template <> constexpr auto& basic_signature_v<int32_t>{"i4"};
+    template <> constexpr auto& basic_signature_v<int64_t>{"i8"};
+    template <> constexpr auto& basic_signature_v<uint8_t>{"u1"};
+    template <> constexpr auto& basic_signature_v<uint16_t>{"u2"};
+    template <> constexpr auto& basic_signature_v<uint32_t>{"u4"};
+    template <> constexpr auto& basic_signature_v<uint64_t>{"u8"};
+    template <> constexpr auto& basic_signature_v<float>{"f4"};
+    template <> constexpr auto& basic_signature_v<double>{"f8"};
+    template <> constexpr auto& basic_signature_v<char16_t>{"c2"};
+    template <> constexpr auto& basic_signature_v<guid>{"g16"};
+    template <> constexpr auto& basic_signature_v<hstring>{"string"};
+    template <> constexpr auto& basic_signature_v<Windows::Foundation::IInspectable>{"cinterface(IInspectable)"};
 
-    template <>
-    struct category<int8_t>
-    {
-        using type = basic_category;
-    };
+    template <> constexpr auto& name_v<bool>{ L"Boolean" };
+    template <> constexpr auto& name_v<int8_t>{ L"Int8" };
+    template <> constexpr auto& name_v<int16_t>{ L"Int16" };
+    template <> constexpr auto& name_v<int32_t>{ L"Int32" };
+    template <> constexpr auto& name_v<int64_t>{ L"Int64" };
+    template <> constexpr auto& name_v<uint8_t>{ L"UInt8" };
+    template <> constexpr auto& name_v<uint16_t>{ L"UInt16" };
+    template <> constexpr auto& name_v<uint32_t>{ L"UInt32" };
+    template <> constexpr auto& name_v<uint64_t>{ L"UInt64" };
+    template <> constexpr auto& name_v<float>{ L"Single" };
+    template <> constexpr auto& name_v<double>{ L"Double" };
+    template <> constexpr auto& name_v<char16_t>{ L"Char16" };
+    template <> constexpr auto& name_v<guid>{ L"Guid" };
+    template <> constexpr auto& name_v<hstring>{ L"String" };
+    template <> constexpr auto& name_v<hresult>{ L"Windows.Foundation.HResult" };
+    template <> constexpr auto& name_v<event_token>{ L"Windows.Foundation.EventRegistrationToken" };
+    template <> constexpr auto& name_v<Windows::Foundation::IInspectable>{ L"Object" };
+    template <> constexpr auto& name_v<Windows::Foundation::TimeSpan>{ L"Windows.Foundation.TimeSpan" };
+    template <> constexpr auto& name_v<Windows::Foundation::DateTime>{ L"Windows.Foundation.DateTime" };
 
-    template <>
-    struct name<int16_t>
-    {
-        static constexpr auto & value{ L"Int16" };
-        static constexpr auto & data{ "i2" };
-    };
-
-    template <>
-    struct category<int16_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<int32_t>
-    {
-        static constexpr auto & value{ L"Int32" };
-        static constexpr auto & data{ "i4" };
-    };
-
-    template <>
-    struct category<int32_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<int64_t>
-    {
-        static constexpr auto & value{ L"Int64" };
-        static constexpr auto & data{ "i8" };
-    };
-
-    template <>
-    struct category<int64_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<uint8_t>
-    {
-        static constexpr auto & value{ L"UInt8" };
-        static constexpr auto & data{ "u1" };
-    };
-
-    template <>
-    struct category<uint8_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<uint16_t>
-    {
-        static constexpr auto & value{ L"UInt16" };
-        static constexpr auto & data{ "u2" };
-    };
-
-    template <>
-    struct category<uint16_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<uint32_t>
-    {
-        static constexpr auto & value{ L"UInt32" };
-        static constexpr auto & data{ "u4" };
-    };
-
-    template <>
-    struct category<uint32_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<uint64_t>
-    {
-        static constexpr auto & value{ L"UInt64" };
-        static constexpr auto & data{ "u8" };
-    };
-
-    template <>
-    struct category<uint64_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<float>
-    {
-        static constexpr auto & value{ L"Single" };
-        static constexpr auto & data{ "f4" };
-    };
-
-    template <>
-    struct category<float>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<double>
-    {
-        static constexpr auto & value{ L"Double" };
-        static constexpr auto & data{ "f8" };
-    };
-
-    template <>
-    struct category<double>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<char16_t>
-    {
-        static constexpr auto & value{ L"Char16" };
-        static constexpr auto & data{ "c2" };
-    };
-
-    template <>
-    struct category<char16_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<guid>
-    {
-        static constexpr auto & value{ L"Guid" };
-        static constexpr auto & data{ "g16" };
-    };
-
-    template <>
-    struct category<guid>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct name<hresult>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.HResult" };
-    };
-
-    template <>
-    struct category<hresult>
-    {
-        using type = struct_category<int32_t>;
-    };
-
-    template <>
-    struct name<event_token>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.EventRegistrationToken" };
-    };
-
-    template <>
-    struct category<event_token>
-    {
-        using type = struct_category<int64_t>;
-    };
+    template <> struct category<bool> { using type = basic_category; };
+    template <> struct category<int8_t> { using type = basic_category; };
+    template <> struct category<int16_t> { using type = basic_category; };
+    template <> struct category<int32_t> { using type = basic_category; };
+    template <> struct category<int64_t> { using type = basic_category; };
+    template <> struct category<uint8_t> { using type = basic_category; };
+    template <> struct category<uint16_t> { using type = basic_category; };
+    template <> struct category<uint32_t> { using type = basic_category; };
+    template <> struct category<uint64_t> { using type = basic_category; };
+    template <> struct category<float> { using type = basic_category; };
+    template <> struct category<double> { using type = basic_category; };
+    template <> struct category<char16_t> { using type = basic_category; };
+    template <> struct category<guid> { using type = basic_category; };
+    template <> struct category<hresult> { using type = struct_category<int32_t>; };
+    template <> struct category<event_token> { using type = struct_category<int64_t>; };
+    template <> struct category<Windows::Foundation::IInspectable> { using type = basic_category; };
+    template <> struct category<Windows::Foundation::TimeSpan> { using type = struct_category<int64_t>; };
+    template <> struct category<Windows::Foundation::DateTime> { using type = struct_category<int64_t>; };
 
     template <typename T>
     struct category_signature<basic_category, T>
     {
-        constexpr static auto data{ to_array(name<T>::data) };
+        constexpr static auto data{ to_array(basic_signature_v<T>) };
     };
 
     template <typename T>
@@ -759,9 +619,9 @@ namespace winrt::impl
     };
 
     template <typename... Args, typename T>
-    struct category_signature<pinterface_category<Args...>, T>
+    struct category_signature<generic_category<Args...>, T>
     {
-        constexpr static auto data{ combine("pinterface(", to_array<char>(category<T>::value), ";", arg_collection<Args...>::data, ")") };
+        constexpr static auto data{ combine("pinterface(", to_array<char>(generic_guid_v<T>), ";", arg_collection<Args...>::data, ")") };
     };
 
     template <typename T>

@@ -35,7 +35,7 @@ namespace winrt::impl
     {
         int32_t aptType;
         int32_t aptTypeQualifier;
-        return (error_ok == WINRT_CoGetApartmentType(&aptType, &aptTypeQualifier)) && ((aptType == 0 /*APTTYPE_STA*/) || (aptType == 3 /*APTTYPE_MAINSTA*/));
+        return (0 == WINRT_CoGetApartmentType(&aptType, &aptTypeQualifier)) && ((aptType == 0 /*APTTYPE_STA*/) || (aptType == 3 /*APTTYPE_MAINSTA*/));
     }
 
     inline void check_sta_blocking_wait() noexcept
@@ -105,7 +105,7 @@ namespace winrt::impl
                     auto callback = [](com_callback_args* args) noexcept -> int32_t
                     {
                         std::experimental::coroutine_handle<>::from_address(args->data)();
-                        return error_ok;
+                        return 0;
                     };
 
                     check_hresult(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
@@ -363,7 +363,7 @@ namespace winrt::impl
             {
                 slim_lock_guard const guard(m_lock);
                 rethrow_if_failed();
-                return error_ok;
+                return 0;
             }
             catch (...)
             {

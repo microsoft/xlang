@@ -106,7 +106,7 @@ namespace winrt::impl
     inline constexpr bool has_category_v = !std::is_same_v<category_t<T>, void>;
 
     template <typename... Args>
-    struct pinterface_category;
+    struct generic_category;
 
     template <typename... Fields>
     struct struct_category;
@@ -117,36 +117,14 @@ namespace winrt::impl
     template <typename T>
     struct signature
     {
-        static constexpr auto data{ category_signature<typename category<T>::type, T>::data };
+        static constexpr auto data{ category_signature<category_t<T>, T>::data };
     };
 
     template <typename T>
-    struct missing_guid_of
-    {
-        static constexpr bool value{};
-    };
-
-    template <typename T>
-    struct missing_guid
-    {
-        static_assert(missing_guid_of<T>::value, "Support for non-WinRT interfaces is disabled. To enable, simply #include <unknwn.h> before any C++/WinRT headers.");
-    };
-
-#ifdef __IUnknown_INTERFACE_DEFINED__
-    template <typename T>
-    struct guid_storage
-    {
-        // Unlike Visual C++, Clang does not treat __uuidof as a constexpr expression.
-        // This has a ripple effect and impacts both winrt::guid_of and winrt::name_of.
 #ifdef __clang__
-        inline static const guid value{ __uuidof(T) };
+    const guid guid_v{ __uuidof(T) };
 #else
-        static constexpr guid value{ __uuidof(T) };
-#endif
-    };
-#else
-    template <typename T>
-    struct guid_storage : missing_guid<T> {};
+    constexpr guid guid_v{ __uuidof(T) };
 #endif
 
     template <typename T>

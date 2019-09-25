@@ -316,35 +316,20 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct category<%>
-    {
-        using type = %;
-    };
+            auto format = R"(    template <> struct category<%>{ using type = %; };
 )";
 
             w.write(format, type, category);
         }
         else
         {
-            auto format = R"(    template <%> struct category<%>
-    {
-        using type = pinterface_category<%>;
-        static constexpr guid value{ % };
-    };
+            auto format = R"(    template <%> struct category<%>{ using type = generic_category<%>; };
 )";
-
-            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
-
-            if (!attribute)
-            {
-                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
-            }
 
             w.write(format,
                 bind<write_generic_typenames>(generics),
                 type,
-                bind_list(", ", generics),
-                bind<write_guid_value>(attribute.Value().FixedArgs()));
+                bind_list(", ", generics));
         }
     }
 
@@ -373,20 +358,14 @@ namespace xlang
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct name<%>
-    {
-        static constexpr auto & value{ L"%.%" };
-    };
+            auto format = R"(    template <> constexpr auto& name_v<%>{ L"%.%" };
 )";
 
             w.write(format, type, type_name.name_space, type_name.name);
         }
         else
         {
-            auto format = R"(    template <%> struct name<%>
-    {
-        static constexpr auto value{ zcombine(L"%.%<"%, L">") };
-    };
+            auto format = R"(    template <%> constexpr auto name_v<%>{ zcombine(L"%.%<"%, L">") };
 )";
 
             w.write(format,
@@ -400,22 +379,19 @@ namespace xlang
 
     static void write_guid(writer& w, TypeDef const& type)
     {
+        auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+
+        if (!attribute)
+        {
+            throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+        }
+
         auto generics = type.GenericParam();
 
         if (empty(generics))
         {
-            auto format = R"(    template <> struct guid_storage<%>
-    {
-        static constexpr guid value{ % };
-    };
+            auto format = R"(    template <> constexpr guid guid_v<%>{ % };
 )";
-
-            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
-
-            if (!attribute)
-            {
-                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
-            }
 
             w.write(format,
                 type,
@@ -423,16 +399,17 @@ namespace xlang
         }
         else
         {
-            auto format = R"(    template <%> struct guid_storage<%>
-    {
-        static constexpr guid value{ pinterface_guid<%>::value };
-    };
+            auto format = R"(    template <%> constexpr guid guid_v<%>{ pinterface_guid<%>::value };
+    template <%> constexpr guid generic_guid_v<%>{ % };
 )";
 
             w.write(format,
                 bind<write_generic_typenames>(generics),
                 type,
-                type);
+                type,
+                bind<write_generic_typenames>(generics),
+                type,
+                bind<write_guid_value>(attribute.Value().FixedArgs()));
         }
     }
 
@@ -440,10 +417,7 @@ namespace xlang
     {
         if (auto default_interface = get_default_interface(type))
         {
-            auto format = R"(    template <> struct default_interface<%>
-    {
-        using type = %;
-    };
+            auto format = R"(    template <> struct default_interface<%>{ using type = %; };
 )";
             w.write(format, type, default_interface);
         }
@@ -451,10 +425,7 @@ namespace xlang
 
     static void write_struct_category(writer& w, TypeDef const& type)
     {
-        auto format = R"(    template <> struct category<%>
-    {
-        using type = struct_category<%>;
-    };
+        auto format = R"(    template <> struct category<%>{ using type = struct_category<%>; };
 )";
 
         w.write(format, type, bind_list(", ", type.FieldList()));
@@ -1307,7 +1278,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (0 == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1333,7 +1304,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (0 == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }

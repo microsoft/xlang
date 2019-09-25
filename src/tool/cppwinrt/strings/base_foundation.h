@@ -102,19 +102,13 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
 
 namespace winrt::impl
 {
-    template <> struct name<Windows::Foundation::Point>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Point" };
-    };
+    template <> constexpr auto& name_v<Windows::Foundation::Point>{ L"Windows.Foundation.Point" };
+    template <> constexpr auto& name_v<Windows::Foundation::Size>{ L"Windows.Foundation.Size" };
+    template <> constexpr auto& name_v<Windows::Foundation::Rect>{ L"Windows.Foundation.Rect" };
 
     template <> struct category<Windows::Foundation::Point>
     {
         using type = struct_category<float, float>;
-    };
-
-    template <> struct name<Windows::Foundation::Size>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Size" };
     };
 
     template <> struct category<Windows::Foundation::Size>
@@ -122,11 +116,6 @@ namespace winrt::impl
         using type = struct_category<float, float>;
     };
     
-    template <> struct name<Windows::Foundation::Rect>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Rect" };
-    };
-
     template <> struct category<Windows::Foundation::Rect>
     {
         using type = struct_category<float, float, float, float>;
@@ -134,19 +123,17 @@ namespace winrt::impl
 
 #ifdef WINRT_IMPL_NUMERICS
 
-    template <> struct name<Windows::Foundation::Numerics::float2>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector2" };
-    };
+    template <> constexpr auto& name_v<Windows::Foundation::Numerics::float2>{ L"Windows.Foundation.Numerics.Vector2" };
+    template <> constexpr auto& name_v<Windows::Foundation::Numerics::float3>{ L"Windows.Foundation.Numerics.Vector3" };
+    template <> constexpr auto& name_v<Windows::Foundation::Numerics::float4>{ L"Windows.Foundation.Numerics.Vector4" };
+    template <> constexpr auto& name_v<Windows::Foundation::Numerics::float3x2>{ L"Windows.Foundation.Numerics.Matrix3x2" };
+    template <> constexpr auto& name_v<Windows::Foundation::Numerics::float4x4>{ L"Windows.Foundation.Numerics.Matrix4x4" };
+    template <> constexpr auto& name_v<Windows::Foundation::Numerics::quaternion>{ L"Windows.Foundation.Numerics.Quaternion" };
+    template <> constexpr auto& name_v<Windows::Foundation::Numerics::plane>{ L"Windows.Foundation.Numerics.Plane" };
 
     template <> struct category<Windows::Foundation::Numerics::float2>
     {
         using type = struct_category<float, float>;
-    };
-
-    template <> struct name<Windows::Foundation::Numerics::float3>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector3" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float3>
@@ -154,29 +141,14 @@ namespace winrt::impl
         using type = struct_category<float, float, float>;
     };
 
-    template <> struct name<Windows::Foundation::Numerics::float4>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Vector4" };
-    };
-
     template <> struct category<Windows::Foundation::Numerics::float4>
     {
         using type = struct_category<float, float, float, float>;
     };
 
-    template <> struct name<Windows::Foundation::Numerics::float3x2>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Matrix3x2" };
-    };
-
     template <> struct category<Windows::Foundation::Numerics::float3x2>
     {
         using type = struct_category<float, float, float, float, float, float>;
-    };
-
-    template <> struct name<Windows::Foundation::Numerics::float4x4>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Matrix4x4" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::float4x4>
@@ -189,19 +161,9 @@ namespace winrt::impl
         >;
     };
 
-    template <> struct name<Windows::Foundation::Numerics::quaternion>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Quaternion" };
-    };
-
     template <> struct category<Windows::Foundation::Numerics::quaternion>
     {
         using type = struct_category<float, float, float, float>;
-    };
-
-    template <> struct name<Windows::Foundation::Numerics::plane>
-    {
-        static constexpr auto & value{ L"Windows.Foundation.Numerics.Plane" };
     };
 
     template <> struct category<Windows::Foundation::Numerics::plane>

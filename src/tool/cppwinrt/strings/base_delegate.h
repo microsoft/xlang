@@ -101,7 +101,7 @@ namespace winrt::impl
             {
                 *result = static_cast<abi_t<T>*>(this);
                 AddRef();
-                return error_ok;
+                return 0;
             }
 
             if (is_guid_of<IMarshal>(id))
@@ -209,7 +209,7 @@ namespace winrt::impl
             {
                 *result = static_cast<unknown_abi*>(this);
                 AddRef();
-                return error_ok;
+                return 0;
             }
 
             *result = nullptr;
