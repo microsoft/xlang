@@ -1,23 +1,6 @@
 
 namespace winrt::impl
 {
-    inline constexpr hresult error_ok{ 0 }; // S_OK
-    inline constexpr hresult error_fail{ static_cast<hresult>(0x80004005) }; // E_FAIL
-    inline constexpr hresult error_access_denied{ static_cast<hresult>(0x80070005) }; // E_ACCESSDENIED
-    inline constexpr hresult error_wrong_thread{ static_cast<hresult>(0x8001010E) }; // RPC_E_WRONG_THREAD
-    inline constexpr hresult error_not_implemented{ static_cast<hresult>(0x80004001) }; // E_NOTIMPL
-    inline constexpr hresult error_invalid_argument{ static_cast<hresult>(0x80070057) }; // E_INVALIDARG
-    inline constexpr hresult error_out_of_bounds{ static_cast<hresult>(0x8000000B) }; // E_BOUNDS
-    inline constexpr hresult error_no_interface{ static_cast<hresult>(0x80004002) }; // E_NOINTERFACE
-    inline constexpr hresult error_class_not_available{ static_cast<hresult>(0x80040111) }; // CLASS_E_CLASSNOTAVAILABLE
-    inline constexpr hresult error_changed_state{ static_cast<hresult>(0x8000000C) }; // E_CHANGED_STATE
-    inline constexpr hresult error_illegal_method_call{ static_cast<hresult>(0x8000000E) }; // E_ILLEGAL_METHOD_CALL
-    inline constexpr hresult error_illegal_state_change{ static_cast<hresult>(0x8000000D) }; // E_ILLEGAL_STATE_CHANGE
-    inline constexpr hresult error_illegal_delegate_assignment{ static_cast<hresult>(0x80000018) }; // E_ILLEGAL_DELEGATE_ASSIGNMENT
-    inline constexpr hresult error_canceled{ static_cast<hresult>(0x800704C7) }; // HRESULT_FROM_WIN32(ERROR_CANCELLED)
-    inline constexpr hresult error_bad_alloc{ static_cast<hresult>(0x8007000E) }; // E_OUTOFMEMORY
-    inline constexpr hresult error_not_initialized{ static_cast<hresult>(0x800401F0) }; // CO_E_NOTINITIALIZED
-
     template <> struct abi<Windows::Foundation::IUnknown>
     {
         struct __declspec(novtable) type
@@ -27,10 +10,7 @@ namespace winrt::impl
             virtual uint32_t __stdcall Release() noexcept = 0;
         };
     };
-    template <> constexpr guid guid_v<Windows::Foundation::IUnknown>
-    {
-        0x00000000,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
-    };
+
     using unknown_abi = abi_t<Windows::Foundation::IUnknown>;
 
     template <> struct abi<Windows::Foundation::IInspectable>
@@ -42,24 +22,18 @@ namespace winrt::impl
             virtual int32_t __stdcall GetTrustLevel(Windows::Foundation::TrustLevel* level) noexcept = 0;
         };
     };
-    template <> constexpr guid guid_v<Windows::Foundation::IInspectable>
-    {
-        0xAF86E2E0,0xB12D,0x4C6A,{ 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 }
-    };
 
-    template <> struct category<Windows::Foundation::IInspectable>
-    {
-        using type = basic_category;
-    };
     using inspectable_abi = abi_t<Windows::Foundation::IInspectable>;
 
-    struct __declspec(novtable) IAgileObject : unknown_abi
+    template <> struct abi<Windows::Foundation::IActivationFactory>
     {
+        struct __declspec(novtable) type : inspectable_abi
+        {
+            virtual int32_t __stdcall ActivateInstance(void** instance) noexcept = 0;
+        };
     };
-    template <> constexpr guid guid_v<IAgileObject>
-    {
-        0x94EA2B94,0xE9CC,0x49E0,{ 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 }
-    };
+
+    struct __declspec(novtable) IAgileObject : unknown_abi {};
 
     struct __declspec(novtable) IAgileReference : unknown_abi
     {
@@ -75,19 +49,11 @@ namespace winrt::impl
         virtual int32_t __stdcall ReleaseMarshalData(void* pStm) noexcept = 0;
         virtual int32_t __stdcall DisconnectObject(uint32_t dwReserved) noexcept = 0;
     };
-    template <> constexpr guid guid_v<IMarshal>
-    {
-        0x00000003,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
-    };
 
     struct __declspec(novtable) IStaticLifetime : inspectable_abi
     {
         virtual int32_t __stdcall unused() noexcept = 0;
         virtual int32_t __stdcall GetCollection(void** value) noexcept = 0;
-    };
-    template <> constexpr guid guid_v<IStaticLifetime>
-    {
-        0x17b0e613,0x942a,0x422d,{ 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae }
     };
 
     struct __declspec(novtable) IStaticLifetimeCollection : inspectable_abi
@@ -100,37 +66,21 @@ namespace winrt::impl
         virtual int32_t __stdcall unused4() noexcept = 0;
         virtual int32_t __stdcall unused5() noexcept = 0;
     };
-    template <> constexpr guid guid_v<IStaticLifetimeCollection>
-    {
-        0x1b0d3570,0x0877,0x5ec2,{ 0x8a,0x2c,0x3b,0x95,0x39,0x50,0x6a,0xca }
-    };
 
     struct __declspec(novtable) IWeakReference : unknown_abi
     {
         virtual int32_t __stdcall Resolve(guid const& iid, void** objectReference) noexcept = 0;
-    };
-    template <> constexpr guid guid_v<IWeakReference>
-    {
-        0x00000037,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
     };
 
     struct __declspec(novtable) IWeakReferenceSource : unknown_abi
     {
         virtual int32_t __stdcall GetWeakReference(IWeakReference** weakReference) noexcept = 0;
     };
-    template <> constexpr guid guid_v<IWeakReferenceSource>
-    {
-        0x00000038,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
-    };
 
     struct __declspec(novtable) IRestrictedErrorInfo : unknown_abi
     {
         virtual int32_t __stdcall GetErrorDetails(bstr* description, int32_t* error, bstr* restrictedDescription, bstr* capabilitySid) noexcept = 0;
         virtual int32_t __stdcall GetReference(bstr* reference) noexcept = 0;
-    };
-    template <> constexpr guid guid_v<IRestrictedErrorInfo>
-    {
-        0x82BA7092,0x4C88,0x427D,{ 0xA7,0xBC,0x16,0xDD,0x93,0xFE,0xB6,0x7E }
     };
 
     struct __declspec(novtable) IErrorInfo : unknown_abi
@@ -141,10 +91,6 @@ namespace winrt::impl
         virtual int32_t __stdcall GetHelpFile(bstr* value) noexcept = 0;
         virtual int32_t __stdcall GetHelpContext(uint32_t* value) noexcept = 0;
     };
-    template <> constexpr guid guid_v<IErrorInfo>
-    {
-        0x1CF2B120,0x547D,0x101B,{ 0x8E,0x65,0x08,0x00,0x2B,0x2B,0xD1,0x19 }
-    };
 
     struct __declspec(novtable) ILanguageExceptionErrorInfo2 : unknown_abi
     {
@@ -153,31 +99,12 @@ namespace winrt::impl
         virtual int32_t __stdcall CapturePropagationContext(void* exception) noexcept = 0;
         virtual int32_t __stdcall GetPropagationContextHead(ILanguageExceptionErrorInfo2** head) noexcept = 0;
     };
-    template <> constexpr guid guid_v<ILanguageExceptionErrorInfo2>
-    {
-        0x5746E5C4,0x5B97,0x424C,{ 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD }
-    };
-
-    struct com_callback_args
-    {
-        uint32_t reserved1;
-        uint32_t reserved2;
-        void* data;
-    };
 
     struct ICallbackWithNoReentrancyToApplicationSTA;
-    template <> constexpr guid guid_v<ICallbackWithNoReentrancyToApplicationSTA>
-    {
-        0x0A299774,0x3E4E,0xFC42,{ 0x1D,0x9D,0x72,0xCE,0xE1,0x05,0xCA,0x57 }
-    };
 
     struct __declspec(novtable) IContextCallback : unknown_abi
     {
-        virtual int32_t __stdcall ContextCallback(int32_t(__stdcall *callback)(com_callback_args*), com_callback_args* args, guid const& iid, int method, void* reserved) noexcept = 0;
-    };
-    template <> constexpr guid guid_v<IContextCallback>
-    {
-        0x000001da,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
+        virtual int32_t __stdcall ContextCallback(int32_t(__stdcall* callback)(com_callback_args*), com_callback_args* args, guid const& iid, int method, void* reserved) noexcept = 0;
     };
 
     struct __declspec(novtable) IServerSecurity : unknown_abi
@@ -187,17 +114,36 @@ namespace winrt::impl
         virtual int32_t __stdcall RevertToSelf() noexcept = 0;
         virtual int32_t __stdcall IsImpersonating() noexcept = 0;
     };
-    template <> constexpr guid guid_v<IServerSecurity>
-    {
-        0x0000013E,0x0000,0x0000,{ 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
-    };
 
     struct __declspec(novtable) IBufferByteAccess : unknown_abi
     {
         virtual int32_t __stdcall Buffer(uint8_t** value) noexcept = 0;
     };
-    template <> constexpr guid guid_v<IBufferByteAccess>
+
+    template <> struct abi<Windows::Foundation::TimeSpan>
     {
-        0x905a0fef,0xbc53,0x11df,{ 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda }
+        using type = int64_t;
     };
+
+    template <> struct abi<Windows::Foundation::DateTime>
+    {
+        using type = int64_t;
+    };
+
+    template <> constexpr guid guid_v<Windows::Foundation::IUnknown>{ 0x00000000, 0x0000, 0x0000, { 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    template <> constexpr guid guid_v<Windows::Foundation::IInspectable>{ 0xAF86E2E0, 0xB12D, 0x4C6A, { 0x9C,0x5A,0xD7,0xAA,0x65,0x10,0x1E,0x90 } };
+    template <> constexpr guid guid_v<Windows::Foundation::IActivationFactory>{ 0x00000035, 0x0000, 0x0000, { 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    template <> constexpr guid guid_v<IAgileObject>{ 0x94EA2B94, 0xE9CC, 0x49E0, { 0xC0,0xFF,0xEE,0x64,0xCA,0x8F,0x5B,0x90 } };
+    template <> constexpr guid guid_v<IMarshal>{ 0x00000003, 0x0000, 0x0000, { 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    template <> constexpr guid guid_v<IStaticLifetime>{ 0x17b0e613, 0x942a, 0x422d, { 0x90,0x4c,0xf9,0x0d,0xc7,0x1a,0x7d,0xae } };
+    template <> constexpr guid guid_v<IStaticLifetimeCollection>{ 0x1b0d3570, 0x0877, 0x5ec2, { 0x8a,0x2c,0x3b,0x95,0x39,0x50,0x6a,0xca } };
+    template <> constexpr guid guid_v<IWeakReference>{ 0x00000037, 0x0000, 0x0000, { 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    template <> constexpr guid guid_v<IWeakReferenceSource>{ 0x00000038, 0x0000, 0x0000, { 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    template <> constexpr guid guid_v<IRestrictedErrorInfo>{ 0x82BA7092, 0x4C88, 0x427D, { 0xA7,0xBC,0x16,0xDD,0x93,0xFE,0xB6,0x7E } };
+    template <> constexpr guid guid_v<IErrorInfo>{ 0x1CF2B120, 0x547D, 0x101B, { 0x8E,0x65,0x08,0x00,0x2B,0x2B,0xD1,0x19 } };
+    template <> constexpr guid guid_v<ILanguageExceptionErrorInfo2>{ 0x5746E5C4, 0x5B97, 0x424C, { 0xB6,0x20,0x28,0x22,0x91,0x57,0x34,0xDD } };
+    template <> constexpr guid guid_v<ICallbackWithNoReentrancyToApplicationSTA>{ 0x0A299774, 0x3E4E, 0xFC42, { 0x1D,0x9D,0x72,0xCE,0xE1,0x05,0xCA,0x57 } };
+    template <> constexpr guid guid_v<IContextCallback>{ 0x000001da, 0x0000, 0x0000, { 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    template <> constexpr guid guid_v<IServerSecurity>{ 0x0000013E, 0x0000, 0x0000, { 0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 } };
+    template <> constexpr guid guid_v<IBufferByteAccess>{ 0x905a0fef, 0xbc53, 0x11df, { 0x8c,0x49,0x00,0x1e,0x4f,0xc6,0x86,0xda } };
 }

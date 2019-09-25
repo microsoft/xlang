@@ -100,11 +100,11 @@ WINRT_EXPORT namespace winrt
 
             if (m_info = info.try_as<impl::IRestrictedErrorInfo>())
             {
-                WINRT_VERIFY_(impl::error_ok, m_info->GetReference(m_debug_reference.put()));
+                WINRT_VERIFY_(0, m_info->GetReference(m_debug_reference.put()));
 
                 if (auto info2 = m_info.try_as<impl::ILanguageExceptionErrorInfo2>())
                 {
-                    WINRT_VERIFY_(impl::error_ok, info2->CapturePropagationContext(nullptr));
+                    WINRT_VERIFY_(0, info2->CapturePropagationContext(nullptr));
                 }
             }
             else
@@ -141,7 +141,7 @@ WINRT_EXPORT namespace winrt
                 impl::bstr_handle message;
                 impl::bstr_handle unused;
 
-                if (impl::error_ok == m_info->GetErrorDetails(fallback.put(), &code, message.put(), unused.put()))
+                if (0 == m_info->GetErrorDetails(fallback.put(), &code, message.put(), unused.put()))
                 {
                     if (code == m_code)
                     {
@@ -191,7 +191,7 @@ WINRT_EXPORT namespace winrt
         void originate(hresult const code, void* message) noexcept
         {
             WINRT_VERIFY(WINRT_RoOriginateLanguageException(code, message, nullptr));
-            WINRT_VERIFY_(impl::error_ok, WINRT_GetRestrictedErrorInfo(m_info.put_void()));
+            WINRT_VERIFY_(0, WINRT_GetRestrictedErrorInfo(m_info.put_void()));
         }
 
 #ifdef __clang__

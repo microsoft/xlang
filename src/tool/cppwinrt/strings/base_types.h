@@ -9,6 +9,13 @@ namespace winrt::impl
     using condition_variable = struct condition_variable_*;
     using bstr = wchar_t*;
     using filetime_period = std::ratio_multiply<std::ratio<100>, std::nano>;
+
+    struct com_callback_args
+    {
+        uint32_t reserved1;
+        uint32_t reserved2;
+        void* data;
+    };
 }
 
 WINRT_EXPORT namespace winrt
@@ -116,4 +123,21 @@ namespace winrt::impl
     using hstring_type = void*;
     using trust_level_type = Windows::Foundation::TrustLevel;
 #endif
+
+    constexpr hresult error_ok{ 0 }; // S_OK
+    constexpr hresult error_fail{ static_cast<hresult>(0x80004005) }; // E_FAIL
+    constexpr hresult error_access_denied{ static_cast<hresult>(0x80070005) }; // E_ACCESSDENIED
+    constexpr hresult error_wrong_thread{ static_cast<hresult>(0x8001010E) }; // RPC_E_WRONG_THREAD
+    constexpr hresult error_not_implemented{ static_cast<hresult>(0x80004001) }; // E_NOTIMPL
+    constexpr hresult error_invalid_argument{ static_cast<hresult>(0x80070057) }; // E_INVALIDARG
+    constexpr hresult error_out_of_bounds{ static_cast<hresult>(0x8000000B) }; // E_BOUNDS
+    constexpr hresult error_no_interface{ static_cast<hresult>(0x80004002) }; // E_NOINTERFACE
+    constexpr hresult error_class_not_available{ static_cast<hresult>(0x80040111) }; // CLASS_E_CLASSNOTAVAILABLE
+    constexpr hresult error_changed_state{ static_cast<hresult>(0x8000000C) }; // E_CHANGED_STATE
+    constexpr hresult error_illegal_method_call{ static_cast<hresult>(0x8000000E) }; // E_ILLEGAL_METHOD_CALL
+    constexpr hresult error_illegal_state_change{ static_cast<hresult>(0x8000000D) }; // E_ILLEGAL_STATE_CHANGE
+    constexpr hresult error_illegal_delegate_assignment{ static_cast<hresult>(0x80000018) }; // E_ILLEGAL_DELEGATE_ASSIGNMENT
+    constexpr hresult error_canceled{ static_cast<hresult>(0x800704C7) }; // HRESULT_FROM_WIN32(ERROR_CANCELLED)
+    constexpr hresult error_bad_alloc{ static_cast<hresult>(0x8007000E) }; // E_OUTOFMEMORY
+    constexpr hresult error_not_initialized{ static_cast<hresult>(0x800401F0) }; // CO_E_NOTINITIALIZED
 }

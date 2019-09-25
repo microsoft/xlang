@@ -32,7 +32,7 @@ namespace winrt::impl
             value;
             value.s = 0;
             guid iid;
-            if (WINRT_IIDFromString(iid_str, &iid) == error_ok)
+            if (WINRT_IIDFromString(iid_str, &iid) == 0)
             {
                 struct memory_basic_information
                 {
@@ -55,7 +55,7 @@ namespace winrt::impl
                 if ((WINRT_VirtualQuery(object, &info, sizeof(info)) != 0) && ((info.protect & 0xEE) != 0))
                 {
                     inspectable_abi* pinsp;
-                    if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == error_ok)
+                    if (((unknown_abi*)object)->QueryInterface(iid, reinterpret_cast<void**>(&pinsp)) == 0)
                     {
                         static const int IInspectable_vtbl_size = 6;
                         auto vtbl = *(void***)pinsp;

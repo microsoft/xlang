@@ -325,19 +325,6 @@ namespace winrt::impl
         return { result, take_ownership_from_abi };
     }
 
-    template <> struct abi<Windows::Foundation::IActivationFactory>
-    {
-        struct __declspec(novtable) type : inspectable_abi
-        {
-            virtual int32_t __stdcall ActivateInstance(void** instance) noexcept = 0;
-        };
-    };
-
-    template <> constexpr guid guid_v<Windows::Foundation::IActivationFactory>
-    {
-        0x00000035,0x0000,0x0000,{ 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x46 }
-    };
-
     template <typename D> struct produce<D, Windows::Foundation::IActivationFactory> : produce_base<D, Windows::Foundation::IActivationFactory>
     {
         int32_t __stdcall ActivateInstance(void** instance) noexcept final try
@@ -345,7 +332,7 @@ namespace winrt::impl
             *instance = nullptr;
             typename D::abi_guard guard(this->shim());
             *instance = detach_abi(this->shim().ActivateInstance());
-            return error_ok;
+            return 0;
         }
         catch (...) { return to_hresult(); }
     };

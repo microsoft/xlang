@@ -574,102 +574,24 @@ namespace winrt::impl
     template <> constexpr auto& name_v<Windows::Foundation::TimeSpan>{ L"Windows.Foundation.TimeSpan" };
     template <> constexpr auto& name_v<Windows::Foundation::DateTime>{ L"Windows.Foundation.DateTime" };
 
-    template <>
-    struct category<bool>
-    {
-        using type = basic_category;
-    };
-
-
-    template <>
-    struct category<int8_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<int16_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<int32_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<int64_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<uint8_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<uint16_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<uint32_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<uint64_t>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<float>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<double>
-    {
-        using type = basic_category;
-    };
-
-    template <>
-    struct category<char16_t>
-    {
-        using type = basic_category;
-    };
-
-
-
-    template <>
-    struct category<guid>
-    {
-        using type = basic_category;
-    };
-
-
-
-    template <>
-    struct category<hresult>
-    {
-        using type = struct_category<int32_t>;
-    };
-
-
-
-    template <>
-    struct category<event_token>
-    {
-        using type = struct_category<int64_t>;
-    };
+    template <> struct category<bool> { using type = basic_category; };
+    template <> struct category<int8_t> { using type = basic_category; };
+    template <> struct category<int16_t> { using type = basic_category; };
+    template <> struct category<int32_t> { using type = basic_category; };
+    template <> struct category<int64_t> { using type = basic_category; };
+    template <> struct category<uint8_t> { using type = basic_category; };
+    template <> struct category<uint16_t> { using type = basic_category; };
+    template <> struct category<uint32_t> { using type = basic_category; };
+    template <> struct category<uint64_t> { using type = basic_category; };
+    template <> struct category<float> { using type = basic_category; };
+    template <> struct category<double> { using type = basic_category; };
+    template <> struct category<char16_t> { using type = basic_category; };
+    template <> struct category<guid> { using type = basic_category; };
+    template <> struct category<hresult> { using type = struct_category<int32_t>; };
+    template <> struct category<event_token> { using type = struct_category<int64_t>; };
+    template <> struct category<Windows::Foundation::IInspectable> { using type = basic_category; };
+    template <> struct category<Windows::Foundation::TimeSpan> { using type = struct_category<int64_t>; };
+    template <> struct category<Windows::Foundation::DateTime> { using type = struct_category<int64_t>; };
 
     template <typename T>
     struct category_signature<basic_category, T>

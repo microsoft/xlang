@@ -111,7 +111,7 @@ WINRT_EXPORT namespace winrt
         static int32_t __stdcall callback(impl::com_callback_args* args) noexcept
         {
             std::experimental::coroutine_handle<>::from_address(args->data)();
-            return impl::error_ok;
+            return 0;
         }
 
         com_ptr<impl::IContextCallback> m_context;

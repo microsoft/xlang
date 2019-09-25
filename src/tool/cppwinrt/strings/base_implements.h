@@ -542,7 +542,7 @@ namespace winrt::impl
             {
                 *object = static_cast<IWeakReferenceSource*>(this);
                 that()->increment_strong();
-                return error_ok;
+                return 0;
             }
 
             return that()->m_object->QueryInterface(id, object);
@@ -562,7 +562,7 @@ namespace winrt::impl
         {
             *weakReference = that();
             that()->AddRef();
-            return error_ok;
+            return 0;
         }
     };
 
@@ -589,7 +589,7 @@ namespace winrt::impl
             {
                 *object = static_cast<IWeakReference*>(this);
                 AddRef();
-                return error_ok;
+                return 0;
             }
 
             if constexpr (Agile)
@@ -598,7 +598,7 @@ namespace winrt::impl
                 {
                     *object = static_cast<unknown_abi*>(this);
                     AddRef();
-                    return error_ok;
+                    return 0;
                 }
 
                 if (is_guid_of<IMarshal>(id))
@@ -637,7 +637,7 @@ namespace winrt::impl
                 if (target == 0)
                 {
                     *objectReference = nullptr;
-                    return error_ok;
+                    return 0;
                 }
 
                 if (m_strong.compare_exchange_weak(target, target + 1, std::memory_order_acquire, std::memory_order_relaxed))
@@ -923,7 +923,7 @@ namespace winrt::impl
                 auto result = to_abi<INonDelegatingInspectable>(this);
                 NonDelegatingAddRef();
                 *object = result;
-                return error_ok;
+                return 0;
             }
 
             int32_t result = query_interface(id, object);
@@ -977,20 +977,20 @@ namespace winrt::impl
                     *array = nullptr;
                 }
             }
-            return error_ok;
+            return 0;
         }
 
         int32_t __stdcall NonDelegatingGetRuntimeClassName(void** name) noexcept try
         {
             *name = detach_abi(static_cast<D*>(this)->GetRuntimeClassName());
-            return error_ok;
+            return 0;
         }
         catch (...) { return to_hresult(); }
 
         int32_t __stdcall NonDelegatingGetTrustLevel(Windows::Foundation::TrustLevel* trustLevel) noexcept try
         {
             *trustLevel = static_cast<D*>(this)->GetTrustLevel();
-            return error_ok;
+            return 0;
         }
         catch (...) { return to_hresult(); }
 
@@ -1071,7 +1071,7 @@ namespace winrt::impl
             if (*object != nullptr)
             {
                 AddRef();
-                return error_ok;
+                return 0;
             }
 
             if constexpr (is_agile::value)
@@ -1080,7 +1080,7 @@ namespace winrt::impl
                 {
                     *object = get_unknown();
                     AddRef();
-                    return error_ok;
+                    return 0;
                 }
 
                 if (is_guid_of<IMarshal>(id))
@@ -1095,7 +1095,7 @@ namespace winrt::impl
                 {
                     *object = find_inspectable();
                     AddRef();
-                    return error_ok;
+                    return 0;
                 }
             }
 
@@ -1103,7 +1103,7 @@ namespace winrt::impl
             {
                 *object = get_unknown();
                 AddRef();
-                return error_ok;
+                return 0;
             }
 
             if constexpr (is_weak_ref_source::value)

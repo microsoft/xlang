@@ -1278,7 +1278,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (0 == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMapView<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }
@@ -1304,7 +1304,7 @@ namespace xlang
                 std::optional<V> result;
                 V value{ empty_value<V>() };
 
-                if (error_ok == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
+                if (0 == WINRT_IMPL_SHIM(Windows::Foundation::Collections::IMap<K, V>)->Lookup(get_abi(key), put_abi(value)))
                 {
                     result = std::move(value);
                 }

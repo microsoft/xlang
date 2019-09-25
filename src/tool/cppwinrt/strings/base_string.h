@@ -18,7 +18,7 @@ namespace winrt::impl
     inline bool embedded_null(void* value) noexcept
     {
         int32_t result = 0;
-        WINRT_VERIFY_(error_ok, WINRT_WindowsStringHasEmbeddedNull(value, &result));
+        WINRT_VERIFY_(0, WINRT_WindowsStringHasEmbeddedNull(value, &result));
         return 0 != result;
     }
 
@@ -28,7 +28,7 @@ namespace winrt::impl
 
         static void close(type value) noexcept
         {
-            WINRT_VERIFY_(error_ok, WINRT_WindowsDeleteString(value));
+            WINRT_VERIFY_(0, WINRT_WindowsDeleteString(value));
         }
 
         static constexpr type invalid() noexcept
@@ -280,7 +280,7 @@ namespace winrt::impl
         {
             if (m_buffer != nullptr)
             {
-                WINRT_VERIFY_(error_ok, WINRT_WindowsDeleteStringBuffer(m_buffer));
+                WINRT_VERIFY_(0, WINRT_WindowsDeleteStringBuffer(m_buffer));
             }
         }
 

@@ -1,27 +1,4 @@
 
-namespace winrt::impl
-{
-    template <> struct abi<Windows::Foundation::TimeSpan>
-    {
-        using type = int64_t;
-    };
-
-    template <> struct abi<Windows::Foundation::DateTime>
-    {
-        using type = int64_t;
-    };
-
-    template <> struct category<Windows::Foundation::TimeSpan>
-    {
-        using type = struct_category<int64_t>;
-    };
-
-    template <> struct category<Windows::Foundation::DateTime>
-    {
-        using type = struct_category<int64_t>;
-    };
-}
-
 WINRT_EXPORT namespace winrt
 {
     struct file_time
