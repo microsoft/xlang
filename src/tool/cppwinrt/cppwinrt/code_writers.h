@@ -329,22 +329,13 @@ namespace xlang
             auto format = R"(    template <%> struct category<%>
     {
         using type = pinterface_category<%>;
-        static constexpr guid value{ % };
     };
 )";
-
-            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
-
-            if (!attribute)
-            {
-                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
-            }
 
             w.write(format,
                 bind<write_generic_typenames>(generics),
                 type,
-                bind_list(", ", generics),
-                bind<write_guid_value>(attribute.Value().FixedArgs()));
+                bind_list(", ", generics));
         }
     }
 
@@ -400,6 +391,13 @@ namespace xlang
 
     static void write_guid(writer& w, TypeDef const& type)
     {
+        auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
+
+        if (!attribute)
+        {
+            throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
+        }
+
         auto generics = type.GenericParam();
 
         if (empty(generics))
@@ -409,13 +407,6 @@ namespace xlang
         %
     };
 )";
-
-            auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "GuidAttribute");
-
-            if (!attribute)
-            {
-                throw_invalid("'Windows.Foundation.Metadata.GuidAttribute' attribute for type '", type.TypeNamespace(), ".", type.TypeName(), "' not found");
-            }
 
             w.write(format,
                 type,
@@ -427,12 +418,19 @@ namespace xlang
     {
         pinterface_guid<%>::value
     };
+    template <%> constexpr guid generic_guid_v<%>
+    {
+        %
+    };
 )";
 
             w.write(format,
                 bind<write_generic_typenames>(generics),
                 type,
-                type);
+                type,
+                bind<write_generic_typenames>(generics),
+                type,
+                bind<write_guid_value>(attribute.Value().FixedArgs()));
         }
     }
 

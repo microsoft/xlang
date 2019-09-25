@@ -541,6 +541,9 @@ namespace winrt::impl
     }
 
     template <typename T>
+    constexpr guid generic_guid_v{};
+
+    template <typename T>
     constexpr auto& basic_signature_v{""};
 
     template <> constexpr auto& basic_signature_v<bool>{"b1"};
@@ -767,7 +770,7 @@ namespace winrt::impl
     template <typename... Args, typename T>
     struct category_signature<pinterface_category<Args...>, T>
     {
-        constexpr static auto data{ combine("pinterface(", to_array<char>(category<T>::value), ";", arg_collection<Args...>::data, ")") };
+        constexpr static auto data{ combine("pinterface(", to_array<char>(generic_guid_v<T>), ";", arg_collection<Args...>::data, ")") };
     };
 
     template <typename T>
