@@ -12,6 +12,8 @@ namespace winrt::impl
 
 WINRT_EXPORT namespace winrt
 {
+    struct hstring;
+
     struct hresult
     {
         int32_t value{};

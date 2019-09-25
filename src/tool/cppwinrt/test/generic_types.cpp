@@ -140,6 +140,7 @@ TEST_CASE("generic_types")
     REQUIRE_EQUAL_GUID("FB393EF3-BBAC-5BD5-9144-84F23576F415", IReference<char16_t>);
     REQUIRE_EQUAL_GUID("7D50F649-632C-51F9-849A-EE49428933EA", IReference<guid>);
     REQUIRE_EQUAL_GUID("6FF27A1E-4B6A-59B7-B2C3-D1F2EE474593", IReference<hresult>);
+    REQUIRE_EQUAL_GUID("FD416DFB-2A07-52EB-AAE3-DFCE14116C05", IReference<hstring>);
     REQUIRE_EQUAL_GUID("A9B18291-CE2A-5DAE-8A23-B7F7388416DB", IReference<event_token>);
 
     // Enums, structs, IInspectable, classes, and delegates
@@ -240,6 +241,8 @@ TEST_CASE("generic_types")
         IReference<guid>);
     REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.HResult>",
         IReference<hresult>);
+    REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<String>",
+        IReference<hstring>);
     REQUIRE_EQUAL_NAME(L"Windows.Foundation.IReference`1<Windows.Foundation.EventRegistrationToken>",
         IReference<event_token>);
 

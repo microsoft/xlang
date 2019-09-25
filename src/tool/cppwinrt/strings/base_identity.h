@@ -540,11 +540,29 @@ namespace winrt::impl
         return output;
     }
 
+    template <typename T>
+    constexpr auto& basic_signature_v{""};
+
+    template <> constexpr auto& basic_signature_v<bool>{"b1"};
+    template <> constexpr auto& basic_signature_v<int8_t>{"i1"};
+    template <> constexpr auto& basic_signature_v<int16_t>{"i2"};
+    template <> constexpr auto& basic_signature_v<int32_t>{"i4"};
+    template <> constexpr auto& basic_signature_v<int64_t>{"i8"};
+    template <> constexpr auto& basic_signature_v<uint8_t>{"u1"};
+    template <> constexpr auto& basic_signature_v<uint16_t>{"u2"};
+    template <> constexpr auto& basic_signature_v<uint32_t>{"u4"};
+    template <> constexpr auto& basic_signature_v<uint64_t>{"u8"};
+    template <> constexpr auto& basic_signature_v<float>{"f4"};
+    template <> constexpr auto& basic_signature_v<double>{"f8"};
+    template <> constexpr auto& basic_signature_v<char16_t>{"c2"};
+    template <> constexpr auto& basic_signature_v<guid>{"g16"};
+    template <> constexpr auto& basic_signature_v<hstring>{"string"};
+    template <> constexpr auto& basic_signature_v<Windows::Foundation::IInspectable>{"cinterface(IInspectable)"};
+
     template <>
     struct name<bool>
     {
         static constexpr auto & value{ L"Boolean" };
-        static constexpr auto & data{ "b1" };
     };
 
     template <>
@@ -557,7 +575,6 @@ namespace winrt::impl
     struct name<int8_t>
     {
         static constexpr auto & value{ L"Int8" };
-        static constexpr auto & data{ "i1" };
     };
 
     template <>
@@ -570,7 +587,6 @@ namespace winrt::impl
     struct name<int16_t>
     {
         static constexpr auto & value{ L"Int16" };
-        static constexpr auto & data{ "i2" };
     };
 
     template <>
@@ -583,7 +599,6 @@ namespace winrt::impl
     struct name<int32_t>
     {
         static constexpr auto & value{ L"Int32" };
-        static constexpr auto & data{ "i4" };
     };
 
     template <>
@@ -596,7 +611,6 @@ namespace winrt::impl
     struct name<int64_t>
     {
         static constexpr auto & value{ L"Int64" };
-        static constexpr auto & data{ "i8" };
     };
 
     template <>
@@ -609,7 +623,6 @@ namespace winrt::impl
     struct name<uint8_t>
     {
         static constexpr auto & value{ L"UInt8" };
-        static constexpr auto & data{ "u1" };
     };
 
     template <>
@@ -622,7 +635,6 @@ namespace winrt::impl
     struct name<uint16_t>
     {
         static constexpr auto & value{ L"UInt16" };
-        static constexpr auto & data{ "u2" };
     };
 
     template <>
@@ -635,7 +647,6 @@ namespace winrt::impl
     struct name<uint32_t>
     {
         static constexpr auto & value{ L"UInt32" };
-        static constexpr auto & data{ "u4" };
     };
 
     template <>
@@ -648,7 +659,6 @@ namespace winrt::impl
     struct name<uint64_t>
     {
         static constexpr auto & value{ L"UInt64" };
-        static constexpr auto & data{ "u8" };
     };
 
     template <>
@@ -661,7 +671,6 @@ namespace winrt::impl
     struct name<float>
     {
         static constexpr auto & value{ L"Single" };
-        static constexpr auto & data{ "f4" };
     };
 
     template <>
@@ -674,7 +683,6 @@ namespace winrt::impl
     struct name<double>
     {
         static constexpr auto & value{ L"Double" };
-        static constexpr auto & data{ "f8" };
     };
 
     template <>
@@ -687,7 +695,6 @@ namespace winrt::impl
     struct name<char16_t>
     {
         static constexpr auto & value{ L"Char16" };
-        static constexpr auto & data{ "c2" };
     };
 
     template <>
@@ -700,7 +707,6 @@ namespace winrt::impl
     struct name<guid>
     {
         static constexpr auto & value{ L"Guid" };
-        static constexpr auto & data{ "g16" };
     };
 
     template <>
@@ -736,7 +742,7 @@ namespace winrt::impl
     template <typename T>
     struct category_signature<basic_category, T>
     {
-        constexpr static auto data{ to_array(name<T>::data) };
+        constexpr static auto data{ to_array(basic_signature_v<T>) };
     };
 
     template <typename T>

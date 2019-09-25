@@ -264,7 +264,6 @@ namespace winrt::impl
     template <> struct name<hstring>
     {
         static constexpr auto & value{ L"String" };
-        static constexpr auto & data{ "string" };
     };
 
     template <> struct category<hstring>
