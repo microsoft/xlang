@@ -121,10 +121,14 @@ namespace winrt::impl
     };
 
     template <typename T>
+#ifdef __IUnknown_INTERFACE_DEFINED__
 #ifdef __clang__
     const guid guid_v{ __uuidof(T) };
 #else
     constexpr guid guid_v{ __uuidof(T) };
+#endif
+#else
+    constexpr guid guid_v{};
 #endif
 
     template <typename T>

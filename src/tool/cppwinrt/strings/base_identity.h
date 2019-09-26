@@ -454,7 +454,7 @@ namespace winrt::impl
 
     template <typename T>
 #ifdef __clang__
-    static const auto value
+    static const auto name_v
 #else
 #pragma warning(suppress: 4307)
     constexpr auto name_v
