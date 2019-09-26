@@ -65,7 +65,7 @@ namespace winrt::impl
     {
         check_sta_blocking_wait();
         auto const milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
-        WINRT_ASSERT((milliseconds >= 0) && (milliseconds < 0xFFFFFFFFull)); // Within uint32_t range and not INFINITE
+        WINRT_ASSERT((milliseconds >= 0) && (static_cast<uint64_t>(milliseconds) < 0xFFFFFFFFull)); // Within uint32_t range and not INFINITE
         wait_for_completed(async, static_cast<uint32_t>(milliseconds));
         return async.Status();
     }

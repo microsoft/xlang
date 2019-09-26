@@ -98,7 +98,7 @@ WINRT_EXPORT namespace winrt
             com_ptr<impl::IErrorInfo> info;
             WINRT_GetErrorInfo(0, info.put_void());
 
-            if (m_info = info.try_as<impl::IRestrictedErrorInfo>())
+            if ((m_info = info.try_as<impl::IRestrictedErrorInfo>()))
             {
                 WINRT_VERIFY_(0, m_info->GetReference(m_debug_reference.put()));
 
