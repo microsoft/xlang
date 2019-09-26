@@ -573,6 +573,7 @@ namespace winrt::impl
     template <> inline constexpr auto& name_v<Windows::Foundation::IInspectable>{ L"Object" };
     template <> inline constexpr auto& name_v<Windows::Foundation::TimeSpan>{ L"Windows.Foundation.TimeSpan" };
     template <> inline constexpr auto& name_v<Windows::Foundation::DateTime>{ L"Windows.Foundation.DateTime" };
+    template <> inline constexpr auto& name_v<IAgileObject>{ L"IAgileObject" };
 
     template <> struct category<bool> { using type = basic_category; };
     template <> struct category<int8_t> { using type = basic_category; };
