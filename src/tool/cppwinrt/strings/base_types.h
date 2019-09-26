@@ -9,6 +9,7 @@ namespace winrt::impl
     using condition_variable = struct condition_variable_*;
     using bstr = wchar_t*;
     using filetime_period = std::ratio_multiply<std::ratio<100>, std::nano>;
+    struct IAgileObject;
 
     struct com_callback_args
     {
@@ -101,7 +102,6 @@ WINRT_EXPORT namespace winrt::Windows::Foundation
     struct IActivationFactory;
     using TimeSpan = std::chrono::duration<int64_t, impl::filetime_period>;
     using DateTime = std::chrono::time_point<clock, TimeSpan>;
-
 }
 
 namespace winrt::impl

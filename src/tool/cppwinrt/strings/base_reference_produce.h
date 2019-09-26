@@ -269,7 +269,7 @@ WINRT_EXPORT namespace winrt
         }
         else
         {
-            return Windows::Foundation::IReference<T>(value);
+            return impl::reference_traits<T>::make(value);
         }
     }
 
