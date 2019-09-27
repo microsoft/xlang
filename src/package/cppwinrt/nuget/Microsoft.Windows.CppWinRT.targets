@@ -278,7 +278,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             DependsOnTargets="$(CppWinRTComputeXamlGeneratedCompileInputsDependsOn)"
             Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT'">
         <ItemGroup>
-            <ClCompile Include="$(XamlMetaDataProviderCpp)">
+            <ClCompile Include="$(XamlMetaDataProviderCpp)" Condition="'$(CppWinRTOptimized)'=='true'">
                 <CompilerIteration>XamlGenerated</CompilerIteration>
             </ClCompile>
         </ItemGroup>
