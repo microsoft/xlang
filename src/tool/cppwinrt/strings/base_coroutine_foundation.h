@@ -31,13 +31,6 @@ namespace winrt::impl
         using type = Windows::Foundation::AsyncOperationWithProgressCompletedHandler<TResult, TProgress>;
     };
 
-    inline bool is_sta() noexcept
-    {
-        int32_t aptType;
-        int32_t aptTypeQualifier;
-        return (0 == WINRT_CoGetApartmentType(&aptType, &aptTypeQualifier)) && ((aptType == 0 /*APTTYPE_STA*/) || (aptType == 3 /*APTTYPE_MAINSTA*/));
-    }
-
     inline void check_sta_blocking_wait() noexcept
     {
         // Note: A blocking wait on the UI thread for an asynchronous operation can cause a deadlock.
@@ -95,36 +88,10 @@ namespace winrt::impl
 
         void await_suspend(std::experimental::coroutine_handle<> handle) const
         {
-            if (is_sta())
+            async.Completed([handle, context = impl::sta_apartment_context()](auto&& ...)
             {
-                async.Completed([handle, context = capture<IContextCallback>(WINRT_CoGetObjectContext)](auto&&...)
-                {
-                    com_callback_args args{};
-                    args.data = handle.address();
-
-                    auto callback = [](com_callback_args* args) noexcept -> int32_t
-                    {
-                        std::experimental::coroutine_handle<>::from_address(args->data)();
-                        return 0;
-                    };
-
-                    check_hresult(context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
-                });
-            }
-            else
-            {
-                async.Completed([handle](auto&& ...)
-                {
-                    if (is_sta())
-                    {
-                        impl::resume_background(handle);
-                    }
-                    else
-                    {
-                        handle();
-                    }
-                });
-            }
+                impl::resume_apartment(context, handle);
+            });
         }
 
         auto await_resume() const
