@@ -31,8 +31,9 @@ namespace
         {
             results.push_back(queue.Async([&]
                 {
-                    Sleep(10); // Induce thread pool to use more threads if available
-                    ++counter;
+                    auto value = counter + 1;
+                    Sleep(10); // Induce thread pool to use more threads if available, also force race condition
+                    counter = value;
                 }));
         }
 
