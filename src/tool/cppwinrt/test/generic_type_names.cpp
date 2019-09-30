@@ -2,9 +2,10 @@
 // Note that WINRT_LEAN_AND_MEAN is not defined for these tests.
 //
 
-#include <unknwn.h>
-#include "winrt/Windows.Foundation.Collections.h"
-#include "winrt/Windows.Foundation.Numerics.h"
+// Windows.Foundation is intentionally *not* included here to ensure that stable names/guids
+// are generated with only the xxx.0.h header.
+#include "winrt/Windows.Storage.h"
+
 #include "catch.hpp"
 #include "generic_types.h"
 
