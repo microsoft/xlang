@@ -454,17 +454,16 @@ namespace winrt::impl
 
     template <typename T>
 #ifdef __clang__
-    inline static const auto name_v
+    inline static const std::array<wchar_t, 37> name_v
 #else
 #pragma warning(suppress: 4307)
-    inline constexpr auto name_v
+    inline constexpr std::array<wchar_t, 37> name_v
 #endif
     {
-        combine
-        (
-            to_array<wchar_t>(guid_of<T>()),
-            std::array<wchar_t, 1>{ L'\0' }
-        )
+#ifdef __IUnknown_INTERFACE_DEFINED__
+        static_assert(std::is_base_of_v<::IUnknown, T>, "T must be COM interface or WinRT class (unless WINRT_LEAN_AND_MEAN is not defined).");
+        combine(to_array<wchar_t>(guid_of<T>()), std::array<wchar_t, 1>{ L'\0' })
+#endif
     };
 
     constexpr size_t to_utf8_size(wchar_t const value) noexcept
@@ -554,6 +553,7 @@ namespace winrt::impl
     template <> inline constexpr auto& basic_signature_v<hstring>{"string"};
     template <> inline constexpr auto& basic_signature_v<Windows::Foundation::IInspectable>{"cinterface(IInspectable)"};
 
+#ifndef WINRT_LEAN_AND_MEAN
     template <> inline constexpr auto& name_v<bool>{ L"Boolean" };
     template <> inline constexpr auto& name_v<int8_t>{ L"Int8" };
     template <> inline constexpr auto& name_v<int16_t>{ L"Int16" };
@@ -574,6 +574,7 @@ namespace winrt::impl
     template <> inline constexpr auto& name_v<Windows::Foundation::TimeSpan>{ L"Windows.Foundation.TimeSpan" };
     template <> inline constexpr auto& name_v<Windows::Foundation::DateTime>{ L"Windows.Foundation.DateTime" };
     template <> inline constexpr auto& name_v<IAgileObject>{ L"IAgileObject" };
+#endif
 
     template <> struct category<bool> { using type = basic_category; };
     template <> struct category<int8_t> { using type = basic_category; };

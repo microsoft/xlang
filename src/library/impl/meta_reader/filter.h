@@ -30,6 +30,12 @@ namespace xlang::meta::reader
             return includes(type.TypeNamespace(), type.TypeName());
         }
 
+        bool includes(std::string_view const& type) const
+        {
+            auto position = type.find_last_of('.');
+            return includes(type.substr(0, position), type.substr(position + 1));
+        }
+
         bool includes(std::vector<TypeDef> const& types) const
         {
             if (m_rules.empty())
