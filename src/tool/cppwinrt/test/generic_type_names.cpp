@@ -3,7 +3,8 @@
 //
 
 // Windows.Foundation is intentionally *not* included here to ensure that stable names/guids
-// are generated with only the xxx.0.h header.
+// are generated with only the xxx.0.h header. This ensures that indirect declarations produce
+// stable identity values.
 #include "winrt/Windows.Storage.h"
 
 #include "catch.hpp"
