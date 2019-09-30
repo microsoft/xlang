@@ -81,7 +81,6 @@ namespace xlang
         w.write_each<write_category>(members.enums, "enum_category");
         w.write_each<write_struct_category>(members.structs);
         w.write_each<write_category>(members.delegates, "delegate_category");
-        w.write_each<write_name>(members.classes);
         w.write_each<write_guid>(members.interfaces);
         w.write_each<write_guid>(members.delegates);
         w.write_each<write_default_interface>(members.classes);
@@ -167,12 +166,18 @@ namespace xlang
         w.write_each<write_delegate_implementation>(members.delegates);
         w.write_each<write_produce>(members.interfaces);
         w.write_each<write_dispatch_overridable>(members.classes);
-        write_lean_and_mean(w);
-        w.write_each<write_name>(members.interfaces);
+
+        // Class names are always required for activation.
+        // Class, enum, and struct names are required for producing GUIDs for generic types.
+        // Interface and delegates names are not required by WinRT.
+        w.write_each<write_name>(members.classes);
         w.write_each<write_name>(members.enums);
         w.write_each<write_name>(members.structs);
+        write_lean_and_mean(w);
+        w.write_each<write_name>(members.interfaces);
         w.write_each<write_name>(members.delegates);
         write_endif(w);
+
         write_close_namespace(w);
 
         write_type_namespace(w, ns);
