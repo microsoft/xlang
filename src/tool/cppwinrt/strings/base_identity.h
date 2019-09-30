@@ -452,24 +452,20 @@ namespace winrt::impl
         static constexpr guid value{ generate_guid(signature<T>::data) };
     };
 
-// When using the winrt::name_of<T>() helper function, T must be a COM interface (if <unknwn.h> is included) or a WinRT class.
-// If WINRT_LEAN_AND_MEAN is not defined then T can be any WinRT type, although this is discouraged.
-#ifdef __IUnknown_INTERFACE_DEFINED__
+    template <typename T>
 #ifdef __clang__
-    template <typename T> inline static const auto name_v
+    inline static const auto name_v
 #else
 #pragma warning(suppress: 4307)
-    template <typename T> inline constexpr auto name_v
+    inline constexpr auto name_v
 #endif
     {
-        combine(to_array<wchar_t>(guid_of<T>()), std::array<wchar_t, 1>{ L'\0' })
+        combine
+        (
+            to_array<wchar_t>(guid_of<T>()),
+            std::array<wchar_t, 1>{ L'\0' }
+        )
     };
-#else
-    template <typename T> inline constexpr auto name_v
-    {
-        std::array<wchar_t, 1>{ L'\0' }
-    };
-#endif
 
     constexpr size_t to_utf8_size(wchar_t const value) noexcept
     {
