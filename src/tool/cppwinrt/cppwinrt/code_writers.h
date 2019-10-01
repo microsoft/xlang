@@ -59,7 +59,15 @@ namespace xlang
         w.write(format, mangled_name, mangled_name);
     }
 
-    static void write_close_file_guard(writer& w)
+    static void write_lean_and_mean(writer& w)
+    {
+        auto format = R"(#ifndef WINRT_LEAN_AND_MEAN
+)";
+
+        w.write(format);
+    }
+
+    static void write_endif(writer& w)
     {
         auto format = R"(#endif
 )";
@@ -1782,6 +1790,12 @@ namespace xlang
 
         auto generics = type.GenericParam();
         auto guard{ w.push_generic_params(generics) };
+        bool const lean_and_mean = !can_produce(type);
+
+        if (lean_and_mean)
+        {
+            write_lean_and_mean(w);
+        }
 
         w.write(format,
             bind<write_comma_generic_typenames>(generics),
@@ -1789,6 +1803,11 @@ namespace xlang
             type,
             bind_each<write_produce_method>(type.MethodList()),
             bind<write_fast_produce_methods>(type));
+
+        if (lean_and_mean)
+        {
+            write_endif(w);
+        }
     }
 
     static void write_dispatch_overridable_method(writer& w, MethodDef const& method)
@@ -1821,7 +1840,8 @@ namespace xlang
 struct __declspec(empty_bases) produce_dispatch_to_overridable<T, D, %>
     : produce_dispatch_to_overridable_base<T, D, %>
 {
-%};)";
+%};
+)";
 
         for (auto&& [interface_name, info] : get_interfaces(w, class_type))
         {

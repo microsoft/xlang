@@ -854,4 +854,22 @@ namespace xlang
             !members.structs.empty() ||
             !members.delegates.empty();
     }
+
+    static bool can_produce(TypeDef const& type)
+    {
+        auto attribute = get_attribute(type, "Windows.Foundation.Metadata", "ExclusiveToAttribute");
+
+        if (!attribute)
+        {
+            return true;
+        }
+
+        if (!settings.component)
+        {
+            return false;
+        }
+
+        auto class_name = get_attribute_value<ElemSig::SystemType>(attribute, 0).name;
+        return settings.component_filter.includes(class_name);
+    }
 }
