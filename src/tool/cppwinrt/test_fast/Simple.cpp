@@ -20,5 +20,5 @@ TEST_CASE("Simple")
     REQUIRE(info.factories[name_of<Simple>()].requests == 1);
 
     REQUIRE(info.queries.size() == 1);
-    REQUIRE(info.queries[L"{94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90}"] == 1); // IAgileObject
+    REQUIRE(info.queries[L"IAgileObject"] == 1);
 }

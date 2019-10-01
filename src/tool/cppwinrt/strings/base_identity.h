@@ -454,10 +454,10 @@ namespace winrt::impl
 
     template <typename T>
 #ifdef __clang__
-    static const auto value
+    inline static const auto name_v
 #else
 #pragma warning(suppress: 4307)
-    constexpr auto name_v
+    inline constexpr auto name_v
 #endif
     {
         combine
@@ -573,6 +573,7 @@ namespace winrt::impl
     template <> inline constexpr auto& name_v<Windows::Foundation::IInspectable>{ L"Object" };
     template <> inline constexpr auto& name_v<Windows::Foundation::TimeSpan>{ L"Windows.Foundation.TimeSpan" };
     template <> inline constexpr auto& name_v<Windows::Foundation::DateTime>{ L"Windows.Foundation.DateTime" };
+    template <> inline constexpr auto& name_v<IAgileObject>{ L"IAgileObject" };
 
     template <> struct category<bool> { using type = basic_category; };
     template <> struct category<int8_t> { using type = basic_category; };

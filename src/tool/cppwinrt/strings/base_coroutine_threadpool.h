@@ -13,6 +13,46 @@ namespace winrt::impl
             throw_last_error();
         }
     }
+
+    inline bool is_sta() noexcept
+    {
+        int32_t aptType;
+        int32_t aptTypeQualifier;
+        return (0 == WINRT_CoGetApartmentType(&aptType, &aptTypeQualifier)) && ((aptType == 0 /*APTTYPE_STA*/) || (aptType == 3 /*APTTYPE_MAINSTA*/));
+    }
+
+    inline auto sta_apartment_context()
+    {
+        return is_sta() ? capture<IContextCallback>(WINRT_CoGetObjectContext) : nullptr;
+    }
+
+    inline auto resume_apartment(com_ptr<IContextCallback> const& sta_context, std::experimental::coroutine_handle<> handle)
+    {
+        if (sta_context)
+        {
+            com_callback_args args{};
+            args.data = handle.address();
+
+            auto callback = [](com_callback_args* args) noexcept -> int32_t
+            {
+                std::experimental::coroutine_handle<>::from_address(args->data)();
+                return 0;
+            };
+
+            check_hresult(sta_context->ContextCallback(callback, &args, guid_of<ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
+        }
+        else
+        {
+            if (is_sta())
+            {
+                resume_background(handle);
+            }
+            else
+            {
+                handle();
+            }
+        }
+    }
 }
 
 WINRT_EXPORT namespace winrt
@@ -85,11 +125,6 @@ WINRT_EXPORT namespace winrt
 
     struct apartment_context
     {
-        apartment_context()
-        {
-            m_context.capture(WINRT_CoGetObjectContext);
-        }
-
         bool await_ready() const noexcept
         {
             return false;
@@ -101,20 +136,10 @@ WINRT_EXPORT namespace winrt
 
         void await_suspend(std::experimental::coroutine_handle<> handle) const
         {
-            impl::com_callback_args args{};
-            args.data = handle.address();
-            check_hresult(m_context->ContextCallback(callback, &args, guid_of<impl::ICallbackWithNoReentrancyToApplicationSTA>(), 5, nullptr));
+            impl::resume_apartment(sta_context, handle);
         }
 
-    private:
-
-        static int32_t __stdcall callback(impl::com_callback_args* args) noexcept
-        {
-            std::experimental::coroutine_handle<>::from_address(args->data)();
-            return 0;
-        }
-
-        com_ptr<impl::IContextCallback> m_context;
+        com_ptr<impl::IContextCallback> sta_context = impl::sta_apartment_context();
     };
 
     [[nodiscard]] inline auto resume_after(Windows::Foundation::TimeSpan duration) noexcept

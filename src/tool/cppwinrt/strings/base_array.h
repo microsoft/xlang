@@ -31,6 +31,18 @@ WINRT_EXPORT namespace winrt
             array_view(value, N)
         {}
 
+        template <typename = std::enable_if_t<std::is_same_v<T, bool>>>
+        array_view(std::vector<bool>& value) noexcept
+        {
+            static_assert(false, "Cannot use std::vector<bool> as an array_view. Consider std::array or std::unique_ptr<bool[]>.");
+        }
+
+        template <typename = std::enable_if_t<std::is_same_v<T, bool>>>
+        array_view(std::vector<bool> const& value) noexcept
+        {
+            static_assert(false, "Cannot use std::vector<bool> as an array_view. Consider std::array or std::unique_ptr<bool[]>.");
+        }
+
         template <typename C>
         array_view(std::vector<C>& value) noexcept :
             array_view(value.data(), static_cast<size_type>(value.size()))
