@@ -41,7 +41,7 @@ namespace xlang
         w.write(strings::base_natvis);
         w.write(strings::base_version, XLANG_VERSION_STRING);
 
-        write_close_file_guard(w);
+        write_endif(w);
         w.flush_to_file(settings.output_folder + "winrt/base.h");
     }
 
@@ -59,7 +59,7 @@ namespace xlang
             bind<write_component_fast_abi_thunk>(),
             bind<write_component_fast_abi_vtable>());
 
-        write_close_file_guard(w);
+        write_endif(w);
         w.flush_to_file(settings.output_folder + "winrt/fast_forward.h");
     }
 
@@ -81,11 +81,18 @@ namespace xlang
         w.write_each<write_category>(members.enums, "enum_category");
         w.write_each<write_struct_category>(members.structs);
         w.write_each<write_category>(members.delegates, "delegate_category");
-        w.write_each<write_name>(members.interfaces);
+
+        // Class names are always required for activation.
+        // Class, enum, and struct names are required for producing GUIDs for generic types.
+        // Interface and delegates names are not required by WinRT.
         w.write_each<write_name>(members.classes);
         w.write_each<write_name>(members.enums);
         w.write_each<write_name>(members.structs);
+        write_lean_and_mean(w);
+        w.write_each<write_name>(members.interfaces);
         w.write_each<write_name>(members.delegates);
+        write_endif(w);
+
         w.write_each<write_guid>(members.interfaces);
         w.write_each<write_guid>(members.delegates);
         w.write_each<write_default_interface>(members.classes);
@@ -95,7 +102,7 @@ namespace xlang
         w.write_each<write_struct_abi>(members.structs);
         write_close_namespace(w);
 
-        write_close_file_guard(w);
+        write_endif(w);
         w.swap();
         write_preamble(w);
         write_open_file_guard(w, ns, '0');
@@ -119,7 +126,7 @@ namespace xlang
         w.write_each<write_interface>(members.interfaces);
         write_close_namespace(w);
 
-        write_close_file_guard(w);
+        write_endif(w);
         w.swap();
         write_preamble(w);
         write_open_file_guard(w, ns, '1');
@@ -145,7 +152,7 @@ namespace xlang
         w.write_each<write_interface_override>(members.classes);
         write_close_namespace(w);
 
-        write_close_file_guard(w);
+        write_endif(w);
         w.swap();
         write_preamble(w);
         write_open_file_guard(w, ns, '2');
@@ -172,22 +179,26 @@ namespace xlang
         w.write_each<write_produce>(members.interfaces);
         w.write_each<write_dispatch_overridable>(members.classes);
         write_close_namespace(w);
+
         write_type_namespace(w, ns);
         w.write_each<write_enum_operators>(members.enums);
         w.write_each<write_class_definitions>(members.classes);
         w.write_each<write_fast_class_base_definitions>(members.classes);
-
         w.write_each<write_delegate_definition>(members.delegates);
         w.write_each<write_interface_override_methods>(members.classes);
         w.write_each<write_class_override>(members.classes);
         write_close_namespace(w);
+
         write_std_namespace(w);
+        write_lean_and_mean(w);
         w.write_each<write_std_hash>(members.interfaces);
         w.write_each<write_std_hash>(members.classes);
+        write_endif(w);
         write_close_namespace(w);
+
         write_namespace_special(w, ns, c);
 
-        write_close_file_guard(w);
+        write_endif(w);
         w.swap();
         write_preamble(w);
         write_open_file_guard(w, ns);
