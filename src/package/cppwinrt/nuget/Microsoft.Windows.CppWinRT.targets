@@ -260,7 +260,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Adds the XamlMetadataProvider idl to the Midl itemgroup, if building any xaml content -->
     <Target Name="CppWinRTComputeXamlGeneratedMidlInputs"
             DependsOnTargets="$(CppWinRTComputeXamlGeneratedMidlInputsDependsOn)"
-            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT'">
+            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
         <PropertyGroup>
             <_DisableReferences>false</_DisableReferences>
             <_DisableReferences Condition="('$(CppWinRTOverrideSDKReferences)' != 'true') and ('$(TargetPlatformVersion)' &lt; '10.0.18310.0')">true</_DisableReferences>
@@ -277,7 +277,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Adds the XamlMetadataProvider cpp to the ClCompile itemgroup, if building any xaml content -->
     <Target Name="CppWinRTComputeXamlGeneratedCompileInputs"
             DependsOnTargets="$(CppWinRTComputeXamlGeneratedCompileInputsDependsOn)"
-            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT'">
+            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
         <ItemGroup>
             <ClCompile Remove="$(XamlMetaDataProviderCpp)" />
             <ClCompile Include="$(XamlMetaDataProviderCpp)" Condition="'$(CppWinRTOptimized)'=='true'">
@@ -288,7 +288,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!--If building any Xaml content, write XamlMetaDataProvider idl file -->
     <Target Name="CppWinRTAddXamlMetaDataProviderIdl"
-            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT'">
+            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
         <PropertyGroup>
             <_DisableReferences>false</_DisableReferences>
             <_DisableReferences Condition="('$(CppWinRTOverrideSDKReferences)' != 'true') and ('$(TargetPlatformVersion)' &lt; '10.0.18310.0')">true</_DisableReferences>
@@ -317,7 +317,7 @@ namespace $(RootNamespace)
 
     <!--If building any Xaml content, write XamlMetaDataProvider cpp file -->
     <Target Name="CppWinRTAddXamlMetaDataProviderCpp"
-            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT'">
+            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
         <PropertyGroup>
             <_PCH>@(ClCompile->Metadata('PrecompiledHeaderFile')->Distinct())</_PCH>
             <XamlMetaDataProviderPch Condition="'$(_PCH)'!=''">#include "$(_PCH)"</XamlMetaDataProviderPch>
