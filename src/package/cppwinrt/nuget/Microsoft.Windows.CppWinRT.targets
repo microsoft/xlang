@@ -21,6 +21,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CppWinRTPath Condition="'$(CppWinRTPackage)' != 'true' and '$(CppWinRTPath)'==''">"$(CppWinRTPackageDir)"</CppWinRTPath>
         <XamlLanguage Condition="'$(CppWinRTProjectLanguage)' == 'C++/CX'">C++</XamlLanguage>
         <XamlNamespace Condition="'$(XamlNamespace)' == ''">Windows.UI.Xaml</XamlNamespace>
+        <XamlMetaDataProviderIdl Condition="'$(XamlMetaDataProviderIdl)'== ''">$(GeneratedFilesDir)XamlMetaDataProvider.idl</XamlMetaDataProviderIdl>
+        <XamlMetaDataProviderCpp Condition="'$(XamlMetaDataProviderCpp)'== ''">$(GeneratedFilesDir)XamlMetaDataProvider.cpp</XamlMetaDataProviderCpp>
 
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
         <!--Override SDK's uap.props setting to ensure version-matched headers-->
@@ -34,15 +36,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <PrepareForBuildDependsOn>
             $(PrepareForBuildDependsOn);CppWinRTVerifyKitVersion
         </PrepareForBuildDependsOn>
+        <!-- Note: Before* targets run before Compute* targets. -->
+        <BeforeMidlCompileTargets>
+            $(BeforeMidlCompileTargets);CppWinRTAddXamlMetaDataProviderIdl;
+        </BeforeMidlCompileTargets>
+        <ComputeMidlInputsTargets>
+            $(ComputeMidlInputsTargets);CppWinRTComputeXamlGeneratedMidlInputs;CppWinRTSetMidlReferences;
+        </ComputeMidlInputsTargets>
+        <AfterMidlTargets>
+            $(AfterMidlTargets);CppWinRTMergeProjectWinMDInputs
+        </AfterMidlTargets>
         <ResolveAssemblyReferencesDependsOn>
             $(ResolveAssemblyReferencesDependsOn);GetCppWinRTProjectWinMDReferences;CppWinRTRemoveStaticLibraries
         </ResolveAssemblyReferencesDependsOn>
-        <ComputeCompileInputsTargets>
-            $(ComputeCompileInputsTargets);CppWinRTHeapEnforcementOptOut;
-        </ComputeCompileInputsTargets>
+        <!-- Note: Before* targets run before Compute* targets. -->
         <BeforeClCompileTargets>
-            $(BeforeClCompileTargets);CppWinRTMakeProjections;
+            $(BeforeClCompileTargets);CppWinRTAddXamlMetaDataProviderCpp;CppWinRTMakeProjections;
         </BeforeClCompileTargets>
+        <ComputeCompileInputsTargets>
+            $(ComputeCompileInputsTargets);CppWinRTComputeXamlGeneratedCompileInputs;CppWinRTHeapEnforcementOptOut;
+        </ComputeCompileInputsTargets>
         <MarkupCompilePass1DependsOn>
             $(MarkupCompilePass1DependsOn);CppWinRTAddXamlReferences
         </MarkupCompilePass1DependsOn>
@@ -90,7 +103,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <Target Name="CppWinRTCalculateEnabledProjections"
             DependsOnTargets="GetCppWinRTProjectWinMDReferences;GetCppWinRTMdMergeInputs;$(CppWinRTCalculateEnabledProjectionsDependsOn)"
-            BeforeTargets="CppWinRTGetTargetPath;CppWinRTMergeProjectWinMDInputs;CppWinRTMakePlatformProjection;CppWinRTMakeComponentProjection;CppWinRTMakeReferenceProjection"
+            BeforeTargets="CppWinRTGetTargetPath;CppWinRTMakePlatformProjection;CppWinRTMakeComponentProjection;CppWinRTMakeReferenceProjection"
             Returns="$(CppWinRTEnableComponentProjection);$(CppWinRTEnablePlatformProjection);$(CppWinRTEnableReferenceProjection)">
         <PropertyGroup>
             <!-- For CX projects, turn off the component projection generation-->
@@ -101,7 +114,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                  2. project has static library references
             -->
             <CppWinRTEnableComponentProjection Condition="'$(CppWinRTEnableComponentProjection)' == '' AND '@(Midl)' != ''">true</CppWinRTEnableComponentProjection>
-            <CppWinRTEnableComponentProjection Condition="'$(CppWinRTEnableComponentProjection)' == '' AND '@(CppWinRTProjectMdMergeInputs)' != ''">true</CppWinRTEnableComponentProjection>
+            <CppWinRTEnableComponentProjection Condition="'$(CppWinRTEnableComponentProjection)' == '' AND '@(CppWinRTMdMergeInputs)' != ''">true</CppWinRTEnableComponentProjection>
             <CppWinRTEnablePlatformProjection Condition="'$(CppWinRTEnablePlatformProjection)' == ''">true</CppWinRTEnablePlatformProjection>
             <CppWinRTEnableReferenceProjection Condition="'$(CppWinRTEnableReferenceProjection)' == ''">true</CppWinRTEnableReferenceProjection>
         </PropertyGroup>
@@ -217,8 +230,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Message Text="CppWinRTDynamicProjectWinMDReferences: @(CppWinRTDynamicProjectWinMDReferences->'%(WinMDPath)')" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
+    <!-- Calculates the input files and metadata directories to be passed to MdMerge -->
     <Target Name="GetCppWinRTMdMergeInputs"
-                DependsOnTargets="GetCppWinRTPlatformWinMDReferences;GetCppWinRTDirectWinMDReferences;GetCppWinRTProjectWinMDReferences;CppWinRTAddXamlMetaDataProviderIdl;"
+                DependsOnTargets="GetCppWinRTPlatformWinMDReferences;GetCppWinRTDirectWinMDReferences;GetCppWinRTProjectWinMDReferences;"
                 Returns="@(CppWinRTMdMergeMetadataDirectories);@(CppWinRTMdMergeInputs)">
         <ItemGroup>
             <_MdMergeInputs Remove="@(_MdMergeInputs)"/>
@@ -244,19 +258,39 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Message Text="CppWinRTMdMergeMetadataDirectories: @(CppWinRTMdMergeMetadataDirectories)" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
-    <!--If building any Xaml content, include XamlMetaDataProvider in project metadata-->
-    <Target Name="CppWinRTAddXamlMetaDataProviderIdl" Condition="'$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
+    <!-- Adds the XamlMetadataProvider idl to the Midl itemgroup, if building any xaml content -->
+    <Target Name="CppWinRTComputeXamlGeneratedMidlInputs"
+            DependsOnTargets="$(CppWinRTComputeXamlGeneratedMidlInputsDependsOn)"
+            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
         <PropertyGroup>
-            <XamlMetaDataProviderIdl>
-                $(IntDir)XamlMetaDataProvider.idl
-            </XamlMetaDataProviderIdl>
-            <XamlMetaDataProviderCpp>
-                $(GeneratedFilesDir)XamlMetaDataProvider.cpp
-            </XamlMetaDataProviderCpp>
-            <_HasXaml>false</_HasXaml>
-            <_HasXaml Condition="'@(Page)' != '' Or '@(ApplicationDefinition)' != ''">true</_HasXaml>
+            <_DisableReferences>false</_DisableReferences>
+            <_DisableReferences Condition="('$(CppWinRTOverrideSDKReferences)' != 'true') and ('$(TargetPlatformVersion)' &lt; '10.0.18310.0')">true</_DisableReferences>
         </PropertyGroup>
-        <PropertyGroup Condition="$(_HasXaml)">
+        
+        <ItemGroup>
+            <Midl Remove="$(XamlMetaDataProviderIdl)" />
+            <Midl Include="$(XamlMetaDataProviderIdl)">
+                <DisableReferences Condition="$(_DisableReferences)">>true</DisableReferences>
+            </Midl>
+        </ItemGroup>
+    </Target>
+
+    <!-- Adds the XamlMetadataProvider cpp to the ClCompile itemgroup, if building any xaml content -->
+    <Target Name="CppWinRTComputeXamlGeneratedCompileInputs"
+            DependsOnTargets="$(CppWinRTComputeXamlGeneratedCompileInputsDependsOn)"
+            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
+        <ItemGroup>
+            <ClCompile Remove="$(XamlMetaDataProviderCpp)" />
+            <ClCompile Include="$(XamlMetaDataProviderCpp)" Condition="'$(CppWinRTOptimized)'=='true'">
+                <CompilerIteration>XamlGenerated</CompilerIteration>
+            </ClCompile>
+        </ItemGroup>
+    </Target>
+
+    <!--If building any Xaml content, write XamlMetaDataProvider idl file -->
+    <Target Name="CppWinRTAddXamlMetaDataProviderIdl"
+            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
+        <PropertyGroup>
             <_DisableReferences>false</_DisableReferences>
             <_DisableReferences Condition="('$(CppWinRTOverrideSDKReferences)' != 'true') and ('$(TargetPlatformVersion)' &lt; '10.0.18310.0')">true</_DisableReferences>
             <FullXamlMetadataProviderAttribute Condition="$(XamlCodeGenerationControlFlags.Contains('FullXamlMetadataProvider'))">[$(XamlNamespace).Markup.FullXamlMetadataProvider] </FullXamlMetadataProviderAttribute>
@@ -273,19 +307,19 @@ namespace $(RootNamespace)
 }
 </XamlMetaDataProviderIdlLines>
         </PropertyGroup>
-        <WriteLinesToFile Condition="$(_HasXaml) And !Exists('$(XamlMetaDataProviderIdl)') And !$(CppWinRTWriteOnlyWhenDifferent)"
+        <WriteLinesToFile Condition="!$(CppWinRTWriteOnlyWhenDifferent)"
             File="$(XamlMetaDataProviderIdl)" Lines="$(XamlMetaDataProviderIdlLines)"
             ContinueOnError="true" Overwrite="true" />
-        <WriteLinesToFile Condition="$(_HasXaml) And !Exists('$(XamlMetaDataProviderIdl)') And $(CppWinRTWriteOnlyWhenDifferent)"
+        <WriteLinesToFile Condition="$(CppWinRTWriteOnlyWhenDifferent)"
             File="$(XamlMetaDataProviderIdl)" Lines="$(XamlMetaDataProviderIdlLines)"
             ContinueOnError="true" Overwrite="true"
             WriteOnlyWhenDifferent="true" />
-        <ItemGroup Condition="$(_HasXaml)">
-            <Midl Include="$(XamlMetaDataProviderIdl)">
-                <DisableReferences Condition="$(_DisableReferences)">>true</DisableReferences>
-            </Midl>
-        </ItemGroup>
-        <PropertyGroup Condition="$(_HasXaml)">
+    </Target>
+
+    <!--If building any Xaml content, write XamlMetaDataProvider cpp file -->
+    <Target Name="CppWinRTAddXamlMetaDataProviderCpp"
+            Condition="'@(Page)@(ApplicationDefinition)' != '' and '$(XamlLanguage)' == 'CppWinRT' and '$(CppWinRTAddXamlMetaDataProviderIdl)' == 'true'">
+        <PropertyGroup>
             <_PCH>@(ClCompile->Metadata('PrecompiledHeaderFile')->Distinct())</_PCH>
             <XamlMetaDataProviderPch Condition="'$(_PCH)'!=''">#include "$(_PCH)"</XamlMetaDataProviderPch>
             <XamlMetaDataProviderCppLines>
@@ -295,23 +329,18 @@ $(XamlMetaDataProviderPch)
 #include "XamlMetaDataProvider.g.cpp"
 </XamlMetaDataProviderCppLines>
         </PropertyGroup>
-        <WriteLinesToFile Condition="$(_HasXaml) And !Exists('$(XamlMetaDataProviderCpp)') And !$(CppWinRTWriteOnlyWhenDifferent)"
+        <WriteLinesToFile Condition="!$(CppWinRTWriteOnlyWhenDifferent)"
             File="$(XamlMetaDataProviderCpp)" Lines="$(XamlMetaDataProviderCppLines)"
             ContinueOnError="true" Overwrite="true" />
-        <WriteLinesToFile Condition="$(_HasXaml) And !Exists('$(XamlMetaDataProviderCpp)') And $(CppWinRTWriteOnlyWhenDifferent)"
+        <WriteLinesToFile Condition="$(CppWinRTWriteOnlyWhenDifferent)"
             File="$(XamlMetaDataProviderCpp)" Lines="$(XamlMetaDataProviderCppLines)"
             ContinueOnError="true" Overwrite="true"
             WriteOnlyWhenDifferent="true" />
-        <ItemGroup Condition="$(_HasXaml) And ('$(CppWinRTOptimized)'=='true')">
-            <ClCompile Include="$(GeneratedFilesDir)XamlMetaDataProvider.cpp" />
-        </ItemGroup>
-        <Message Condition="$(_HasXaml)" Text="CppWinRTAddXamlMetaDataProvider: @(Midl)"/>
     </Target>
 
     <!--Insert Midl /references to Platform WinMDs, library reference WinMDs, and direct reference WinMDs-->
     <Target Name="CppWinRTSetMidlReferences"
-            BeforeTargets="Midl"
-            DependsOnTargets="GetCppWinRTPlatformWinMDReferences;GetCppWinRTDirectWinMDReferences;GetCppWinRTProjectWinMDReferences;CppWinRTAddXamlMetaDataProviderIdl;$(CppWinRTSetMidlReferencesDependsOn)">
+            DependsOnTargets="GetCppWinRTPlatformWinMDReferences;GetCppWinRTDirectWinMDReferences;GetCppWinRTProjectWinMDReferences;$(CppWinRTSetMidlReferencesDependsOn)">
         <ItemGroup Condition="'$(CppWinRTModernIDL)' != 'false'">
             <_MidlReferences Remove="@(_MidlReferences)"/>
             <_MidlReferences Include="@(CppWinRTDirectWinMDReferences)"/>
@@ -345,11 +374,9 @@ $(XamlMetaDataProviderPch)
 
     <!--Merge project-generated WinMDs and project-referenced static library WinMDs into project WinMD-->
     <Target Name="CppWinRTMergeProjectWinMDInputs"
-            Condition="'$(CppWinRTEnableComponentProjection)' == 'true'"
-            DependsOnTargets="GetCppWinRTMdMergeInputs;$(CppWinRTMergeProjectWinMDInputsDependsOn)"
+            DependsOnTargets="Midl;GetCppWinRTMdMergeInputs;$(CppWinRTMergeProjectWinMDInputsDependsOn)"
             Inputs="@(CppWinRTMdMergeInputs)"
-            Outputs="@(CppWinRTMdMergeInputs->'%(MdMergeOutputFile)'"
-            Returns="$(CppWinRTProjectWinMD)">
+            Outputs="$(CppWinRTProjectWinMD)">
         <PropertyGroup>
             <!--Note: CppWinRTNamespaceMergeDepth supersedes CppWinRTMergeDepth-->
             <_MdMergeDepth Condition="'$(CppWinRTNamespaceMergeDepth)' != ''">-n:$(CppWinRTNamespaceMergeDepth)</_MdMergeDepth>
@@ -382,13 +409,10 @@ $(XamlMetaDataProviderPch)
             SkipUnchangedFiles="$(CppWinRTSkipUnchangedFiles)"
             SourceFiles="@(_MdMergedOutput)"
             DestinationFiles="@(_MdMergedOutput->'$(OutDir)%(Filename)%(Extension)')" />
-        <ItemGroup>
-            <MdMergeOutput Remove="@(MdMergeOutput)"/>
-            <MdMergeOutput Include="@(_MdMergedOutput->'$(OutDir)%(Filename)%(Extension)')"/>
-        </ItemGroup>
         <Message Text="CppWinRTMdMerge output: @(MdMergeOutput)" Importance="$(CppWinRTVerbosity)"/>
     </Target>
 
+    <!-- Build the platform projection from the winmds that sip with the platform in the Windows SDK -->
     <Target Name="CppWinRTMakePlatformProjection"
             Condition="'$(CppWinRTEnablePlatformProjection)' == 'true' AND '$(CppWinRTOverrideSDKReferences)' != 'true'"
             DependsOnTargets="GetCppWinRTPlatformWinMDInputs;$(CppWinRTMakePlatformProjectionDependsOn)"
@@ -450,11 +474,11 @@ $(XamlMetaDataProviderPch)
     <Exec Command="$(CppWinRTCommand)" />
   </Target>
 
-    <!--Build component projection from project WinMD file and WinMD project references-->
+    <!--Build component projection from project WinMD file and static library project references-->
     <Target Name="CppWinRTMakeComponentProjection"
             Condition="'$(CppWinRTEnableComponentProjection)' == 'true'"
-            DependsOnTargets="GetCppWinRTProjectWinMDReferences;GetCppWinRTPlatformWinMDReferences;CppWinRTMergeProjectWinMDInputs;$(CppWinRTMakeComponentProjectionDependsOn)"
-            Inputs="@(MdMergeOutput->'%(FullPath)');@(CppWinRTStaticProjectWinMDReferences)"
+            DependsOnTargets="GetCppWinRTProjectWinMDReferences;GetCppWinRTPlatformWinMDReferences;GetCppWinRTDirectWinMDReferences;$(CppWinRTMakeComponentProjectionDependsOn)"
+            Inputs="@(Midl->'%(MetadataFileName)');@(CppWinRTStaticProjectWinMDReferences)"
             Outputs="$(GeneratedFilesDir)winrt\$(RootNamespace).h">
         <PropertyGroup>
             <_PCH>@(ClCompile->Metadata('PrecompiledHeaderFile')->Distinct())</_PCH>
@@ -471,9 +495,12 @@ $(XamlMetaDataProviderPch)
             <CppWinRTCommand>$(CppWinRTPath)cppwinrt %40"$(IntDir)cppwinrt_comp.rsp"</CppWinRTCommand>
         </PropertyGroup>
         <ItemGroup>
+            <!-- use the output from MdMerge directly to generate the component projection. -->
+            <_MdMergedOutput Remove="@(_MdMergedOutput)"/>
+            <_MdMergedOutput Include="$(CppWinRTMergedDir)*.winmd"/>
             <_CppwinrtCompInputs Remove="@(_CppwinrtCompInputs)"/>
-            <_CppwinrtCompInputs Include="@(MdMergeOutput)">
-                <WinMDPath>%(MdMergeOutput.FullPath)</WinMDPath>
+            <_CppwinrtCompInputs Include="@(_MdMergedOutput)">
+                <WinMDPath>@(_MdMergedOutput->'%(FullPath)')</WinMDPath>
             </_CppwinrtCompInputs>
             <!-- If this is a static library with static library references,
                  pass the individual static library references to cppwinrt.exe 
@@ -504,6 +531,7 @@ $(XamlMetaDataProviderPch)
         <Exec Command="$(CppWinRTCommand)" Condition="'@(_CppwinrtCompInputs)' != ''"/>
     </Target>
 
+    <!-- Main target that generates all the CppWinRT projections. -->
     <Target Name="CppWinRTMakeProjections" DependsOnTargets="CppWinRTCalculateEnabledProjections;CppWinRTMakePlatformProjection;CppWinRTMakeReferenceProjection;CppWinRTMakeComponentProjection;$(CppWinRTMakeProjectionsDependsOn)" />
 
     <!--Add references to all merged project WinMD files for Xaml Compiler-->
