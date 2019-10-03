@@ -77,7 +77,7 @@
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
       <!--Temporarily disable cppwinrt heap enforcement to work around xaml compiler generated std::shared_ptr use -->
       <AdditionalOptions Condition="'$(CppWinRTHeapEnforcement)'==''">/DWINRT_NO_MAKE_DETECTION %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
+      <DisableSpecificWarnings></DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">

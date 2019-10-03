@@ -81,7 +81,7 @@
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
       <!--Temporarily disable cppwinrt heap enforcement to work around xaml compiler generated std::shared_ptr use -->
       <AdditionalOptions Condition="'$(CppWinRTHeapEnforcement)'==''">/DWINRT_NO_MAKE_DETECTION %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>28204</DisableSpecificWarnings>
+      <DisableSpecificWarnings></DisableSpecificWarnings>
       <PreprocessorDefinitions>_WINRT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>$(WindowsSDK_WindowsMetadata);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>
     </ClCompile>
@@ -100,6 +100,10 @@
     <ClCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
