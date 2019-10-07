@@ -3,8 +3,18 @@
 namespace xlang
 {
     using namespace std::filesystem;
+    using namespace std::literals;
     using namespace text;
-    using namespace meta::reader;
+    using namespace winmd::reader;
+    using namespace winmd::impl;
+
+    template <typename...T> struct visit_overload : T... { using T::operator()...; };
+
+    template <typename V, typename...C>
+    auto call(V&& variant, C&& ...call)
+    {
+        return std::visit(visit_overload<C...>{ std::forward<C>(call)... }, std::forward<V>(variant));
+    }
 
     struct type_name
     {
