@@ -8,6 +8,8 @@ using namespace Windows::UI::Xaml;
 using namespace winrt::TestRuntimeComponent1;
 using namespace winrt::TestRuntimeComponent2;
 using namespace winrt::TestRuntimeComponentCX;
+using namespace winrt::TestRuntimeComponentEmpty;
+using namespace winrt::TestRuntimeComponentEmpty::SubNamespace1;
 
 namespace winrt::TestApp::implementation
 {
@@ -29,6 +31,12 @@ namespace winrt::TestApp::implementation
 
         TestStaticLibrary4Class cStatic4{};
         cStatic4.Test();
+
+        TestStaticLibrary5Class cStatic5{};
+        cStatic5.Test();
+
+        TestStaticLibrary6Class cStatic6{};
+        cStatic6.Test();
     }
 
     int32_t MainPage::MyProperty()

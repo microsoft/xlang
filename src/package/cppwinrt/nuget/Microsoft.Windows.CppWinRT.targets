@@ -500,7 +500,7 @@ $(XamlMetaDataProviderPch)
             <_MdMergedOutput Include="$(CppWinRTMergedDir)*.winmd"/>
             <_CppwinrtCompInputs Remove="@(_CppwinrtCompInputs)"/>
             <_CppwinrtCompInputs Include="@(_MdMergedOutput)">
-                <WinMDPath>@(_MdMergedOutput->'%(FullPath)')</WinMDPath>
+                <WinMDPath>%(_MdMergedOutput.FullPath)</WinMDPath>
             </_CppwinrtCompInputs>
             <!-- If this is a static library with static library references,
                  pass the individual static library references to cppwinrt.exe 

@@ -17,3 +17,4 @@
 #include <winrt/TestRuntimeComponent1.h>
 #include <winrt/TestRuntimeComponent2.h>
 #include <winrt/TestRuntimeComponentCX.h>
+#include <winrt/TestRuntimeComponentEmpty.SubNamespace1.h>
