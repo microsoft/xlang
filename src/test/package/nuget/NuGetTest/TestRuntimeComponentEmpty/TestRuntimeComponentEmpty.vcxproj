@@ -124,6 +124,9 @@
     <ProjectReference Include="..\TestStaticLibrary5\TestStaticLibrary5.vcxproj">
       <Project>{dc435c3f-c38e-43d1-b702-dc03f530a3cb}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\TestStaticLibrary6\TestStaticLibrary6.vcxproj">
+      <Project>{dc435c3f-c38e-43d1-b702-dc03f530a3dd}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
