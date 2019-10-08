@@ -1,9 +1,0 @@
-namespace TestRuntimeComponentNamespace
-{
-    [bindable]
-    [default_interface]
-    runtimeclass TestNamespace 
-    {
-        TestNamespace();
-    }
-}
