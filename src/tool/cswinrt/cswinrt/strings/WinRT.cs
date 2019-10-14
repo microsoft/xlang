@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
+using System.Linq.Expressions;
 
 namespace WinRT
 {
@@ -59,6 +64,8 @@ namespace WinRT
         }
 
         // standard accessors/mutators
+        public unsafe delegate int _get_PropertyAs<T>([In] IntPtr thisPtr, [Out] out T value);
+        public delegate int _put_PropertyAs<T>([In] IntPtr thisPtr, [In] T value);
         public unsafe delegate int _get_PropertyAsBoolean([In] IntPtr thisPtr, [Out, MarshalAs(UnmanagedType.Bool)] out bool value);
         public delegate int _put_PropertyAsBoolean([In] IntPtr thisPtr, [In, MarshalAs(UnmanagedType.Bool)] bool value);
         public unsafe delegate int _get_PropertyAsChar([In] IntPtr thisPtr, [Out] out char value);
@@ -100,14 +107,6 @@ namespace WinRT
         public unsafe delegate int _add_EventHandler([In] IntPtr thisPtr, [In] IntPtr handler, [Out] out WinRT.Interop.EventRegistrationToken token);
         public delegate int _remove_EventHandler([In] IntPtr thisPtr, [In] WinRT.Interop.EventRegistrationToken token);
 
-        // IReference
-        [Guid("dacbffdc-68ef-5fd0-b657-782d0ac9807e")]
-        public struct IReference_Matrix4x4
-        {
-            IInspectableVftbl IInspectableVftbl;
-            public _get_PropertyAsMatrix4x4 get_Value;
-        }
-
         // IDelegate
         public struct IDelegateVftbl
         {
@@ -120,6 +119,14 @@ namespace WinRT
         public struct EventRegistrationToken
         {
             public long Value;
+        }
+#if false
+        // IReference
+        [Guid("dacbffdc-68ef-5fd0-b657-782d0ac9807e")]
+        public struct IReference_Matrix4x4
+        {
+            IInspectableVftbl IInspectableVftbl;
+            public _get_PropertyAsMatrix4x4 get_Value;
         }
 
         // IIterator
@@ -183,6 +190,21 @@ namespace WinRT
             public _get_PropertyAsUInt32 get_Size;
             public _IndexOf IndexOf;
             public _GetMany GetMany;
+        }
+#endif
+    }
+
+    public static class DelegateExtensions
+    {
+        public static Interop._get_PropertyAsObject ToGetPropertyAsObject<T>(this Interop._get_PropertyAs<T> getPropertyAsT)
+        {
+            return Marshal.GetDelegateForFunctionPointer<Interop._get_PropertyAsObject>(
+                Marshal.GetFunctionPointerForDelegate(getPropertyAsT));
+        }
+        public static T AsDelegate<T>(this MulticastDelegate del)
+        {
+            return Marshal.GetDelegateForFunctionPointer<T>(
+                Marshal.GetFunctionPointerForDelegate(del));
         }
     }
 
@@ -462,14 +484,13 @@ namespace WinRT
             }
         }
 
-        public ObjectReference<T> As<T>() => As<T>(typeof(T).GUID);
+        public ObjectReference<T> As<T>() => As<T>(GuidGenerator.GetIID(typeof(T)));
         public ObjectReference<T> As<T>(Guid iid)
         {
             IntPtr thatPtr;
             unsafe { Marshal.ThrowExceptionForHR(VftblIUnknown.QueryInterface(ThisPtr, ref iid, out thatPtr)); }
             return ObjectReference<T>.Attach(Module, ref thatPtr);
         }
-
 
         ~IObjectReference()
         {
@@ -613,9 +634,6 @@ namespace WinRT
             {
                 _cache.Remove(_fileName);
             }
-
-            // How reliable is this?  What if a ThisPtr is passed to managed code and
-            // needs to be wrapped with a new projection?  How is the module handle found?
             if ((_moduleHandle != IntPtr.Zero) && !Platform.FreeLibrary(_moduleHandle))
             {
                 Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
@@ -862,6 +880,10 @@ namespace WinRT
                 GC.SuppressFinalize(this);
             }
         }
+
+        public Delegate(MulticastDelegate nativeInvoke, MulticastDelegate managedDelegate) :
+            this(Marshal.GetFunctionPointerForDelegate(nativeInvoke), managedDelegate)
+        { }
 
         public Delegate(IntPtr invoke_method, object target_invoker)
         {
@@ -1212,6 +1234,7 @@ namespace WinRT
         }
     }
 
+#if false
     public class VectorViewOfObject<T> : IReadOnlyList<T>
     {
         ObjectReference<Interop.IVectorViewOfObject> _obj;
@@ -1383,6 +1406,196 @@ namespace WinRT
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+    }
+#endif
+
+    public static class TypeExtensions
+    {
+        public static bool IsDelegate(this Type type)
+        {
+            return typeof(MulticastDelegate).IsAssignableFrom(type.BaseType);
+        }
+    }
+
+    public class Marshaler<T>
+    {
+        public Marshaler()
+        {
+            Type type = typeof(T);
+            if (!type.IsClass)
+            {
+                throw new InvalidOperationException("marshaling not needed for value types (todo: structs)");
+            }
+            Type factory = type.IsDelegate() ? Type.GetType(type.FullName + "Extensions") : type;
+            FromNative = MakeFromNativeCall(factory);
+            ToNative = MakeToNativeCall(factory);
+        }
+        public readonly Func<IntPtr, T> FromNative;
+        public readonly Func<T, IntPtr> ToNative;
+
+        private static Func<IntPtr, T> MakeFromNativeCall(Type type)
+        {
+            var method = type.GetMethod("FromNative");
+            var methodParams = new[] { Expression.Parameter(typeof(IntPtr), "@this") };
+            var methodCall = Expression.Lambda<Func<IntPtr, T>>(
+                Expression.Call(method, methodParams), methodParams).Compile();
+            return methodCall;
+        }
+
+        private static Func<T, IntPtr> MakeToNativeCall(Type type)
+        {
+            var method = type.GetMethod("ToNative");
+            var methodParams = new[] { Expression.Parameter(typeof(T), "@this") };
+            var methodCall = Expression.Lambda<Func<T, IntPtr>>(
+                Expression.Call(method, methodParams), methodParams).Compile();
+            return methodCall;
+        }
+    }
+
+    public static class GuidGenerator
+    {
+        private static Type GetGuidType(Type type)
+        {
+            if (type.IsDelegate())
+            {
+                var type_name = type.FullName;
+                if (type.IsGenericType)
+                {
+                    var backtick = type_name.IndexOf('`');
+                    type_name = type_name.Substring(0, backtick) + "Extensions`" + type_name.Substring(backtick + 1);
+                }
+                else
+                {
+                    type_name += "Extensions";
+                }
+                return Type.GetType(type_name);
+            }
+            return type;
+        }
+
+        public static Guid GetGUID(Type type)
+        {
+            return GetGuidType(type).GUID;
+        }
+
+        public static Guid GetIID(Type type)
+        {
+            type = GetGuidType(type);
+            if (!type.IsGenericType)
+            {
+                return type.GUID;
+            }
+            return (Guid)type.GetField("PIID").GetValue(null);
+        }
+
+        public static string GetSignature(Type type)
+        {
+            // todo: project IInspectable            
+            if (type == typeof(ObjectReference<Interop.IInspectableVftbl>))
+            {
+                return "cinterface(IInspectable)";
+            }
+
+            if (type.IsGenericType)
+            {
+                var args = type.GetGenericArguments().Select(t => GetSignature(t));
+                return "pinterface({" + GetGUID(type) + "};" + String.Join(";", args) + ")";
+            }
+
+            if (type.IsValueType)
+            {
+                switch (type.Name)
+                {
+                    case "SByte": return "i1";
+                    case "Byte": return "u1";
+                    case "Int16": return "i2";
+                    case "UInt16": return "u2";
+                    case "Int32": return "i4";
+                    case "UInt32": return "u4";
+                    case "Int64": return "i8";
+                    case "UInt64": return "u8";
+                    case "Single": return "f4";
+                    case "Double": return "f8";
+                    case "Boolean": return "b1";
+                    case "Char": return "c2";
+                    case "Guid": return "g16";
+                    default:
+                        {
+                            if (type.IsEnum)
+                            {
+                                var isFlags = type.CustomAttributes.Any(cad => cad.AttributeType == typeof(FlagsAttribute));
+                                return "enum(" + type.FullName + ";" + (isFlags ? "u4" : "i4") + ")";
+                            }
+                            if (!type.IsPrimitive)
+                            {
+                                var args = type.GetFields().Select(fi => GetSignature(fi.FieldType));
+                                return "struct(" + type.FullName + ";" + String.Join(";", args) + ")";
+                            }
+                            throw new InvalidOperationException("unsupported value type");
+                        }
+                }
+            }
+
+            if (type == typeof(String))
+            {
+                return "string";
+            }
+
+            var _default = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault((FieldInfo fi) => fi.Name == "_default");
+            if (_default != null)
+            {
+                return "rc(" + type.FullName + ";" + GetSignature(_default.FieldType) + ")";
+            }
+
+            if (type.IsDelegate())
+            {
+                return "delegate({" + GetGUID(type) + "})";
+            }
+
+            return "{" + type.GUID.ToString() + "}";
+        }
+
+        private static Guid encode_guid(byte[] data)
+        {
+            if (BitConverter.IsLittleEndian)
+            {
+                // swap bytes of int a
+                byte t = data[0];
+                data[0] = data[3];
+                data[3] = t;
+                t = data[1];
+                data[1] = data[2];
+                data[2] = t;
+                // swap bytes of short b
+                t = data[4];
+                data[4] = data[5];
+                data[5] = t;
+                // swap bytes of short c and encode rfc time/version field
+                t = data[6];
+                data[6] = data[7];
+                data[7] = (byte)((t & 0x0f) | (5 << 4));
+                // encode rfc clock/reserved field
+                data[8] = (byte)((data[8] & 0x3f) | 0x80);
+            }
+            return new Guid(new ReadOnlySpan<byte>(data, 0, 16));
+        }
+
+        private static Guid wrt_pinterface_namespace = new Guid("d57af411-737b-c042-abae-878b1e16adee");
+
+        public static Guid CreateIID(Type type)
+        {
+            var sig = GetSignature(type);
+            if (!type.IsGenericType)
+            {
+                return new Guid(sig);
+            }
+            var data = wrt_pinterface_namespace.ToByteArray().Concat(UTF8Encoding.UTF8.GetBytes(sig)).ToArray();
+            using (SHA1 sha = new SHA1CryptoServiceProvider())
+            {
+                var hash = sha.ComputeHash(data);
+                return encode_guid(hash);
+            }
         }
     }
 }

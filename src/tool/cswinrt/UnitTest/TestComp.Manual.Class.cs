@@ -105,7 +105,7 @@ namespace TestComp.Manual
                 // demonstrating 'casting' an object to an interface (Class -> IClass),
                 //       both exclusive and polymorphic (e.g. IStringable)
                 // demonstrating 'casting' an interface back to its RC (constructing from IUnknown -> exclusive)
-                // object equivalence via IUknown, etc
+                // object equivalence via IUnknown, etc
                 (IntPtr value) => (obj.ThisPtr == value) ? Owner : ObjectReference<Vftbl>.FromNativePtr(value),
                 (IntPtr value) => new MarshaledValue<Int32>(value).UnmarshalFromNative());    
 

@@ -99,6 +99,15 @@ namespace cswinrt
 
     struct writer : indented_writer_base<writer>
     {
+        using indented_writer_base::indented_writer_base;
+
+        std::string_view _current_namespace{};
+
+        writer(std::string_view current_namespace) :
+            _current_namespace(current_namespace)
+        {
+        }
+
         using indented_writer_base<writer>::write;
 
         struct generic_params
