@@ -431,18 +431,6 @@ namespace cswinrt
         }
     }
 
-    void write_interop_return(writer& w, method_signature const& signature)
-    {
-        if (signature.return_signature())
-        {
-            write_interop_type(w, get_type_semantics(signature.return_signature().Type()));
-        }
-        else
-        {
-            w.write("void");
-        }
-    }
-
     void write_interop_parameters(writer& w, method_signature const& signature)
     {
         w.write("IntPtr @this");
@@ -461,6 +449,19 @@ namespace cswinrt
         {
             auto semantics = get_type_semantics(signature.return_signature().Type());
             w.write(", out % %", bind<write_interop_type>(semantics), signature.return_param_name());
+        }
+    }
+
+#if 0
+    void write_interop_return(writer& w, method_signature const& signature)
+    {
+        if (signature.return_signature())
+        {
+            write_interop_type(w, get_type_semantics(signature.return_signature().Type()));
+        }
+        else
+        {
+            w.write("void");
         }
     }
 
@@ -662,6 +663,7 @@ namespace cswinrt
         }
         w.write("}\n");
     }
+#endif
 
     template<typename write_params>
     void write_event_params(writer& w, row_base<Event>::value_type const& evt, write_params write_params)
@@ -1047,9 +1049,9 @@ public IntPtr NativePtr { get => _default.NativePtr; }
 
 private % _default;
 
-public static % FromNative(IntPtr ^@this) => new %(ObjectReference<%.Vftbl>.FromNativePtr(^@this));
-
 public %() : this(ActivationFactory<%>.ActivateInstance<%.Vftbl>()){}
+
+public static % FromNative(IntPtr ^@this) => new %(ObjectReference<%.Vftbl>.FromNativePtr(^@this));
 
 internal %(% ifc)
 {
@@ -1073,20 +1075,24 @@ _default.Owner = this;
         {
             auto semantics = get_type_semantics(ii.Interface());
         
-            // temporarily projection IStringable as explicit interface implementation to avoid ToString name collision
-            //if (interface_type.TypeName() == "IStringable" && interface_type.TypeNamespace() == "Windows.Foundation")
-            //{
-            //    w.write(strings::istringable, bind<write_check_disposed>(type));
-            //    continue;
-            //}
-        
-//                auto guard{ w.push_generic_params(semantics, [&](auto const& arg) { return w.write_temp("%", bind<write_projection_type>(arg)); }) };
-            auto is_default_interface = has_attribute(ii, "Windows.Foundation.Metadata", "DefaultAttribute");
-            if (!is_default_interface)
-                continue;
-
             auto write_interface = [&](TypeDef const& interface_type)
             {
+                // interface casts
+                auto interface_name = w.write_temp("%", bind<write_type_name>(interface_type));
+
+                w.write(
+R"(public static implicit operator %(% obj) =>
+    new %(obj._default.As<%.Vftbl>());
+)",
+                    interface_name,
+                    type_name,
+                    interface_name,
+                    interface_name);
+
+                auto is_default_interface = has_attribute(ii, "Windows.Foundation.Metadata", "DefaultAttribute");
+                if (!is_default_interface)
+                    return;
+
                 w.write_each<write_class_method2>(interface_type.MethodList(), interface_type, false, "_default");
                 w.write_each<write_class_property2>(interface_type.PropertyList(), false, "_default");
                 w.write_each<write_class_event2>(interface_type.EventList(), false, "_default");
@@ -1099,9 +1105,6 @@ _default.Owner = this;
                     write_interface(type.generic_type);
                 },
                 [](auto){ throw_invalid("invalid type"); });
-
-//            auto guard{ w.push_generic_params(interface_type.GenericParam()) };
-
         }
 
         w.write(R"(}
@@ -1984,6 +1987,7 @@ R"()"sv
         w.write(R"(%
 % class %%
 {
+%
 public struct Vftbl
 {
 #pragma warning disable 0169 // warning CS0169: The field '...' is never used
@@ -1998,6 +2002,7 @@ public IntPtr NativePtr { get => _obj.ThisPtr; }
 public static ObjectReference<Vftbl> FromNative(IntPtr ^@this) => ObjectReference<Vftbl>.FromNativePtr(^@this);
 public static implicit operator %(WinRT.IObjectReference obj) => obj.As<Vftbl>();
 public static implicit operator %(WinRT.ObjectReference<Vftbl> obj) => new %(obj);
+public ObjectReference<I> As<I>() => _obj.As<I>();
 public @(WinRT.ObjectReference<Vftbl> obj)
 {
 _obj = obj;%%
@@ -2013,6 +2018,7 @@ public object Owner { get; set; }
             type_name,
             "",  //bind<write_type_inheritance>(type),
             // Vftbl
+            bind<write_guid_attribute>(type),
             bind_each([&](writer& w, MethodDef const& method)
             {
                 write_vtbl_entry(w, method, vtbl_index++);

@@ -149,4 +149,10 @@ namespace winrt::TestComp::implementation
     {
         _string = provider();
     }
+
+    // IStringable
+    hstring Class::ToString()
+    {
+        return _string;
+    }
 }

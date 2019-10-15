@@ -299,6 +299,16 @@ namespace UnitTest
         }
 
         [Fact]
+        public void TestInterfaces()
+        {
+            var stringProperty = "hello";
+            TestObject.StringProperty = stringProperty;
+            var stringable = (Windows.Foundation.IStringable)TestObject;
+            var toString = stringable.ToString();
+            Assert.Equal(stringProperty, toString);
+        }
+
+        [Fact]
         public void TestPrimitives()
         {
             var test_int = 21;

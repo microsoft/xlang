@@ -8,6 +8,11 @@
     <ClCompile Include="@(StaticStrings->'%(Source)')" />
     <ClCompile Include="@(StaticStrings->'%(Source)')" />
     <ClCompile Include="@(StaticStrings->'%(Source)')" />
+    <ClCompile Include="@(StaticStrings->'%(Source)')" />
+    <ClCompile Include="@(StaticStrings->'%(Source)')" />
+    <ClCompile Include="@(StaticStrings->'%(Source)')" />
+    <ClCompile Include="@(StaticStrings->'%(Source)')" />
+    <ClCompile Include="@(StaticStrings->'%(Source)')" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code_writers.h" />
@@ -25,18 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="strings\base_interop.cs">
-      <Filter>strings</Filter>
-    </None>
-    <None Include="strings\default_activation.cs">
-      <Filter>strings</Filter>
-    </None>
-    <None Include="strings\dispose_pattern.cs">
-      <Filter>strings</Filter>
-    </None>
-    <None Include="strings\istringable.cs">
-      <Filter>strings</Filter>
-    </None>
     <None Include="strings\WinRT.cs">
       <Filter>strings</Filter>
     </None>

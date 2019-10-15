@@ -62,10 +62,6 @@
     <ResourceCompile Include="version.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="strings\base_interop.cs" />
-    <None Include="strings\default_activation.cs" />
-    <None Include="strings\dispose_pattern.cs" />
-    <None Include="strings\istringable.cs" />
     <None Include="strings\WinRT.cs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

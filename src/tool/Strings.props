@@ -111,7 +111,7 @@
   </ItemGroup>
 
   <Target Name="UpdateStringSources" BeforeTargets="Build;PrepareForBuild;ClCompile"
-          Condition="@(StaticStrings->Count()) > 1"
+          Condition="@(StaticStrings->Count()) >= 1"
           Inputs="@(StaticStrings)" 
           Outputs="%(Source)">
     <WriteLinesToFile Encoding="Unicode"
@@ -125,7 +125,7 @@
   </Target>
 
   <Target Name="UpdateStringsHeader" BeforeTargets="Build;PrepareForBuild;ClCompile"
-         Condition="@(StaticStrings->Count()) > 1"
+         Condition="@(StaticStrings->Count()) >= 1"
          Inputs="@(StaticStringDirs)"
          Outputs="$(IntDir)strings.h">
     <PropertyGroup>

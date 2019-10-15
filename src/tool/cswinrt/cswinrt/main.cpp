@@ -95,7 +95,7 @@ Where <spec> is one or more of:
             settings.exclude.insert(exclude);
         }
 
-        settings.output_folder = absolute(args.value("output", "output"));
+        settings.output_folder = std::filesystem::absolute(args.value("output", "output"));
         create_directories(settings.output_folder);
     }
 

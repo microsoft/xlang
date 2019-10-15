@@ -112,9 +112,9 @@ namespace xlang::cmd
 
             auto add_directory = [&](auto&& path)
             {
-                for (auto&& file : std::experimental::filesystem::directory_iterator(path))
+                for (auto&& file : std::filesystem::directory_iterator(path))
                 {
-                    if (std::experimental::filesystem::is_regular_file(file))
+                    if (std::filesystem::is_regular_file(file))
                     {
                         auto filename = canonical(file.path()).string();
 
@@ -128,15 +128,15 @@ namespace xlang::cmd
 
             for (auto&& path : values(name))
             {
-                auto canonical = std::experimental::filesystem::canonical(path);
+                auto canonical = std::filesystem::canonical(path);
 
-                if (std::experimental::filesystem::is_directory(canonical))
+                if (std::filesystem::is_directory(canonical))
                 {
                     add_directory(canonical);
                     continue;
                 }
 
-                if (std::experimental::filesystem::is_regular_file(canonical))
+                if (std::filesystem::is_regular_file(canonical))
                 {
                     files.insert(canonical.string());
                     continue;
@@ -186,7 +186,7 @@ namespace xlang::cmd
                         continue;
                     }
 
-                    for (auto&& item : std::experimental::filesystem::directory_iterator(sdk_path / L"Extension SDKs"))
+                    for (auto&& item : std::filesystem::directory_iterator(sdk_path / L"Extension SDKs"))
                     {
                         xml_path = item.path() / sdk_version;
                         xml_path /= L"SDKManifest.xml";
@@ -259,7 +259,7 @@ namespace xlang::cmd
         template<typename O, typename L>
         void extract_response_file(std::string_view const& arg, O const& options, L& last)
         {
-            std::experimental::filesystem::path response_path{ std::string{ arg } };
+            std::filesystem::path response_path{ std::string{ arg } };
             std::string extension = response_path.extension().generic_string();
             std::transform(extension.begin(), extension.end(), extension.begin(),
                 [](auto c) { return static_cast<unsigned char>(::tolower(c)); });

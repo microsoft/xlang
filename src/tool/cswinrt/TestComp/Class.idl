@@ -17,10 +17,10 @@ namespace TestComp
     delegate String ProvideString();
 
     [default_interface]
-    runtimeclass Class
+    runtimeclass Class : Windows.Foundation.IStringable //, Windows.Foundation.Collections.IVector<String>
     {
         Class();
-        
+    
         event EventHandler0 Event0;
         void InvokeEvent0();
         event EventHandler1 Event1;
