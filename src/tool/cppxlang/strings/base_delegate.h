@@ -6,17 +6,17 @@ namespace xlang::impl
     {
         implements_delegate(H&& handler) : H(std::forward<H>(handler)) {}
 
-        int32_t XLANG_CALL QueryInterface(guid const& id, void** result) noexcept final
+        com_interop_result XLANG_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
             if (is_guid_of<T>(id) || is_guid_of<Windows::Foundation::IUnknown>(id))
             {
                 *result = static_cast<abi_t<T>*>(this);
                 AddRef();
-                return error_ok;
+                return com_interop_result::success;
             }
 
             *result = nullptr;
-            return error_no_interface;
+            return com_interop_result::no_interface;
         }
 
         uint32_t XLANG_CALL AddRef() noexcept final
@@ -64,17 +64,17 @@ namespace xlang::impl
             (*this)(args...);
         }
 
-        int32_t XLANG_CALL QueryInterface(guid const& id, void** result) noexcept final
+        com_interop_result XLANG_CALL QueryInterface(guid const& id, void** result) noexcept final
         {
             if (is_guid_of<Windows::Foundation::IUnknown>(id))
             {
                 *result = static_cast<unknown_abi*>(this);
                 AddRef();
-                return error_ok;
+                return com_interop_result::success;
             }
 
             *result = nullptr;
-            return error_no_interface;
+            return com_interop_result::no_interface;
         }
 
         uint32_t XLANG_CALL AddRef() noexcept final

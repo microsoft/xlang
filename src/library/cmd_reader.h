@@ -13,8 +13,8 @@ namespace xlang::cmd
         std::string_view name;
         uint32_t min{ no_min };
         uint32_t max{ no_max };
-        std::string_view arg;
-        std::string_view desc;
+        std::string_view arg{};
+        std::string_view desc{};
     };
 
     struct reader
@@ -116,7 +116,7 @@ namespace xlang::cmd
                 {
                     if (std::filesystem::is_regular_file(file))
                     {
-                        auto filename = canonical(file.path()).string();
+                        auto filename = file.path().string();
 
                         if (directory_filter(filename))
                         {
@@ -128,17 +128,15 @@ namespace xlang::cmd
 
             for (auto&& path : values(name))
             {
-                auto canonical = std::filesystem::canonical(path);
-
-                if (std::filesystem::is_directory(canonical))
+                if (std::filesystem::is_directory(path))
                 {
-                    add_directory(canonical);
+                    add_directory(std::filesystem::canonical(path));
                     continue;
                 }
 
-                if (std::filesystem::is_regular_file(canonical))
+                if (std::filesystem::is_regular_file(path))
                 {
-                    files.insert(canonical.string());
+                    files.insert(std::filesystem::canonical(path).string());
                     continue;
                 }
 #if XLANG_PLATFORM_WINDOWS

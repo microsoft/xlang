@@ -1,8 +1,8 @@
 resources:
   containers:
   - container: build_container
-    image: msftxlang.azurecr.io/xlang-ubuntu-build
-    endpoint: msftxlang_acr
+    image: msftxlangbuild.azurecr.io/xlang-ubuntu-build
+    endpoint: msftxlangbuild
 
 pool:
   vmImage: 'ubuntu-16.04'
@@ -24,3 +24,4 @@ steps:
   inputs:
     testResultsFormat: 'JUnit'
     testResultsFiles: '**/TEST-*.xml'  
+

@@ -1,9 +1,8 @@
 
 namespace xlang
 {
-    void check_hresult(hresult const result);
-    void check_hresult(xlang_error_info* result);
-    hresult to_hresult() noexcept;
+    void check_com_interop_error(com_interop_result const result);
+    void check_xlang_error(xlang_error_info* result);
 
     template <typename D, typename I>
     D* get_self(I const& from) noexcept;

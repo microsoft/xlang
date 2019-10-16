@@ -155,10 +155,14 @@ namespace cswinrt
             { s(); write_generic_type_name(w, index++); }, type.GenericParam()));
     }
 
-    void write_type_name(writer& w, type_semantics const& semantics)
+    void write_full_type_name(writer& w, type_semantics const& semantics, bool include_namespace = false)
     {
         auto write_name = [&](TypeDef const& type)
         {
+            if (include_namespace)
+            {
+                w.write("%.", type.TypeNamespace());
+            }
             w.write("@", type.TypeName());
             write_type_params(w, type);
         };
@@ -170,6 +174,11 @@ namespace cswinrt
                 write_name(type.generic_type);
             },
             [](auto){ throw_invalid("invalid type"); });
+    }
+
+    void write_type_name(writer& w, type_semantics const& semantics)
+    {
+        write_full_type_name(w, semantics);
     }
 
     void write_type_inheritance(writer& w, TypeDef const& type)
@@ -1077,25 +1086,27 @@ _default.Owner = this;
         
             auto write_interface = [&](TypeDef const& interface_type)
             {
-                // interface casts
-                auto interface_name = w.write_temp("%", bind<write_type_name>(interface_type));
-
+                if( !is_exclusive_to(interface_type) )
+                {
+                    auto interface_name = w.write_temp("%", bind<write_full_type_name>(interface_type, true));
                 w.write(
-R"(public static implicit operator %(% obj) =>
+                    R"(
+public static implicit operator %(% obj) =>
     new %(obj._default.As<%.Vftbl>());
 )",
                     interface_name,
                     type_name,
                     interface_name,
                     interface_name);
+                }
 
                 auto is_default_interface = has_attribute(ii, "Windows.Foundation.Metadata", "DefaultAttribute");
-                if (!is_default_interface)
-                    return;
-
-                w.write_each<write_class_method2>(interface_type.MethodList(), interface_type, false, "_default");
-                w.write_each<write_class_property2>(interface_type.PropertyList(), false, "_default");
-                w.write_each<write_class_event2>(interface_type.EventList(), false, "_default");
+                if (is_default_interface)
+                {
+                    w.write_each<write_class_method2>(interface_type.MethodList(), interface_type, false, "_default");
+                    w.write_each<write_class_property2>(interface_type.PropertyList(), false, "_default");
+                    w.write_each<write_class_event2>(interface_type.EventList(), false, "_default");
+                }
             };
             call(semantics,
                 [&](type_definition const& type){ write_interface(type); },

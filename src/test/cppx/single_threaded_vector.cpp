@@ -27,17 +27,17 @@ namespace
 
         change(); // <-- invalidate
 
-        REQUIRE_THROWS_AS(first.HasCurrent(), hresult_changed_state);
-        REQUIRE_THROWS_AS(first.Current(), hresult_changed_state);
-        REQUIRE_THROWS_AS(first.MoveNext(), hresult_changed_state);
-        REQUIRE_THROWS_AS(first.GetMany(array), hresult_changed_state);
+        REQUIRE_THROWS_AS(first.HasCurrent(), invalid_state_error);
+        REQUIRE_THROWS_AS(first.Current(), invalid_state_error);
+        REQUIRE_THROWS_AS(first.MoveNext(), invalid_state_error);
+        REQUIRE_THROWS_AS(first.GetMany(array), invalid_state_error);
     }
 
     void test_vector(IVector<int> const & values)
     {
         compare(values, {});
 
-        REQUIRE_THROWS_AS(values.SetAt(0, 1), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.SetAt(0, 1), out_of_bounds_error);
         values.InsertAt(0, 1);
         compare(values, { 1 });
         values.SetAt(0, 2);
@@ -46,7 +46,7 @@ namespace
         values.Clear();
         compare(values, {});
 
-        REQUIRE_THROWS_AS(values.InsertAt(1, 1), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.InsertAt(1, 1), out_of_bounds_error);
         compare(values, {});
         values.InsertAt(0, 1);
         compare(values, {1});
@@ -55,7 +55,7 @@ namespace
         values.InsertAt(2, 0);
         compare(values, { 2, 1, 0 });
 
-        REQUIRE_THROWS_AS(values.RemoveAt(3), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.RemoveAt(3), out_of_bounds_error);
         values.RemoveAt(1);
         compare(values, { 2, 0 });
         values.RemoveAt(0);
@@ -76,7 +76,7 @@ namespace
         compare(values, { 1 });
         values.RemoveAtEnd();
         compare(values, {  });
-        REQUIRE_THROWS_AS(values.RemoveAtEnd(), hresult_out_of_bounds);
+        REQUIRE_THROWS_AS(values.RemoveAtEnd(), out_of_bounds_error);
 
         values.ReplaceAll({1,2,3,4});
         compare(values, {1,2,3,4});

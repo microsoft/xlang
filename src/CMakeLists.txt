@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
+project(xlang)
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
     cmake_policy(SET CMP0076 NEW)
@@ -142,4 +143,4 @@ add_subdirectory(tool)
 add_subdirectory(foundation)
 add_subdirectory(platform)
 add_subdirectory(test)
-add_subdirectory(package)
+add_subdirectory(package EXCLUDE_FROM_ALL)

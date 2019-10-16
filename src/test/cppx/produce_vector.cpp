@@ -24,7 +24,7 @@ TEST_CASE("produce_IVector_int32_t")
 
     REQUIRE(v.GetAt(0) == 1);
     REQUIRE(v.GetAt(2) == 3);
-    REQUIRE_THROWS_AS(v.GetAt(v.Size()), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(v.GetAt(v.Size()), out_of_bounds_error);
 
     REQUIRE(v.Size() == 3);
 
@@ -38,14 +38,14 @@ TEST_CASE("produce_IVector_int32_t")
 
     v.SetAt(1, 20);
     REQUIRE(v.GetAt(1) == 20);
-    REQUIRE_THROWS_AS(v.SetAt(v.Size(), 0), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(v.SetAt(v.Size(), 0), out_of_bounds_error);
     v.SetAt(1, 2);
 
     v.InsertAt(0, 0);
 
     v.InsertAt(v.Size(), 4);
 
-    REQUIRE_THROWS_AS(v.InsertAt(v.Size() + 1, 0), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(v.InsertAt(v.Size() + 1, 0), out_of_bounds_error);
     REQUIRE(v.Size() == 5);
     REQUIRE(v.GetAt(0) == 0);
     REQUIRE(v.GetAt(1) == 1);
@@ -55,7 +55,7 @@ TEST_CASE("produce_IVector_int32_t")
 
     v.RemoveAt(0);
     v.RemoveAt(v.Size() - 1);
-    REQUIRE_THROWS_AS(v.RemoveAt(v.Size()), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(v.RemoveAt(v.Size()), out_of_bounds_error);
     REQUIRE(v.Size() == 3);
     REQUIRE(v.GetAt(0) == 1);
     REQUIRE(v.GetAt(1) == 2);
@@ -195,7 +195,7 @@ TEST_CASE("produce_IVector_hstring")
 
     REQUIRE(v.GetAt(0) == L"1");
     REQUIRE(v.GetAt(2) == L"3");
-    REQUIRE_THROWS_AS(v.GetAt(v.Size()), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(v.GetAt(v.Size()), out_of_bounds_error);
 
     REQUIRE(v.Size() == 3);
 
@@ -209,12 +209,12 @@ TEST_CASE("produce_IVector_hstring")
 
     v.SetAt(1, L"20");
     REQUIRE(v.GetAt(1) == L"20");
-    REQUIRE_THROWS_AS(v.SetAt(v.Size(), L"0"), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(v.SetAt(v.Size(), L"0"), out_of_bounds_error);
     v.SetAt(1, L"2");
 
     v.InsertAt(0, L"0");
     v.InsertAt(v.Size(), L"4");
-    REQUIRE_THROWS_AS(v.InsertAt(v.Size() + 1, L"0"), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(v.InsertAt(v.Size() + 1, L"0"), out_of_bounds_error);
     REQUIRE(v.Size() == 5);
     REQUIRE(v.GetAt(0) == L"0");
     REQUIRE(v.GetAt(1) == L"1");
@@ -224,7 +224,7 @@ TEST_CASE("produce_IVector_hstring")
 
     v.RemoveAt(0);
     v.RemoveAt(v.Size() - 1);
-    REQUIRE_THROWS_AS(v.RemoveAt(v.Size()), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(v.RemoveAt(v.Size()), out_of_bounds_error);
     REQUIRE(v.Size() == 3);
     REQUIRE(v.GetAt(0) == L"1");
     REQUIRE(v.GetAt(1) == L"2");

@@ -1,8 +1,8 @@
 # xlang
 
-| Windows Build | Linux Build |
-|---------------|-------------|
-| [![Build Status](https://dev.azure.com/msft-xlang/public/_apis/build/status/xlang-CI-windows)](https://dev.azure.com/msft-xlang/public/_build/latest?definitionId=8) | [![Build Status](https://dev.azure.com/msft-xlang/public/_apis/build/status/xlang-CI-ubuntu)](https://dev.azure.com/msft-xlang/public/_build/latest?definitionId=1) |
+| Windows Build |
+|---------------|
+| [![Build Status](https://dev.azure.com/msft-xlang/public/_apis/build/status/xlang-CI-windows)](https://dev.azure.com/msft-xlang/public/_build/latest?definitionId=8) |
 
 ## Overview
 

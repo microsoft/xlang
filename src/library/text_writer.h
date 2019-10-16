@@ -299,6 +299,102 @@ namespace xlang::text
         std::vector<char> m_first;
     };
 
+
+    template <typename T>
+    struct indented_writer_base : writer_base<T>
+    {
+        struct indent_guard
+        {
+            indent_guard(indented_writer_base<T>& w, int32_t offset = 1) noexcept : m_writer(w), m_offset(offset)
+            {
+                m_writer.m_indent += m_offset;
+            }
+
+            ~indent_guard() noexcept
+            {
+                m_writer.m_indent -= m_offset;
+            }
+
+        private:
+            indented_writer_base<T>& m_writer;
+            int32_t m_offset{};
+        };
+
+
+        void write_indent()
+        {
+            for (int32_t i = 0; i < m_indent; i++)
+            {
+                writer_base<T>::write_impl("    ");
+            }
+        }
+
+        void write_impl(std::string_view const& value)
+        {
+            std::string_view::size_type current_pos{ 0 };
+            auto on_new_line = writer_base<T>::back() == '\n';
+
+            while (true)
+            {
+                const auto pos = value.find('\n', current_pos);
+
+                if (pos == std::string_view::npos)
+                {
+                    if (current_pos < value.size())
+                    {
+                        if (on_new_line)
+                        {
+                            write_indent();
+                        }
+
+                        writer_base<T>::write_impl(value.substr(current_pos));
+                    }
+
+                    return;
+                }
+
+                auto current_line = value.substr(current_pos, pos - current_pos + 1);
+                auto empty_line = current_line[0] == '\n';
+
+                if (on_new_line && !empty_line)
+                {
+                    write_indent();
+                }
+
+                writer_base<T>::write_impl(current_line);
+
+                on_new_line = true;
+                current_pos = pos + 1;
+            }
+        }
+
+        void write_impl(char const value)
+        {
+            if (writer_base<T>::back() == '\n' && value != '\n')
+            {
+                write_indent();
+            }
+
+            writer_base<T>::write_impl(value);
+        }
+
+        template <typename... Args>
+        std::string write_temp(std::string_view const& value, Args const& ... args)
+        {
+            auto restore_indent = m_indent;
+            m_indent = 0;
+
+            auto result = writer_base<T>::write_temp(value, args...);
+
+            m_indent = restore_indent;
+
+            return result;
+        }
+
+        int32_t m_indent{};
+    };
+
+
     template <auto F, typename... Args>
     auto bind(Args&&... args)
     {

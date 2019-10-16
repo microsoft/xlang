@@ -38,9 +38,9 @@ goto :init
     if /i "%~1"=="-h"         call :usage "%~2" & goto :end
     if /i "%~1"=="--help"     call :usage "%~2" & goto :end
 
-    if /i "%~1"=="/v"         set "OPT_VERBOSE_NINJA=-v" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
-    if /i "%~1"=="-v"         set "OPT_VERBOSE_NINJA=-v" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
-    if /i "%~1"=="--verbose"  set "OPT_VERBOSE_NINJA=-v" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
+    if /i "%~1"=="/v"         set "OPT_VERBOSE_NINJA=-v -d explain" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
+    if /i "%~1"=="-v"         set "OPT_VERBOSE_NINJA=-v -d explain" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
+    if /i "%~1"=="--verbose"  set "OPT_VERBOSE_NINJA=-v -d explain" & set "OPT_VERBOSE_CMAKE=-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON" & shift & goto :parse
 
     if /i "%~1"=="/f"               set "OPT_FORCE_CMAKE=yes"  & shift & goto :parse
     if /i "%~1"=="-f"               set "OPT_FORCE_CMAKE=yes"  & shift & goto :parse
@@ -69,7 +69,7 @@ goto :init
         cmake "%SRC_PATH%" "-B%BUILD_PATH%" %OPT_VERBOSE_CMAKE% -GNinja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DXLANG_BUILD_VERSION=%BUILD_VERSION% "-DCMAKE_INSTALL_PREFIX=%BUILD_PATH%/Install"
     )
 
-    ninja -C "%BUILD_PATH%" %OPT_VERBOSE_NINJA% %BUILD_TARGET%
+    ninja -C "%BUILD_PATH%" %OPT_VERBOSE_NINJA% %BUILD_TARGET% 2>&1
 
 
 :end

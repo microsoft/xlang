@@ -56,7 +56,7 @@ TEST_CASE("produce_IMap_int32_t_hstring")
 
     REQUIRE(m.Lookup(1) == u8"one");
     REQUIRE(m.Lookup(2) == u8"two");
-    REQUIRE_THROWS_AS(m.Lookup(3), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(m.Lookup(3), out_of_bounds_error);
 
     REQUIRE(m.TryLookup(1).value() == u8"one");
     REQUIRE(m.TryLookup(2).value() == u8"two");
@@ -134,7 +134,7 @@ TEST_CASE("produce_IMap_hstring_int32_t")
 
     REQUIRE(m.Lookup(u8"one") == 1);
     REQUIRE(m.Lookup(u8"two") == 2);
-    REQUIRE_THROWS_AS(m.Lookup(u8"three"), hresult_out_of_bounds);
+    REQUIRE_THROWS_AS(m.Lookup(u8"three"), out_of_bounds_error);
 
     REQUIRE(m.TryLookup(u8"one").value() == 1);
     REQUIRE(m.TryLookup(u8"two").value() == 2);

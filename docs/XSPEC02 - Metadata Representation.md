@@ -419,7 +419,7 @@ Each event on an interface is defined as rows in the Event (ECMA II.22.13), Even
 
 Each interface with one or more events will be represented as a single row in the EventMap table containing the following information:
 
-- Parent: an index into the TypeDef table containing the interface that contains the properties
+- Parent: an index into the TypeDef table containing the interface that contains the events
 
 - EventList: an index into the Event table containing the first in a run of rows associated with this type.
 
@@ -442,7 +442,7 @@ The MethodDef rows for the event contains the following:
 - Flags: public | Final | virtual | hidebysig | newslot | specialname (0x09e6)
 
 - Name: an index into the string table containing "add_\<EventName> or
-  “remove\<EventName> as appropriate.
+  “remove_\<EventName> as appropriate.
 
 - Signature: an index into the blob heap containing a MethodDefSig blob (ECMA II.23.2.1) that contains the parameter and return types of the method as described below.
 

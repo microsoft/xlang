@@ -26,4 +26,8 @@
 #include <unordered_map>
 #include <vector>
 
+#ifdef _WIN32
+#include <winerror.h>
+#endif
+
 #include <pal.h>

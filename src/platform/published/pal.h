@@ -147,9 +147,25 @@ extern "C"
         ObjectSize
     };
 
+#ifdef __cplusplus
+    enum class com_interop_result : int32_t
+    {
+        success = 0,
+        no_interface = static_cast<int32_t>(0x80004002),
+        pointer = static_cast<int32_t>(0x80004003)
+    };
+#else
+    enum com_interop_result
+    {
+        com_interop_result_success = 0,
+        com_interop_result_no_interface = 0x80004002,
+        com_interop_result_pointer = 0x80004003
+    };
+#endif
+
     struct XLANG_NOVTABLE xlang_unknown
     {
-        virtual int32_t XLANG_CALL QueryInterface(xlang_guid const& id, void** object) XLANG_NOEXCEPT = 0;
+        virtual com_interop_result XLANG_CALL QueryInterface(xlang_guid const& id, void** object) XLANG_NOEXCEPT = 0;
         virtual uint32_t XLANG_CALL AddRef() XLANG_NOEXCEPT = 0;
         virtual uint32_t XLANG_CALL Release() XLANG_NOEXCEPT = 0;
     };
@@ -218,18 +234,18 @@ extern "C"
 #else
     enum xlang_result
     {
-        xlang_success = 0,
-        xlang_access_denied = 1,
-        xlang_bounds = 2,
-        xlang_fail = 3,
-        xlang_handle = 4,
-        xlang_invalid_arg = 5,
-        xlang_invalid_state = 6,
-        xlang_no_interface = 7,
-        xlang_not_impl = 8,
-        xlang_out_of_memory = 9,
-        xlang_pointer = 10,
-        xlang_type_load = 11
+        xlang_result_success = 0,
+        xlang_result_access_denied = 1,
+        xlang_result_bounds = 2,
+        xlang_result_fail = 3,
+        xlang_result_handle = 4,
+        xlang_result_invalid_arg = 5,
+        xlang_result_invalid_state = 6,
+        xlang_result_no_interface = 7,
+        xlang_result_not_impl = 8,
+        xlang_result_out_of_memory = 9,
+        xlang_result_pointer = 10,
+        xlang_result_type_load = 11
     };
 #endif
 
@@ -376,8 +392,6 @@ constexpr xlang_string_encoding& operator&=(xlang_string_encoding& lhs, xlang_st
     lhs = lhs & rhs;
     return lhs;
 }
-
-inline constexpr int32_t xlang_hresult_no_interface{ static_cast<int32_t>(0x80004002) };
 #endif
 
 #endif
