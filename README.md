@@ -1,11 +1,5 @@
 # xlang
 
-| Windows Build |
-|---------------|
-| [![Build Status](https://dev.azure.com/msft-xlang/public/_apis/build/status/xlang-CI-windows)](https://dev.azure.com/msft-xlang/public/_build/latest?definitionId=8) |
-
-## Overview
-
 The xlang project enables developers to take existing shared libraries,
 implemented in one programming language and make that library's APIs available to client code using a different programming language. Thus the name "xlang", for cross-language.
 
