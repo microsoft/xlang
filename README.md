@@ -5,10 +5,11 @@ implemented in one programming language and make that library's APIs available t
 
 See these related repos:
 
-| | |
+|Repository|Status|
 |-|-|
 |[C++/WinRT Language Projection](https://github.com/microsoft/cppwinrt)|[![Build status](https://dev.azure.com/microsoft/Dart/_apis/build/status/cppwinrt%20internal%20build)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=31784)|
 |[WinMD Parser Library](https://github.com/microsoft/winmd)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/WinMD%20Nuget?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=44715&branchName=master)|
+[WinRT Test Component](https://github.com/microsoft/TestWinRT)||
 
 Additionally, the xlang toolset will be available on multiple operating systems.
 This means that if your shared library is portable to various operating systems,
