@@ -9,7 +9,7 @@ See these related repos:
 |-|-|
 |[C++/WinRT Language Projection](https://github.com/microsoft/cppwinrt)|[![Build status](https://dev.azure.com/microsoft/Dart/_apis/build/status/cppwinrt%20internal%20build)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=31784)|
 |[WinMD Parser Library](https://github.com/microsoft/winmd)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/WinMD%20Nuget?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=44715&branchName=master)|
-[WinRT Test Component](https://github.com/microsoft/TestWinRT)||
+[WinRT Test Component](https://github.com/microsoft/TestWinRT)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/TestWinRT?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=45310&branchName=master)|
 
 Additionally, the xlang toolset will be available on multiple operating systems.
 This means that if your shared library is portable to various operating systems,
