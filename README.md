@@ -10,7 +10,7 @@ See these related repos:
 |[C++/WinRT](https://github.com/microsoft/cppwinrt)|[![Build status](https://dev.azure.com/microsoft/Dart/_apis/build/status/cppwinrt%20internal%20build)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=31784)|
 |[C++ winmd parser](https://github.com/microsoft/winmd)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/WinMD%20Nuget?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=44715&branchName=master)|
 |[Rust winmd parser](https://github.com/microsoft/winmd-rs)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/microsoft.winmd-rs?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=45839&branchName=master)|
-[WinRT Test Component](https://github.com/microsoft/TestWinRT)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/TestWinRT?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=45310&branchName=master)|
+[WinRT test component](https://github.com/microsoft/TestWinRT)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/TestWinRT?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=45310&branchName=master)|
 
 Additionally, the xlang toolset will be available on multiple operating systems.
 This means that if your shared library is portable to various operating systems,
