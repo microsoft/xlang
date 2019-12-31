@@ -72,15 +72,47 @@ type_argument_list
 
 /* Expression */
 expression //Maybe separate expression and literal later when we do real expression
-    : DECIMAL_INTEGER_LITERAL
-    | HEXADECIMAL_INTEGER_LITERAL
-    | BOOLEAN_LITERAL
-    | REAL_LITERAL
-    | CHARACTER_LITERAL
-    | STRING_LITERAL
+    : decimal_literal_expression
+    | hexadecimal_literal_expression
+    | boolean_literal_expression
+    | real_literal_expression
+    | character_literal_expression
+    | string_expression
     | IDENTIFIER
-    | UUID
-    | NILL
+    | uuid_expression
+    | null_expression
+    ;
+
+string_expression
+    : STRING_LITERAL
+    ;
+
+uuid_expression
+    : UUID
+    ;
+
+null_expression
+    : NILL
+    ;
+
+character_literal_expression
+    : CHARACTER_LITERAL
+    ;
+
+real_literal_expression
+    : REAL_LITERAL
+    ;
+
+boolean_literal_expression
+    : BOOLEAN_LITERAL
+    ;
+
+hexadecimal_literal_expression
+    : HEXADECIMAL_INTEGER_LITERAL
+    ;
+
+decimal_literal_expression
+    : DECIMAL_INTEGER_LITERAL
     ;
 
 // /* Variables */ // this is not used anywhere

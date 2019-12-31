@@ -4,6 +4,8 @@
 
 #include "model_types.h" 
 
+using namespace xlang::meta::reader;
+
 namespace xlang::xmeta
 {
     enum class AttributeTargets
@@ -30,18 +32,40 @@ namespace xlang::xmeta
         Delegate | ReturnValue | GenericParameter,
     };
 
-    using attribute_parameter_value_semantics = std::variant<bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, std::string>;
+    using attribute_parameter_value_semantics = std::variant<bool, std::string, GUID>;
 
     struct attribute_member
     {
         attribute_member() = delete;
-        attribute_member(std::string_view const& str_val) :
-            m_value{ str_val }
+        attribute_member(std::string_view const& unknown) :
+            m_value{ unknown }
         {
         }
 
-        std::errc resolve_value(type_ref type)
+        std::errc check_type(type_ref const& type)
         {
+            auto const& target = type.get_semantic().get_resolved_target();
+        /*    if (std::holds_alternative<ElementType>(target))
+            {
+                ElementType element_type = std::get<ElementType>(target);
+                if (element_type == ElementType::String)
+                {
+
+                    m_value.resolve(std::string)
+                }
+            }*/
+            return std::errc();
+        }
+
+        std::errc resolve_value(std::string value)
+        {
+            m_value.resolve(value);
+            return std::errc();
+        }
+
+        std::errc resolve_value(GUID value)
+        {
+            m_value.resolve(value);
             return std::errc();
         }
 
@@ -106,7 +130,7 @@ namespace xlang::xmeta
             for (size_t i = 0; i < attribute_class->get_positonal_parameters().size(); i++)
             {
                 type_ref const& attr_class_param = attribute_class->get_positonal_parameters().at(i);
-                if (positoned_parameter.at(i).resolve_value(attr_class_param) != std::errc())
+                if (positoned_parameter.at(i).check_type(attr_class_param) != std::errc())
                 {
                     return nullptr;
                 }
@@ -118,7 +142,7 @@ namespace xlang::xmeta
                 type_ref const& attr_named_class_param = attribute_class_named_param_entry.second;
                 if (search != named_parameter.end())
                 {
-                    if (search->second.resolve_value(attr_named_class_param) != std::errc())
+                    if (search->second.check_type(attr_named_class_param) != std::errc())
                     {
                         return nullptr;
                     }

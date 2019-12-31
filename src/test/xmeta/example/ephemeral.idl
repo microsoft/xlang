@@ -1,0 +1,6 @@
+
+namespace N
+{
+    [HelpAttribute(Windows.Foundation.UniversalApiContract, Topic= agile, url="Test3")]
+    enum E {}
+}

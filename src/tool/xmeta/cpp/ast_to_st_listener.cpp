@@ -961,6 +961,18 @@ void ast_to_st_listener::enterEnum_declaration(XlangParser::Enum_declarationCont
 
                 for (XlangParser::Positional_argumentContext * positional_arg : attribute_argument->positional_argument_list()->positional_argument())
                 {
+                    auto const& expr = positional_arg->expression();
+                    if (expr->string_expression())
+                    {
+                        attribute_member attr_member{ nullptr };
+                        attr_member.resolve_value(expr->string_expression()->getText());
+                    }
+                    else if (expr->uuid_expression())
+                    {
+                       /* GUID uuid = expr->uuid_expression()->getText();
+                        attribute_member attr_member{ nullptr };
+                        attr_member.resolve_value(expr->string_expression()->getText());*/
+                    }
                     positoned_parameter.emplace_back(attribute_member{ positional_arg->getText() });
                 }
                 for (XlangParser::Named_argumentContext * named_arg : attribute_argument->named_argument_list()->named_argument())
