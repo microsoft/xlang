@@ -1,0 +1,4 @@
+LIBRARY winrtact
+
+EXPORTS
+	ExtRoLoadCatalog
