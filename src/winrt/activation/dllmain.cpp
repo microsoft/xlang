@@ -18,11 +18,11 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 {
     IActivationFactory* pFactory;
     HRESULT hr = WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
-    if (hr == REGDB_E_CLASSNOTREG)
-    {
-        hr =  TrueRoActivateInstance(activatableClassId, instance);
-    }
-    else if (SUCCEEDED(hr))
+    //if (hr == REGDB_E_CLASSNOTREG)
+    //{
+    //    hr =  TrueRoActivateInstance(activatableClassId, instance);
+    //}
+    if (SUCCEEDED(hr))
     {
         hr = pFactory->ActivateInstance(instance);
     }
@@ -33,10 +33,10 @@ HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID i
 )
 {
     HRESULT hr = WinRTGetActivationFactory(activatableClassId, iid, factory);
-    if (hr == REGDB_E_CLASSNOTREG)
+    /*if (hr == REGDB_E_CLASSNOTREG)
     {
         hr = TrueRoGetActivationFactory(activatableClassId, iid, factory);
-    }
+    }*/
     return hr;
 }
 
@@ -49,10 +49,10 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
 )
 {
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    if (hr == REGDB_E_CLASSNOTREG)
+    /*if (hr == REGDB_E_CLASSNOTREG)
     {
         hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    }
+    }*/
     return hr;
 }
 
@@ -123,5 +123,6 @@ BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
     {
         RemoveHooks();
     }
+	return true;
 }
 
