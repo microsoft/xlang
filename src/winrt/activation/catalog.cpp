@@ -31,6 +31,7 @@ struct component
     wstring metadata_path;
     HMODULE handle = nullptr;
     activation_factory_type get_activation_factory;
+	DWORD threading_model;
 
     bool LoadModule() 
     {
