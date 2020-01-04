@@ -2,6 +2,10 @@
 
 HRESULT WinRTLoadComponent(PCWSTR componentPath);
 
+HRESULT WinRTGetThreadingModel(
+	HSTRING activatableClassId,
+	DWORD* threading_model);
+
 HRESULT WinRTGetActivationFactory(
     HSTRING activatableClassId,
     REFIID  iid,

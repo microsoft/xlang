@@ -7,6 +7,7 @@
 #include <detours.h>
 #include <catalog.h>
 #include <extwinrt.h>
+#include <activationregistration.h>
 
 static decltype(RoActivateInstance)* TrueRoActivateInstance = RoActivateInstance;
 static decltype(RoGetActivationFactory)* TrueRoGetActivationFactory = RoGetActivationFactory;
@@ -17,15 +18,67 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 )
 {
     IActivationFactory* pFactory;
-    HRESULT hr = WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
-    //if (hr == REGDB_E_CLASSNOTREG)
-    //{
-    //    hr =  TrueRoActivateInstance(activatableClassId, instance);
-    //}
-    if (SUCCEEDED(hr))
-    {
-        hr = pFactory->ActivateInstance(instance);
-    }
+	HRESULT hr;
+
+	APTTYPE aptType;
+	APTTYPEQUALIFIER aptQualifier;
+	CoGetApartmentType(&aptType, &aptQualifier);
+
+	DWORD threading_model;
+	hr = WinRTGetThreadingModel(activatableClassId, &threading_model);
+	
+	enum
+	{
+		Here,
+		CrossApartmentMTA
+	} activationLocation = Here;
+
+	if (hr == REGDB_E_CLASSNOTREG)
+	{
+	    hr =  TrueRoActivateInstance(activatableClassId, instance);
+	}
+	switch (threading_model)
+	{
+		case static_cast<DWORD>(ABI::Windows::Foundation::ThreadingType_BOTH) :
+			activationLocation = Here;
+			break;
+		case static_cast<DWORD>(ABI::Windows::Foundation::ThreadingType_STA) :
+			if (aptType == APTTYPE_MTA)
+			{
+				return RO_E_UNSUPPORTED_FROM_MTA;
+			}
+			else
+			{
+				activationLocation = Here;
+			}
+		break;
+		case static_cast<DWORD>(ABI::Windows::Foundation::ThreadingType_MTA) :
+			if (aptType == APTTYPE_MTA)
+			{
+				activationLocation = Here;
+			}
+			else
+			{
+				activationLocation = CrossApartmentMTA;
+			}
+		break;
+	}
+	if (activationLocation == Here)
+	{
+		hr = WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
+		if (hr == REGDB_E_CLASSNOTREG)
+		{
+			hr = TrueRoActivateInstance(activatableClassId, instance);
+		}
+		if (SUCCEEDED(hr))
+		{
+			hr = pFactory->ActivateInstance(instance);
+		}
+	}
+	else
+	{
+		// Cross apartment MTA activation
+	}
     return hr;
 }
 
