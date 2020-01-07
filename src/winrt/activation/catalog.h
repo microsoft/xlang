@@ -1,4 +1,4 @@
-
+#define RETURN_IF_FAILED( exp ) { HRESULT _hr_ = (exp); if( FAILED( _hr_ ) ) return _hr_; }
 
 HRESULT WinRTLoadComponent(PCWSTR componentPath);
 

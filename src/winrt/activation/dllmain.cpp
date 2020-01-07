@@ -36,48 +36,59 @@ outside of the NTA and blocks all others. The workaround for this is to spin up 
 thread that is not been CoInitialize. COM treats this thread as a implicit MTA and 
 when we call CoGetObjectContext on it we implicitily initialized the MTA. 
 */
-void EnsureMTAInitialized()
+HRESULT EnsureMTAInitialized()
 {
 	TP_CALLBACK_ENVIRON callBackEnviron;
 	InitializeThreadpoolEnvironment(&callBackEnviron);
 	PTP_POOL pool = CreateThreadpool(nullptr);
+	if (pool == nullptr)
+	{
+		return HRESULT_FROM_WIN32(GetLastError());
+	}
 	SetThreadpoolThreadMaximum(pool, 1);
-	SetThreadpoolThreadMinimum(pool, 1);
+	if (!SetThreadpoolThreadMinimum(pool, 1)) 
+	{
+		return HRESULT_FROM_WIN32(GetLastError());
+	}
 	PTP_CLEANUP_GROUP cleanupgroup = CreateThreadpoolCleanupGroup();
-	HRESULT hr;
+	if (cleanupgroup == nullptr)
+	{
+		return HRESULT_FROM_WIN32(GetLastError());
+	}
 	SetThreadpoolCallbackPool(&callBackEnviron, pool);
 	SetThreadpoolCallbackCleanupGroup(&callBackEnviron,
 		cleanupgroup,
 		nullptr);
-	PTP_WORK ensureMTAInitializedWork = CreateThreadpoolWork(&EnsureMTAInitializedCallBack,
+	PTP_WORK ensureMTAInitializedWork = CreateThreadpoolWork(
+		&EnsureMTAInitializedCallBack,
 		nullptr,
 		&callBackEnviron);
+	if (ensureMTAInitializedWork == nullptr)
+	{
+		return HRESULT_FROM_WIN32(GetLastError());
+	}
 	SubmitThreadpoolWork(ensureMTAInitializedWork);
 	CloseThreadpoolCleanupGroupMembers(cleanupgroup,
 		false,
 		nullptr);
+	return S_OK;
 }
 
-HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable** instance
-)
+HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable** instance)
 {
 	APTTYPE aptType;
 	APTTYPEQUALIFIER aptQualifier;
 	CoGetApartmentType(&aptType, &aptQualifier);
-
-	DWORD threading_model;
-	HRESULT hr = WinRTGetThreadingModel(activatableClassId, &threading_model);
-	
 	enum
 	{
 		Here,
 		CrossApartmentMTA
 	} activationLocation = Here;
 
-	if (hr == REGDB_E_CLASSNOTREG)
+	DWORD threading_model;
+	if (WinRTGetThreadingModel(activatableClassId, &threading_model) == REGDB_E_CLASSNOTREG)
 	{
-	    hr =  TrueRoActivateInstance(activatableClassId, instance);
-		return;
+	    return TrueRoActivateInstance(activatableClassId, instance);
 	}
 	switch (threading_model)
 	{
@@ -105,78 +116,61 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 			}
 		break;
 	}
+	// Activate in current apartment
 	if (activationLocation == Here)
 	{
 		IActivationFactory* pFactory;
-		hr = WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
-		if (SUCCEEDED(hr))
-		{
-			hr = pFactory->ActivateInstance(instance);
-		}
+		RETURN_IF_FAILED(WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));
+		return pFactory->ActivateInstance(instance);
 	}
-	else
-	{
-		// Cross apartment MTA activation
-		struct CrossApartmentMTAActData {
-			HSTRING activatableClassId;
-			IStream *stream;
-		};
-		CrossApartmentMTAActData cbdata{ activatableClassId };
-		CO_MTA_USAGE_COOKIE mtaUsageCookie;
-		hr = CoIncrementMTAUsage(&mtaUsageCookie);
-		EnsureMTAInitialized();
-		if (FAILED(hr))
+	// Cross apartment MTA activation
+	struct CrossApartmentMTAActData {
+		HSTRING activatableClassId;
+		IStream *stream;
+	};
+	CrossApartmentMTAActData cbdata{ activatableClassId };
+	CO_MTA_USAGE_COOKIE mtaUsageCookie;
+	RETURN_IF_FAILED(CoIncrementMTAUsage(&mtaUsageCookie));
+	RETURN_IF_FAILED(EnsureMTAInitialized());
+	RETURN_IF_FAILED(CoGetApartmentType(&aptType, &aptQualifier));
+	Microsoft::WRL::ComPtr<IContextCallback> defaultContext;
+	ComCallData data;
+	data.pUserDefined = &cbdata;
+	RETURN_IF_FAILED(CoGetDefaultContext(APTTYPE_MTA, IID_PPV_ARGS(&defaultContext)));
+	RETURN_IF_FAILED(defaultContext->ContextCallback(
+		[](_In_ ComCallData* pComCallData) -> HRESULT
 		{
-			return hr;
-		}
-		CoGetApartmentType(&aptType, &aptQualifier);
-		Microsoft::WRL::ComPtr<IContextCallback> defaultContext;
-		ComCallData data;
-		data.pUserDefined = &cbdata;
-		hr = CoGetDefaultContext(APTTYPE_MTA, IID_PPV_ARGS(&defaultContext));
-		if (SUCCEEDED(hr))
-		{
-			hr = defaultContext->ContextCallback(
-				[](_In_ ComCallData* pComCallData) -> HRESULT
-				{
-					CrossApartmentMTAActData* data = reinterpret_cast<CrossApartmentMTAActData*>(pComCallData->pUserDefined);
-					Microsoft::WRL::ComPtr<IInspectable> instance;
-					HRESULT hr;
-					IActivationFactory* pFactory;
-					hr = WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
-					if (hr == REGDB_E_CLASSNOTREG)
-					{
-						hr = TrueRoActivateInstance(data->activatableClassId, &instance);
-					}
-					if (SUCCEEDED(hr))
-					{
-						hr = pFactory->ActivateInstance(&instance);
-					}
-					if (SUCCEEDED(hr))
-					{
-						return CoMarshalInterThreadInterfaceInStream(IID_IInspectable, instance.Get(), &data->stream);
-					}
-					return hr;
-				},
-				&data, IID_ICallbackWithNoReentrancyToApplicationSTA, 5, nullptr); // 5 is meaningless.
-
+			CrossApartmentMTAActData* data = reinterpret_cast<CrossApartmentMTAActData*>(pComCallData->pUserDefined);
+			Microsoft::WRL::ComPtr<IInspectable> instance;
+			HRESULT hr;
+			IActivationFactory* pFactory;
+			hr = WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
+			if (hr == REGDB_E_CLASSNOTREG)
+			{
+				hr = TrueRoActivateInstance(data->activatableClassId, &instance);
+			}
 			if (SUCCEEDED(hr))
 			{
-				hr = CoGetInterfaceAndReleaseStream(cbdata.stream, IID_IInspectable, (LPVOID*)instance);
+				hr = pFactory->ActivateInstance(&instance);
 			}
-		}
-	}
-    return hr;
+			if (SUCCEEDED(hr))
+			{
+				return CoMarshalInterThreadInterfaceInStream(IID_IInspectable, instance.Get(), &data->stream);
+			}
+			return hr;
+		},
+		&data, IID_ICallbackWithNoReentrancyToApplicationSTA, 5, nullptr)); // 5 is meaningless.
+	RETURN_IF_FAILED(CoGetInterfaceAndReleaseStream(cbdata.stream, IID_IInspectable, (LPVOID*)instance));
+	return S_OK;
 }
 
-HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID iid, void** factory
-)
+HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID iid, void** factory)
 {
     HRESULT hr = WinRTGetActivationFactory(activatableClassId, iid, factory);
-    /*if (hr == REGDB_E_CLASSNOTREG)
+    if (hr == REGDB_E_CLASSNOTREG)
     {
         hr = TrueRoGetActivationFactory(activatableClassId, iid, factory);
-    }*/
+    }
     return hr;
 }
 
@@ -185,14 +179,13 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     IMetaDataDispenserEx* metaDataDispenser,
     HSTRING* metaDataFilePath,
     IMetaDataImport2** metaDataImport,
-    mdTypeDef* typeDefToken
-)
+    mdTypeDef* typeDefToken)
 {
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    /*if (hr == REGDB_E_CLASSNOTREG)
+    if (hr == REGDB_E_CLASSNOTREG)
     {
         hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    }*/
+    }
     return hr;
 }
 
