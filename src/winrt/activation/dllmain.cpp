@@ -29,6 +29,13 @@ VOID CALLBACK EnsureMTAInitializedCallBack
 	CoGetObjectContext(IID_PPV_ARGS(&spThreadingInfo));
 }
 
+/* 
+In the context callback call to the MTA apartment, there is a bug that prevents COM 
+from automatically initializing MTA remoting. It only allows NTA to be intialized 
+outside of the NTA and blocks all others. The workaround for this is to spin up another 
+thread that is not been CoInitialize. COM treats this thread as a implicit MTA and 
+when we call CoGetObjectContext on it we implicitily initialized the MTA. 
+*/
 void EnsureMTAInitialized()
 {
 	TP_CALLBACK_ENVIRON callBackEnviron;
@@ -70,6 +77,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 	if (hr == REGDB_E_CLASSNOTREG)
 	{
 	    hr =  TrueRoActivateInstance(activatableClassId, instance);
+		return;
 	}
 	switch (threading_model)
 	{
@@ -97,26 +105,23 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 			}
 		break;
 	}
-	/*if (activationLocation == Here)
+	if (activationLocation == Here)
 	{
 		IActivationFactory* pFactory;
 		hr = WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
-		if (hr == REGDB_E_CLASSNOTREG)
-		{
-			hr = TrueRoActivateInstance(activatableClassId, instance);
-		}
 		if (SUCCEEDED(hr))
 		{
 			hr = pFactory->ActivateInstance(instance);
 		}
 	}
 	else
-	{*/
-		struct CBData {
-			HSTRING hs;
-			IStream *strm;
+	{
+		// Cross apartment MTA activation
+		struct CrossApartmentMTAActData {
+			HSTRING activatableClassId;
+			IStream *stream;
 		};
-		CBData cbdata{ activatableClassId };
+		CrossApartmentMTAActData cbdata{ activatableClassId };
 		CO_MTA_USAGE_COOKIE mtaUsageCookie;
 		hr = CoIncrementMTAUsage(&mtaUsageCookie);
 		EnsureMTAInitialized();
@@ -134,14 +139,14 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 			hr = defaultContext->ContextCallback(
 				[](_In_ ComCallData* pComCallData) -> HRESULT
 				{
-					CBData* data = reinterpret_cast<CBData*>(pComCallData->pUserDefined);
+					CrossApartmentMTAActData* data = reinterpret_cast<CrossApartmentMTAActData*>(pComCallData->pUserDefined);
 					Microsoft::WRL::ComPtr<IInspectable> instance;
 					HRESULT hr;
 					IActivationFactory* pFactory;
-					hr = WinRTGetActivationFactory(data->hs, __uuidof(IActivationFactory), (void**)&pFactory);
+					hr = WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
 					if (hr == REGDB_E_CLASSNOTREG)
 					{
-						hr = TrueRoActivateInstance(data->hs, &instance);
+						hr = TrueRoActivateInstance(data->activatableClassId, &instance);
 					}
 					if (SUCCEEDED(hr))
 					{
@@ -149,19 +154,18 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 					}
 					if (SUCCEEDED(hr))
 					{
-						return CoMarshalInterThreadInterfaceInStream(IID_IInspectable, instance.Get(), &data->strm);
+						return CoMarshalInterThreadInterfaceInStream(IID_IInspectable, instance.Get(), &data->stream);
 					}
 					return hr;
-				}, 
+				},
 				&data, IID_ICallbackWithNoReentrancyToApplicationSTA, 5, nullptr); // 5 is meaningless.
 
 			if (SUCCEEDED(hr))
 			{
-				hr = CoGetInterfaceAndReleaseStream(cbdata.strm, IID_IInspectable, (LPVOID*)instance);
+				hr = CoGetInterfaceAndReleaseStream(cbdata.stream, IID_IInspectable, (LPVOID*)instance);
 			}
 		}
-		// Cross apartment MTA activation
-	//}
+	}
     return hr;
 }
 
