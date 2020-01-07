@@ -78,37 +78,37 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 {
 	APTTYPE aptType;
 	APTTYPEQUALIFIER aptQualifier;
-	CoGetApartmentType(&aptType, &aptQualifier);
+	RETURN_IF_FAILED(CoGetApartmentType(&aptType, &aptQualifier));
 	enum
 	{
-		Here,
+		CurrentApartment,
 		CrossApartmentMTA
-	} activationLocation = Here;
+	} activationLocation = CurrentApartment;
 
-	DWORD threading_model;
+	ABI::Windows::Foundation::ThreadingType threading_model;
 	if (WinRTGetThreadingModel(activatableClassId, &threading_model) == REGDB_E_CLASSNOTREG)
 	{
 	    return TrueRoActivateInstance(activatableClassId, instance);
 	}
 	switch (threading_model)
 	{
-		case static_cast<DWORD>(ABI::Windows::Foundation::ThreadingType_BOTH) :
-			activationLocation = Here;
+		case ABI::Windows::Foundation::ThreadingType_BOTH :
+			activationLocation = CurrentApartment;
 			break;
-		case static_cast<DWORD>(ABI::Windows::Foundation::ThreadingType_STA) :
+		case ABI::Windows::Foundation::ThreadingType_STA :
 			if (aptType == APTTYPE_MTA)
 			{
 				return RO_E_UNSUPPORTED_FROM_MTA;
 			}
 			else
 			{
-				activationLocation = Here;
+				activationLocation = CurrentApartment;
 			}
 		break;
-		case static_cast<DWORD>(ABI::Windows::Foundation::ThreadingType_MTA) :
+		case ABI::Windows::Foundation::ThreadingType_MTA :
 			if (aptType == APTTYPE_MTA)
 			{
-				activationLocation = Here;
+				activationLocation = CurrentApartment;
 			}
 			else
 			{
@@ -117,7 +117,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 		break;
 	}
 	// Activate in current apartment
-	if (activationLocation == Here)
+	if (activationLocation == CurrentApartment)
 	{
 		IActivationFactory* pFactory;
 		RETURN_IF_FAILED(WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));

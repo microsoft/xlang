@@ -1,10 +1,12 @@
+#include <activationregistration.h>
+
 #define RETURN_IF_FAILED( exp ) { HRESULT _hr_ = (exp); if( FAILED( _hr_ ) ) return _hr_; }
 
 HRESULT WinRTLoadComponent(PCWSTR componentPath);
 
 HRESULT WinRTGetThreadingModel(
 	HSTRING activatableClassId,
-	DWORD* threading_model);
+	ABI::Windows::Foundation::ThreadingType* threading_model);
 
 HRESULT WinRTGetActivationFactory(
     HSTRING activatableClassId,
