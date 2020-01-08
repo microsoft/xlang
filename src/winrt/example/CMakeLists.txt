@@ -11,3 +11,14 @@ target_include_directories(activation_demo PUBLIC ${WINRT_INCLUDE_PATH} ${PROJEC
 target_link_libraries(activation_demo windowsapp winrtact)
 
 add_dependencies(activation_demo winrtact)
+
+add_custom_command(TARGET activation_demo POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/../activation/winrtact.dll
+	${CMAKE_CURRENT_BINARY_DIR}
+)
+
+file(GLOB test_files
+  "test_files/*"
+)
+file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
