@@ -23,6 +23,7 @@
   <ItemGroup>
     <None Include="regfree_winrt_test_component.def" />
     <None Include="packages.config" />
+    <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
