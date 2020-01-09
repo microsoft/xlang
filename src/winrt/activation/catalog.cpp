@@ -32,19 +32,27 @@ struct component
     activation_factory_type get_activation_factory;
 	ABI::Windows::Foundation::ThreadingType threading_model;
 
-    bool LoadModule() 
+	HRESULT LoadModule()
     {
         if (handle == nullptr)
         {
             handle = LoadLibraryW(module_path.c_str());
+			if (handle == nullptr)
+			{
+				return HRESULT_FROM_WIN32(GetLastError());;
+			}
             this->get_activation_factory = (activation_factory_type)GetProcAddress(handle, "DllGetActivationFactory");
+			if (this->get_activation_factory == nullptr)
+			{
+				return HRESULT_FROM_WIN32(GetLastError());;
+			}
         }
-        return handle != nullptr && this->get_activation_factory != nullptr;
+        return (handle != nullptr && this->get_activation_factory != nullptr) ? S_OK : E_FAIL;
     }
 
     HRESULT GetActivationFactory(HSTRING className, REFIID  iid, void** factory)
     {
-        if (!LoadModule()) return REGDB_E_CLASSNOTREG;
+        if (FAILED(LoadModule())) return REGDB_E_CLASSNOTREG;
 
         IActivationFactory* ifactory = nullptr;
         HRESULT hr = this->get_activation_factory(className, &ifactory);

@@ -21,11 +21,11 @@ TEST_CASE("Normal Activation")
 	CoInitialize(nullptr);
 	{
 		ComPtr<IInspectable> instance;
-		REQUIRE(RoActivateInstance(HStringReference(L"test_component.Class").Get(), &instance) == S_OK);
+		REQUIRE(RoActivateInstance(HStringReference(L"regfree_winrt_test_component.Class").Get(), &instance) == S_OK);
 
 		HString result;
 		REQUIRE(instance->GetRuntimeClassName(result.GetAddressOf()) == S_OK);
-		REQUIRE(result == HStringReference(L"test_component.Class").Get());
+		REQUIRE(result == HStringReference(L"regfree_winrt_test_component.Class").Get());
 	}
 	CoUninitialize();
 }
@@ -37,11 +37,11 @@ TEST_CASE("Block MTA to STA activation")
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	{
 		ComPtr<IInspectable> instance;
-		REQUIRE(RoActivateInstance(HStringReference(L"test_component.Class").Get(), &instance) == S_OK);
+		REQUIRE(RoActivateInstance(HStringReference(L"regfree_winrt_test_component.Class").Get(), &instance) == S_OK);
 
 		HString result;
 		REQUIRE(instance->GetRuntimeClassName(result.GetAddressOf()) == S_OK);
-		REQUIRE(result == HStringReference(L"test_component.Class").Get());
+		REQUIRE(result == HStringReference(L"regfree_winrt_test_component.Class").Get());
 	}
 	CoUninitialize();
 }

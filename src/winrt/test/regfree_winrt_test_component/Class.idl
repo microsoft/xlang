@@ -1,0 +1,10 @@
+namespace regfree_winrt_test_component
+{
+    [default_interface]
+    runtimeclass Class
+    {
+        Class();
+        Int32 MyProperty;
+		Int32 GetApartmentType();
+    }
+}
