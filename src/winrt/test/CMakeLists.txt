@@ -10,11 +10,17 @@ set_target_properties(regfree_winrt_test PROPERTIES OUTPUT_NAME "regfree_winrt_t
 target_include_directories(regfree_winrt_test PUBLIC ${WINRT_INCLUDE_PATH} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
 target_link_libraries(regfree_winrt_test windowsapp winrtact)
 
-add_dependencies(regfree_winrt_test winrtact)
+add_dependencies(regfree_winrt_test winrtact test_comp)
 
 add_custom_command(TARGET regfree_winrt_test POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/../activation/winrtact.dll
+	${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_custom_command(TARGET regfree_winrt_test POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/test_comp/test_comp.dll
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
