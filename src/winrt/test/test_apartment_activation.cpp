@@ -59,3 +59,26 @@ TEST_CASE("Test MTA activation")
 	}
 	CoUninitialize();
 }
+
+TEST_CASE("Test cross apartment MTA activation")
+{
+	ExtRoLoadCatalog(L"manifesttest1.txt");
+	HRESULT hr = S_OK;
+	CoInitialize(nullptr);
+	{
+		ComPtr<IInspectable> instance;
+		REQUIRE(RoActivateInstance(HStringReference(L"RegFreeWinRtTest.TestComp").Get(), &instance) == S_OK);
+
+		HString result;
+		REQUIRE(instance->GetRuntimeClassName(result.GetAddressOf()) == S_OK);
+		REQUIRE(result == HStringReference(L"RegFreeWinRtTest.TestComp").Get());
+
+		ComPtr<IStringable> stringUri;
+		REQUIRE(instance->QueryInterface<IStringable>(&stringUri) == S_OK);
+
+		HString outputString;
+		stringUri->ToString(outputString.GetAddressOf());
+		REQUIRE(outputString == HStringReference(L"MTA").Get());
+	}
+	CoUninitialize();
+}

@@ -116,7 +116,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 			}
 		break;
 	}
-	// Activate in current apartment
+	//// Activate in current apartment
 	if (activationLocation == CurrentApartment)
 	{
 		IActivationFactory* pFactory;
@@ -144,20 +144,10 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 			Microsoft::WRL::ComPtr<IInspectable> instance;
 			HRESULT hr;
 			IActivationFactory* pFactory;
-			hr = WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory);
-			if (hr == REGDB_E_CLASSNOTREG)
-			{
-				hr = TrueRoActivateInstance(data->activatableClassId, &instance);
-			}
-			if (SUCCEEDED(hr))
-			{
-				hr = pFactory->ActivateInstance(&instance);
-			}
-			if (SUCCEEDED(hr))
-			{
-				return CoMarshalInterThreadInterfaceInStream(IID_IInspectable, instance.Get(), &data->stream);
-			}
-			return hr;
+			RETURN_IF_FAILED(WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));
+			RETURN_IF_FAILED(pFactory->ActivateInstance(&instance));
+			RETURN_IF_FAILED(CoMarshalInterThreadInterfaceInStream(IID_IInspectable, instance.Get(), &data->stream));
+			return S_OK;
 		},
 		&data, IID_ICallbackWithNoReentrancyToApplicationSTA, 5, nullptr)); // 5 is meaningless.
 	RETURN_IF_FAILED(CoGetInterfaceAndReleaseStream(cbdata.stream, IID_IInspectable, (LPVOID*)instance));

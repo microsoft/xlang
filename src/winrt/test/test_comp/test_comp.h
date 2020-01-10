@@ -12,7 +12,9 @@ const wchar_t* MAIN_STA = L"MAIN_STA";
 namespace RegFreeWinRtTest
 {
 	class TestComp :
-		public Microsoft::WRL::RuntimeClass<ABI::Windows::Foundation::IStringable>
+		public Microsoft::WRL::RuntimeClass<
+			Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::WinRt | Microsoft::WRL::InhibitFtmBase>, 
+			ABI::Windows::Foundation::IStringable>
 	{
 		InspectableClass(L"RegFreeWinRtTest.TestComp", BaseTrust);
 

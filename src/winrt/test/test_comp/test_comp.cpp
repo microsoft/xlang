@@ -18,29 +18,33 @@ RegFreeWinRtTest::TestComp::ToString(__out HSTRING* result)
 				static_cast<UINT32>(::wcslen(STA)),
 				result);
 		}
-		if (aptType == APTTYPE_MTA)
+		else if (aptType == APTTYPE_MTA)
 		{
 			WindowsCreateString(MTA,
 				static_cast<UINT32>(::wcslen(MTA)),
 				result);
 		}
-		if (aptType == APTTYPE_CURRENT)
+		else if (aptType == APTTYPE_CURRENT)
 		{
 			WindowsCreateString(CURRENT,
 				static_cast<UINT32>(::wcslen(CURRENT)),
 				result);
 		}
-		if (aptType == APTTYPE_NA)
+		else if (aptType == APTTYPE_NA)
 		{
 			WindowsCreateString(NA,
 				static_cast<UINT32>(::wcslen(NA)),
 				result);
 		}
-		if (aptType == APTTYPE_MAINSTA)
+		else if (aptType == APTTYPE_MAINSTA)
 		{
 			WindowsCreateString(MAIN_STA,
 				static_cast<UINT32>(::wcslen(MAIN_STA)),
 				result);
+		}
+		else
+		{
+			return E_FAIL;
 		}
 	}
 	return S_OK;
