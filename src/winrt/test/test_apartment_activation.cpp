@@ -16,6 +16,7 @@ using namespace Microsoft::WRL::Wrappers;
 
 TEST_CASE("Test STA activation")
 {
+	// TODO: Replace manifest with correct format that marks class as both STA and MTA
 	ExtRoLoadCatalog(L"manifesttest1.txt");
 	HRESULT hr = S_OK;
 	CoInitialize(nullptr);
@@ -39,6 +40,7 @@ TEST_CASE("Test STA activation")
 
 TEST_CASE("Test MTA activation")
 {
+	// TODO: Replace manifest with correct format that marks class as both STA and MTA
 	ExtRoLoadCatalog(L"manifesttest1.txt");
 	HRESULT hr = S_OK;
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -62,6 +64,7 @@ TEST_CASE("Test MTA activation")
 
 TEST_CASE("Test cross apartment MTA activation")
 {
+	// TODO: Replace manifest with correct format that marks class as only MTA
 	ExtRoLoadCatalog(L"manifesttest1.txt");
 	HRESULT hr = S_OK;
 	CoInitialize(nullptr);
@@ -79,6 +82,19 @@ TEST_CASE("Test cross apartment MTA activation")
 		HString outputString;
 		stringUri->ToString(outputString.GetAddressOf());
 		REQUIRE(outputString == HStringReference(L"MTA").Get());
+	}
+	CoUninitialize();
+}
+
+TEST_CASE("Test block STA to MTA activation")
+{
+	// TODO: Replace manifest with correct format that marks class as only STA
+	ExtRoLoadCatalog(L"manifesttest1.txt");
+	HRESULT hr = S_OK;
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	{
+		ComPtr<IInspectable> instance;
+		REQUIRE(RoActivateInstance(HStringReference(L"RegFreeWinRtTest.TestComp").Get(), &instance) == RO_E_UNSUPPORTED_FROM_MTA);
 	}
 	CoUninitialize();
 }
