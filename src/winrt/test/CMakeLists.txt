@@ -15,13 +15,13 @@ add_dependencies(regfree_winrt_test winrtact test_comp)
 add_custom_command(TARGET regfree_winrt_test POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/../activation/winrtact.dll
-	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 add_custom_command(TARGET regfree_winrt_test POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/test_comp/test_comp.dll
-	${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 file(GLOB test_files

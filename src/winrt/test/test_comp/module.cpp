@@ -6,11 +6,11 @@
 
 STDAPI __stdcall DllCanUnloadNow()
 {
-	return Microsoft::WRL::Module<Microsoft::WRL::InProc>::GetModule().GetObjectCount() == 0;
+    return Microsoft::WRL::Module<Microsoft::WRL::InProc>::GetModule().GetObjectCount() == 0;
 }
 
 STDAPI __stdcall DllGetActivationFactory(_In_ HSTRING classId, _COM_Outptr_ IActivationFactory** factory) noexcept
 {
-	auto& module = Microsoft::WRL::Module<Microsoft::WRL::InProc>::GetModule();
-	return module.GetActivationFactory(classId, factory);
+    auto& module = Microsoft::WRL::Module<Microsoft::WRL::InProc>::GetModule();
+    return module.GetActivationFactory(classId, factory);
 }
