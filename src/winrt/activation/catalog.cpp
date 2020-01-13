@@ -34,7 +34,7 @@ struct component
     wstring module_path;
     HMODULE handle = nullptr;
     activation_factory_type get_activation_factory;
-	DWORD threading_model;
+	ABI::Windows::Foundation::ThreadingType threading_model;
 
     bool LoadModule() 
     {
@@ -131,22 +131,31 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
     return S_OK;
 }
 
+HRESULT WinRTGetThreadingModel(HSTRING activatableClassId, ABI::Windows::Foundation::ThreadingType* threading_model)
+{
+	auto raw_class_name = WindowsGetStringRawBuffer(activatableClassId, nullptr);
+	auto component_iter = g_types.find(raw_class_name);
+	if (component_iter != g_types.end())
+	{
+		*threading_model = component_iter->second->threading_model;
+		return S_OK;
+	}
+	return REGDB_E_CLASSNOTREG;
+}
+
 HRESULT WinRTGetActivationFactory(
     HSTRING activatableClassId,
     REFIID  iid,
     void** factory)
 {
-    uint32_t length;
-    auto raw_class_name = WindowsGetStringRawBuffer(activatableClassId, &length);
+    auto raw_class_name = WindowsGetStringRawBuffer(activatableClassId, nullptr);
     auto component_iter = g_types.find(raw_class_name);
     if (component_iter != g_types.end())
     {
-        return component_iter->second->GetActivationFactory(activatableClassId, iid, factory);
+		return component_iter->second->GetActivationFactory(activatableClassId, iid, factory);
     }
-    else
-    {
-        return REGDB_E_CLASSNOTREG;
-    }
+    return REGDB_E_CLASSNOTREG;
+    
 }
 
 HRESULT WinRTGetMetadataFile(
