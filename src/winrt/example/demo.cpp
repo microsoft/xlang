@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     ExtRoLoadCatalog(L"demo2.txt");
 
     HRESULT hr = S_OK;
-	CoInitialize(nullptr);
+    CoInitialize(nullptr);
     {
         ComPtr<IInspectable> instance;
         hr = RoActivateInstance(HStringReference(L"test_component.Class").Get(), &instance);
@@ -44,6 +44,6 @@ int main(int argc, char *argv[])
         unsigned int length = 0;
         wprintf(L"%s\n", result.GetRawBuffer(&length));
     }
-	CoUninitialize();
+    CoUninitialize();
     return 0;
 }
