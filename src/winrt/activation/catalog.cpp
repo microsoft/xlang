@@ -47,7 +47,7 @@ struct component
                 return HRESULT_FROM_WIN32(GetLastError());;
             }
         }
-        return (handle != nullptr || this->get_activation_factory != nullptr) ? S_OK : E_FAIL;
+        return (handle != nullptr && this->get_activation_factory != nullptr) ? S_OK : E_FAIL;
     }
 
     HRESULT GetActivationFactory(HSTRING className, REFIID  iid, void** factory)
