@@ -91,8 +91,8 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
     {
         ComPtr<IXMLDOMNamedNodeMap> attributes;
         ComPtr<IXMLDOMNode> attribute;
-        ComPtr<IXMLDOMNodeList> comClassList;
-        ComPtr<IXMLDOMNode> comClass;
+        ComPtr<IXMLDOMNodeList> activatableClassList;
+        ComPtr<IXMLDOMNode> activatableClass;
         BSTR value;
 
         auto this_component = make_shared<component>();
@@ -102,10 +102,10 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
         RETURN_IF_FAILED(attribute->get_text(&value));
         this_component->module_path = value;
 
-        RETURN_IF_FAILED(file->get_childNodes(&comClassList));
-        while (SUCCEEDED(comClassList->nextNode(&comClass)) && comClass)
+        RETURN_IF_FAILED(file->get_childNodes(&activatableClassList));
+        while (SUCCEEDED(activatableClassList->nextNode(&activatableClass)) && activatableClass)
         {
-            RETURN_IF_FAILED(comClass->get_attributes(&attributes));
+            RETURN_IF_FAILED(activatableClass->get_attributes(&attributes));
             RETURN_IF_FAILED(attributes->getNamedItem(BSTR(L"threadingModel"), &attribute));
             RETURN_IF_FAILED(attribute->get_text(&value));
 
