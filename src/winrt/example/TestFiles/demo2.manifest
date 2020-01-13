@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <file name="test_component.dll">
+    <comClass
+        clsid="test_component.Class"
+        threadingModel="Both">
+
+      <progid>"test_component.Class"</progid>
+    </comClass>
+  </file>
+</assembly>

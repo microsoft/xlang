@@ -4,7 +4,10 @@
 #include <roapi.h>
 #include <winstring.h>
 #include <rometadataresolution.h>
-
+#include <combaseapi.h>
+#include <wrl.h>
+#include <msxml6.h>
+#include <comutil.h>
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
@@ -15,6 +18,7 @@
 #include <catalog.h>
 
 using namespace std;
+using namespace Microsoft::WRL;
 
 // TODO: Components won't respect COM lifetime. workaround to get them in the COM list?
 
@@ -28,7 +32,6 @@ extern "C"
 struct component
 {
     wstring module_path;
-    wstring metadata_path;
     HMODULE handle = nullptr;
     activation_factory_type get_activation_factory;
 	DWORD threading_model;
@@ -63,26 +66,66 @@ static unordered_map < wstring, shared_ptr<component> > g_types;
 
 HRESULT WinRTLoadComponent(PCWSTR manifest_path)
 {
-    auto this_component = make_shared<component>();
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    VARIANT_BOOL vbResult = VARIANT_FALSE;
 
-    // first line is the name of the DLL that contains the types
-    ifstream manifest_file(manifest_path, ios_base::in);
-    std::string u8_module_name;
-    getline(manifest_file, u8_module_name);
-    this_component->module_path = converter.from_bytes(u8_module_name);
-
-    // second line is the name of the winmd that contains the types (in case of CLR, can be the same as dll)
-    string u8_metadata_path;
-    getline(manifest_file, u8_metadata_path);
-    this_component->metadata_path = converter.from_bytes(u8_metadata_path);
-
-    // each line after is an activatable class. No apartment-specific registration. Implicitly "both".
-    string u8_class_name;
-    while (getline(manifest_file, u8_class_name))
+    ComPtr<IXMLDOMDocument2> xmlDoc;
+    RETURN_IF_FAILED(CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(xmlDoc.GetAddressOf())));
+    HRESULT hr = xmlDoc->load(_variant_t(manifest_path), &vbResult);
+    if (hr != S_OK)
     {
-        std::wstring wide_class_name = converter.from_bytes(u8_class_name);
-        g_types[wide_class_name] = this_component;
+        // load can return S_FALSE on failure
+        return hr;
+    }
+
+    ComPtr<IXMLDOMNodeList> fileList;
+    xmlDoc->setProperty(_bstr_t(L"SelectionNamespaces"), _variant_t(L"xmlns:m='urn:schemas-microsoft-com:asm.v1'"));
+    BSTR query = SysAllocString(L"/m:assembly/m:file");
+    RETURN_IF_FAILED(xmlDoc->selectNodes(query, &fileList));
+    if (fileList == nullptr)
+    {
+        return S_OK;
+    }
+
+    ComPtr<IXMLDOMNode> file;
+    while (SUCCEEDED(fileList->nextNode(&file)) && file)
+    {
+        ComPtr<IXMLDOMNamedNodeMap> attributes;
+        ComPtr<IXMLDOMNode> attribute;
+        ComPtr<IXMLDOMNodeList> comClassList;
+        ComPtr<IXMLDOMNode> comClass;
+        BSTR value;
+
+        auto this_component = make_shared<component>();
+
+        RETURN_IF_FAILED(file->get_attributes(&attributes));
+        RETURN_IF_FAILED(attributes->getNamedItem(BSTR(L"name"), &attribute));
+        RETURN_IF_FAILED(attribute->get_text(&value));
+        this_component->module_path = value;
+
+        RETURN_IF_FAILED(file->get_childNodes(&comClassList));
+        while (SUCCEEDED(comClassList->nextNode(&comClass)) && comClass)
+        {
+            RETURN_IF_FAILED(comClass->get_attributes(&attributes));
+            RETURN_IF_FAILED(attributes->getNamedItem(BSTR(L"threadingModel"), &attribute));
+            RETURN_IF_FAILED(attribute->get_text(&value));
+
+            if (wcsicmp(L"apartment", value) == 0)
+            {
+                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
+            }
+            else if (wcsicmp(L"free", value) == 0)
+            {
+                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
+            }
+            else
+            {
+                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
+            }
+
+            RETURN_IF_FAILED(attributes->getNamedItem(BSTR(L"clsid"), &attribute));
+            RETURN_IF_FAILED(attribute->get_text(&value));
+            g_types[value] = this_component;
+        }
     }
 
     return S_OK;
