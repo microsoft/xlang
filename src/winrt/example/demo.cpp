@@ -17,6 +17,10 @@ int main(int argc, char *argv[])
     HRESULT hr = S_OK;
     CoInitialize(nullptr);
 
+    ComPtr<IInspectable> instance;
+    hr = RoActivateInstance(HStringReference(L"test_component.Class").Get(), &instance);
+    if (FAILED(hr)) { printf("Failed activate: %x\n", hr); return false; }
+
     ExtRoLoadCatalog(LR"(demo2.manifest)");
 
     {
@@ -31,6 +35,6 @@ int main(int argc, char *argv[])
         unsigned int length = 0;
         wprintf(L"%s\n", result.GetRawBuffer(&length));
     }
-	CoUninitialize();
+    CoUninitialize();
     return 0;
 }
