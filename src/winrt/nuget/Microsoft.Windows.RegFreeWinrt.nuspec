@@ -17,8 +17,9 @@
   </metadata>
   <files>
     <file src="LICENSE"/>
-    <file src="$winrtact$" target="build"></file>
+    <file src="$winrtact$" target="runtimes\"></file>
     <file src="$winrtactinclude$" target="content"></file>
+    <file src="Microsoft.Windows.UndockedRegFreeWinrt.targets" target="build\native"/>
     <file src="readme.txt"/>
   </files>
 </package>
