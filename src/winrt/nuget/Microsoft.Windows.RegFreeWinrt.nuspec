@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata minClientVersion="2.5">
-    <id>Microsoft.Windows.CppWinRT</id>
+    <id>Microsoft.Windows.UndockedRegFreeWinrt</id>
     <version>1.0.0.0</version>
     <title>Regfree WinRT Build Support</title>
     <authors>Microsoft</authors>
@@ -16,7 +16,8 @@
     <iconUrl>https://aka.ms/cppwinrt.ico</iconUrl>
   </metadata>
   <files>
-    <file src="winrtact" target="lib"></file>
+    <file src="LICENSE"/>
+    <file src="$winrtact$" target="lib"></file>
     <file src="readme.txt"/>
   </files>
 </package>
