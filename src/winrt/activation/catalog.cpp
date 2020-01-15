@@ -6,7 +6,8 @@
 #include <rometadataresolution.h>
 #include <combaseapi.h>
 #include <wrl.h>
-#include <msxml6.h>
+#include <xmllite.h>
+#include <Shlwapi.h>
 #include <comutil.h>
 #include <iostream>
 #include <fstream>
@@ -32,6 +33,7 @@ extern "C"
 struct component
 {
     wstring module_path;
+    wstring xmlns;
     HMODULE handle = nullptr;
     activation_factory_type get_activation_factory;
     ABI::Windows::Foundation::ThreadingType threading_model;
@@ -74,65 +76,56 @@ static unordered_map < wstring, shared_ptr<component> > g_types;
 
 HRESULT WinRTLoadComponent(PCWSTR manifest_path)
 {
-    VARIANT_BOOL vbResult = VARIANT_FALSE;
+    ComPtr<IStream> fileStream;
+    ComPtr<IXmlReader> xmlReader;
+    XmlNodeType nodeType;
+    const WCHAR* localName = L"";
+    auto this_component = make_shared<component>();
 
-    ComPtr<IXMLDOMDocument2> xmlDoc;
-    RETURN_IF_FAILED(CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(xmlDoc.GetAddressOf())));
-    HRESULT hr = xmlDoc->load(_variant_t(manifest_path), &vbResult);
-    if (hr != S_OK)
+    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifest_path, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
+    RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
+    RETURN_IF_FAILED(xmlReader->SetInput(fileStream.Get()));
+    const WCHAR* fileName;
+    while (S_OK == xmlReader->Read(&nodeType))
     {
-        // load can return S_FALSE on failure
-        return hr;
-    }
-
-    ComPtr<IXMLDOMNodeList> fileList;
-    xmlDoc->setProperty(_bstr_t(L"SelectionNamespaces"), _variant_t(L"xmlns:m='urn:schemas-microsoft-com:asm.v1'"));
-    BSTR query = SysAllocString(L"/m:assembly/m:file");
-    RETURN_IF_FAILED(xmlDoc->selectNodes(query, &fileList));
-    if (fileList == nullptr)
-    {
-        return S_OK;
-    }
-
-    ComPtr<IXMLDOMNode> file;
-    while (SUCCEEDED(fileList->nextNode(&file)) && file)
-    {
-        ComPtr<IXMLDOMNamedNodeMap> attributes;
-        ComPtr<IXMLDOMNode> attribute;
-        ComPtr<IXMLDOMNodeList> activatableClassList;
-        ComPtr<IXMLDOMNode> activatableClass;
-        BSTR value;
-
-        auto this_component = make_shared<component>();
-
-        RETURN_IF_FAILED(file->get_attributes(&attributes));
-        RETURN_IF_FAILED(attributes->getNamedItem(BSTR(L"name"), &attribute));
-        RETURN_IF_FAILED(attribute->get_text(&value));
-        this_component->module_path = value;
-
-        RETURN_IF_FAILED(file->get_childNodes(&activatableClassList));
-        while (SUCCEEDED(activatableClassList->nextNode(&activatableClass)) && activatableClass)
+        if (nodeType == XmlNodeType_Element)
         {
-            RETURN_IF_FAILED(activatableClass->get_attributes(&attributes));
-            RETURN_IF_FAILED(attributes->getNamedItem(BSTR(L"threadingModel"), &attribute));
-            RETURN_IF_FAILED(attribute->get_text(&value));
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (localName && _wcsicmp(localName, L"file") == 0)
+            {
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
+                this_component->module_path = fileName;
+            }
+            else if (localName && _wcsicmp(localName, L"activatableClass") == 0)
+            {
+                const WCHAR* threadingModel;
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
 
-            if (wcsicmp(L"apartment", value) == 0)
-            {
-                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
-            }
-            else if (wcsicmp(L"free", value) == 0)
-            {
-                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
-            }
-            else
-            {
-                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
-            }
+                if (wcsicmp(L"apartment", threadingModel) == 0)
+                {
+                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
+                }
+                else if (wcsicmp(L"free", threadingModel) == 0)
+                {
+                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
+                }
+                else
+                {
+                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
+                }
 
-            RETURN_IF_FAILED(attributes->getNamedItem(BSTR(L"clsid"), &attribute));
-            RETURN_IF_FAILED(attribute->get_text(&value));
-            g_types[value] = this_component;
+                const WCHAR* xmlns;
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"xmlns", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&xmlns, nullptr));
+                this_component->xmlns = xmlns;
+
+                const WCHAR* activatableClass;
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"clsid", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&activatableClass, nullptr));
+                g_types[activatableClass] = this_component;
+            }
         }
     }
 

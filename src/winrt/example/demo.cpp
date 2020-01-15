@@ -17,15 +17,10 @@ int main(int argc, char *argv[])
     HRESULT hr = S_OK;
     CoInitialize(nullptr);
 
-    ComPtr<IInspectable> instance;
-    hr = RoActivateInstance(HStringReference(L"test_component.Class").Get(), &instance);
-    if (FAILED(hr)) { printf("Failed activate: %x\n", hr); return false; }
-
-    ExtRoLoadCatalog(LR"(demo2.manifest)");
-
+    ExtRoLoadCatalog(LR"(demo.manifest)");
     {
         ComPtr<IInspectable> instance;
-        hr = RoActivateInstance(HStringReference(L"test_component.Class").Get(), &instance);
+        hr = RoActivateInstance(HStringReference(L"RegFreeWinRtTest.TestComp").Get(), &instance);
         if (FAILED(hr)) { printf("Failed activate: %x\n", hr); return false; }
 
         HString result;
