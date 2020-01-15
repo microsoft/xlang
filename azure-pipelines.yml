@@ -14,6 +14,7 @@ pool:
 steps:
 - task: CMake@1
   inputs:
+    workingDirectory: 'winrt'
     cmakeArgs: 
     
 - script: echo Hello, world!
