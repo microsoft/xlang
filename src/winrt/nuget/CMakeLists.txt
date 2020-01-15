@@ -7,19 +7,13 @@ file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/build_tools/nuget.exe" nuget_exe)
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" regfree_winrt_nupkg_dir)
 file(TO_NATIVE_PATH "${regfree_winrt_nupkg_dir}/Microsoft.Windows.RegFreeWinRT.nupkg" regfree_winrt_nupkg)
 
-get_target_property(cppwinrt_exe cppwinrt "cppwinrt_exe")
-
 file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuget_exe})
 
 add_custom_command(OUTPUT ${regfree_winrt_nupkg}
-    COMMAND ${nuget_exe} pack ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.RegFreeWinrt.nuspec -Version ${REGFREE_WINRT_BUILD_VERSION} -OutputDirectory ${CMAKE_CURRENT_BINARY_DIR} -NonInteractive -Verbosity Detailed
-    DEPENDS ${cppwinrt_exe} ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.RegFreeWinrt.nuspec
+    COMMAND ${nuget_exe} pack ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.RegFreeWinrt.nuspec -Properties winrtact=${CMAKE_CURRENT_BINARY_DIR}/../activation/winrtact.dll winrtactinclude=${CMAKE_CURRENT_SOURCE_DIR}/../include/extwinrt.h -Version ${REGFREE_WINRT_BUILD_VERSION} -OutputDirectory ${CMAKE_CURRENT_BINARY_DIR} -NonInteractive -Verbosity Detailed
 )
 
-add_custom_target(make_cppwinrt_nupkg ALL DEPENDS cppwinrt ${cppwinrt_nupkg} cppwinrt_fast_fwd)
-
-set_target_properties(make_cppwinrt_nupkg PROPERTIES "cppwinrt_nupkg_dir" ${cppwinrt_nupkg_dir})
-set_target_properties(make_cppwinrt_nupkg PROPERTIES "cppwinrt_nupkg" ${cppwinrt_nupkg})
+#"D:\Downloads\nuget.exe" pack "C:\Users\kyawt\source\repos\xlang\src\winrt\nuget\Microsoft.Windows.RegFreeWinrt.nuspec" -Properties winrtact="C:\Users\kyawt\source\repos\xlang\src\_build\Windows\x64\Release\winrt\activation\winrtact.dll" -Properties winrtactinclude="C:\Users\kyawt\source\repos\xlang\src\winrt\include\extwinrt.h" -NonInteractive -Verbosity Detailed
 
 endif()
 
