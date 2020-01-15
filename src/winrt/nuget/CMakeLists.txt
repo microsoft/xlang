@@ -10,7 +10,7 @@ file(TO_NATIVE_PATH "${regfree_winrt_nupkg_dir}/Microsoft.Windows.RegFreeWinRT.n
 file(DOWNLOAD https://dist.nuget.org/win-x86-commandline/latest/nuget.exe ${nuget_exe})
 
 add_custom_command(OUTPUT ${regfree_winrt_nupkg}
-    COMMAND ${nuget_exe} pack ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.RegFreeWinrt.nuspec -Properties winrtact=${CMAKE_CURRENT_BINARY_DIR}/../activation/winrtact.dll -Version ${REGFREE_WINRT_BUILD_VERSION} -OutputDirectory ${CMAKE_CURRENT_BINARY_DIR} -NonInteractive -Verbosity Detailed
+    COMMAND ${nuget_exe} pack ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.RegFreeWinrt.nuspec -Properties winrtact=${CMAKE_CURRENT_BINARY_DIR}/../activation/winrtact.dll winrtactinclude=${CMAKE_CURRENT_SOURCE_DIR}/../include/extwinrt.h -Version ${REGFREE_WINRT_BUILD_VERSION} -OutputDirectory ${CMAKE_CURRENT_BINARY_DIR} -NonInteractive -Verbosity Detailed
 )
 
 add_custom_target(make_cppwinrt_nupkg ALL DEPENDS cppwinrt ${cppwinrt_nupkg} cppwinrt_fast_fwd)

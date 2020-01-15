@@ -17,7 +17,8 @@
   </metadata>
   <files>
     <file src="LICENSE"/>
-    <file src="$winrtact$" target="lib"></file>
+    <file src="$winrtact$" target="build"></file>
+    <file src="$winrtactinclude$" target="content"></file>
     <file src="readme.txt"/>
   </files>
 </package>
