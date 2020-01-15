@@ -1,7 +1,5 @@
 # Starter pipeline
-- task: CMake@1
-  inputs:
-    cmakeArgs: 
+
 
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
@@ -14,6 +12,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- task: CMake@1
+  inputs:
+    cmakeArgs: 
+    
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
 
