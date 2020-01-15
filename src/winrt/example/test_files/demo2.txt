@@ -1,0 +1,3 @@
+test_component.dll
+MyComponent.winmd
+test_component.Class

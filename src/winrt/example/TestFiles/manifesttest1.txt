@@ -1,0 +1,3 @@
+regfree_winrt_test_component.dll
+regfree_winrt_test_component.winmd
+regfree_winrt_test_component.Class
