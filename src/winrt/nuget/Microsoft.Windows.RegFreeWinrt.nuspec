@@ -16,12 +16,7 @@
     <iconUrl>https://aka.ms/cppwinrt.ico</iconUrl>
   </metadata>
   <files>
-    <file src="..\LICENSE"/>
-    <file src="$cppwinrt_exe$" target="bin"/>
-    <file src="$cppwinrt_fast_fwd_x86$" target="build\native\lib\win32"/>
-    <file src="$cppwinrt_fast_fwd_x64$" target="build\native\lib\x64"/>
-    <file src="$cppwinrt_fast_fwd_arm$" target="build\native\lib\arm"/>
-    <file src="$cppwinrt_fast_fwd_arm64$" target="build\native\lib\arm64"/>
+    <file src="winrtact" target="lib"></file>
     <file src="readme.txt"/>
   </files>
 </package>
