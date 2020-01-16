@@ -21,5 +21,6 @@ add_custom_command(OUTPUT ${regfree_winrt_nupkg}
     COMMAND ${nuget_exe} pack ${CMAKE_CURRENT_SOURCE_DIR}/Microsoft.Windows.UndockedRegFreeWinrt.nuspec -Properties winrtactinclude=${CMAKE_CURRENT_SOURCE_DIR}/include/extwinrt.h -Version ${REGFREE_WINRT_BUILD_VERSION} -OutputDirectory ${CMAKE_CURRENT_BINARY_DIR} -NonInteractive -Verbosity Detailed
 )
 
+add_custom_target(make_regfree_winrt_nupkg DEPENDS ${regfree_winrt_nupkg})
 #"C:\Users\kythant\Downloads\nuget.exe" pack "E:\xlang\src\winrt\Microsoft.Windows.RegFreeWinrt.nuspec" -Properties winrtactinclude="C:\Users\kyawt\source\repos\xlang\src\winrt\include\extwinrt.h" -NonInteractive -Verbosity Detailed
 #"C:\Users\kythant\Downloads\nuget.exe" pack "E:\xlang\src\winrt\Microsoft.Windows.UndockedRegFreeWinrt.nuspec" -Properties winrtactinclude="E:\xlang\src\winrt\include\extwinrt.h" -NonInteractive -Verbosity Detailed
