@@ -195,7 +195,8 @@ goto :init
     echo Using build type..... %BUILD_TYPE%
     echo Using build root..... %CD%
     echo.
-    cmake %CMAKE_ARGS% ..\..
+    echo Using cmake args %CMAKE_ARGS%
+    cmake %CMAKE_ARGS%
     popd
 
     goto :eof
