@@ -14,7 +14,7 @@ pool:
 steps:
 - task: CMake@1
   inputs:
-    workingDirectory: 'build.common'
+    workingDirectory: 'src/winrt'
     cmakeArgs: 
     
 - script: echo Hello, world!
