@@ -91,13 +91,13 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
         if (nodeType == XmlNodeType_Element)
         {
             RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
-            if (localName && _wcsicmp(localName, L"file") == 0)
+            if (_wcsicmp(localName, L"file") == 0)
             {
                 RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
                 RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
                 this_component->module_path = fileName;
             }
-            else if (localName && _wcsicmp(localName, L"activatableClass") == 0)
+            else if (_wcsicmp(localName, L"activatableClass") == 0)
             {
                 const WCHAR* threadingModel;
                 RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
