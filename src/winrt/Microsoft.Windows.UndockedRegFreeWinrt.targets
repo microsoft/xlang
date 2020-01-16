@@ -1,4 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ClCompile>
+    <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\content\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+  </ClCompile>
   <!-- x86 -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x86\debug\winrtact.dll" />
