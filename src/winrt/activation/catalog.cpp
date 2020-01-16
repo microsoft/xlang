@@ -80,6 +80,7 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
     ComPtr<IXmlReader> xmlReader;
     XmlNodeType nodeType;
     const WCHAR* localName = L"";
+    auto locale = _create_locale(LC_ALL, "C");
     auto this_component = make_shared<component>();
 
     RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifest_path, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
@@ -91,27 +92,27 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
         if (nodeType == XmlNodeType_Element)
         {
             RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
-            if (_wcsicmp(localName, L"file") == 0)
+            if (_wcsicmp_l(localName, L"file", locale) == 0)
             {
                 RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
                 RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
                 this_component->module_path = fileName;
             }
-            else if (_wcsicmp(localName, L"activatableClass") == 0)
+            else if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
             {
                 const WCHAR* threadingModel;
                 RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
                 RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
 
-                if (wcsicmp(L"sta", threadingModel) == 0)
+                if (_wcsicmp_l(L"sta", threadingModel, locale) == 0)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
                 }
-                else if (wcsicmp(L"mta", threadingModel) == 0)
+                else if (_wcsicmp_l(L"mta", threadingModel, locale) == 0)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
                 }
-                else if(wcsicmp(L"both", threadingModel) == 0)
+                else if(_wcsicmp_l(L"both", threadingModel, locale) == 0)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
                 }
