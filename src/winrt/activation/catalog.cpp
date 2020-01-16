@@ -103,17 +103,21 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
                 RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
                 RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
 
-                if (wcsicmp(L"apartment", threadingModel) == 0)
+                if (wcsicmp(L"sta", threadingModel) == 0)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
                 }
-                else if (wcsicmp(L"free", threadingModel) == 0)
+                else if (wcsicmp(L"mta", threadingModel) == 0)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
                 }
-                else
+                else if(wcsicmp(L"both", threadingModel) == 0)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
+                }
+                else
+                {
+                    return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
                 }
 
                 const WCHAR* xmlns;

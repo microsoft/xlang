@@ -3,7 +3,7 @@
   <file name="test_comp.dll">
     <activatableClass
         clsid="RegFreeWinRtTest.TestComp"
-        threadingModel="Apartment"
+        threadingModel="sta"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
   </file>
 </assembly>
