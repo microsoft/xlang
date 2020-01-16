@@ -188,7 +188,7 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     DWORD* subNamespacesCount,
     HSTRING** subNamespaces)
 {
-    HRESULT hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
+    HRESULT hr = WinRTResolveNamespaceDetour(name, windowsMetaDataDir,
         packageGraphDirsCount, packageGraphDirs,
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
@@ -216,6 +216,7 @@ void InstallHooks()
     DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour);
     DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour);
     DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour);
+    DetourAttach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour);
     DetourTransactionCommit();
 }
 
@@ -227,6 +228,7 @@ void RemoveHooks()
     DetourDetach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour);
     DetourDetach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour);
     DetourDetach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour);
+    DetourDetach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour);
     DetourTransactionCommit();
 }
 
