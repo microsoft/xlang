@@ -1,0 +1,3 @@
+test_comp.dll
+test_comp.winmd
+RegFreeWinRtTest.TestComp
