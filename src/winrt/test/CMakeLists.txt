@@ -27,6 +27,10 @@ add_custom_command(TARGET regfree_winrt_test POST_BUILD
 file(GLOB test_files
   "test_files/*"
 )
-file(COPY ${test_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_custom_command(TARGET regfree_winrt_test POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${test_files}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 add_subdirectory(test_comp)
