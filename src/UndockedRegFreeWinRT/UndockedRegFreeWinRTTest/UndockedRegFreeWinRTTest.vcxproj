@@ -164,6 +164,20 @@
       <Project>{31ed69a8-5310-45a9-953f-56c351d2c3e1}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ContentWithTargetPath  Include="test_files\manifestTestBoth.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>manifestTestBoth.manifest</TargetPath>
+    </ContentWithTargetPath >
+    <ContentWithTargetPath  Include="test_files\manifestTestMTA.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>manifestTestMTA.manifest</TargetPath>
+    </ContentWithTargetPath >
+    <ContentWithTargetPath  Include="test_files\manifestTestSTA.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>manifestTestSTA.manifest</TargetPath>
+    </ContentWithTargetPath >
+</ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
