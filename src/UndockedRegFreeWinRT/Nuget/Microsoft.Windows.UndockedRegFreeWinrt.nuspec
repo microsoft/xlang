@@ -16,7 +16,7 @@
   </metadata>
   <files>
     <file src="LICENSE"/>
-    <file src="$winrtactinclude$" target="include\"></file>
+    <file src="$winrtactinclude$" target="content"></file>
     <file src="Microsoft.Windows.UndockedRegFreeWinrt.targets" target="build\native"/>
     <file src="readme.txt"/>
     <file src="$winrtactx64release$" target="runtimes\x64\release\"/>
