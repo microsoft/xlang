@@ -1,29 +1,47 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ClCompile>
+  <ResourceCompile>
     <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\content\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-  </ClCompile>
+  </ResourceCompile>
   <!-- x86 -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x86\debug\winrtact.dll" />
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)\..\..\runtimes\x86\debug\/winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Release' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x86\release\winrtact.dll" />
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)\..\..\runtimes\x86\release\/winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemGroup>
 
   <!-- x64 -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'x64'">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x64\debug\winrtact.dll" />
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)\..\..\runtimes\x64\debug\/winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemGroup>
-   <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64'">
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64'">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x64\release\winrtact.dll" />
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)\..\..\runtimes\x64\release\/winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemGroup>
 
   <!-- arm64 -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'ARM64'">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\arm64\debug\winrtact.dll" />
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)\..\..\runtimes\arm64\debug\/winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemGroup>
-   <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'ARM64'">
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'ARM64'">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\arm64\release\winrtact.dll" />
+     <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)\..\..\runtimes\arm64\release\/winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemGroup>
 
 
