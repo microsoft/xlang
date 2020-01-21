@@ -8,7 +8,8 @@
 #include <stdio.h>
 #include <wrl\client.h>
 #include <wrl\wrappers\corewrappers.h>
-#include <extwinrt.h>
+
+#include "../UndockedRegFreeWinRT/extwinrt.h"
 
 using namespace Microsoft::WRL;
 using namespace ABI::Windows::Foundation;

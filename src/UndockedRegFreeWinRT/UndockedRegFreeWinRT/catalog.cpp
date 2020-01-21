@@ -16,7 +16,7 @@
 #include <locale>
 #include <string>
 
-#include <catalog.h>
+#include "catalog.h"
 
 using namespace std;
 using namespace Microsoft::WRL;
@@ -25,7 +25,7 @@ using namespace Microsoft::WRL;
 
 extern "C"
 {
-    typedef HRESULT (__stdcall * activation_factory_type)(HSTRING, IActivationFactory**) ;
+    typedef HRESULT(__stdcall* activation_factory_type)(HSTRING, IActivationFactory**);
 }
 
 // Intentionally no class factory cache here. That would be excessive since 
@@ -112,7 +112,7 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
                 }
-                else if(_wcsicmp_l(L"both", threadingModel, locale) == 0)
+                else if (_wcsicmp_l(L"both", threadingModel, locale) == 0)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
                 }
@@ -161,7 +161,7 @@ HRESULT WinRTGetActivationFactory(
         return component_iter->second->GetActivationFactory(activatableClassId, iid, factory);
     }
     return REGDB_E_CLASSNOTREG;
-    
+
 }
 
 HRESULT WinRTGetMetadataFile(
@@ -175,7 +175,7 @@ HRESULT WinRTGetMetadataFile(
     // documentation: 
     //  https://docs.microsoft.com/en-us/uwp/winrt-cref/winmd-files
     //  https://docs.microsoft.com/en-us/windows/win32/api/rometadataresolution/nf-rometadataresolution-rogetmetadatafile
-    
+
     // algorithm: search our metadata, find best match if any.
     // search system metedata. 
     // Take longest string match excluding extension (which should be winmd, but not clear it's required to be).

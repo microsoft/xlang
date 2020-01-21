@@ -3,7 +3,7 @@
 #include <combaseapi.h>
 #include <windows.foundation.h>
 #include <winstring.h>
-#include <test_comp.h>
+#include "test_comp.h"
 
 IFACEMETHODIMP
 RegFreeWinRtTest::TestComp::ToString(__out HSTRING* result)
