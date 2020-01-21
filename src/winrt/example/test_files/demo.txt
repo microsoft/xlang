@@ -1,3 +1,0 @@
-MyComponent.winmd
-MyComponent.winmd
-MyComponent.SampleClass

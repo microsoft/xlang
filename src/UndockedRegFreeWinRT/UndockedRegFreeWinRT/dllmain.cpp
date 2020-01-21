@@ -3,14 +3,15 @@
 #include <roapi.h>
 #include <rometadataresolution.h>
 #include <windows.foundation.h>
-#include <detours.h>
-#include <catalog.h>
-#include <extwinrt.h>
 #include <activationregistration.h>
 #include <combaseapi.h>
 #include <wrl.h>
 #include <ctxtcall.h>
 #include <Processthreadsapi.h>
+
+#include "../detours/detours.h"
+#include "catalog.h"
+#include "extwinrt.h"
 
 static decltype(RoActivateInstance)* TrueRoActivateInstance = RoActivateInstance;
 static decltype(RoGetActivationFactory)* TrueRoGetActivationFactory = RoGetActivationFactory;
@@ -28,12 +29,12 @@ VOID CALLBACK EnsureMTAInitializedCallBack
     CoGetObjectContext(IID_PPV_ARGS(&spThreadingInfo));
 }
 
-/* 
-In the context callback call to the MTA apartment, there is a bug that prevents COM 
-from automatically initializing MTA remoting. It only allows NTA to be intialized 
-outside of the NTA and blocks all others. The workaround for this is to spin up another 
-thread that is not been CoInitialize. COM treats this thread as a implicit MTA and 
-when we call CoGetObjectContext on it we implicitily initialized the MTA. 
+/*
+In the context callback call to the MTA apartment, there is a bug that prevents COM
+from automatically initializing MTA remoting. It only allows NTA to be intialized
+outside of the NTA and blocks all others. The workaround for this is to spin up another
+thread that is not been CoInitialize. COM treats this thread as a implicit MTA and
+when we call CoGetObjectContext on it we implicitily initialized the MTA.
 */
 HRESULT EnsureMTAInitialized()
 {
@@ -45,7 +46,7 @@ HRESULT EnsureMTAInitialized()
         return HRESULT_FROM_WIN32(GetLastError());
     }
     SetThreadpoolThreadMaximum(pool, 1);
-    if (!SetThreadpoolThreadMinimum(pool, 1)) 
+    if (!SetThreadpoolThreadMinimum(pool, 1))
     {
         return HRESULT_FROM_WIN32(GetLastError());
     }
@@ -87,32 +88,32 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     ABI::Windows::Foundation::ThreadingType threading_model;
     if (WinRTGetThreadingModel(activatableClassId, &threading_model) == REGDB_E_CLASSNOTREG)
     {
-        return TrueRoActivateInstance(activatableClassId, instance);
+        return E_FAIL;
     }
     switch (threading_model)
     {
-        case ABI::Windows::Foundation::ThreadingType_BOTH :
-            activationLocation = CurrentApartment;
-            break;
-        case ABI::Windows::Foundation::ThreadingType_STA :
-            if (aptType == APTTYPE_MTA)
-            {
-                return RO_E_UNSUPPORTED_FROM_MTA;
-            }
-            else
-            {
-                activationLocation = CurrentApartment;
-            }
+    case ABI::Windows::Foundation::ThreadingType_BOTH:
+        activationLocation = CurrentApartment;
         break;
-        case ABI::Windows::Foundation::ThreadingType_MTA :
-            if (aptType == APTTYPE_MTA)
-            {
-                activationLocation = CurrentApartment;
-            }
-            else
-            {
-                activationLocation = CrossApartmentMTA;
-            }
+    case ABI::Windows::Foundation::ThreadingType_STA:
+        if (aptType == APTTYPE_MTA)
+        {
+            return RO_E_UNSUPPORTED_FROM_MTA;
+        }
+        else
+        {
+            activationLocation = CurrentApartment;
+        }
+        break;
+    case ABI::Windows::Foundation::ThreadingType_MTA:
+        if (aptType == APTTYPE_MTA)
+        {
+            activationLocation = CurrentApartment;
+        }
+        else
+        {
+            activationLocation = CrossApartmentMTA;
+        }
         break;
     }
     // Activate in current apartment
@@ -125,7 +126,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     // Cross apartment MTA activation
     struct CrossApartmentMTAActData {
         HSTRING activatableClassId;
-        IStream *stream;
+        IStream* stream;
     };
     CrossApartmentMTAActData cbdata{ activatableClassId };
     CO_MTA_USAGE_COOKIE mtaUsageCookie;
@@ -188,7 +189,7 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     DWORD* subNamespacesCount,
     HSTRING** subNamespaces)
 {
-    HRESULT hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
+    HRESULT hr = WinRTResolveNamespaceDetour(name, windowsMetaDataDir,
         packageGraphDirsCount, packageGraphDirs,
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
@@ -216,6 +217,7 @@ void InstallHooks()
     DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour);
     DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour);
     DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour);
+    DetourAttach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour);
     DetourTransactionCommit();
 }
 
@@ -227,6 +229,7 @@ void RemoveHooks()
     DetourDetach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour);
     DetourDetach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour);
     DetourDetach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour);
+    DetourDetach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour);
     DetourTransactionCommit();
 }
 
