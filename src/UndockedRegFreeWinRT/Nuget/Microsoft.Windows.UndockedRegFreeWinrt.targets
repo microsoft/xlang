@@ -1,9 +1,9 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ResourceCompile>
-    <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\content\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-  </ResourceCompile>
   
   <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\content\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <Link>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Debug' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(MSBuildThisFileDirectory)..\..\runtimes\x86\debug\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Release' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(MSBuildThisFileDirectory)..\..\runtimes\x86\release\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
