@@ -10,6 +10,7 @@ RegFreeWinRtTest::TestComp::ToString(__out HSTRING* result)
 {
     APTTYPE aptType;
     APTTYPEQUALIFIER aptQualifier;
+    // Returning apartment type via ToString
     if (CoGetApartmentType(&aptType, &aptQualifier) == S_OK)
     {
         if (aptType == APTTYPE_STA)
