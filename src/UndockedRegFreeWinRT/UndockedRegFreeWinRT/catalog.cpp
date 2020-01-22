@@ -4,6 +4,11 @@
 #include <roapi.h>
 #include <winstring.h>
 #include <rometadataresolution.h>
+#include <combaseapi.h>
+#include <wrl.h>
+#include <xmllite.h>
+#include <Shlwapi.h>
+#include <comutil.h>
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
@@ -11,15 +16,16 @@
 #include <locale>
 #include <string>
 
-#include <catalog.h>
+#include "catalog.h"
 
 using namespace std;
+using namespace Microsoft::WRL;
 
 // TODO: Components won't respect COM lifetime. workaround to get them in the COM list?
 
 extern "C"
 {
-    typedef HRESULT (__stdcall * activation_factory_type)(HSTRING, IActivationFactory**) ;
+    typedef HRESULT(__stdcall* activation_factory_type)(HSTRING, IActivationFactory**);
 }
 
 // Intentionally no class factory cache here. That would be excessive since 
@@ -27,7 +33,7 @@ extern "C"
 struct component
 {
     wstring module_path;
-    wstring metadata_path;
+    wstring xmlns;
     HMODULE handle = nullptr;
     activation_factory_type get_activation_factory;
     ABI::Windows::Foundation::ThreadingType threading_model;
@@ -70,26 +76,62 @@ static unordered_map < wstring, shared_ptr<component> > g_types;
 
 HRESULT WinRTLoadComponent(PCWSTR manifest_path)
 {
+    ComPtr<IStream> fileStream;
+    ComPtr<IXmlReader> xmlReader;
+    XmlNodeType nodeType;
+    const WCHAR* localName = L"";
+    auto locale = _create_locale(LC_ALL, "C");
     auto this_component = make_shared<component>();
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-    // first line is the name of the DLL that contains the types
-    ifstream manifest_file(manifest_path, ios_base::in);
-    std::string u8_module_name;
-    getline(manifest_file, u8_module_name);
-    this_component->module_path = converter.from_bytes(u8_module_name);
-
-    // second line is the name of the winmd that contains the types (in case of CLR, can be the same as dll)
-    string u8_metadata_path;
-    getline(manifest_file, u8_metadata_path);
-    this_component->metadata_path = converter.from_bytes(u8_metadata_path);
-
-    // each line after is an activatable class. No apartment-specific registration. Implicitly "both".
-    string u8_class_name;
-    while (getline(manifest_file, u8_class_name))
+    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifest_path, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
+    RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
+    RETURN_IF_FAILED(xmlReader->SetInput(fileStream.Get()));
+    const WCHAR* fileName;
+    while (S_OK == xmlReader->Read(&nodeType))
     {
-        std::wstring wide_class_name = converter.from_bytes(u8_class_name);
-        g_types[wide_class_name] = this_component;
+        if (nodeType == XmlNodeType_Element)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (_wcsicmp_l(localName, L"file", locale) == 0)
+            {
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
+                this_component->module_path = fileName;
+            }
+            else if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
+            {
+                const WCHAR* threadingModel;
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
+
+                if (_wcsicmp_l(L"sta", threadingModel, locale) == 0)
+                {
+                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
+                }
+                else if (_wcsicmp_l(L"mta", threadingModel, locale) == 0)
+                {
+                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
+                }
+                else if (_wcsicmp_l(L"both", threadingModel, locale) == 0)
+                {
+                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
+                }
+                else
+                {
+                    return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+                }
+
+                const WCHAR* xmlns;
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"xmlns", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&xmlns, nullptr));
+                this_component->xmlns = xmlns;
+
+                const WCHAR* activatableClass;
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"clsid", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&activatableClass, nullptr));
+                g_types[activatableClass] = this_component;
+            }
+        }
     }
 
     return S_OK;
@@ -119,7 +161,7 @@ HRESULT WinRTGetActivationFactory(
         return component_iter->second->GetActivationFactory(activatableClassId, iid, factory);
     }
     return REGDB_E_CLASSNOTREG;
-    
+
 }
 
 HRESULT WinRTGetMetadataFile(
@@ -133,7 +175,7 @@ HRESULT WinRTGetMetadataFile(
     // documentation: 
     //  https://docs.microsoft.com/en-us/uwp/winrt-cref/winmd-files
     //  https://docs.microsoft.com/en-us/windows/win32/api/rometadataresolution/nf-rometadataresolution-rogetmetadatafile
-    
+
     // algorithm: search our metadata, find best match if any.
     // search system metedata. 
     // Take longest string match excluding extension (which should be winmd, but not clear it's required to be).

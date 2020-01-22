@@ -8,7 +8,8 @@
 #include <stdio.h>
 #include <wrl\client.h>
 #include <wrl\wrappers\corewrappers.h>
-#include <extwinrt.h>
+
+#include "../UndockedRegFreeWinRT/extwinrt.h"
 
 using namespace Microsoft::WRL;
 using namespace ABI::Windows::Foundation;
@@ -16,8 +17,7 @@ using namespace Microsoft::WRL::Wrappers;
 
 TEST_CASE("Test STA activation")
 {
-    // TODO: Replace manifest with correct format that marks class as both STA and MTA
-    ExtRoLoadCatalog(L"manifesttest1.txt");
+    ExtRoLoadCatalog(L"manifestTestBoth.manifest");
     HRESULT hr = S_OK;
     CoInitialize(nullptr);
     {
@@ -40,8 +40,7 @@ TEST_CASE("Test STA activation")
 
 TEST_CASE("Test MTA activation")
 {
-    // TODO: Replace manifest with correct format that marks class as both STA and MTA
-    ExtRoLoadCatalog(L"manifesttest1.txt");
+    ExtRoLoadCatalog(L"manifestTestBoth.manifest");
     HRESULT hr = S_OK;
     CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     {
@@ -64,8 +63,7 @@ TEST_CASE("Test MTA activation")
 
 TEST_CASE("Test cross apartment MTA activation")
 {
-    // TODO: Replace manifest with correct format that marks class as only MTA
-    ExtRoLoadCatalog(L"manifesttest1.txt");
+    ExtRoLoadCatalog(L"manifestTestMTA.manifest");
     HRESULT hr = S_OK;
     CoInitialize(nullptr);
     {
@@ -88,8 +86,7 @@ TEST_CASE("Test cross apartment MTA activation")
 
 TEST_CASE("Test block STA to MTA activation")
 {
-    // TODO: Replace manifest with correct format that marks class as only STA
-    ExtRoLoadCatalog(L"manifesttest1.txt");
+    ExtRoLoadCatalog(L"manifestTestSTA.manifest");
     HRESULT hr = S_OK;
     CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     {

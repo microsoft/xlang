@@ -3,13 +3,14 @@
 #include <combaseapi.h>
 #include <windows.foundation.h>
 #include <winstring.h>
-#include <test_comp.h>
+#include "test_comp.h"
 
 IFACEMETHODIMP
 RegFreeWinRtTest::TestComp::ToString(__out HSTRING* result)
 {
     APTTYPE aptType;
     APTTYPEQUALIFIER aptQualifier;
+    // Returning apartment type via ToString
     if (CoGetApartmentType(&aptType, &aptQualifier) == S_OK)
     {
         if (aptType == APTTYPE_STA)
