@@ -39,5 +39,6 @@
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="test_files\manifestTestSTA.manifest" />
+    <CopyFileToFolders Include="test_files\RegFreeWinRtTest.winmd" />
   </ItemGroup>
 </Project>

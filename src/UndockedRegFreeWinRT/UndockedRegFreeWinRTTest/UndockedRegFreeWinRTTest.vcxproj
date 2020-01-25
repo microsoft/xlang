@@ -177,6 +177,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>manifestTestSTA.manifest</TargetPath>
     </ContentWithTargetPath >
+    <ContentWithTargetPath  Include="test_files\RegFreeWinRtTest.winmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>RegFreeWinRtTest.winmd</TargetPath>
+    </ContentWithTargetPath >
 </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

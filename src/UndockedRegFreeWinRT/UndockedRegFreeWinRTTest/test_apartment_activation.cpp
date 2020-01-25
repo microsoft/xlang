@@ -95,3 +95,19 @@ TEST_CASE("Test block STA to MTA activation")
     }
     CoUninitialize();
 }
+
+TEST_CASE("Test get metadata file")
+{
+    ExtRoLoadCatalog(L"manifestTestBoth.manifest");
+    HRESULT hr = S_OK;
+    CoInitialize(nullptr);
+    {
+        HString result;
+
+        hr = RoGetMetaDataFile(HStringReference(L"RegFreeWinRtTest.TestComp").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr);
+
+        REQUIRE(RoGetMetaDataFile(HStringReference(L"RegFreeWinRtTest.TestComp").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
+        REQUIRE(wcsstr(WindowsGetStringRawBuffer(result.Get(), 0), L"RegFreeWinRtTest.winmd") != nullptr);
+    }
+    CoUninitialize();
+}
