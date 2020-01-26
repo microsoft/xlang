@@ -37,6 +37,14 @@ struct component
     activation_factory_type get_activation_factory;
     ABI::Windows::Foundation::ThreadingType threading_model;
 
+    ~component()
+    {
+        if (handle)
+        {
+            FreeLibrary(handle);
+        }
+    }
+
     HRESULT LoadModule()
     {
         if (handle == nullptr)
@@ -189,6 +197,7 @@ HRESULT WinRTGetMetadataFile(
             // Let original RoGetMetadataFile handle Windows namespace
             return REGDB_E_CLASSNOTREG;
         }
+        WindowsDeleteString(substring);
     }
 
     DWORD metaDataFilePathsCount = 0;
