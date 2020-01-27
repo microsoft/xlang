@@ -34,11 +34,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="test_files\manifestTestMTA.manifest" />
-    <Manifest Include="test_files\manifestTestBoth.manifest" />
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="test_files\manifestTestSTA.manifest" />
-    <CopyFileToFolders Include="test_files\RegFreeWinRtTest.winmd" />
+    <None Include="packages.config" />
+    <None Include="directory.build.props" />
   </ItemGroup>
 </Project>

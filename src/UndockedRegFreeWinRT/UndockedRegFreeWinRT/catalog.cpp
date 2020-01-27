@@ -24,7 +24,7 @@ using namespace Microsoft::WRL::Wrappers;
 
 extern "C"
 {
-    typedef HRESULT (__stdcall * activation_factory_type)(HSTRING, IActivationFactory**) ;
+    typedef HRESULT(__stdcall* activation_factory_type)(HSTRING, IActivationFactory**);
 }
 
 // Intentionally no class factory cache here. That would be excessive since 
@@ -169,8 +169,7 @@ HRESULT WinRTGetActivationFactory(
     {
         return component_iter->second->GetActivationFactory(activatableClassId, iid, factory);
     }
-    return REGDB_E_CLASSNOTREG;
-    
+    return REGDB_E_CLASSNOTREG;    
 }
 
 HRESULT WinRTGetMetadataFile(

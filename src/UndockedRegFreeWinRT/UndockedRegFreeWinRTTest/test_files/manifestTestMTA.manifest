@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <file name="TestComp.dll">
+  <file name="TestComponent.dll">
     <activatableClass
-        clsid="RegFreeWinRtTest.TestComp"
+        clsid="TestComponent.Class"
         threadingModel="mta"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
   </file>
