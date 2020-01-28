@@ -11,6 +11,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Detours", "detours\detours.vcxproj", "{787EC629-C0FB-4BA9-9746-4A82CD06B73E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UndockedRegFreeWinRTTest", "UndockedRegFreeWinRTTest\UndockedRegFreeWinRTTest.vcxproj", "{DD92B07F-ED53-4318-A775-017AEEF2324F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E63DC9F0-834C-42C8-9392-13B0531A9959} = {E63DC9F0-834C-42C8-9392-13B0531A9959}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1E15BC1E-A4E7-4EC2-9E9B-855324963431}"
 	ProjectSection(SolutionItems) = preProject
