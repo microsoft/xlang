@@ -14,12 +14,11 @@
 #include <unordered_map>
 #include <codecvt>
 #include <locale>
-#include <string>
-
 #include "catalog.h"
 
 using namespace std;
 using namespace Microsoft::WRL;
+using namespace Microsoft::WRL::Wrappers;
 
 // TODO: Components won't respect COM lifetime. workaround to get them in the COM list?
 
@@ -32,25 +31,33 @@ extern "C"
 // other layers already cache.
 struct component
 {
-    wstring module_path;
+    wstring module_name;
     wstring xmlns;
     HMODULE handle = nullptr;
     activation_factory_type get_activation_factory;
     ABI::Windows::Foundation::ThreadingType threading_model;
 
+    ~component()
+    {
+        if (handle)
+        {
+            FreeLibrary(handle);
+        }
+    }
+
     HRESULT LoadModule()
     {
         if (handle == nullptr)
         {
-            handle = LoadLibraryW(module_path.c_str());
+            handle = LoadLibraryExW(module_name.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
             if (handle == nullptr)
             {
-                return HRESULT_FROM_WIN32(GetLastError());;
+                return HRESULT_FROM_WIN32(GetLastError());
             }
             this->get_activation_factory = (activation_factory_type)GetProcAddress(handle, "DllGetActivationFactory");
             if (this->get_activation_factory == nullptr)
             {
-                return HRESULT_FROM_WIN32(GetLastError());;
+                return HRESULT_FROM_WIN32(GetLastError());
             }
         }
         return (handle != nullptr && this->get_activation_factory != nullptr) ? S_OK : E_FAIL;
@@ -96,7 +103,7 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
             {
                 RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
                 RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
-                this_component->module_path = fileName;
+                this_component->module_name = fileName;
             }
             else if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
             {
@@ -112,7 +119,7 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
                 }
-                else if (_wcsicmp_l(L"both", threadingModel, locale) == 0)
+                else if(_wcsicmp_l(L"both", threadingModel, locale) == 0)
                 {
                     this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
                 }
@@ -160,8 +167,7 @@ HRESULT WinRTGetActivationFactory(
     {
         return component_iter->second->GetActivationFactory(activatableClassId, iid, factory);
     }
-    return REGDB_E_CLASSNOTREG;
-
+    return REGDB_E_CLASSNOTREG;    
 }
 
 HRESULT WinRTGetMetadataFile(
@@ -172,32 +178,45 @@ HRESULT WinRTGetMetadataFile(
     mdTypeDef* typeDefToken
 )
 {
-    // documentation: 
-    //  https://docs.microsoft.com/en-us/uwp/winrt-cref/winmd-files
-    //  https://docs.microsoft.com/en-us/windows/win32/api/rometadataresolution/nf-rometadataresolution-rogetmetadatafile
+    if (metaDataDispenser != nullptr ||
+        metaDataImport != nullptr ||
+        typeDefToken != nullptr)
+    {
+        return E_NOTIMPL;
+    }
 
-    // algorithm: search our metadata, find best match if any.
-    // search system metedata. 
-    // Take longest string match excluding extension (which should be winmd, but not clear it's required to be).
+    HSTRING substring;
+    if (SUCCEEDED(WindowsSubstringWithSpecifiedLength(name, 0, 7, &substring)))
+    {
+        int result;
+        if (SUCCEEDED(WindowsCompareStringOrdinal(substring, HStringReference(L"Windows").Get(), &result)) && (result == 0))
+        {
+            // Let original RoGetMetadataFile handle Windows namespace
+            return REGDB_E_CLASSNOTREG;
+        }
+        WindowsDeleteString(substring);
+    }
 
-    // TODO: Once implented, change the detour hook. no need to call the system API twice.
+    DWORD metaDataFilePathsCount = 0;
+    HSTRING* metaDataFilePaths;
+    RETURN_IF_FAILED(RoResolveNamespace(name, HStringReference(exeFilePath.c_str()).Get(),
+        0, nullptr,
+        &metaDataFilePathsCount, &metaDataFilePaths,
+        0, nullptr));
 
-    return REGDB_E_CLASSNOTREG;
-}
+    DWORD bestMatch = 0;
+    int bestMatchLength = 0;
+    for (DWORD i = 0; i < metaDataFilePathsCount; i++)
+    {
+        int length = WindowsGetStringLen(metaDataFilePaths[i]);
+        if (length > bestMatchLength)
+        {
+            bestMatch = i;
+            bestMatchLength = length;
+        }
+    }
 
-HRESULT WinRTResolveNamespaceDetour(
-    const HSTRING name,
-    const HSTRING windowsMetaDataDir,
-    const DWORD   packageGraphDirsCount,
-    const HSTRING* packageGraphDirs,
-    DWORD* metaDataFilePathsCount,
-    HSTRING** metaDataFilePaths,
-    DWORD* subNamespacesCount,
-    HSTRING** subNamespaces)
+    *metaDataFilePath = metaDataFilePaths[bestMatch];
 
-{
-    // documentation:
-    // https://docs.microsoft.com/en-us/windows/win32/api/rometadataresolution/nf-rometadataresolution-roresolvenamespace
-
-    return REGDB_E_CLASSNOTREG;
+    return S_OK;
 }

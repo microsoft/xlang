@@ -1,22 +1,61 @@
 #include <Windows.h>
 #include <synchapi.h>
 #include <roapi.h>
-#include <rometadataresolution.h>
 #include <windows.foundation.h>
 #include <activationregistration.h>
 #include <combaseapi.h>
 #include <wrl.h>
 #include <ctxtcall.h>
 #include <Processthreadsapi.h>
-
 #include "../detours/detours.h"
 #include "catalog.h"
 #include "extwinrt.h"
+#include <activation.h>
+#include <hstring.h>
+
+// Ensure that metadata resolution functions are imported so they can be detoured
+extern "C"
+{
+    __declspec(dllimport) HRESULT WINAPI RoGetMetaDataFile(
+        const HSTRING name,
+        IMetaDataDispenserEx* metaDataDispenser,
+        HSTRING* metaDataFilePath,
+        IMetaDataImport2** metaDataImport,
+        mdTypeDef* typeDefToken);
+
+    __declspec(dllimport) HRESULT WINAPI RoParseTypeName(
+        HSTRING typeName,
+        DWORD* partsCount,
+        HSTRING** typeNameParts);
+
+    __declspec(dllimport) HRESULT WINAPI RoResolveNamespace(
+        const HSTRING name,
+        const HSTRING windowsMetaDataDir,
+        const DWORD packageGraphDirsCount,
+        const HSTRING* packageGraphDirs,
+        DWORD* metaDataFilePathsCount,
+        HSTRING** metaDataFilePaths,
+        DWORD* subNamespacesCount,
+        HSTRING** subNamespaces);
+
+    __declspec(dllimport) HRESULT WINAPI RoIsApiContractPresent(
+        PCWSTR name,
+        UINT16 majorVersion,
+        UINT16 minorVersion,
+        BOOL* present);
+
+    __declspec(dllimport) HRESULT WINAPI RoIsApiContractMajorVersionPresent(
+        PCWSTR name,
+        UINT16 majorVersion,
+        BOOL* present);
+}
 
 static decltype(RoActivateInstance)* TrueRoActivateInstance = RoActivateInstance;
 static decltype(RoGetActivationFactory)* TrueRoGetActivationFactory = RoGetActivationFactory;
 static decltype(RoGetMetaDataFile)* TrueRoGetMetaDataFile = RoGetMetaDataFile;
 static decltype(RoResolveNamespace)* TrueRoResolveNamespace = RoResolveNamespace;
+
+std::wstring exeFilePath;
 
 VOID CALLBACK EnsureMTAInitializedCallBack
 (
@@ -29,12 +68,12 @@ VOID CALLBACK EnsureMTAInitializedCallBack
     CoGetObjectContext(IID_PPV_ARGS(&spThreadingInfo));
 }
 
-/*
-In the context callback call to the MTA apartment, there is a bug that prevents COM
-from automatically initializing MTA remoting. It only allows NTA to be intialized
-outside of the NTA and blocks all others. The workaround for this is to spin up another
-thread that is not been CoInitialize. COM treats this thread as a implicit MTA and
-when we call CoGetObjectContext on it we implicitily initialized the MTA.
+/* 
+In the context callback call to the MTA apartment, there is a bug that prevents COM 
+from automatically initializing MTA remoting. It only allows NTA to be intialized 
+outside of the NTA and blocks all others. The workaround for this is to spin up another 
+thread that is not been CoInitialize. COM treats this thread as a implicit MTA and 
+when we call CoGetObjectContext on it we implicitily initialized the MTA. 
 */
 HRESULT EnsureMTAInitialized()
 {
@@ -46,7 +85,7 @@ HRESULT EnsureMTAInitialized()
         return HRESULT_FROM_WIN32(GetLastError());
     }
     SetThreadpoolThreadMaximum(pool, 1);
-    if (!SetThreadpoolThreadMinimum(pool, 1))
+    if (!SetThreadpoolThreadMinimum(pool, 1)) 
     {
         return HRESULT_FROM_WIN32(GetLastError());
     }
@@ -92,28 +131,28 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     }
     switch (threading_model)
     {
-    case ABI::Windows::Foundation::ThreadingType_BOTH:
-        activationLocation = CurrentApartment;
-        break;
-    case ABI::Windows::Foundation::ThreadingType_STA:
-        if (aptType == APTTYPE_MTA)
-        {
-            return RO_E_UNSUPPORTED_FROM_MTA;
-        }
-        else
-        {
+        case ABI::Windows::Foundation::ThreadingType_BOTH :
             activationLocation = CurrentApartment;
-        }
+            break;
+        case ABI::Windows::Foundation::ThreadingType_STA :
+            if (aptType == APTTYPE_MTA)
+            {
+                return RO_E_UNSUPPORTED_FROM_MTA;
+            }
+            else
+            {
+                activationLocation = CurrentApartment;
+            }
         break;
-    case ABI::Windows::Foundation::ThreadingType_MTA:
-        if (aptType == APTTYPE_MTA)
-        {
-            activationLocation = CurrentApartment;
-        }
-        else
-        {
-            activationLocation = CrossApartmentMTA;
-        }
+        case ABI::Windows::Foundation::ThreadingType_MTA :
+            if (aptType == APTTYPE_MTA)
+            {
+                activationLocation = CurrentApartment;
+            }
+            else
+            {
+                activationLocation = CrossApartmentMTA;
+            }
         break;
     }
     // Activate in current apartment
@@ -126,7 +165,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     // Cross apartment MTA activation
     struct CrossApartmentMTAActData {
         HSTRING activatableClassId;
-        IStream* stream;
+        IStream *stream;
     };
     CrossApartmentMTAActData cbdata{ activatableClassId };
     CO_MTA_USAGE_COOKIE mtaUsageCookie;
@@ -142,7 +181,6 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
         {
             CrossApartmentMTAActData* data = reinterpret_cast<CrossApartmentMTAActData*>(pComCallData->pUserDefined);
             Microsoft::WRL::ComPtr<IInspectable> instance;
-            HRESULT hr;
             IActivationFactory* pFactory;
             RETURN_IF_FAILED(WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));
             RETURN_IF_FAILED(pFactory->ActivateInstance(&instance));
@@ -189,12 +227,12 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     DWORD* subNamespacesCount,
     HSTRING** subNamespaces)
 {
-    HRESULT hr = WinRTResolveNamespaceDetour(name, windowsMetaDataDir,
+    HRESULT hr = TrueRoResolveNamespace(name, Microsoft::WRL::Wrappers::HStringReference(exeFilePath.c_str()).Get(),
         packageGraphDirsCount, packageGraphDirs,
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
 
-    if (hr == REGDB_E_CLASSNOTREG)
+    if (hr == RO_E_METADATA_NAME_NOT_FOUND)
     {
         hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
             packageGraphDirsCount, packageGraphDirs,
@@ -209,6 +247,11 @@ void InstallHooks()
     if (DetourIsHelperProcess()) {
         return;
     }
+
+    WCHAR filePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, filePath, _countof(filePath));
+    std::wstring::size_type pos = std::wstring(filePath).find_last_of(L"\\/");
+    exeFilePath = std::wstring(filePath).substr(0, pos);
 
     DetourRestoreAfterWith();
 
@@ -233,9 +276,14 @@ void RemoveHooks()
     DetourTransactionCommit();
 }
 
-HRESULT WINAPI ExtRoLoadCatalog(PCWSTR componentPath)
+HRESULT ExtRoLoadCatalog()
 {
-    return WinRTLoadComponent(componentPath);
+    WCHAR filePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, filePath, _countof(filePath));
+    std::wstring manifestPath(filePath);
+    manifestPath += L".manifest";
+
+    return WinRTLoadComponent(manifestPath.c_str());
 }
 
 BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
@@ -243,6 +291,7 @@ BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
     if (reason == DLL_PROCESS_ATTACH)
     {
         InstallHooks();
+        ExtRoLoadCatalog();
     }
     if (reason == DLL_PROCESS_DETACH)
     {
@@ -251,3 +300,7 @@ BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
     return true;
 }
 
+extern "C" void WINAPI winrtact_Initialize()
+{
+    return;
+}
