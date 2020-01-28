@@ -276,9 +276,14 @@ void RemoveHooks()
     DetourTransactionCommit();
 }
 
-HRESULT WINAPI ExtRoLoadCatalog(PCWSTR componentPath)
+HRESULT ExtRoLoadCatalog()
 {
-    return WinRTLoadComponent(componentPath);
+    WCHAR filePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, filePath, _countof(filePath));
+    std::wstring manifestPath(filePath);
+    manifestPath += L".manifest";
+
+    return WinRTLoadComponent(manifestPath.c_str());
 }
 
 BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
@@ -286,6 +291,7 @@ BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
     if (reason == DLL_PROCESS_ATTACH)
     {
         InstallHooks();
+        ExtRoLoadCatalog();
     }
     if (reason == DLL_PROCESS_DETACH)
     {
@@ -294,3 +300,7 @@ BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
     return true;
 }
 
+extern "C" void WINAPI winrtact_Initialize()
+{
+    return;
+}

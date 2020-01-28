@@ -90,9 +90,7 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
     auto locale = _create_locale(LC_ALL, "C");
     auto this_component = make_shared<component>();
 
-    wstring fullPath = exeFilePath + L"\\" + manifest_path;
-
-    RETURN_IF_FAILED(SHCreateStreamOnFileEx(fullPath.c_str(), STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
+    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifest_path, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
     RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
     RETURN_IF_FAILED(xmlReader->SetInput(fileStream.Get()));
     const WCHAR* fileName;
