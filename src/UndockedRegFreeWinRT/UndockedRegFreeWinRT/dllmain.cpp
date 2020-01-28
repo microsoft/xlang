@@ -9,7 +9,6 @@
 #include <Processthreadsapi.h>
 #include "../detours/detours.h"
 #include "catalog.h"
-#include "extwinrt.h"
 #include <activation.h>
 #include <hstring.h>
 
