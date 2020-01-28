@@ -1,9 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
   <ItemDefinitionGroup>
-    <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\content\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
     <Link>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Debug' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(MSBuildThisFileDirectory)..\..\runtimes\x86\debug\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Release' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(MSBuildThisFileDirectory)..\..\runtimes\x86\release\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -11,6 +8,7 @@
       <AdditionalDependencies Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64'">$(MSBuildThisFileDirectory)..\..\runtimes\x64\release\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'ARM64'">$(MSBuildThisFileDirectory)..\..\runtimes\arm64\debug\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'ARM64'">$(MSBuildThisFileDirectory)..\..\runtimes\arm64\release\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ForceSymbolReferences>_winrtact_Initialize@0;%(ForceSymbolReferences)</ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   
