@@ -8,19 +8,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UndockedRegFreeWinRT", "Und
 		{787EC629-C0FB-4BA9-9746-4A82CD06B73E} = {787EC629-C0FB-4BA9-9746-4A82CD06B73E}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "detours", "detours\detours.vcxproj", "{787EC629-C0FB-4BA9-9746-4A82CD06B73E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Detours", "detours\detours.vcxproj", "{787EC629-C0FB-4BA9-9746-4A82CD06B73E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UndockedRegFreeWinRTTest", "UndockedRegFreeWinRTTest\UndockedRegFreeWinRTTest.vcxproj", "{DD92B07F-ED53-4318-A775-017AEEF2324F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A} = {883D007C-C5E5-4BD6-8693-D683CA7F182A}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestComp", "TestComp\TestComp.vcxproj", "{883D007C-C5E5-4BD6-8693-D683CA7F182A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1E15BC1E-A4E7-4EC2-9E9B-855324963431}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestComponent", "TestComponent\TestComponent.vcxproj", "{E63DC9F0-834C-42C8-9392-13B0531A9959}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,16 +59,18 @@ Global
 		{DD92B07F-ED53-4318-A775-017AEEF2324F}.Release|x64.Build.0 = Release|x64
 		{DD92B07F-ED53-4318-A775-017AEEF2324F}.Release|x86.ActiveCfg = Release|Win32
 		{DD92B07F-ED53-4318-A775-017AEEF2324F}.Release|x86.Build.0 = Release|Win32
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Debug|ARM.ActiveCfg = Debug|Win32
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Debug|x64.ActiveCfg = Debug|x64
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Debug|x64.Build.0 = Debug|x64
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Debug|x86.ActiveCfg = Debug|Win32
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Debug|x86.Build.0 = Debug|Win32
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Release|ARM.ActiveCfg = Release|Win32
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Release|x64.ActiveCfg = Release|x64
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Release|x64.Build.0 = Release|x64
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Release|x86.ActiveCfg = Release|Win32
-		{883D007C-C5E5-4BD6-8693-D683CA7F182A}.Release|x86.Build.0 = Release|Win32
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Debug|ARM.ActiveCfg = Debug|ARM
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Debug|ARM.Build.0 = Debug|ARM
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Debug|x64.ActiveCfg = Debug|x64
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Debug|x64.Build.0 = Debug|x64
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Debug|x86.ActiveCfg = Debug|Win32
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Debug|x86.Build.0 = Debug|Win32
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Release|ARM.ActiveCfg = Release|ARM
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Release|ARM.Build.0 = Release|ARM
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Release|x64.ActiveCfg = Release|x64
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Release|x64.Build.0 = Release|x64
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Release|x86.ActiveCfg = Release|Win32
+		{E63DC9F0-834C-42C8-9392-13B0531A9959}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
