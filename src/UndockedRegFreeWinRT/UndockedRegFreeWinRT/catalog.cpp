@@ -178,6 +178,7 @@ HRESULT WinRTGetMetadataFile(
     mdTypeDef* typeDefToken
 )
 {
+    std::cout << "Starting" << std::endl;
     if (metaDataDispenser != nullptr ||
         metaDataImport != nullptr ||
         typeDefToken != nullptr)
@@ -196,14 +197,14 @@ HRESULT WinRTGetMetadataFile(
         }
         WindowsDeleteString(substring);
     }
-
+    std::cout << "Second" << std::endl;
     DWORD metaDataFilePathsCount = 0;
     HSTRING* metaDataFilePaths;
     RETURN_IF_FAILED(RoResolveNamespace(name, HStringReference(exeFilePath.c_str()).Get(),
         0, nullptr,
         &metaDataFilePathsCount, &metaDataFilePaths,
         0, nullptr));
-
+    std::cout << "Third" << std::endl;
     DWORD bestMatch = 0;
     int bestMatchLength = 0;
     for (DWORD i = 0; i < metaDataFilePathsCount; i++)
