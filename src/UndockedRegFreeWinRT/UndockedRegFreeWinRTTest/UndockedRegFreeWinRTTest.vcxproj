@@ -182,14 +182,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>UndockedRegFreeWinRTTest.exe.manifest</TargetPath>
     </ContentWithTargetPath>
-    <ContentWithTargetPath Include="test_files\manifestTestMTA.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>manifestTestMTA.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="test_files\manifestTestSTA.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>manifestTestSTA.manifest</TargetPath>
-    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <None Include="directory.build.props" />

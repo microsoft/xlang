@@ -1,12 +1,30 @@
 ﻿#pragma once
 
-#include "Class.g.h"
+#include "ClassBoth.g.h"
+#include "ClassSta.g.h"
+#include "ClassMta.g.h"
 
 namespace winrt::TestComponent::implementation
 {
-    struct Class : ClassT<Class>
+    struct ClassBoth : ClassBothT<ClassBoth>
     {
-        Class() = default;
+        ClassBoth() = default;
+
+        int32_t Apartment();
+        void Apartment(int32_t value);
+    };
+
+    struct ClassSta : ClassStaT<ClassSta>
+    {
+        ClassSta() = default;
+
+        int32_t Apartment();
+        void Apartment(int32_t value);
+    };
+
+    struct ClassMta : ClassMtaT<ClassMta>
+    {
+        ClassMta() = default;
 
         int32_t Apartment();
         void Apartment(int32_t value);
@@ -15,7 +33,15 @@ namespace winrt::TestComponent::implementation
 
 namespace winrt::TestComponent::factory_implementation
 {
-    struct Class : ClassT<Class, implementation::Class>
+    struct ClassBoth : ClassBothT<ClassBoth, implementation::ClassBoth>
+    {
+    };
+
+    struct ClassSta : ClassStaT<ClassSta, implementation::ClassSta>
+    {
+    };
+
+    struct ClassMta : ClassMtaT<ClassMta, implementation::ClassMta>
     {
     };
 }

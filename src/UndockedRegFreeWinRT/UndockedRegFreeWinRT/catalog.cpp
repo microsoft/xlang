@@ -88,7 +88,6 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
     XmlNodeType nodeType;
     const WCHAR* localName = L"";
     auto locale = _create_locale(LC_ALL, "C");
-    auto this_component = make_shared<component>();
 
     RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifest_path, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
     RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
@@ -103,40 +102,50 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
             {
                 RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
                 RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
-                this_component->module_name = fileName;
-            }
-            else if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
-            {
-                const WCHAR* threadingModel;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
 
-                if (_wcsicmp_l(L"sta", threadingModel, locale) == 0)
+                while (S_OK == xmlReader->Read(&nodeType))
                 {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
-                }
-                else if (_wcsicmp_l(L"mta", threadingModel, locale) == 0)
-                {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
-                }
-                else if(_wcsicmp_l(L"both", threadingModel, locale) == 0)
-                {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
-                }
-                else
-                {
-                    return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
-                }
+                    if (nodeType == XmlNodeType_Element)
+                    {
+                        RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+                        if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
+                        {
+                            auto this_component = make_shared<component>();
+                            this_component->module_name = fileName;
 
-                const WCHAR* xmlns;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"xmlns", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&xmlns, nullptr));
-                this_component->xmlns = xmlns;
+                            const WCHAR* threadingModel;
+                            RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
+                            RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
 
-                const WCHAR* activatableClass;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"clsid", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&activatableClass, nullptr));
-                g_types[activatableClass] = this_component;
+                            if (_wcsicmp_l(L"sta", threadingModel, locale) == 0)
+                            {
+                                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
+                            }
+                            else if (_wcsicmp_l(L"mta", threadingModel, locale) == 0)
+                            {
+                                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
+                            }
+                            else if (_wcsicmp_l(L"both", threadingModel, locale) == 0)
+                            {
+                                this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
+                            }
+                            else
+                            {
+                                return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+                            }
+
+                            const WCHAR* xmlns;
+                            RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"xmlns", nullptr));
+                            RETURN_IF_FAILED(xmlReader->GetValue(&xmlns, nullptr));
+                            this_component->xmlns = xmlns;
+
+                            const WCHAR* activatableClass;
+                            RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"clsid", nullptr));
+                            RETURN_IF_FAILED(xmlReader->GetValue(&activatableClass, nullptr));
+                            g_types[activatableClass] = this_component;
+                        }
+                    }
+                }
             }
         }
     }
