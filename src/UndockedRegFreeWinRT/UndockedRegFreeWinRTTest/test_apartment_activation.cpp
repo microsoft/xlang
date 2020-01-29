@@ -59,6 +59,7 @@ TEST_CASE("Test block STA to MTA activation")
 TEST_CASE("Test get metadata file")
 {
     HString result;
-    REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
+    Microsoft::WRL::Wrappers::HStringReference local(L"TestComponent");
+    REQUIRE(RoGetMetaDataFile(local.Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
     REQUIRE(wcsstr(WindowsGetStringRawBuffer(result.Get(), 0), L"TestComponent.winmd") != nullptr);
 }

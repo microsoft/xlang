@@ -202,7 +202,8 @@ HRESULT WinRTGetMetadataFile(
     std::wcout << "exeFilePath: " << exeFilePath << std::endl;
     DWORD metaDataFilePathsCount = 0;
     HSTRING* metaDataFilePaths;
-    RETURN_IF_FAILED(RoResolveNamespace(name, HStringReference(exeFilePath.c_str()).Get(),
+    Microsoft::WRL::Wrappers::HStringReference local(exeFilePath.c_str());
+    RETURN_IF_FAILED(RoResolveNamespace(name, local.Get(),
         0, nullptr,
         &metaDataFilePathsCount, &metaDataFilePaths,
         0, nullptr));
