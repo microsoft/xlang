@@ -11,6 +11,7 @@
 #include "catalog.h"
 #include <activation.h>
 #include <hstring.h>
+#include <iostream>
 
 // Ensure that metadata resolution functions are imported so they can be detoured
 extern "C"
@@ -226,6 +227,7 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     DWORD* subNamespacesCount,
     HSTRING** subNamespaces)
 {
+    std::cout << "Roresolve detour" << std::endl;
     HRESULT hr = TrueRoResolveNamespace(name, Microsoft::WRL::Wrappers::HStringReference(exeFilePath.c_str()).Get(),
         packageGraphDirsCount, packageGraphDirs,
         metaDataFilePathsCount, metaDataFilePaths,
@@ -233,6 +235,7 @@ HRESULT WINAPI RoResolveNamespaceDetour(
 
     if (hr == RO_E_METADATA_NAME_NOT_FOUND)
     {
+        std::cout << "Roresolve detour 2" << std::endl;
         hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
             packageGraphDirsCount, packageGraphDirs,
             metaDataFilePathsCount, metaDataFilePaths,
