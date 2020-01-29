@@ -8,7 +8,8 @@
       <AdditionalDependencies Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64'">$(MSBuildThisFileDirectory)..\..\runtimes\x64\release\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'ARM64'">$(MSBuildThisFileDirectory)..\..\runtimes\arm64\debug\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'ARM64'">$(MSBuildThisFileDirectory)..\..\runtimes\arm64\release\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ForceSymbolReferences>_winrtact_Initialize@0;%(ForceSymbolReferences)</ForceSymbolReferences>
+      <ForceSymbolReferences Condition="'$(Platform)' == 'x86'">_winrtact_Initialize@0;%(ForceSymbolReferences)</ForceSymbolReferences>
+      <ForceSymbolReferences Condition="'$(Platform)' == 'x64'">winrtact_Initialize@0;%(ForceSymbolReferences)</ForceSymbolReferences>
     </Link>
   </ItemDefinitionGroup>
   
