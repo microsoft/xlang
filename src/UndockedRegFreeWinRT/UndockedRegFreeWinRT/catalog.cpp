@@ -198,6 +198,7 @@ HRESULT WinRTGetMetadataFile(
         WindowsDeleteString(substring);
     }
     std::cout << "Second" << std::endl;
+    std::wcout << "exeFilePath: " << exeFilePath << std::endl;
     DWORD metaDataFilePathsCount = 0;
     HSTRING* metaDataFilePaths;
     RETURN_IF_FAILED(RoResolveNamespace(name, HStringReference(exeFilePath.c_str()).Get(),
