@@ -230,7 +230,8 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     std::cout << "Roresolve detour" << std::endl;
     std::wcout << "Name2: " << WindowsGetStringRawBuffer(name, nullptr) << std::endl;
     std::wcout << "exeFilePath2: " << exeFilePath << std::endl;
-    HRESULT hr = TrueRoResolveNamespace(name, Microsoft::WRL::Wrappers::HStringReference(exeFilePath.c_str()).Get(),
+    Microsoft::WRL::Wrappers::HStringReference local(exeFilePath.c_str());
+    HRESULT hr = TrueRoResolveNamespace(name, local.Get(),
         packageGraphDirsCount, packageGraphDirs,
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
