@@ -12,6 +12,8 @@
 #include <activation.h>
 #include <hstring.h>
 
+#include "extwinrt.h"
+
 // Ensure that metadata resolution functions are imported so they can be detoured
 extern "C"
 {
@@ -285,8 +287,15 @@ HRESULT ExtRoLoadCatalog()
     return WinRTLoadComponent(manifestPath.c_str());
 }
 
+
 BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
 {
+    BOOL present = false;
+    // if version 8 is present, that means we're on 19h1 build 18362 and above and we want to disable detour.
+    if (RoIsApiContractMajorVersionPresent(L"Windows.Foundation.UniversalApiContract", 8, &present) == S_OK && present)
+    {
+        return true;
+    }
     if (reason == DLL_PROCESS_ATTACH)
     {
         InstallHooks();
@@ -297,6 +306,19 @@ BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
         RemoveHooks();
     }
     return true;
+}
+
+HRESULT WINAPI RegFreeWinRTInitializeForTest()
+{
+    InstallHooks();
+    ExtRoLoadCatalog();
+    return S_OK;
+}
+
+HRESULT WINAPI RegFreeWinRTUninitializeForTest()
+{
+    RemoveHooks();
+    return S_OK;
 }
 
 extern "C" void WINAPI winrtact_Initialize()
