@@ -22,8 +22,4 @@ HRESULT WinRTGetMetadataFile(
     IMetaDataImport2** metaDataImport,
     mdTypeDef* typeDefToken);
 
-HRESULT EnableByDefault();
-
 extern std::wstring exeFilePath;
-
-extern bool alwaysEnabled;
