@@ -11,8 +11,10 @@
 #include "catalog.h"
 #include <activation.h>
 #include <hstring.h>
-
+#include <VersionHelpers.h>
 #include "extwinrt.h"
+
+#define WIN1019H1_BLDNUM 18362
 
 // Ensure that metadata resolution functions are imported so they can be detoured
 extern "C"
@@ -128,7 +130,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     ABI::Windows::Foundation::ThreadingType threading_model;
     if (WinRTGetThreadingModel(activatableClassId, &threading_model) == REGDB_E_CLASSNOTREG)
     {
-        return E_FAIL;
+        return TrueRoActivateInstance(activatableClassId, instance);
     }
     switch (threading_model)
     {
@@ -191,6 +193,32 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
         &data, IID_ICallbackWithNoReentrancyToApplicationSTA, 5, nullptr)); // 5 is meaningless.
     RETURN_IF_FAILED(CoGetInterfaceAndReleaseStream(cbdata.stream, IID_IInspectable, (LPVOID*)instance));
     return S_OK;
+}
+
+VERSIONHELPERAPI IsWindowsVersionOrGreaterEx(WORD wMajorVersion, WORD wMinorVersion, WORD wServicePackMajor, WORD wBuildNumber)
+{
+    OSVERSIONINFOEXW osvi = { sizeof(osvi), 0, 0, 0, 0, {0}, 0, 0 };
+    DWORDLONG const dwlConditionMask = 
+        VerSetConditionMask(
+            VerSetConditionMask(
+                VerSetConditionMask(
+                    VerSetConditionMask(
+                        0, VER_MAJORVERSION, VER_GREATER_EQUAL),
+                    VER_MINORVERSION, VER_GREATER_EQUAL),
+                VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL),
+            VER_BUILDNUMBER, VER_GREATER_EQUAL);
+
+    osvi.dwMajorVersion = wMajorVersion;
+    osvi.dwMinorVersion = wMinorVersion;
+    osvi.wServicePackMajor = wServicePackMajor;
+    osvi.dwBuildNumber = wBuildNumber;
+
+    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR | VER_BUILDNUMBER, dwlConditionMask) != FALSE;
+}
+
+VERSIONHELPERAPI IsWindows1019H1OrGreater()
+{
+    return IsWindowsVersionOrGreaterEx(HIBYTE(_WIN32_WINNT_WINTHRESHOLD), LOBYTE(_WIN32_WINNT_WINTHRESHOLD), 0, WIN1019H1_BLDNUM);
 }
 
 HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID iid, void** factory)
@@ -290,9 +318,7 @@ HRESULT ExtRoLoadCatalog()
 
 BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
 {
-    BOOL present = false;
-    // if version 8 is present, that means we're on 19h1 build 18362 and above and we want to disable detour.
-    if (RoIsApiContractMajorVersionPresent(L"Windows.Foundation.UniversalApiContract", 8, &present) == S_OK && present)
+    if (IsWindows1019H1OrGreater())
     {
         return true;
     }
