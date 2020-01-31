@@ -239,6 +239,11 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     IMetaDataImport2** metaDataImport,
     mdTypeDef* typeDefToken)
 {
+    if (metaDataFilePath)
+    {
+        std::cout << *metaDataFilePath << std::endl;
+    }
+
     std::cout << "RoGetMetaDataFileDetoured" << std::endl;
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     std::cout << hr << std::endl;
@@ -261,18 +266,21 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     DWORD* subNamespacesCount,
     HSTRING** subNamespaces)
 {
+    std::cout << "RoResolveNamespaceDetourd" << std::endl;
     HRESULT hr = TrueRoResolveNamespace(name, Microsoft::WRL::Wrappers::HStringReference(exeFilePath.c_str()).Get(),
         packageGraphDirsCount, packageGraphDirs,
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
-
+    std::cout << hr << std::endl;
     if (FAILED(hr))
     {
+        std::cout << "RoResolveNamespaceDetourd2" << std::endl;
         hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
             packageGraphDirsCount, packageGraphDirs,
             metaDataFilePathsCount, metaDataFilePaths,
             subNamespacesCount, subNamespaces);
     }
+    std::cout << hr << std::endl;
     return hr;
 }
 
