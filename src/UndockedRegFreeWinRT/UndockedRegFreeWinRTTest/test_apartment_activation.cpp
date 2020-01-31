@@ -47,7 +47,7 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         std::cout << "3" << std::endl;
         winrt::TestComponent::ClassMta c;
         std::cout << "4" << std::endl;
-        RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), reinterpret_cast<::IInspectable**>(winrt::put_abi(instance)));
+        REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), reinterpret_cast<::IInspectable**>(winrt::put_abi(instance))) ==  S_OK);
         std::cout << "5" << std::endl;
         instance.as(c);
         std::cout << "6" << std::endl;
