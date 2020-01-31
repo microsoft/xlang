@@ -41,10 +41,10 @@ TEST_CASE("Undocked Regfree WinRT Activation")
     SECTION("Cross Apartment MTA Activation")
     {
         winrt::init_apartment(winrt::apartment_type::single_threaded);
-        ComPtr<IInspectable> d;
+        ComPtr<IInspectable> instance;
         winrt::TestComponent::ClassMta c;
-        RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), &d);
-        REQUIRE(d.CopyTo(winrt::guid_of<winrt::TestComponent::ClassMta>(), winrt::put_abi(c)) == S_OK);
+        RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), &instance);
+        REQUIRE(instance.CopyTo(winrt::guid_of<winrt::TestComponent::ClassMta>(), winrt::put_abi(c)) == S_OK);
         REQUIRE(c.Apartment() == APTTYPE_MTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
