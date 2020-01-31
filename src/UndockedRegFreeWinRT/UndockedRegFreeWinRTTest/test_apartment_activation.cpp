@@ -38,33 +38,33 @@ TEST_CASE("Undocked Regfree WinRT Activation")
     //    winrt::clear_factory_cache();
     //    winrt::uninit_apartment();
     //}
-    SECTION("Cross Apartment MTA Activation")
-    {
-        std::cout << "1" << std::endl;
-        winrt::init_apartment(winrt::apartment_type::single_threaded);
-        std::cout << "2" << std::endl;
-        ComPtr<IInspectable> instance;
-
-        std::cout << "3" << std::endl;
-        winrt::TestComponent::ClassMta c;
-        std::cout << "4" << std::endl;
-        REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), &instance) ==  S_OK);
-        std::cout << "5" << std::endl;
-        REQUIRE(instance.CopyTo(winrt::guid_of<winrt::TestComponent::ClassMta>(), winrt::put_abi(c)) == S_OK);
-        std::cout << "6" << std::endl;
-        REQUIRE(c.Apartment() == APTTYPE_MTA);
-        std::cout << "7" << std::endl;
-        winrt::clear_factory_cache();
-        winrt::uninit_apartment();
-    }
-    //SECTION("BLOCK STA To Current MTA")
+    //SECTION("Cross Apartment MTA Activation")
     //{
-    //    winrt::init_apartment();
-    //    winrt::TestComponent::ClassSta c;
-    //    REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassSta").Get(), (IInspectable**)winrt::put_abi(c)) == RO_E_UNSUPPORTED_FROM_MTA);
+    //    std::cout << "1" << std::endl;
+    //    winrt::init_apartment(winrt::apartment_type::single_threaded);
+    //    std::cout << "2" << std::endl;
+    //    ComPtr<IInspectable> instance;
+
+    //    std::cout << "3" << std::endl;
+    //    winrt::TestComponent::ClassMta c;
+    //    std::cout << "4" << std::endl;
+    //    REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), &instance) ==  S_OK);
+    //    std::cout << "5" << std::endl;
+    //    REQUIRE(instance.CopyTo(winrt::guid_of<winrt::TestComponent::ClassMta>(), winrt::put_abi(c)) == S_OK);
+    //    std::cout << "6" << std::endl;
+    //    REQUIRE(c.Apartment() == APTTYPE_MTA);
+    //    std::cout << "7" << std::endl;
     //    winrt::clear_factory_cache();
     //    winrt::uninit_apartment();
     //}
+    SECTION("BLOCK STA To Current MTA")
+    {
+        winrt::init_apartment();
+        winrt::TestComponent::ClassSta c;
+        REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassSta").Get(), (IInspectable**)winrt::put_abi(c)) == RO_E_UNSUPPORTED_FROM_MTA);
+        winrt::clear_factory_cache();
+        winrt::uninit_apartment();
+    }
     //SECTION("Test Get Metadata File")
     //{
     //    HString result;
