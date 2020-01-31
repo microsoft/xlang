@@ -13,7 +13,7 @@
 #include <hstring.h>
 #include <VersionHelpers.h>
 #include "extwinrt.h"
-
+#include <iostream>
 #define WIN1019H1_BLDNUM 18362
 
 // Ensure that metadata resolution functions are imported so they can be detoured
@@ -118,6 +118,7 @@ HRESULT EnsureMTAInitialized()
 
 HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable** instance)
 {
+    std::cout << "RoActivateInstanceDetoured" << std::endl;
     APTTYPE aptType;
     APTTYPEQUALIFIER aptQualifier;
     RETURN_IF_FAILED(CoGetApartmentType(&aptType, &aptQualifier));
