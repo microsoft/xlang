@@ -38,15 +38,17 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
-    //SECTION("Cross Apartment MTA Activation")
-    //{
-    //    winrt::init_apartment(winrt::apartment_type::single_threaded);
-    //    winrt::TestComponent::ClassMta c;
-    //    RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), (IInspectable**)winrt::put_abi(c));
-    //    REQUIRE(c.Apartment() == APTTYPE_MTA);
-    //    winrt::clear_factory_cache();
-    //    winrt::uninit_apartment();
-    //}
+    SECTION("Cross Apartment MTA Activation")
+    {
+        winrt::init_apartment(winrt::apartment_type::single_threaded);
+        ComPtr<IInspectable> d;
+        winrt::TestComponent::ClassMta c;
+        RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), &d);
+        REQUIRE(d.CopyTo(winrt::guid_of<winrt::TestComponent::ClassMta>(), winrt::put_abi(c)) == S_OK);
+        REQUIRE(c.Apartment() == APTTYPE_MTA);
+        winrt::clear_factory_cache();
+        winrt::uninit_apartment();
+    }
     SECTION("BLOCK STA To Current MTA")
     {
         winrt::init_apartment();
@@ -55,12 +57,12 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
-    //SECTION("Test Get Metadata File")
-    //{
-    //    HString result;
-    //    REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
-    //    REQUIRE(wcsstr(WindowsGetStringRawBuffer(result.Get(), 0), L"TestComponent.winmd") != nullptr);
-    //}
+    SECTION("Test Get Metadata File")
+    {
+        HString result;
+        REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
+        REQUIRE(wcsstr(WindowsGetStringRawBuffer(result.Get(), 0), L"TestComponent.winmd") != nullptr);
+    }
 
     RegFreeWinRTUninitializeForTest();
 }

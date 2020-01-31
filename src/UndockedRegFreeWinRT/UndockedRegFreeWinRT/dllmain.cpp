@@ -224,7 +224,7 @@ VERSIONHELPERAPI IsWindows1019H1OrGreater()
 HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID iid, void** factory)
 {
     HRESULT hr = WinRTGetActivationFactory(activatableClassId, iid, factory);
-    if (hr == REGDB_E_CLASSNOTREG)
+    if (FAILED(hr))
     {
         hr = TrueRoGetActivationFactory(activatableClassId, iid, factory);
     }
@@ -239,7 +239,7 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     mdTypeDef* typeDefToken)
 {
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    if (hr == REGDB_E_CLASSNOTREG)
+    if (FAILED(hr))
     {
         hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     }
@@ -261,7 +261,7 @@ HRESULT WINAPI RoResolveNamespaceDetour(
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
 
-    if (hr == RO_E_METADATA_NAME_NOT_FOUND)
+    if (FAILED(hr))
     {
         hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
             packageGraphDirsCount, packageGraphDirs,
