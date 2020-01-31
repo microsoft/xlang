@@ -40,19 +40,19 @@ TEST_CASE("Undocked Regfree WinRT Activation")
     //}
     SECTION("Cross Apartment MTA Activation")
     {
+        std::cout << "1" << std::endl;
         winrt::init_apartment(winrt::apartment_type::single_threaded);
+        std::cout << "2" << std::endl;
         winrt::com_ptr<IInspectable> instance;
+        std::cout << "3" << std::endl;
         winrt::TestComponent::ClassMta c;
-        try
-        {
-            RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), reinterpret_cast<::IInspectable**>(winrt::put_abi(instance)));
-        }
-        catch (...)
-        {
-            
-        }
+        std::cout << "4" << std::endl;
+        RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), reinterpret_cast<::IInspectable**>(winrt::put_abi(instance)));
+        std::cout << "5" << std::endl;
         instance.as(c);
+        std::cout << "6" << std::endl;
         REQUIRE(c.Apartment() == APTTYPE_MTA);
+        std::cout << "7" << std::endl;
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
