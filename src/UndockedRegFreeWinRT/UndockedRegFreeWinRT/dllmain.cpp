@@ -197,7 +197,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
 
 VERSIONHELPERAPI IsWindowsVersionOrGreaterEx(WORD wMajorVersion, WORD wMinorVersion, WORD wServicePackMajor, WORD wBuildNumber)
 {
-    OSVERSIONINFOEXW osvi = { sizeof(osvi), 0, 0, 0, 0, {0}, 0, 0 };
+    OSVERSIONINFOEXW osvi = { sizeof(osvi) };
     DWORDLONG const dwlConditionMask = 
         VerSetConditionMask(
             VerSetConditionMask(
