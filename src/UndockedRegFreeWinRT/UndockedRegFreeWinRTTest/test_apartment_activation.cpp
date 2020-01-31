@@ -54,23 +54,28 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         std::cout << "6" << std::endl;
         REQUIRE(c.Apartment() == APTTYPE_MTA);
         std::cout << "7" << std::endl;
-        winrt::clear_factory_cache();
-        winrt::uninit_apartment();
+
     }
-    SECTION("BLOCK STA To Current MTA")
-    {
-        winrt::init_apartment();
-        winrt::TestComponent::ClassSta c;
-        REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassSta").Get(), (IInspectable**)winrt::put_abi(c)) == RO_E_UNSUPPORTED_FROM_MTA);
-        winrt::clear_factory_cache();
-        winrt::uninit_apartment();
-    }
+    //SECTION("BLOCK STA To Current MTA")
+    //{
+    //    winrt::init_apartment();
+    //    winrt::TestComponent::ClassSta c;
+    //    REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassSta").Get(), (IInspectable**)winrt::put_abi(c)) == RO_E_UNSUPPORTED_FROM_MTA);
+    //}
     //SECTION("Test Get Metadata File")
     //{
     //    HString result;
     //    REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
     //    REQUIRE(wcsstr(WindowsGetStringRawBuffer(result.Get(), 0), L"TestComponent.winmd") != nullptr);
     //}
+    try 
+    {
+        winrt::clear_factory_cache();
+        winrt::uninit_apartment();
+    }
+    catch (...)
+    {
 
+    }
     RegFreeWinRTUninitializeForTest();
 }

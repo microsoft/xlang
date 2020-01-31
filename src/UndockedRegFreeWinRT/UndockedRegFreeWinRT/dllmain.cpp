@@ -239,11 +239,15 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     IMetaDataImport2** metaDataImport,
     mdTypeDef* typeDefToken)
 {
+    std::cout << "RoGetMetaDataFileDetoured" << std::endl;
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
+    std::cout << hr << std::endl;
     if (FAILED(hr))
     {
+        std::cout << "RoGetMetaDataFileDetoured2" << std::endl;
         hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     }
+    std::cout << hr << std::endl;
     return hr;
 }
 
