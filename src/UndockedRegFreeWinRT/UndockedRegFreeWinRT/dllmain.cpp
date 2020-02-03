@@ -11,6 +11,10 @@
 #include "catalog.h"
 #include <activation.h>
 #include <hstring.h>
+#include <VersionHelpers.h>
+#include "extwinrt.h"
+
+#define WIN1019H1_BLDNUM 18362
 
 // Ensure that metadata resolution functions are imported so they can be detoured
 extern "C"
@@ -126,7 +130,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     ABI::Windows::Foundation::ThreadingType threading_model;
     if (WinRTGetThreadingModel(activatableClassId, &threading_model) == REGDB_E_CLASSNOTREG)
     {
-        return E_FAIL;
+        return TrueRoActivateInstance(activatableClassId, instance);
     }
     switch (threading_model)
     {
@@ -191,10 +195,36 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     return S_OK;
 }
 
+VERSIONHELPERAPI IsWindowsVersionOrGreaterEx(WORD wMajorVersion, WORD wMinorVersion, WORD wServicePackMajor, WORD wBuildNumber)
+{
+    OSVERSIONINFOEXW osvi = { sizeof(osvi) };
+    DWORDLONG const dwlConditionMask = 
+        VerSetConditionMask(
+            VerSetConditionMask(
+                VerSetConditionMask(
+                    VerSetConditionMask(
+                        0, VER_MAJORVERSION, VER_GREATER_EQUAL),
+                    VER_MINORVERSION, VER_GREATER_EQUAL),
+                VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL),
+            VER_BUILDNUMBER, VER_GREATER_EQUAL);
+
+    osvi.dwMajorVersion = wMajorVersion;
+    osvi.dwMinorVersion = wMinorVersion;
+    osvi.wServicePackMajor = wServicePackMajor;
+    osvi.dwBuildNumber = wBuildNumber;
+
+    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR | VER_BUILDNUMBER, dwlConditionMask) != FALSE;
+}
+
+VERSIONHELPERAPI IsWindows1019H1OrGreater()
+{
+    return IsWindowsVersionOrGreaterEx(HIBYTE(_WIN32_WINNT_WIN10), LOBYTE(_WIN32_WINNT_WIN10), 0, WIN1019H1_BLDNUM);
+}
+
 HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID iid, void** factory)
 {
     HRESULT hr = WinRTGetActivationFactory(activatableClassId, iid, factory);
-    if (hr == REGDB_E_CLASSNOTREG)
+    if (FAILED(hr))
     {
         hr = TrueRoGetActivationFactory(activatableClassId, iid, factory);
     }
@@ -209,7 +239,7 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     mdTypeDef* typeDefToken)
 {
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    if (hr == REGDB_E_CLASSNOTREG)
+    if (FAILED(hr))
     {
         hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     }
@@ -231,7 +261,7 @@ HRESULT WINAPI RoResolveNamespaceDetour(
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
 
-    if (hr == RO_E_METADATA_NAME_NOT_FOUND)
+    if (FAILED(hr))
     {
         hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
             packageGraphDirsCount, packageGraphDirs,
@@ -285,8 +315,13 @@ HRESULT ExtRoLoadCatalog()
     return WinRTLoadComponent(manifestPath.c_str());
 }
 
+
 BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
 {
+    if (IsWindows1019H1OrGreater())
+    {
+        return true;
+    }
     if (reason == DLL_PROCESS_ATTACH)
     {
         InstallHooks();
@@ -297,6 +332,19 @@ BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
         RemoveHooks();
     }
     return true;
+}
+
+HRESULT WINAPI RegFreeWinRTInitializeForTest()
+{
+    InstallHooks();
+    ExtRoLoadCatalog();
+    return S_OK;
+}
+
+HRESULT WINAPI RegFreeWinRTUninitializeForTest()
+{
+    RemoveHooks();
+    return S_OK;
 }
 
 extern "C" void WINAPI winrtact_Initialize()

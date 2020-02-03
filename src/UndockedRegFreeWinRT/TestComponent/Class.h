@@ -6,7 +6,7 @@
 
 namespace winrt::TestComponent::implementation
 {
-    struct ClassBoth : ClassBothT<ClassBoth>
+    struct ClassBoth : ClassBothT<ClassBoth, winrt::non_agile>
     {
         ClassBoth() = default;
 
@@ -14,7 +14,7 @@ namespace winrt::TestComponent::implementation
         void Apartment(int32_t value);
     };
 
-    struct ClassSta : ClassStaT<ClassSta>
+    struct ClassSta : ClassStaT<ClassSta, winrt::non_agile>
     {
         ClassSta() = default;
 
@@ -22,7 +22,7 @@ namespace winrt::TestComponent::implementation
         void Apartment(int32_t value);
     };
 
-    struct ClassMta : ClassMtaT<ClassMta>
+    struct ClassMta : ClassMtaT<ClassMta, winrt::non_agile>
     {
         ClassMta() = default;
 
