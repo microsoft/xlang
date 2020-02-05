@@ -24,7 +24,6 @@ TEST_CASE("Undocked Regfree WinRT Activation")
     {
         winrt::init_apartment(winrt::apartment_type::single_threaded);
         winrt::TestComponent::ClassBoth c;
-        RoActivateInstance(HStringReference(L"TestComponent.ClassBoth").Get(), (IInspectable**)winrt::put_abi(c));
         REQUIRE(c.Apartment() == APTTYPE_MAINSTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
@@ -33,7 +32,6 @@ TEST_CASE("Undocked Regfree WinRT Activation")
     {
         winrt::init_apartment();
         winrt::TestComponent::ClassBoth c;
-        RoActivateInstance(HStringReference(L"TestComponent.ClassBoth").Get(), (IInspectable**)winrt::put_abi(c));
         REQUIRE(c.Apartment() == APTTYPE_MTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
@@ -41,10 +39,7 @@ TEST_CASE("Undocked Regfree WinRT Activation")
     SECTION("Cross Apartment MTA Activation")
     {
         winrt::init_apartment(winrt::apartment_type::single_threaded);
-        winrt::com_ptr<IInspectable> instance;
         winrt::TestComponent::ClassMta c;
-        RoActivateInstance(HStringReference(L"TestComponent.ClassMta").Get(), reinterpret_cast<::IInspectable**>(winrt::put_abi(instance)));
-        instance.as(c);
         REQUIRE(c.Apartment() == APTTYPE_MTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();

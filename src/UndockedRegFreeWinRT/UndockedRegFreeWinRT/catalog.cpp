@@ -224,8 +224,6 @@ HRESULT WinRTGetMetadataFile(
             bestMatchLength = length;
         }
     }
-
     *metaDataFilePath = metaDataFilePaths[bestMatch];
-
     return S_OK;
 }

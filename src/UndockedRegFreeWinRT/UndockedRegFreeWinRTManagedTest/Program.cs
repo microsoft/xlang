@@ -55,19 +55,19 @@ namespace UndockedRegFreeWinRTManagedTest
             winrtact_Initialize();
             System.Threading.Thread testThread;
 
-            //succeeded = false;
-            //testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassBoth(3)));
-            //testThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            //testThread.Start();
-            //testThread.Join();
-            //if (!succeeded) return 1;
+            succeeded = false;
+            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassBoth(3)));
+            testThread.SetApartmentState(System.Threading.ApartmentState.STA);
+            testThread.Start();
+            testThread.Join();
+            if (!succeeded) return 1;
 
-            //succeeded = false;
-            //testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassBoth(1)));
-            //testThread.SetApartmentState(System.Threading.ApartmentState.MTA);
-            //testThread.Start();
-            //testThread.Join();
-            //if (!succeeded) return 1;
+            succeeded = false;
+            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassBoth(1)));
+            testThread.SetApartmentState(System.Threading.ApartmentState.MTA);
+            testThread.Start();
+            testThread.Join();
+            if (!succeeded) return 1;
 
             succeeded = false;
             testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassMta(1)));
@@ -76,13 +76,12 @@ namespace UndockedRegFreeWinRTManagedTest
             testThread.Join();
             if (!succeeded) return 1;
 
-            //succeeded = false;
-            //testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassSta(1)));
-            //testThread.SetApartmentState(System.Threading.ApartmentState.MTA);
-            //testThread.Start();
-            //testThread.Join();
-            //if (succeeded) return 1;
-
+            succeeded = false;
+            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassSta(1)));
+            testThread.SetApartmentState(System.Threading.ApartmentState.MTA);
+            testThread.Start();
+            testThread.Join();
+            if (succeeded) return 1;
 
             return 0;
         }

@@ -267,9 +267,6 @@ HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID i
     defaultContext->ContextCallback(
         [](_In_ ComCallData* pComCallData) -> HRESULT
         {
-            APTTYPE aptType2;
-            APTTYPEQUALIFIER aptQualifier2;
-            RETURN_IF_FAILED(CoGetApartmentType(&aptType2, &aptQualifier2));
             CrossApartmentMTAActData* data = reinterpret_cast<CrossApartmentMTAActData*>(pComCallData->pUserDefined);
             Microsoft::WRL::ComPtr<IActivationFactory> pFactory;
             RETURN_IF_FAILED(WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));

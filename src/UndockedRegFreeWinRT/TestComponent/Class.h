@@ -33,15 +33,15 @@ namespace winrt::TestComponent::implementation
 
 namespace winrt::TestComponent::factory_implementation
 {
-    struct ClassBoth : ClassBothT<ClassBoth, implementation::ClassBoth>
+    struct ClassBoth : ClassBothT<ClassBoth, implementation::ClassBoth, winrt::non_agile>
     {
     };
 
-    struct ClassSta : ClassStaT<ClassSta, implementation::ClassSta>
+    struct ClassSta : ClassStaT<ClassSta, implementation::ClassSta, winrt::non_agile>
     {
     };
 
-    struct ClassMta : ClassMtaT<ClassMta, implementation::ClassMta>
+    struct ClassMta : ClassMtaT<ClassMta, implementation::ClassMta, winrt::non_agile>
     {
     };
 }
