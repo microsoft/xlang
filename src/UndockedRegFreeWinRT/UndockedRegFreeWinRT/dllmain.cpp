@@ -60,6 +60,38 @@ static decltype(RoResolveNamespace)* TrueRoResolveNamespace = RoResolveNamespace
 
 std::wstring exeFilePath;
 
+enum class ActivationLocation
+{
+    CurrentApartment,
+    CrossApartmentMTA
+};
+
+VERSIONHELPERAPI IsWindowsVersionOrGreaterEx(WORD wMajorVersion, WORD wMinorVersion, WORD wServicePackMajor, WORD wBuildNumber)
+{
+    OSVERSIONINFOEXW osvi = { sizeof(osvi) };
+    DWORDLONG const dwlConditionMask =
+        VerSetConditionMask(
+            VerSetConditionMask(
+                VerSetConditionMask(
+                    VerSetConditionMask(
+                        0, VER_MAJORVERSION, VER_GREATER_EQUAL),
+                    VER_MINORVERSION, VER_GREATER_EQUAL),
+                VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL),
+            VER_BUILDNUMBER, VER_GREATER_EQUAL);
+
+    osvi.dwMajorVersion = wMajorVersion;
+    osvi.dwMinorVersion = wMinorVersion;
+    osvi.wServicePackMajor = wServicePackMajor;
+    osvi.dwBuildNumber = wBuildNumber;
+
+    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR | VER_BUILDNUMBER, dwlConditionMask) != FALSE;
+}
+
+VERSIONHELPERAPI IsWindows1019H1OrGreater()
+{
+    return IsWindowsVersionOrGreaterEx(HIBYTE(_WIN32_WINNT_WIN10), LOBYTE(_WIN32_WINNT_WIN10), 0, WIN1019H1_BLDNUM);
+}
+
 VOID CALLBACK EnsureMTAInitializedCallBack
 (
     PTP_CALLBACK_INSTANCE instance,
@@ -116,65 +148,72 @@ HRESULT EnsureMTAInitialized()
     return S_OK;
 }
 
-HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable** instance)
+HRESULT GetActivationLocation(HSTRING activatableClassId, ActivationLocation &activationLocation)
 {
     APTTYPE aptType;
     APTTYPEQUALIFIER aptQualifier;
     RETURN_IF_FAILED(CoGetApartmentType(&aptType, &aptQualifier));
-    enum
-    {
-        CurrentApartment,
-        CrossApartmentMTA
-    } activationLocation = CurrentApartment;
 
     ABI::Windows::Foundation::ThreadingType threading_model;
-    if (WinRTGetThreadingModel(activatableClassId, &threading_model) == REGDB_E_CLASSNOTREG)
+    RETURN_IF_FAILED(WinRTGetThreadingModel(activatableClassId, &threading_model)); //REGDB_E_CLASSNOTREG
+    switch (threading_model)
+    {
+    case ABI::Windows::Foundation::ThreadingType_BOTH:
+        activationLocation = ActivationLocation::CurrentApartment;
+        break;
+    case ABI::Windows::Foundation::ThreadingType_STA:
+        if (aptType == APTTYPE_MTA)
+        {
+            return RO_E_UNSUPPORTED_FROM_MTA;
+        }
+        else
+        {
+            activationLocation = ActivationLocation::CurrentApartment;
+        }
+        break;
+    case ABI::Windows::Foundation::ThreadingType_MTA:
+        if (aptType == APTTYPE_MTA)
+        {
+            activationLocation = ActivationLocation::CurrentApartment;
+        }
+        else
+        {
+            activationLocation = ActivationLocation::CrossApartmentMTA;
+        }
+        break;
+    }
+    return S_OK;
+}
+
+
+HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable** instance)
+{
+    ActivationLocation location;
+    HRESULT hr = GetActivationLocation(activatableClassId, location);
+    if (hr == REGDB_E_CLASSNOTREG)
     {
         return TrueRoActivateInstance(activatableClassId, instance);
     }
-    switch (threading_model)
-    {
-        case ABI::Windows::Foundation::ThreadingType_BOTH :
-            activationLocation = CurrentApartment;
-            break;
-        case ABI::Windows::Foundation::ThreadingType_STA :
-            if (aptType == APTTYPE_MTA)
-            {
-                return RO_E_UNSUPPORTED_FROM_MTA;
-            }
-            else
-            {
-                activationLocation = CurrentApartment;
-            }
-        break;
-        case ABI::Windows::Foundation::ThreadingType_MTA :
-            if (aptType == APTTYPE_MTA)
-            {
-                activationLocation = CurrentApartment;
-            }
-            else
-            {
-                activationLocation = CrossApartmentMTA;
-            }
-        break;
-    }
+    RETURN_IF_FAILED(hr);
+
     // Activate in current apartment
-    if (activationLocation == CurrentApartment)
+    if (location == ActivationLocation::CurrentApartment)
     {
         IActivationFactory* pFactory;
         RETURN_IF_FAILED(WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));
         return pFactory->ActivateInstance(instance);
     }
+
     // Cross apartment MTA activation
     struct CrossApartmentMTAActData {
         HSTRING activatableClassId;
         IStream *stream;
     };
+
     CrossApartmentMTAActData cbdata{ activatableClassId };
     CO_MTA_USAGE_COOKIE mtaUsageCookie;
     RETURN_IF_FAILED(CoIncrementMTAUsage(&mtaUsageCookie));
     RETURN_IF_FAILED(EnsureMTAInitialized());
-    RETURN_IF_FAILED(CoGetApartmentType(&aptType, &aptQualifier));
     Microsoft::WRL::ComPtr<IContextCallback> defaultContext;
     ComCallData data;
     data.pUserDefined = &cbdata;
@@ -195,40 +234,51 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     return S_OK;
 }
 
-VERSIONHELPERAPI IsWindowsVersionOrGreaterEx(WORD wMajorVersion, WORD wMinorVersion, WORD wServicePackMajor, WORD wBuildNumber)
-{
-    OSVERSIONINFOEXW osvi = { sizeof(osvi) };
-    DWORDLONG const dwlConditionMask = 
-        VerSetConditionMask(
-            VerSetConditionMask(
-                VerSetConditionMask(
-                    VerSetConditionMask(
-                        0, VER_MAJORVERSION, VER_GREATER_EQUAL),
-                    VER_MINORVERSION, VER_GREATER_EQUAL),
-                VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL),
-            VER_BUILDNUMBER, VER_GREATER_EQUAL);
-
-    osvi.dwMajorVersion = wMajorVersion;
-    osvi.dwMinorVersion = wMinorVersion;
-    osvi.wServicePackMajor = wServicePackMajor;
-    osvi.dwBuildNumber = wBuildNumber;
-
-    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR | VER_BUILDNUMBER, dwlConditionMask) != FALSE;
-}
-
-VERSIONHELPERAPI IsWindows1019H1OrGreater()
-{
-    return IsWindowsVersionOrGreaterEx(HIBYTE(_WIN32_WINNT_WIN10), LOBYTE(_WIN32_WINNT_WIN10), 0, WIN1019H1_BLDNUM);
-}
-
 HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID iid, void** factory)
 {
-    HRESULT hr = WinRTGetActivationFactory(activatableClassId, iid, factory);
-    if (FAILED(hr))
+    ActivationLocation location;
+    HRESULT hr = GetActivationLocation(activatableClassId, location);
+    if (hr == REGDB_E_CLASSNOTREG)
     {
-        hr = TrueRoGetActivationFactory(activatableClassId, iid, factory);
+        return TrueRoGetActivationFactory(activatableClassId, iid, factory);
     }
-    return hr;
+    RETURN_IF_FAILED(hr);
+
+    // Activate in current apartment
+    if (location == ActivationLocation::CurrentApartment)
+    {
+        IActivationFactory* pFactory;
+        RETURN_IF_FAILED(WinRTGetActivationFactory(activatableClassId, iid, factory));
+        return S_OK;
+    }
+    // Cross apartment MTA activation
+    struct CrossApartmentMTAActData {
+        HSTRING activatableClassId;
+        IStream* stream;
+    };
+    CrossApartmentMTAActData cbdata{ activatableClassId };
+    CO_MTA_USAGE_COOKIE mtaUsageCookie;
+    RETURN_IF_FAILED(CoIncrementMTAUsage(&mtaUsageCookie));
+    RETURN_IF_FAILED(EnsureMTAInitialized());
+    Microsoft::WRL::ComPtr<IContextCallback> defaultContext;
+    ComCallData data;
+    data.pUserDefined = &cbdata;
+    RETURN_IF_FAILED(CoGetDefaultContext(APTTYPE_MTA, IID_PPV_ARGS(&defaultContext)));
+    defaultContext->ContextCallback(
+        [](_In_ ComCallData* pComCallData) -> HRESULT
+        {
+            APTTYPE aptType2;
+            APTTYPEQUALIFIER aptQualifier2;
+            RETURN_IF_FAILED(CoGetApartmentType(&aptType2, &aptQualifier2));
+            CrossApartmentMTAActData* data = reinterpret_cast<CrossApartmentMTAActData*>(pComCallData->pUserDefined);
+            Microsoft::WRL::ComPtr<IActivationFactory> pFactory;
+            RETURN_IF_FAILED(WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));
+            RETURN_IF_FAILED(CoMarshalInterThreadInterfaceInStream(IID_IActivationFactory, pFactory.Get(), &data->stream));
+            return S_OK;
+        },
+        &data, IID_ICallbackWithNoReentrancyToApplicationSTA, 5, nullptr); // 5 is meaningless.
+    RETURN_IF_FAILED(CoGetInterfaceAndReleaseStream(cbdata.stream, IID_IActivationFactory, factory));
+    return S_OK;
 }
 
 HRESULT WINAPI RoGetMetaDataFileDetour(
