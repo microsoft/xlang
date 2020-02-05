@@ -316,7 +316,7 @@ HRESULT ExtRoLoadCatalog()
 }
 
 
-BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
+BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 {
     if (IsWindows1019H1OrGreater())
     {
@@ -324,6 +324,7 @@ BOOL WINAPI DllMain(HINSTANCE /*hmodule*/, DWORD reason, LPVOID /*lpvReserved*/)
     }
     if (reason == DLL_PROCESS_ATTACH)
     {
+        DisableThreadLibraryCalls(hmodule);
         InstallHooks();
         ExtRoLoadCatalog();
     }
