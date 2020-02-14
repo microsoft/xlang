@@ -192,7 +192,8 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     HRESULT hr = GetActivationLocation(activatableClassId, location);
     if (hr == REGDB_E_CLASSNOTREG)
     {
-        return TrueRoActivateInstance(activatableClassId, instance);
+        return E_FAIL;
+        //return TrueRoActivateInstance(activatableClassId, instance);
     }
     RETURN_IF_FAILED(hr);
 
@@ -240,7 +241,8 @@ HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID i
     HRESULT hr = GetActivationLocation(activatableClassId, location);
     if (hr == REGDB_E_CLASSNOTREG)
     {
-        return TrueRoGetActivationFactory(activatableClassId, iid, factory);
+        return E_FAIL;
+        //return TrueRoGetActivationFactory(activatableClassId, iid, factory);
     }
     RETURN_IF_FAILED(hr);
 
