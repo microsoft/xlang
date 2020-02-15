@@ -65,7 +65,7 @@ struct component
 
     HRESULT GetActivationFactory(HSTRING className, REFIID  iid, void** factory)
     {
-        if (FAILED(LoadModule())) return REGDB_E_CLASSNOTREG;
+        RETURN_IF_FAILED(LoadModule());
 
         IActivationFactory* ifactory = nullptr;
         HRESULT hr = this->get_activation_factory(className, &ifactory);

@@ -17,6 +17,8 @@
   <files>
     <file src="LICENSE"/>
     <file src="Microsoft.Windows.UndockedRegFreeWinrt.targets" target="build\native"/>
+    <file src="Microsoft.Windows.UndockedRegFreeWinrt.targets" target="build\net45"/>
+    <file src="Microsoft.Windows.UndockedRegFreeWinrt.targets" target="build\netcoreapp2.0"/>
     <file src="readme.txt"/>
     <file src="$winrtactx64release$" target="runtimes\x64\release\"/>
     <file src="$winrtactx64debug$" target="runtimes\x64\debug\"/>
