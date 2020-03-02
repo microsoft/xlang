@@ -21,9 +21,57 @@ auto output_directory(reader const& args)
     return out.string();
 }
 
-void print_usage()
+struct usage_exception {};
+
+static constexpr option options[]
 {
-    puts("Usage...");
+    { "input", 0, option::no_max, "<spec>", "Windows metadata to include in generation" },
+    { "reference", 0, option::no_max, "<spec>", "Windows metadata to reference from generation" },
+    { "output", 0, 1, "<path>", "Location of generated headers" },
+    { "include", 0, option::no_max, "<prefix>", "One or more prefixes to include in input" },
+    { "exclude", 0, option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
+    { "verbose", 0, 0, {}, "Show detailed progress information" },
+    { "ns-prefix", 0, 1, "<always|optional|never>", "Sets policy for prefixing type names with 'ABI' namespace (default: never)" },
+    { "enum-class", 0, 0, {}, "Use 'MIDL_ENUM', rather than 'enum'" },
+    { "lowercase-include-guard", 0, 0, {}, "Generate lowercase include guards for compatibility with Windows SDK headers" },
+    { "enable-header-deprecation", 0, 0, {}, "Generate support for [[deprecated(...)]] attribute" },
+    { "help", 0, option::no_max, {}, "Show detailed help with examples" },
+};
+
+static void print_usage(basic_writer& w)
+{
+    static auto printColumns = [](basic_writer& w, std::string_view const& col1, std::string_view const& col2)
+    {
+        w.write_printf("  %-40s%s\n", col1.data(), col2.data());
+    };
+
+    static auto printOption = [](basic_writer& w, option const& opt)
+    {
+        if(opt.desc.empty())
+        {
+            return;
+        }
+        printColumns(w, w.write_temp("-% %", opt.name, opt.arg), opt.desc);
+    };
+
+    auto format = R"(
+WinRT ABI Header Generation Tool v%
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+  abi.exe [options...]
+
+Options:
+
+%  ^@<path>                                 Response file containing command line options
+
+Where <spec> is one or more of:
+
+  path                                    Path to winmd file or recursively scanned folder
+  local                                   Local ^%WinDir^%\System32\WinMetadata folder
+  sdk[+]                                  Current version of Windows SDK [with extensions]
+  10.0.12345.0[+]                         Specific version of Windows SDK [with extensions]
+)";
+    w.write(format, ABIWINRT_VERSION_STRING, bind_each(printOption, options));
 }
 
 int main(int const argc, char** argv)
@@ -35,28 +83,13 @@ int main(int const argc, char** argv)
     {
         auto const start = high_resolution_clock::now();
 
-        static constexpr cmd::option options[]
-        {
-            // name, min, max
-            { "input", 1 },
-            { "reference", 0 },
-            { "output", 0, 1 },
-            { "include", 0 },
-            { "exclude", 0 },
-            { "verbose", 0, 0 },
-            { "ns-prefix", 0, 1 },
-            { "enum-class", 0, 0 },
-            { "lowercase-include-guard", 0, 0 },
-            { "enable-header-deprecation", 0, 0 }
-        };
-
         reader args{ argc, argv, options };
-        if (!args)
+        
+        if (!args || args.exists("help"))
         {
-            print_usage();
-            return 1;
+            throw usage_exception{};
         }
-
+        
         abi_configuration config;
         config.verbose = args.exists("verbose");
         config.output_directory = output_directory(args);
@@ -230,6 +263,11 @@ int main(int const argc, char** argv)
         {
             w.write("time: %ms\n", static_cast<std::int64_t>(duration_cast<milliseconds>((high_resolution_clock::now() - start)).count()));
         }
+    }
+    catch (usage_exception const&)
+    {
+        print_usage(w);
+        exitCode = 1;
     }
     catch (std::exception const& e)
     {
