@@ -31,9 +31,9 @@ static constexpr option options[]
     { "include", 0, option::no_max, "<prefix>", "One or more prefixes to include in input" },
     { "exclude", 0, option::no_max, "<prefix>", "One or more prefixes to exclude from input" },
     { "verbose", 0, 0, {}, "Show detailed progress information" },
-    { "ns-prefix", 0, 1, "<always|optional|never>", "Set namespace prefixing preference (default: never)" },
+    { "ns-prefix", 0, 1, "<always|optional|never>", "Sets policy for prefixing type names with 'ABI' namespace (default: never)" },
     { "enum-class", 0, 0, {}, "Use 'MIDL_ENUM', rather than 'enum'" },
-    { "lowercase-include-guard", 0, 0, {}, "Generate lowercase include guards" },
+    { "lowercase-include-guard", 0, 0, {}, "Generate lowercase include guards for compatibility with Windows SDK headers" },
     { "enable-header-deprecation", 0, 0, {}, "Generate support for [[deprecated(...)]] attribute" },
     { "help", 0, option::no_max, {}, "Show detailed help with examples" },
 };
