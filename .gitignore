@@ -339,6 +339,3 @@ ASALocalRun/
 src/test/output/
 src/test/python/output/
 src/test/python/__pycache__/
-
-# Ignore copied license
-src/package/cppwinrt/vsix/LICENSE
