@@ -194,16 +194,15 @@ HRESULT WinRTGetMetadataFile(
         return E_NOTIMPL;
     }
 
-    HSTRING substring;
-    if (SUCCEEDED(WindowsSubstringWithSpecifiedLength(name, 0, 7, &substring)))
+    Microsoft::WRL::Wrappers::HString substring;
+    if (SUCCEEDED(WindowsSubstringWithSpecifiedLength(name, 0, 7, substring.GetAddressOf())))
     {
         int result;
-        if (SUCCEEDED(WindowsCompareStringOrdinal(substring, HStringReference(L"Windows").Get(), &result)) && (result == 0))
+        if (SUCCEEDED(WindowsCompareStringOrdinal(substring.Get(), HStringReference(L"Windows").Get(), &result)) && (result == 0))
         {
             // Let original RoGetMetadataFile handle Windows namespace
             return REGDB_E_CLASSNOTREG;
         }
-        WindowsDeleteString(substring);
     }
 
     DWORD metaDataFilePathsCount = 0;
