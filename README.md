@@ -10,6 +10,8 @@ See these related repos:
 * [Rust winmd parser](https://github.com/microsoft/winmd-rs)
 * [WinRT test component](https://github.com/microsoft/TestWinRT)
 
+Some of the other projects and samples in this repo remain for historical reasons but are not necessarily in a usable state.
+
 ## License
 
 Code licensed under the [MIT License](LICENSE).
