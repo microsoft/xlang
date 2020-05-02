@@ -7,7 +7,7 @@ See these related repos:
 
 * [C++/WinRT](https://github.com/microsoft/cppwinrt)
 * [C++ winmd parser](https://github.com/microsoft/winmd)
-* [Rust winmd parser](https://github.com/microsoft/winmd-rs)
+* [Rust/WinRT](https://github.com/microsoft/winrt-rs)
 * [WinRT test component](https://github.com/microsoft/TestWinRT)
 
 Some of the other projects and samples in this repo remain for historical reasons but are not necessarily in a usable state.
