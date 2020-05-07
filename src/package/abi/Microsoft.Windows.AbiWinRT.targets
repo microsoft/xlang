@@ -1,0 +1,13 @@
+﻿<!--
+***********************************************************************************************
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <PropertyGroup>
+        <AbiWinRTPackageDir Condition="'$(AbiWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\</AbiWinRTPackageDir>
+        <AbiWinRTPath Condition="'$(AbiWinRTPath)'==''">"$(AbiWinRTPackageDir)bin\"</AbiWinRTPath>
+    </PropertyGroup>
+
+</Project>

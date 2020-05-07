@@ -5,32 +5,12 @@ implemented in one programming language and make that library's APIs available t
 
 See these related repos:
 
-|Repository|Status|
-|-|-|
-|[C++/WinRT](https://github.com/microsoft/cppwinrt)|[![Build status](https://dev.azure.com/microsoft/Dart/_apis/build/status/cppwinrt%20internal%20build)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=31784)|
-|[C++ winmd parser](https://github.com/microsoft/winmd)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/WinMD%20Nuget?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=44715&branchName=master)|
-|[Rust winmd parser](https://github.com/microsoft/winmd-rs)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/microsoft.winmd-rs?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=45839&branchName=master)|
-[WinRT test component](https://github.com/microsoft/TestWinRT)|[![Build Status](https://dev.azure.com/microsoft/Dart/_apis/build/status/TestWinRT?branchName=master)](https://dev.azure.com/microsoft/Dart/_build/latest?definitionId=45310&branchName=master)|
+* [C++/WinRT](https://github.com/microsoft/cppwinrt)
+* [C++ winmd parser](https://github.com/microsoft/winmd)
+* [Rust winmd parser](https://github.com/microsoft/winmd-rs)
+* [WinRT test component](https://github.com/microsoft/TestWinRT)
 
-Additionally, the xlang toolset will be available on multiple operating systems.
-This means that if your shared library is portable to various operating systems,
-then you can use the xlang tooling to make that shared library available to various client programming language on those various platforms.
-
-More succinctly, you can take a library written in language A and make it available to language B applications running on platform C. The set of supported languages and platforms will expand as the project progresses.
-
-The xlang project is in a very, very early stage of development.
-The project wants and encourages community feedback and contributions. As such, the xlang team is doing *all* xlang project development in the open on GitHub. 
-
-## What xlang is NOT
-
-* The xlang project is not a port of the Windows Runtime, COM, DCOM or related technology.
-* The xlang project will not port the Windows Runtime APIs.
-
-## Project details
-
-For details on project structure and build process, please see the [Project Readme](./src/readme.md).
-
-For technical design details, please see the [Design Notes](./design_notes).
+Some of the other projects and samples in this repo remain for historical reasons but are not necessarily in a usable state.
 
 ## License
 

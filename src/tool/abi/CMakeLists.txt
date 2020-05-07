@@ -13,6 +13,7 @@ target_sources(abi PUBLIC
     types.cpp
     "${PROJECT_BINARY_DIR}/strings.cpp")
 target_include_directories(abi PUBLIC ${XLANG_LIBRARY_PATH} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
+target_compile_definitions(abi PUBLIC "ABIWINRT_VERSION_STRING=\"${XLANG_BUILD_VERSION}\"")
 
 GENERATE_STRING_LITERAL_FILES("${PROJECT_SOURCE_DIR}/strings/*.h" "strings" "xlang::strings" abi)
 
@@ -23,3 +24,6 @@ else()
     target_link_libraries(abi c++ c++abi c++experimental)
     target_link_libraries(abi -lpthread)
 endif()
+
+file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/abi.exe" abiwinrt_exe)
+set_target_properties(abi PROPERTIES "abiwinrt_exe" ${abiwinrt_exe})
