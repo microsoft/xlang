@@ -199,7 +199,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
     // Activate in current apartment
     if (location == ActivationLocation::CurrentApartment)
     {
-        IActivationFactory* pFactory;
+        Microsoft::WRL::ComPtr<IActivationFactory> pFactory;
         RETURN_IF_FAILED(WinRTGetActivationFactory(activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));
         return pFactory->ActivateInstance(instance);
     }
@@ -223,7 +223,7 @@ HRESULT WINAPI RoActivateInstanceDetour(HSTRING activatableClassId, IInspectable
         {
             CrossApartmentMTAActData* data = reinterpret_cast<CrossApartmentMTAActData*>(pComCallData->pUserDefined);
             Microsoft::WRL::ComPtr<IInspectable> instance;
-            IActivationFactory* pFactory;
+            Microsoft::WRL::ComPtr<IActivationFactory> pFactory;
             RETURN_IF_FAILED(WinRTGetActivationFactory(data->activatableClassId, __uuidof(IActivationFactory), (void**)&pFactory));
             RETURN_IF_FAILED(pFactory->ActivateInstance(&instance));
             RETURN_IF_FAILED(CoMarshalInterThreadInterfaceInStream(IID_IInspectable, instance.Get(), &data->stream));
@@ -247,7 +247,6 @@ HRESULT WINAPI RoGetActivationFactoryDetour(HSTRING activatableClassId, REFIID i
     // Activate in current apartment
     if (location == ActivationLocation::CurrentApartment)
     {
-        IActivationFactory* pFactory;
         RETURN_IF_FAILED(WinRTGetActivationFactory(activatableClassId, iid, factory));
         return S_OK;
     }
