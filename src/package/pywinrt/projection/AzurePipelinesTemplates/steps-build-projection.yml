@@ -1,6 +1,6 @@
 parameters: # defaults for any parameters that aren't specified
   architecture: 'x86'
-  pythonVersionSpec: '3.7.x'
+  pythonVersionSpec: '3.8.x'
   projectionType: 'partial'
 
 steps:
