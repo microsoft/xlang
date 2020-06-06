@@ -1,8 +1,7 @@
 #include <activationregistration.h>
 #include <string>
 #include <cor.h>
-
-#define RETURN_IF_FAILED( exp ) { HRESULT _hr_ = (exp); if( FAILED( _hr_ ) ) return _hr_; }
+#include "wil/result.h"
 
 HRESULT WinRTLoadComponent(PCWSTR componentPath);
 

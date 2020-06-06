@@ -12,6 +12,7 @@
 #include <activation.h>
 #include <hstring.h>
 #include <VersionHelpers.h>
+#include "wil/result.h"
 #include "extwinrt.h"
 
 #define WIN1019H1_BLDNUM 18362
@@ -287,7 +288,7 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     if (FAILED(hr))
     {
-        hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
+       return TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     }
     return hr;
 }

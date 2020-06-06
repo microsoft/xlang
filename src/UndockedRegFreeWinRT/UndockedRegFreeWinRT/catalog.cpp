@@ -15,7 +15,7 @@
 #include <codecvt>
 #include <locale>
 #include "catalog.h"
-
+ 
 using namespace std;
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
