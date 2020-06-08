@@ -193,7 +193,7 @@ HRESULT WinRTGetMetadataFile(
     {
         return E_NOTIMPL;
     }
-    wil::unique_hstring substring;
+
     wchar_t szFolderPath[8];
     StringCchPrintf(szFolderPath, _countof(szFolderPath), WindowsGetStringRawBuffer(name, nullptr));
     if (CompareStringOrdinal(szFolderPath, 8, L"Windows", 8, false) == CSTR_EQUAL)
