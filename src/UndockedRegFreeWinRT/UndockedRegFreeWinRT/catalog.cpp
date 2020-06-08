@@ -194,14 +194,11 @@ HRESULT WinRTGetMetadataFile(
         return E_NOTIMPL;
     }
     wil::unique_hstring substring;
-    if (SUCCEEDED(WindowsSubstringWithSpecifiedLength(name, 0, 7, &substring)))
+    wchar_t szFolderPath[8];
+    StringCchPrintf(szFolderPath, _countof(szFolderPath), WindowsGetStringRawBuffer(name, nullptr));
+    if (CompareStringOrdinal(szFolderPath, 8, L"Windows", 8, false) == CSTR_EQUAL)
     {
-        int result;
-        if (SUCCEEDED(WindowsCompareStringOrdinal(substring.get(), HStringReference(L"Windows").Get(), &result)) && (result == 0))
-        {
-            // Let original RoGetMetadataFile handle Windows namespace
-            return REGDB_E_CLASSNOTREG;
-        }
+        return REGDB_E_CLASSNOTREG;
     }
     
     wil::unique_cotaskmem_array_ptr<wil::unique_hstring> metaDataFilePaths;
