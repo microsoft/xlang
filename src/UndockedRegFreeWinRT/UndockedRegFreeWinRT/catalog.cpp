@@ -15,7 +15,7 @@
 #include <codecvt>
 #include <locale>
 #include "catalog.h"
- 
+
 using namespace std;
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
@@ -203,17 +203,16 @@ HRESULT WinRTGetMetadataFile(
             return REGDB_E_CLASSNOTREG;
         }
     }
-
-    DWORD metaDataFilePathsCount = 0;
+    
     wil::unique_cotaskmem_array_ptr<wil::unique_hstring> metaDataFilePaths;
     RETURN_IF_FAILED(RoResolveNamespace(name, HStringReference(exeFilePath.c_str()).Get(),
         0, nullptr,
-        &metaDataFilePathsCount, &metaDataFilePaths,
+        metaDataFilePaths.size_address<DWORD>(), &metaDataFilePaths,
         0, nullptr));
 
     DWORD bestMatch = 0;
     int bestMatchLength = 0;
-    for (DWORD i = 0; i < metaDataFilePathsCount; i++)
+    for (DWORD i = 0; i < metaDataFilePaths.size(); i++)
     {
         int length = WindowsGetStringLen(metaDataFilePaths[i]);
         if (length > bestMatchLength)
@@ -223,5 +222,6 @@ HRESULT WinRTGetMetadataFile(
         }
     }
     *metaDataFilePath = metaDataFilePaths[bestMatch];
+    metaDataFilePaths[bestMatch] = nullptr; // Null this out so it doesn't get over-released
     return S_OK;
 }
