@@ -1,7 +1,9 @@
 #include <activationregistration.h>
 #include <string>
 #include <cor.h>
+
 #include "wil/result.h"
+#include "wil/resource.h"
 
 HRESULT WinRTLoadComponent(PCWSTR componentPath);
 

@@ -12,7 +12,6 @@
 #include <activation.h>
 #include <hstring.h>
 #include <VersionHelpers.h>
-#include "wil/result.h"
 #include "extwinrt.h"
 
 #define WIN1019H1_BLDNUM 18362
