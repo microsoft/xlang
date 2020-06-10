@@ -194,27 +194,26 @@ HRESULT WinRTGetMetadataFile(
         return E_NOTIMPL;
     }
 
-    Microsoft::WRL::Wrappers::HString substring;
-    if (SUCCEEDED(WindowsSubstringWithSpecifiedLength(name, 0, 7, substring.GetAddressOf())))
+    wchar_t szFolderPath[9];
+    HRESULT hr = StringCchCopyW(szFolderPath, _countof(szFolderPath), WindowsGetStringRawBuffer(name, nullptr));
+    if (hr != S_OK && hr != STRSAFE_E_INSUFFICIENT_BUFFER)
     {
-        int result;
-        if (SUCCEEDED(WindowsCompareStringOrdinal(substring.Get(), HStringReference(L"Windows").Get(), &result)) && (result == 0))
-        {
-            // Let original RoGetMetadataFile handle Windows namespace
-            return REGDB_E_CLASSNOTREG;
-        }
+        return hr;
     }
-
-    DWORD metaDataFilePathsCount = 0;
-    HSTRING* metaDataFilePaths;
+    if (CompareStringOrdinal(szFolderPath, -1, L"Windows.", -1, false) == CSTR_EQUAL)
+    {
+        return REGDB_E_CLASSNOTREG;
+    }
+    
+    wil::unique_cotaskmem_array_ptr<wil::unique_hstring> metaDataFilePaths;
     RETURN_IF_FAILED(RoResolveNamespace(name, HStringReference(exeFilePath.c_str()).Get(),
         0, nullptr,
-        &metaDataFilePathsCount, &metaDataFilePaths,
+        metaDataFilePaths.size_address<DWORD>(), &metaDataFilePaths,
         0, nullptr));
 
     DWORD bestMatch = 0;
     int bestMatchLength = 0;
-    for (DWORD i = 0; i < metaDataFilePathsCount; i++)
+    for (DWORD i = 0; i < metaDataFilePaths.size(); i++)
     {
         int length = WindowsGetStringLen(metaDataFilePaths[i]);
         if (length > bestMatchLength)
@@ -224,5 +223,6 @@ HRESULT WinRTGetMetadataFile(
         }
     }
     *metaDataFilePath = metaDataFilePaths[bestMatch];
+    metaDataFilePaths[bestMatch] = nullptr; // Null this out to transfer ownership to parameter
     return S_OK;
 }

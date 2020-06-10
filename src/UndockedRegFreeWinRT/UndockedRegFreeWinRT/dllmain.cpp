@@ -287,7 +287,7 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     if (FAILED(hr))
     {
-        hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
+       return TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     }
     return hr;
 }
