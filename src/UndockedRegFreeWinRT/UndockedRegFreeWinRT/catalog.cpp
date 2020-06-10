@@ -194,9 +194,13 @@ HRESULT WinRTGetMetadataFile(
         return E_NOTIMPL;
     }
 
-    wchar_t szFolderPath[8];
-    StringCchPrintf(szFolderPath, _countof(szFolderPath), WindowsGetStringRawBuffer(name, nullptr));
-    if (CompareStringOrdinal(szFolderPath, 8, L"Windows", 8, false) == CSTR_EQUAL)
+    wchar_t szFolderPath[9];
+    HRESULT hr = StringCchCopyW(szFolderPath, _countof(szFolderPath), WindowsGetStringRawBuffer(name, nullptr));
+    if (hr != S_OK && hr != STRSAFE_E_INSUFFICIENT_BUFFER)
+    {
+        return hr;
+    }
+    if (CompareStringOrdinal(szFolderPath, -1, L"Windows.", -1, false) == CSTR_EQUAL)
     {
         return REGDB_E_CLASSNOTREG;
     }
@@ -219,6 +223,6 @@ HRESULT WinRTGetMetadataFile(
         }
     }
     *metaDataFilePath = metaDataFilePaths[bestMatch];
-    metaDataFilePaths[bestMatch] = nullptr; // Null this out so it doesn't get over-released
+    metaDataFilePaths[bestMatch] = nullptr; // Null this out to transfer ownership to parameter
     return S_OK;
 }
