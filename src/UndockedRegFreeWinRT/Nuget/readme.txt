@@ -8,6 +8,7 @@ to leverage user-defined Windows Runtime types via the use of the
 application manifest down to RS2. 
 
 Example application manifest:
+
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <file name="TestComponent.dll">
@@ -26,9 +27,7 @@ Example application manifest:
   </file>
 </assembly>
 
-Since the regfree winrt feature is already available on versions of windows 19h1 and above, 
-this package will automatically disable itself on 19h1 and above.  
-However you must target your application for windows for it to self-disable.
+Starting with Windows 10 19h1, the operating system has this feature by default and will use this information directly. Be sure to  target your application for windows so that the package automatically disables itself when this feature is available by default.
 https://docs.microsoft.com/en-us/windows/win32/sysinfo/targeting-your-application-at-windows-8-1
 
 ========================================================================
