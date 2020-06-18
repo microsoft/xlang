@@ -5,9 +5,9 @@ enabling you consume Windows Runtime classes registry free!
 
 Installing this package will enable non-packaged desktop applications 
 to leverage user-defined Windows Runtime types via the use of the 
-fusion manifest down to RS2. 
+application manifest down to RS2. 
 
-Example fusion manifest:
+Example application manifest:
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <file name="TestComponent.dll">
@@ -35,6 +35,6 @@ https://docs.microsoft.com/en-us/windows/win32/sysinfo/targeting-your-applicatio
 For more information, visit:
 https://github.com/microsoft/xlang/tree/undocked_winrt_activation
 
-For more information about the original feature, visit:
+For more information about using application manifests for Windows Runtime types, visit:
 https://blogs.windows.com/windowsdeveloper/2019/04/30/enhancing-non-packaged-desktop-apps-using-windows-runtime-components/
 ========================================================================
