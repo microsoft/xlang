@@ -18,6 +18,7 @@
     <file src="LICENSE"/>
     <file src="$abiwinrt_exe$" target="bin"/>
     <file src="Microsoft.Windows.AbiWinRT.targets" target="build\native"/>
+    <file src="Microsoft.Windows.AbiWinRT.props" target="build\native"/>
     <file src="readme.txt"/>
   </files>
 </package>

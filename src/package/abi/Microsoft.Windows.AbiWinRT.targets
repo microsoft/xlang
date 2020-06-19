@@ -6,8 +6,509 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
     <PropertyGroup>
-        <AbiWinRTPackageDir Condition="'$(AbiWinRTPackageDir)'==''">$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)))..\..\</AbiWinRTPackageDir>
-        <AbiWinRTPath Condition="'$(AbiWinRTPath)'==''">"$(AbiWinRTPackageDir)bin\"</AbiWinRTPath>
+        <!-- Only do this for MSBuild versions below 16.0
+             as it is since done automatically, see https://github.com/microsoft/msbuild/pull/3605-->
+        <MSBuildAllProjects Condition="'$(MSBuildToolsVersion)'  &lt;= '15'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <AbiWinRTVerbosity Condition="'$(AbiWinRTVerbosity)' == ''">normal</AbiWinRTVerbosity>
+        <AbiWinRTCommandVerbosity Condition="'$(AbiWinRTVerbosity)' == 'high'">-verbose</AbiWinRTCommandVerbosity>
+        <AbiWinRTProjectWinMD>$(OutDir)$(RootNamespace).winmd</AbiWinRTProjectWinMD>
+        <AbiWinRTMergedDir>$(IntDir)Merged\</AbiWinRTMergedDir>
+        <AbiWinRTUnmergedDir>$(IntDir)Unmerged\</AbiWinRTUnmergedDir>
+        <AbiWinRTSkipUnchangedFiles Condition="'$(AbiWinRTSkipUnchangedFiles)' == ''">true</AbiWinRTSkipUnchangedFiles>
+        <AbiWinRTUseHardlinksIfPossible Condition="'$(AbiWinRTUseHardlinksIfPossible)' == ''">false</AbiWinRTUseHardlinksIfPossible>
+        <AbiWinRTWriteOnlyWhenDifferent Condition="('$(AbiWinRTWriteOnlyWhenDifferent)' == '') And (('$(MSBuildToolsVersion)' == 'Current') Or ('$(MSBuildToolsVersion)' &gt;= '15'))">true</AbiWinRTWriteOnlyWhenDifferent>
+        <AbiWinRTWriteOnlyWhenDifferent Condition="'$(AbiWinRTWriteOnlyWhenDifferent)' != 'true'">false</AbiWinRTWriteOnlyWhenDifferent>
+        <AbiWinRTPath Condition="'$(AbiWinRTPath)'==''">$(MSBuildThisFileDirectory)..\bin\</AbiWinRTPath>
+
+        <AbiWinRTEnableComponentProjection Condition="'$(AbiWinRTEnableComponentProjection)' == ''">true</AbiWinRTEnableComponentProjection>
+        <AbiWinRTEnablePlatformProjection Condition="'$(AbiWinRTEnablePlatformProjection)' == ''">true</AbiWinRTEnablePlatformProjection>
+        <AbiWinRTEnableReferenceProjection Condition="'$(AbiWinRTEnableReferenceProjection)' == ''">true</AbiWinRTEnableReferenceProjection>
+
+        <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
+        <!--Override SDK's uap.props setting to ensure version-matched headers-->
+        <AbiWinRT_IncludePath>$(GeneratedFilesDir)</AbiWinRT_IncludePath>
+        <!--TEMP: Override NuGet SDK's erroneous setting in uap.props -->
+        <WindowsSDK_MetadataFoundationPath Condition="('$(WindowsSDK_MetadataFoundationPath)'!='') And !Exists($(WindowsSDK_MetadataFoundationPath))">$(WindowsSDK_MetadataPathVersioned)</WindowsSDK_MetadataFoundationPath>
+        <!-- CAExcludePath is used to set an environment variable, so make sure this is defined on a single line. -->
+        <CAExcludePath>$(GeneratedFilesDir);$(CAExcludePath)</CAExcludePath>
+
+        <PrepareForBuildDependsOn>
+            $(PrepareForBuildDependsOn);
+            AbiWinRTVerifyKitVersion;
+        </PrepareForBuildDependsOn>
+        <!-- Note: Before* targets run before Compute* targets. -->
+        <ComputeMidlInputsTargets>
+            $(ComputeMidlInputsTargets);AbiWinRTSetMidlReferences;
+        </ComputeMidlInputsTargets>
+        <AfterMidlTargets>
+            $(AfterMidlTargets);
+            GetAbiWinRTMdMergeInputs;
+            AbiWinRTMergeProjectWinMDInputs;
+            GetResolvedWinMD;
+            AbiWinRTCopyWinMDToOutputDirectory;
+        </AfterMidlTargets>
+        <ResolveAssemblyReferencesDependsOn>
+            $(ResolveAssemblyReferencesDependsOn);GetAbiWinRTProjectWinMDReferences;AbiWinRTMarkStaticLibrariesPrivate;
+        </ResolveAssemblyReferencesDependsOn>
+        <!-- Note: Before* targets run before Compute* targets. -->
+        <BeforeClCompileTargets>
+            $(BeforeClCompileTargets);AbiWinRTMakeProjections;
+        </BeforeClCompileTargets>
+        <ComputeCompileInputsTargets>
+            $(ComputeCompileInputsTargets);AbiWinRTHeapEnforcementOptOut;
+        </ComputeCompileInputsTargets>
+        <CleanDependsOn>
+            $(CleanDependsOn);AbiWinRTClean
+        </CleanDependsOn>
+
+    </PropertyGroup>
+
+    <!-- For a static library we don't want the winmd/lib/pdb to be packaged -->
+    <PropertyGroup Condition="'$(ConfigurationType)' == 'StaticLibrary'">
+        <IncludeCopyWinMDArtifactsOutputGroup>false</IncludeCopyWinMDArtifactsOutputGroup>
+    </PropertyGroup>
+
+    <Target Name="AbiWinRTVerifyKitVersion" Condition="'$(AbiWinRTOverrideSDKReferences)' != 'true'">
+        <PropertyGroup>
+            <_AbiWinRT_RS4OrGreater>false</_AbiWinRT_RS4OrGreater>
+            <_AbiWinRT_RS4OrGreater Condition="'$(TargetPlatformVersion)' &gt;= '10.0.17134.0'">true</_AbiWinRT_RS4OrGreater>
+        </PropertyGroup>
+        <VCMessage Code="MSB8036" Type="Error" Arguments="10.0.17134.0 (or later)" Condition="$(_AbiWinRT_RS4OrGreater) != 'true'" />
+    </Target>
+
+    <Target Name="AbiWinRTClean">
+        <ItemGroup>
+            <_FilesToDelete Remove="@(_FilesToDelete)"/>
+            <_FilesToDelete Include="$(GeneratedFilesDir)**"/>
+            <_FilesToDelete Include="$(OutDir)*.winmd"/>
+            <_FilesToDelete Include="$(IntDir)*.winmd"/>
+            <_FilesToDelete Include="$(IntDir)*.idl"/>
+            <_FilesToDelete Include="$(IntDir)*.rsp"/>
+            <_FilesToDelete Include="$(AbiWinRTMergedDir)**"/>
+            <_FilesToDelete Include="$(AbiWinRTUnmergedDir)**"/>
+        </ItemGroup>
+        <Delete Files="@(_FilesToDelete)"/>
+    </Target>
+
+    <Target Name="AbiWinRTHeapEnforcementOptOut" Condition="'@(ClCompile)' != ''">
+        <ItemGroup Condition="'$(AbiWinRTHeapEnforcement)'=='' and ('@(Page)' != '' Or '@(ApplicationDefinition)' != '')">
+            <ClCompile>
+                <AdditionalOptions>%(ClCompile.AdditionalOptions) /DWINRT_NO_MAKE_DETECTION</AdditionalOptions>
+            </ClCompile>
+        </ItemGroup>
+    </Target>
+
+    <!-- Target used only to evaluate AbiWinRTGenerateWindowsMetadata if it doesn't already have a value -->
+    <Target Name="AbiWinRTComputeGenerateWindowsMetadata"
+            DependsOnTargets="GetAbiWinRTProjectWinMDReferences;$(AbiWinRTComputeGenerateWindowsMetadataDependsOn)">
+
+        <PropertyGroup>
+            <!-- For static libraries, only idl causes a winmd to be generated. 
+                 For exe/dll, static libraries that produce a WinMD will be merged, 
+                 so they also cause a WinMD to be generated-->
+            <AbiWinRTGenerateWindowsMetadata Condition="'$(ConfigurationType)' != 'StaticLibrary' AND '@(AbiWinRTStaticProjectWinMDReferences)@(Midl)'!= ''">true</AbiWinRTGenerateWindowsMetadata>
+            <AbiWinRTGenerateWindowsMetadata Condition="'$(ConfigurationType)' == 'StaticLibrary' AND '@(Midl)'!= ''">true</AbiWinRTGenerateWindowsMetadata>
+
+            <!-- At this point we checked all cases where we do generate a WinMD.
+                 The remaining option is no WinMD. -->
+            <AbiWinRTGenerateWindowsMetadata Condition="'$(AbiWinRTGenerateWindowsMetadata)'== ''">false</AbiWinRTGenerateWindowsMetadata>
+        </PropertyGroup>
+
+    </Target>
+
+    <Target Name="ComputeGetResolvedWinMD"
+            Condition="'$(AbiWinRTGenerateWindowsMetadata)' == ''">
+        <!-- If AbiWinRTGenerateWindowsMetadata is not defined, compute it.-->
+        <!-- We use Calltarget, so we don't run anything including DependsOnTargets
+             targets if $(AbiWinRTGenerateWindowsMetadata) already has a value.-->
+        <CallTarget Targets="AbiWinRTComputeGenerateWindowsMetadata" />
+    </Target>
+
+    <!-- This target overrides the GetResolvedWinMD target used to resolve the WinMD for native projects
+         so it is aware of the C++/WinRT generated WinMD.
+         Since not every project that consumes C++/WinRT uses it to generate a WinMD,
+         we need to keep the CX logic as well. -->
+    <Target Name="GetResolvedWinMD"
+            DependsOnTargets="ComputeGetResolvedWinMD"
+            Returns="@(WinMDFullPath)">
+
+        <!-- Copied from the CX GetResolvedWinMD target in Microsoft.CppBuild.targets -->
+        <ItemGroup>
+            <!-- To evaluate the GenerateWindowsMetadata value we need @(Link) to contains at least one element-->
+            <Link Include="tmp" Condition="'@(Link)'==''">
+                <DeleteSoon>true</DeleteSoon>
+            </Link>
+
+            <!-- Condition is modified to only do this if AbiWinRTGenerateWindowsMetadata is not true. -->
+            <WinMDFullPath Condition="'%(Link.GenerateWindowsMetadata)' == 'true' AND '$(AbiWinRTGenerateWindowsMetadata)' != 'true'"
+                           Include="@(Link->Metadata('WindowsMetadataFile')->FullPath()->Distinct()->ClearMetadata())">
+                <TargetPath>$([System.IO.Path]::GetFileName('%(Link.WindowsMetadataFile)'))</TargetPath>
+                <Primary>true</Primary>
+            </WinMDFullPath>
+
+            <WinMDFullPath>
+                <Implementation>$(WinMDImplementationPath)$(TargetName)$(TargetExt)</Implementation>
+                <FileType>winmd</FileType>
+                <WinMDFile>true</WinMDFile>
+                <ProjectType>$(ConfigurationType)</ProjectType>
+            </WinMDFullPath>
+
+            <Link Remove="@(Link)" Condition="'%(Link.DeleteSoon)' == 'true'" />
+        </ItemGroup>
+
+        <!-- Add C++/WinRT primary WinMD to the WinMDFullPath if AbiWinRTGenerateWindowsMetadata is true -->
+        <ItemGroup>
+            <WinMDFullPath Include="$(AbiWinRTProjectWinMD)"  Condition="'$(AbiWinRTGenerateWindowsMetadata)' == 'true'">
+                <TargetPath>$([System.IO.Path]::GetFileName('$(AbiWinRTProjectWinMD)'))</TargetPath>
+                <Primary>true</Primary>
+                <Implementation Condition="'$(TargetExt)' == '.dll'">$(WinMDImplementationPath)$(TargetName)$(TargetExt)</Implementation>
+                <FileType>winmd</FileType>
+                <WinMDFile>true</WinMDFile>
+                <ProjectName>$(MSBuildProjectName)</ProjectName>
+                <ProjectType>$(ConfigurationType)</ProjectType>
+            </WinMDFullPath>
+        </ItemGroup>
+
+        <Message Text="GetResolvedWinMD: @(WinMDFullPath->'%(FullPath)')" Importance="$(AbiWinRTVerbosity)"/>
+    </Target>
+
+    <!-- Static library reference WinMDs are merged into the project WinMD that
+         references it and might have the same name because they often share namespace. 
+         Therefore they shouldn't be copied to the output folder
+         because they might override files in the output folder with the
+         same name, causing missing types. -->
+    <Target Name="AbiWinRTMarkStaticLibrariesPrivate"
+            DependsOnTargets="ResolveProjectReferences"
+            Returns="@(_ResolvedProjectReferencePaths)">
+        <ItemGroup>
+            <_ResolvedProjectReferencePaths Condition="'%(_ResolvedProjectReferencePaths.ProjectType)' == 'StaticLibrary'">
+                <Private>false</Private>
+            </_ResolvedProjectReferencePaths>
+        </ItemGroup>
+    </Target>
+
+    <!--Define platform projection WinMD inputs-->
+    <Target Name="GetAbiWinRTPlatformWinMDInputs"
+            DependsOnTargets="ResolveAssemblyReferences"
+            Returns="@(AbiWinRTPlatformWinMDInputs)">
+        <ItemGroup>
+            <_AbiWinRTPlatformWinMDInputs Remove="@(_AbiWinRTPlatformWinMDInputs)" />
+            <_AbiWinRTPlatformWinMDInputs Include="$(WindowsSDK_MetadataPathVersioned)\**\*.winmd" />
+            <AbiWinRTPlatformWinMDInputs Include="@(_AbiWinRTPlatformWinMDInputs)">
+                <WinMDPath>%(FullPath)</WinMDPath>
+            </AbiWinRTPlatformWinMDInputs>
+        </ItemGroup>
+        <Message Text="AbiWinRTPlatformWinMDInputs: @(AbiWinRTPlatformWinMDInputs->'%(WinMDPath)')" Importance="$(AbiWinRTVerbosity)"/>
+    </Target>
+
+    <!--Define platform WinMD references for modern IDL compilation-->
+    <Target Name="GetAbiWinRTPlatformWinMDReferences"
+            DependsOnTargets="ResolveAssemblyReferences;$(GetAbiWinRTPlatformWinMDReferencesDependsOn)"
+            Returns="@(AbiWinRTPlatformWinMDReferences)">
+        <ItemGroup>
+            <_AbiWinRTPlatformWinMDReferences Remove="@(_AbiWinRTPlatformWinMDReferences)" />
+            <_AbiWinRTPlatformWinMDReferences Include="@(ReferencePath)" Condition="'%(ReferencePath.IsSystemReference)' == 'true' and '%(ReferencePath.WinMDFile)' == 'true' and '%(ReferencePath.ReferenceSourceTarget)' == 'ResolveAssemblyReference'" />
+            <_AbiWinRTPlatformWinMDReferences Condition="'$(AbiWinRTOverrideSDKReferences)' != 'true'" Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Foundation.FoundationContract.winmd" />
+            <_AbiWinRTPlatformWinMDReferences Condition="'$(AbiWinRTOverrideSDKReferences)' != 'true'" Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Foundation.UniversalApiContract.winmd" />
+            <_AbiWinRTPlatformWinMDReferences Condition="'$(AbiWinRTOverrideSDKReferences)' != 'true'" Include="$(WindowsSDK_MetadataPathVersioned)\**\Windows.Networking.Connectivity.WwanContract.winmd" />
+            <_AbiWinRTPlatformWinMDReferences Include="$(AbiWinRTSDKReferences)" />
+            <AbiWinRTPlatformWinMDReferences Remove="@(AbiWinRTPlatformWinMDReferences)"/>
+            <AbiWinRTPlatformWinMDReferences Include="@(_AbiWinRTPlatformWinMDReferences->'%(FullPath)'->Distinct())">
+                <WinMDPath>%(FullPath)</WinMDPath>
+            </AbiWinRTPlatformWinMDReferences>
+        </ItemGroup>
+        <Message Text="AbiWinRTPlatformWinMDReferences: @(AbiWinRTPlatformWinMDReferences->'%(WinMDPath)')" Importance="$(AbiWinRTVerbosity)"/>
+    </Target>
+
+    <!--Get direct WinMD references (including Nuget packages) for projections, IDL processing, and AppX packaging-->
+    <Target Name="GetAbiWinRTDirectWinMDReferences"
+            DependsOnTargets="ResolveAssemblyReferences;$(GetAbiWinRTDirectWinMDReferencesDependsOn)"
+            Returns="@(AbiWinRTDirectWinMDReferences)">
+        <ItemGroup>
+            <_AbiWinRTDirectWinMDReferences Remove="@(_AbiWinRTDirectWinMDReferences)" />
+            <_AbiWinRTDirectWinMDReferences Include="@(ReferencePath)" Condition="'%(ReferencePath.IsSystemReference)' != 'true' and '%(ReferencePath.WinMDFile)' == 'true' and '%(ReferencePath.ReferenceSourceTarget)' == 'ResolveAssemblyReference'" />
+            <AbiWinRTDirectWinMDReferences Remove="@(AbiWinRTDirectWinMDReferences)"/>
+            <AbiWinRTDirectWinMDReferences Include="@(_AbiWinRTDirectWinMDReferences)">
+                <WinMDPath>%(FullPath)</WinMDPath>
+            </AbiWinRTDirectWinMDReferences>
+        </ItemGroup>
+        <Message Text="AbiWinRTDirectWinMDReferences: @(AbiWinRTDirectWinMDReferences->'%(WinMDPath)')" Importance="$(AbiWinRTVerbosity)"/>
+    </Target>
+
+    <!--Get direct WinMD project references for projections, IDL processing, and AppX packaging-->
+    <Target Name="GetAbiWinRTProjectWinMDReferences"
+            DependsOnTargets="ResolveProjectReferences;$(GetAbiWinRTProjectWinMDReferencesDependsOn)"
+            Returns="@(AbiWinRTStaticProjectWinMDReferences);@(AbiWinRTDynamicProjectWinMDReferences)">
+        <ItemGroup>
+            <!-- Get static library project references -->
+            <_AbiWinRTStaticProjectReferences Remove="@(_AbiWinRTStaticProjectReferences)"/>
+            <_AbiWinRTStaticProjectReferences Include="@(_ResolvedProjectReferencePaths)"
+                Condition= "'%(_ResolvedProjectReferencePaths.ProjectType)'=='StaticLibrary' AND 
+                    '%(_ResolvedProjectReferencePaths.WinMDFile)' == 'true'"/>
+            <!--Get dynamic library project references-->
+            <_AbiWinRTDynamicProjectReferences Remove="@(_AbiWinRTDynamicProjectReferences)"/>
+            <_AbiWinRTDynamicProjectReferences Include="@(_ResolvedProjectReferencePaths)"
+                Condition= "'%(_ResolvedProjectReferencePaths.ProjectType)'!='StaticLibrary' AND 
+                ('%(_ResolvedProjectReferencePaths.WinMDFile)' == 'true' OR
+                    ('%(_ResolvedProjectReferencePaths.WinMDFile)' == '' AND '%(_ResolvedProjectReferencePaths.Extension)' == '.winmd'))"/>
+        </ItemGroup>
+        <ItemGroup>
+            <AbiWinRTStaticProjectWinMDReferences Remove="@(AbiWinRTStaticProjectWinMDReferences)" />
+            <AbiWinRTStaticProjectWinMDReferences Include="@(_AbiWinRTStaticProjectReferences)">
+                <WinMDPath>%(FullPath)</WinMDPath>
+            </AbiWinRTStaticProjectWinMDReferences>
+            <AbiWinRTDynamicProjectWinMDReferences Remove="@(AbiWinRTDynamicProjectWinMDReferences)" />
+            <AbiWinRTDynamicProjectWinMDReferences Include="@(_AbiWinRTDynamicProjectReferences)">
+                <WinMDPath>%(FullPath)</WinMDPath>
+            </AbiWinRTDynamicProjectWinMDReferences>
+        </ItemGroup>
+        <Message Text="AbiWinRTStaticProjectWinMDReferences: @(AbiWinRTStaticProjectWinMDReferences->'%(WinMDPath)')" Importance="$(AbiWinRTVerbosity)"/>
+        <Message Text="AbiWinRTDynamicProjectWinMDReferences: @(AbiWinRTDynamicProjectWinMDReferences->'%(WinMDPath)')" Importance="$(AbiWinRTVerbosity)"/>
+    </Target>
+
+    <Target Name="AbiWinRTResolveReferences" DependsOnTargets="GetAbiWinRTPlatformWinMDReferences;GetAbiWinRTDirectWinMDReferences;GetAbiWinRTProjectWinMDReferences;$(AbiWinRTResolveReferencesDependsOn)" />
+
+    <!-- Calculates the input files and metadata directories to be passed to MdMerge -->
+    <Target Name="GetAbiWinRTMdMergeInputs"
+                DependsOnTargets="AbiWinRTResolveReferences;"
+                Returns="@(AbiWinRTMdMergeMetadataDirectories);@(AbiWinRTMdMergeInputs)">
+        <ItemGroup>
+            <_MdMergeInputs Remove="@(_MdMergeInputs)"/>
+            <_MdMergeInputs Include="@(Midl)">
+                <WinMDPath>%(Midl.OutputDirectory)%(Midl.MetadataFileName)</WinMDPath>
+                <MdMergeOutputFile>$(AbiWinRTProjectWinMD)</MdMergeOutputFile>
+            </_MdMergeInputs>
+            <!-- Static libraries don't mdmerge other static libraries.
+                 Instead they are passed as independent inputs for the component projection. -->
+            <_MdMergeInputs Include="@(AbiWinRTStaticProjectWinMDReferences)" Condition="'$(ConfigurationType)' != 'StaticLibrary'">
+                <MdMergeOutputFile>$(AbiWinRTProjectWinMD)</MdMergeOutputFile>
+            </_MdMergeInputs>
+            <_MdMergeReferences Remove="@(_MdMergeReferences)" />
+            <!-- Static libraries don't mdmerge other static libraries.
+                 They are however used as references so idl can reference classes from other libs. -->
+            <_MdMergeReferences Include="@(AbiWinRTStaticProjectWinMDReferences)" Condition="'$(ConfigurationType)' == 'StaticLibrary'" />
+            <_MdMergeReferences Include="@(AbiWinRTDirectWinMDReferences)" />
+            <_MdMergeReferences Include="@(AbiWinRTDynamicProjectWinMDReferences)" />
+            <_MdMergeReferences Include="@(AbiWinRTPlatformWinMDReferences)" />
+            <AbiWinRTMdMergeMetadataDirectories Remove="@(AbiWinRTMdMergeMetadataDirectories)" />
+            <AbiWinRTMdMergeMetadataDirectories Include="@(_MdMergeReferences->'%(RelativeDir)'->Distinct())" />
+            <AbiWinRTMdMergeInputs Remove="@(AbiWinRTMdMergeInputs)" />
+            <AbiWinRTMdMergeInputs Include="@(_MdMergeInputs->'%(WinMDPath)'->Distinct())" />
+        </ItemGroup>
+        <Message Text="AbiWinRTMdMergeInputs: @(AbiWinRTMdMergeInputs)" Importance="$(AbiWinRTVerbosity)"/>
+        <Message Text="AbiWinRTMdMergeMetadataDirectories: @(AbiWinRTMdMergeMetadataDirectories)" Importance="$(AbiWinRTVerbosity)"/>
+    </Target>
+
+    <!--Insert Midl /references to Platform WinMDs, library reference WinMDs, and direct reference WinMDs-->
+    <Target Name="AbiWinRTSetMidlReferences"
+            Condition="'$(AbiWinRTModernIDL)' != 'false'"
+            DependsOnTargets="GetAbiWinRTPlatformWinMDReferences;GetAbiWinRTDirectWinMDReferences;GetAbiWinRTProjectWinMDReferences;$(AbiWinRTSetMidlReferencesDependsOn)"
+            Inputs="$(MSBuildAllProjects);@(AbiWinRTDirectWinMDReferences);@(AbiWinRTStaticProjectWinMDReferences);@(AbiWinRTDynamicProjectWinMDReferences);@(AbiWinRTPlatformWinMDReferences)"
+            Outputs="$(IntDir)midlrt.rsp">
+        <ItemGroup>
+            <_MidlReferences Remove="@(_MidlReferences)"/>
+            <_MidlReferences Include="@(AbiWinRTDirectWinMDReferences)"/>
+            <_MidlReferences Include="@(AbiWinRTStaticProjectWinMDReferences)"/>
+            <_MidlReferences Include="@(AbiWinRTDynamicProjectWinMDReferences)"/>
+            <_MidlReferences Include="@(AbiWinRTPlatformWinMDReferences)"/>
+            <_MidlReferencesDistinct Remove="@(_MidlReferencesDistinct)" />
+            <_MidlReferencesDistinct Include="@(_MidlReferences->'%(WinMDPath)'->Distinct())" />
+            <Midl Condition="'%(Midl.DisableReferences)'==''">
+                <AdditionalOptions>%(Midl.AdditionalOptions) %40"$(IntDir)midlrt.rsp"</AdditionalOptions>
+            </Midl>
+        </ItemGroup>
+        <PropertyGroup>
+            <_MidlrtParameters>@(_MidlReferencesDistinct->'/reference &quot;%(WinMDPath)&quot;','&#x0d;&#x0a;')</_MidlrtParameters>
+        </PropertyGroup>
+        <!-- Always write the midlrt.rsp file when the target runs, because the file is used as the output of this target. -->
+        <WriteLinesToFile
+            File="$(IntDir)midlrt.rsp" Lines="$(_MidlrtParameters)"
+            ContinueOnError="true" Overwrite="true" />
+        <Message Text="AbiWinRTMidlReferences: @(_MidlReferences->'%(WinMDPath)')" Importance="$(AbiWinRTVerbosity)"/>
+    </Target>
+
+    <!--Ctrl+F7 (selected file) midl compilation support-->
+    <Target Name="AbiWinRTSetSelectMidlReferences" BeforeTargets="SelectMidl" DependsOnTargets="AbiWinRTSetMidlReferences" />
+
+    <!--Merge project-generated WinMDs and project-referenced static library WinMDs into project WinMD-->
+    <Target Name="AbiWinRTMergeProjectWinMDInputs"
+            DependsOnTargets="Midl;GetAbiWinRTMdMergeInputs;$(AbiWinRTMergeProjectWinMDInputsDependsOn)"
+            Inputs="$(MSBuildAllProjects);@(AbiWinRTMdMergeInputs)"
+            Outputs="@(_MdMergedOutput);$(IntDir)mdmerge.rsp">
+        <PropertyGroup>
+            <!--Note: AbiWinRTNamespaceMergeDepth supersedes AbiWinRTMergeDepth-->
+            <_MdMergeDepth Condition="'$(AbiWinRTNamespaceMergeDepth)' != ''">-n:$(AbiWinRTNamespaceMergeDepth)</_MdMergeDepth>
+            <_MdMergeDepth Condition="'$(_MdMergeDepth)' == ''">$(AbiWinRTMergeDepth)</_MdMergeDepth>
+            <_MdMergeDepth Condition="'$(_MdMergeDepth)' == '' And '$(AbiWinRTRootNamespaceAutoMerge)' == 'true'">-n:$(RootNamespace.Split('.').length)</_MdMergeDepth>
+            <_MdMergeDepth Condition="'$(_MdMergeDepth)' == '' And ('@(Page)' != '' Or '@(ApplicationDefinition)' != '')">-n:1</_MdMergeDepth>
+            <_MdMergeCommand>$(MdMergePath)mdmerge %40"$(IntDir)mdmerge.rsp"</_MdMergeCommand>
+        </PropertyGroup>
+        <PropertyGroup>
+            <!-- mdmerge.exe wants the folders to not have a trailing \ -->
+            <_MdMergeParameters>-v @(AbiWinRTMdMergeMetadataDirectories->'-metadata_dir &quot;%(RelativeDir).&quot;', '&#x0d;&#x0a;')</_MdMergeParameters>
+            <_MdMergeParameters>$(_MdMergeParameters) @(AbiWinRTMdMergeInputs->'-i &quot;%(Identity)&quot;', '&#x0d;&#x0a;')</_MdMergeParameters>
+            <_MdMergeParameters>$(_MdMergeParameters) -o &quot;$(AbiWinRTMergedDir.TrimEnd('\'))&quot; -partial $(_MdMergeDepth)</_MdMergeParameters>
+        </PropertyGroup>
+        <!-- Always write the mdmerge.rsp file when the target runs, because the file is used as the output of this target. -->
+        <WriteLinesToFile
+            File="$(IntDir)mdmerge.rsp" Lines="$(_MdMergeParameters)"
+            ContinueOnError="true" Overwrite="true" />
+        <MakeDir Directories="$(AbiWinRTUnmergedDir);$(AbiWinRTMergedDir)" />
+        <Message Text="$(_MdMergeCommand)" Importance="$(AbiWinRTVerbosity)" Condition="'@(AbiWinRTMdMergeInputs)' != ''" />
+        <!-- Only run mdmerge.exe when we actually have inputs -->
+        <Exec Command="$(_MdMergeCommand)" Condition="'@(AbiWinRTMdMergeInputs)' != ''" />
+        <ItemGroup>
+            <_MdMergedOutput Remove="@(_MdMergedOutput)"/>
+            <_MdMergedOutput Include="$(AbiWinRTMergedDir)*.winmd"/>
+        </ItemGroup>
+        <Message Text="AbiWinRTMdMerge output: @(MdMergeOutput)" Importance="$(AbiWinRTVerbosity)"/>
+    </Target>
+
+    <!-- Only copy winmd to output folder if AbiWinRTGenerateWindowsMetadata is true -->
+    <!-- Note that Condition is evaluated before DependsOnTargets are run -->
+    <Target Name="AbiWinRTCopyWinMDToOutputDirectory"
+            Condition="'$(AbiWinRTGenerateWindowsMetadata)' == 'true'"
+            DependsOnTargets="AbiWinRTMergeProjectWinMDInputs;$(AbiWinRTCopyWinMDToOutputDirectoryDependsOn)"
+            Inputs="@(_MdMergedOutput)"
+            Outputs="$(AbiWinRTProjectWinMD)">
+        <Copy UseHardlinksIfPossible="$(AbiWinRTUseHardlinksIfPossible)"
+            SkipUnchangedFiles="$(AbiWinRTSkipUnchangedFiles)"
+            SourceFiles="@(_MdMergedOutput)"
+            DestinationFiles="@(_MdMergedOutput->'$(OutDir)%(Filename)%(Extension)')" />
+    </Target>
+
+    <!-- Build the platform projection from the winmds that sip with the platform in the Windows SDK -->
+    <!-- Note that Condition is evaluated before DependsOnTargets are run -->
+    <Target Name="AbiWinRTMakePlatformProjection"
+            Condition="'$(AbiWinRTEnablePlatformProjection)' == 'true' AND '$(AbiWinRTOverrideSDKReferences)' != 'true'"
+            DependsOnTargets="GetAbiWinRTPlatformWinMDInputs;$(AbiWinRTMakePlatformProjectionDependsOn)"
+            Inputs="$(MSBuildAllProjects);@(AbiWinRTPlatformWinMDInputs)"
+            Outputs="$(IntDir)AbiWinRT_plat.rsp">
+        <PropertyGroup>
+            <AbiWinRTCommand>$(AbiWinRTPath)AbiWinRT %40"$(IntDir)AbiWinRT_plat.rsp"</AbiWinRTCommand>
+        </PropertyGroup>
+        <ItemGroup>
+            <_AbiWinRTInputs Remove="@(_AbiWinRTInputs)"/>
+            <_AbiWinRTInputs Include="@(AbiWinRTPlatformWinMDInputs)"/>
+        </ItemGroup>
+        <PropertyGroup>
+            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters)</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) -out &quot;$(GeneratedFilesDir).&quot;</_AbiWinRTParameters>
+        </PropertyGroup>
+        <!-- Always write the AbiWinRT_plat.rsp file when the target runs, because the file is used as the output of this target. -->
+        <WriteLinesToFile
+            File="$(IntDir)AbiWinRT_plat.rsp" Lines="$(_AbiWinRTParameters)"
+            ContinueOnError="true" Overwrite="true" />
+        <Message Text="$(AbiWinRTCommand)" Importance="$(AbiWinRTVerbosity)" Condition="'@(_AbiWinRTInputs)' != ''" />
+        <Exec Command="$(AbiWinRTCommand)" Condition="'@(_AbiWinRTInputs)' != ''" />
+    </Target>
+
+    <!--Build reference projection from WinMD project references and dynamic library project references-->
+    <!-- Note that Condition is evaluated before DependsOnTargets are run -->
+    <Target Name="AbiWinRTMakeReferenceProjection"
+            Condition="'@(AbiWinRTDirectWinMDReferences)@(AbiWinRTDynamicProjectWinMDReferences)' != '' AND '$(AbiWinRTEnableReferenceProjection)' == 'true'"
+            DependsOnTargets="$(AbiWinRTMakeReferenceProjectionDependsOn)"
+            Inputs="$(MSBuildAllProjects);@(AbiWinRTDirectWinMDReferences);@(AbiWinRTDynamicProjectWinMDReferences);@(AbiWinRTPlatformWinMDReferences)"
+            Outputs="$(IntDir)AbiWinRT_ref.rsp">
+        <PropertyGroup>
+            <AbiWinRTCommand>$(AbiWinRTPath)AbiWinRT %40"$(IntDir)AbiWinRT_ref.rsp"</AbiWinRTCommand>
+        </PropertyGroup>
+        <ItemGroup>
+            <_AbiWinRTRefInputs Remove="@(_AbiWinRTRefInputs)"/>
+            <_AbiWinRTRefInputs Include="@(AbiWinRTDirectWinMDReferences)"/>
+            <_AbiWinRTRefInputs Include="@(AbiWinRTDynamicProjectWinMDReferences)"/>
+            <_AbiWinRTRefRefs Remove="@(_AbiWinRTRefRefs)"/>
+            <_AbiWinRTRefRefs Include="@(AbiWinRTPlatformWinMDReferences)"/>
+        </ItemGroup>
+        <PropertyGroup>
+            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters)</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTRefInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTRefRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) -out &quot;$(GeneratedFilesDir).&quot;</_AbiWinRTParameters>
+        </PropertyGroup>
+        <!-- Always write the AbiWinRT_ref.rsp file when the target runs, because the file is used as the output of this target. -->
+        <WriteLinesToFile
+            File="$(IntDir)AbiWinRT_ref.rsp" Lines="$(_AbiWinRTParameters)"
+            ContinueOnError="true" Overwrite="true" />
+        <Message Text="$(AbiWinRTCommand)" Importance="$(AbiWinRTVerbosity)" Condition="'@(_AbiWinRTRefInputs)' != ''" />
+        <Exec Command="$(AbiWinRTCommand)" Condition="'@(_AbiWinRTRefInputs)' != ''" />
+    </Target>
+
+    <!--Build component projection from project WinMD file and static library project references-->
+    <!-- Note that Condition is evaluated before DependsOnTargets are run -->
+    <Target Name="AbiWinRTMakeComponentProjection"
+            Condition="'$(AbiWinRTEnableComponentProjection)' == 'true'"
+            DependsOnTargets="GetAbiWinRTMdMergeInputs;$(AbiWinRTMakeComponentProjectionDependsOn)"
+            Inputs="$(MSBuildAllProjects);@(AbiWinRTMdMergeInputs);@(AbiWinRTStaticProjectWinMDReferences)"
+            Outputs="$(IntDir)AbiWinRT_comp.rsp">
+        <PropertyGroup>
+            <_PCH>@(ClCompile->Metadata('PrecompiledHeaderFile')->Distinct())</_PCH>
+        </PropertyGroup>
+        <Error Condition="('$(AbiWinRTOverrideSDKReferences)' != 'true') and ('$(TargetPlatformVersion)' &lt; '10.0.17709.0') and ('$(_PCH)' != 'pch.h')"
+            Text="Please retarget to 10.0.17709.0 or later, or rename your PCH to 'pch.h'."/>
+        <PropertyGroup Condition="('$(AbiWinRTOverrideSDKReferences)' == 'true') or ('$(TargetPlatformVersion)' &gt; '10.0.17708.0')">
+            <AbiWinRTUsePrefixes Condition="'$(AbiWinRTUsePrefixes)' == ''">true</AbiWinRTUsePrefixes>
+            <AbiWinRTPrecompiledHeader Condition="'$(AbiWinRTPrecompiledHeader)' == ''">$(_PCH)</AbiWinRTPrecompiledHeader>
+        </PropertyGroup>
+        <PropertyGroup>
+            <AbiWinRTCommandUsePrefixes Condition="'$(AbiWinRTUsePrefixes)' == 'true'">-prefix</AbiWinRTCommandUsePrefixes>
+            <AbiWinRTCommandPrecompiledHeader Condition="'$(AbiWinRTPrecompiledHeader)' != ''">-pch $(AbiWinRTPrecompiledHeader)</AbiWinRTCommandPrecompiledHeader>
+            <AbiWinRTCommand>$(AbiWinRTPath)AbiWinRT %40"$(IntDir)AbiWinRT_comp.rsp"</AbiWinRTCommand>
+        </PropertyGroup>
+        <ItemGroup>
+            <!-- use the output from MdMerge directly to generate the component projection. -->
+            <_MdMergedOutput Remove="@(_MdMergedOutput)"/>
+            <_MdMergedOutput Include="$(AbiWinRTMergedDir)*.winmd"/>
+            <_AbiWinRTCompInputs Remove="@(_AbiWinRTCompInputs)"/>
+            <_AbiWinRTCompInputs Include="@(_MdMergedOutput)">
+                <WinMDPath>%(_MdMergedOutput.FullPath)</WinMDPath>
+            </_AbiWinRTCompInputs>
+            <!-- If this is a static library with static library references,
+                 pass the individual static library references to AbiWinRT.exe 
+                 for the component projection as they are not merged.-->
+            <_AbiWinRTCompInputs Include="@(AbiWinRTStaticProjectWinMDReferences)" Condition="'$(ConfigurationType)' == 'StaticLibrary'">
+                <WinMDPath>%(AbiWinRTStaticProjectWinMDReferences.FullPath)</WinMDPath>
+            </_AbiWinRTCompInputs>
+            <_AbiWinRTCompRefs Remove="@(_AbiWinRTCompRefs)"/>
+            <_AbiWinRTCompRefs Include="@(AbiWinRTDirectWinMDReferences)"/>
+            <_AbiWinRTCompRefs Include="@(AbiWinRTDynamicProjectWinMDReferences)"/>
+            <_AbiWinRTCompRefs Include="@(AbiWinRTPlatformWinMDReferences)"/>
+        </ItemGroup>
+        <PropertyGroup>
+            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters) -overwrite -name $(RootNamespace) $(AbiWinRTCommandPrecompiledHeader) $(AbiWinRTCommandUsePrefixes) -comp &quot;$(GeneratedFilesDir)sources&quot;</_AbiWinRTParameters>
+            <_AbiWinRTParameters Condition="'$(AbiWinRTOptimized)'=='true'">$(_AbiWinRTParameters) -opt</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTCompInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTCompRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) -out &quot;$(GeneratedFilesDir).&quot;</_AbiWinRTParameters>
+        </PropertyGroup>
+        <!-- Always write the AbiWinRT_comp.rsp file when the target runs, because the file is used as the output of this target. -->
+        <WriteLinesToFile
+            File="$(IntDir)AbiWinRT_comp.rsp" Lines="$(_AbiWinRTParameters)"
+            ContinueOnError="true" Overwrite="true" />
+        <Message Text="$(AbiWinRTCommand)" Importance="$(AbiWinRTVerbosity)" Condition="'@(_AbiWinRTCompInputs)' != ''"/>
+        <Exec Command="$(AbiWinRTCommand)" Condition="'@(_AbiWinRTCompInputs)' != ''"/>
+    </Target>
+
+    <Target Name="AbiWinRTMakeProjections" DependsOnTargets="AbiWinRTResolveReferences;AbiWinRTMakePlatformProjection;AbiWinRTMakeReferenceProjection;AbiWinRTMakeComponentProjection;$(AbiWinRTMakeProjectionsDependsOn)" />
+
+    <!--Append any additional item metadata after all default and project settings have been applied-->
+    <ItemDefinitionGroup>
+      <ClCompile>
+        <AdditionalOptions>%(AdditionalOptions) /bigobj /await</AdditionalOptions>
+        <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(GeneratedFilesDir)</AdditionalIncludeDirectories>
+      </ClCompile>
+      <Midl Condition="'$(AbiWinRTModernIDL)' != 'false'">
+        <AdditionalMetadataDirectories Condition="'%(AdditionalMetadataDirectories)' == '' And '$(WindowsSDK_MetadataFoundationPath)' != ''">$(WindowsSDK_MetadataFoundationPath);%(AdditionalMetadataDirectories)</AdditionalMetadataDirectories>
+        <AdditionalMetadataDirectories Condition="'%(AdditionalMetadataDirectories)' == '' And '$(WindowsSDK_MetadataFoundationPath)' == ''">$(WindowsSDK_MetadataPath);%(AdditionalMetadataDirectories)</AdditionalMetadataDirectories>
+        <AdditionalOptions>%(AdditionalOptions) /nomidl</AdditionalOptions>
+      </Midl>
+      <Link>
+        <AdditionalDependencies Condition="'$(AbiWinRTLibs)' != 'false'">%(AdditionalDependencies);WindowsApp.lib</AdditionalDependencies>
+      </Link>
+    </ItemDefinitionGroup>
+  
 </Project>
