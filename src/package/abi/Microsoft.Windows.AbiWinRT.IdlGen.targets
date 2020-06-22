@@ -1,0 +1,83 @@
+<!--
+***********************************************************************************************
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!--
+        This file contains targets for generating IDL files from winmd references. This are only
+        used when the consumer hasn't switched to Modern IDL.
+    -->
+    
+  <!--If not using the newer modern idl semantics, generate the .idl for any referenced winmd files -->
+  <Target Name="GetAbiWinRTDirectWinMDReferencesForIdl"
+          BeforeTargets="Midl"
+          Returns="@(AbiWinRTDirectWinMDReferencesForIdl);@(AbiWinRTDirectWinMDReferenceDirs)">
+    <ItemGroup>
+      <_AbiWinRTDirectWinMDReferencesForIdl Remove="@(_AbiWinRTDirectWinMDReferencesForIdl)" />
+      <_AbiWinRTDirectWinMDReferencesForIdl Include="@(Reference)" Condition="'%(Reference.Extension)' == '.winmd' and '%(Reference.IsSystemReference)' != 'true'" />
+      <AbiWinRTDirectWinMDReferencesForIdl Remove="@(AbiWinRTDirectWinMDReferencesForIdl)"/>
+      <AbiWinRTDirectWinMDReferencesForIdl Include="@(_AbiWinRTDirectWinMDReferencesForIdl)">
+        <WinMDPath>%(FullPath)</WinMDPath>
+      </AbiWinRTDirectWinMDReferencesForIdl>
+
+      <!-- Generate list of reference directories to pass into winmdidl.exe -->
+      <_AbiWinRTDirectWinMDReferenceDirs Include="@(AbiWinRTDirectWinMDReferencesForIdl->'%(RootDir)%(Directory)')"/>
+    </ItemGroup>
+
+    <!-- Remove any duplicates of file paths (caused by a nuget containing mulitple .winmd files) -->
+    <RemoveDuplicates Inputs="@(_AbiWinRTDirectWinMDReferenceDirs)">
+      <Output TaskParameter="Filtered" ItemName="AbiWinRTDirectWinMDReferenceDirs"/>
+    </RemoveDuplicates>
+    <Message Text="AbiWinRTDirectWinMDReferencesForIdl: @(AbiWinRTDirectWinMDReferencesForIdl->'%(WinMDPath)')" Importance="$(AbiWinRTVerbosity)"/>
+  </Target>
+
+    <!-- 
+      Gather outputs to satisfy incremental builds of the AbiWinRTMakeReferenceIdl target. While this is an incomplete
+      list of output files (due to subnamespaces contained in a winmd) this should be enough to ensure that the
+      target executes properly. If the outputs don't exist, the target will run and if a namespace is added/removed
+      from the winmd, then the timestamp of the winmd will not match the output and the target will run. This is
+      essentially equivalent to using a response file as the output, like the other targets in Microsoft.Windows.AbiWinRT.targets
+      do, but since the winmdidl tool doesn't accept a response file, we do this instead.
+    -->
+  <Target Name="_GatherExpectedGeneratedFiles" BeforeTargets="AbiWinRTMakeReferenceIdl" Returns="@(_ExpectedGeneratedIdl)">
+    <ItemGroup>
+      <_ExpectedGeneratedIdl Include="@(AbiWinRTDirectWinMDReferencesForIdl->'$(GeneratedFilesDir)\%(Filename).idl')"/>
+    </ItemGroup>
+  </Target>
+
+  <!--Build reference IDL from WinMD project references and dynamic library project references
+      Note that Condition is evaluated before DependsOnTargets are run -->
+  <Target Name="AbiWinRTMakeReferenceIdl"
+          Condition="'@(AbiWinRTDirectWinMDReferencesForIdl)' != ''"
+          AfterTargets="GetAbiWinRTDirectWinMDReferencesForIdl"
+          Inputs="@(AbiWinRTDirectWinMDReferencesForIdl)"
+          Outputs="@(_ExpectedGeneratedIdl)">
+    <PropertyGroup>
+      <WindowsSdkToolLocation Condition="'$(WindowsSdkToolLocation)'==''">$(WDKBinRoot)\$(PreferredToolArchitecture)</WindowsSdkToolLocation>
+    </PropertyGroup>
+    <ItemGroup>
+      <_AbiWinRTRefInputs Remove="@(_AbiWinRTRefInputs)"/>
+      <_AbiWinRTRefInputs Include="@(AbiWinRTDirectWinMDReferencesForIdl)"/>
+
+      <_AbiWinRTMetadataDirInputs Include="$(WindowsSDK_UnionMetadataPath)"/>
+      <_AbiWinRTMetadataDirInputs Include="@(AbiWinRTDirectWinMDReferenceDirs)"/>
+    </ItemGroup>
+
+    <!-- Since the backslash is an escape character, we need to append a '.' to the end of each path so that they are properly formed -->
+    <PropertyGroup>
+      <_AbiWinRTWinmdIdlParams>/outdir:&quot;$(GeneratedFilesDir).&quot;</_AbiWinRTWinmdIdlParams>
+      <_AbiWinRTWinmdIdlParams>$(_AbiWinRTWinmdIdlParams) @(_AbiWinRTMetadataDirInputs->'/metadata_dir:&quot;%(Identity).&quot;', ' ')</_AbiWinRTWinmdIdlParams>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(GeneratedFilesDir)" />
+    <Exec Command="&quot;$(WindowsSdkToolLocation)\winmdidl.exe&quot; $(_AbiWinRTWinmdIdlParams) %(_AbiWinRTRefInputs.Identity)"
+          Condition="'@(_AbiWinRTRefInputs)' != ''"/>
+  </Target>
+
+  <ItemDefinitionGroup>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(GeneratedFilesDir)</AdditionalIncludeDirectories>
+    </Midl>
+  </ItemDefinitionGroup>
+</Project>

@@ -21,11 +21,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <AbiWinRTUseHardlinksIfPossible Condition="'$(AbiWinRTUseHardlinksIfPossible)' == ''">false</AbiWinRTUseHardlinksIfPossible>
         <AbiWinRTWriteOnlyWhenDifferent Condition="('$(AbiWinRTWriteOnlyWhenDifferent)' == '') And (('$(MSBuildToolsVersion)' == 'Current') Or ('$(MSBuildToolsVersion)' &gt;= '15'))">true</AbiWinRTWriteOnlyWhenDifferent>
         <AbiWinRTWriteOnlyWhenDifferent Condition="'$(AbiWinRTWriteOnlyWhenDifferent)' != 'true'">false</AbiWinRTWriteOnlyWhenDifferent>
-        <AbiWinRTPath Condition="'$(AbiWinRTPath)'==''">$(MSBuildThisFileDirectory)..\bin\</AbiWinRTPath>
+        <AbiWinRTPath Condition="'$(AbiWinRTPath)'==''">$(MSBuildThisFileDirectory)..\..\bin\</AbiWinRTPath>
 
-        <AbiWinRTEnableComponentProjection Condition="'$(AbiWinRTEnableComponentProjection)' == ''">true</AbiWinRTEnableComponentProjection>
-        <AbiWinRTEnablePlatformProjection Condition="'$(AbiWinRTEnablePlatformProjection)' == ''">true</AbiWinRTEnablePlatformProjection>
-        <AbiWinRTEnableReferenceProjection Condition="'$(AbiWinRTEnableReferenceProjection)' == ''">true</AbiWinRTEnableReferenceProjection>
+        <!-- Default modern idl semantics to false considering that most users probably have not made the switch to the modern idl syntax -->
+        <AbiWinRTModernIDL Condition="'$(AbiWinRTModernIDL)'==''">false</AbiWinRTModernIDL>
+
+        <!-- Only generate the platform and component projection if using modern idl. Otherwise, allow the legacy
+             toolchain to kick in, as well as use the existing references from the Windows SDK -->
+        <AbiWinRTEnableComponentProjection Condition="'$(AbiWinRTEnableComponentProjection)' == '' and '$(AbiWinRTModernIdl)'!='false'">true</AbiWinRTEnableComponentProjection>
+        <AbiWinRTEnablePlatformProjection Condition="'$(AbiWinRTEnablePlatformProjection)' == '' and '$(AbiWinRTModernIdl)'!='false'">true</AbiWinRTEnablePlatformProjection>
+        <AbiWinRTEnableReferenceProjection Condition="'$(AbiWinRTEnableReferenceProjection)' == '' and '$(AbiWinRTModernIdl)'!='false'">true</AbiWinRTEnableReferenceProjection>
+
+        <!-- Default ABI headers to always be prepended with the ABI namespace -->
+        <AbiWinRTAddAbiNamespacePrefix Condition="'$(AbiWinRTAddAbiNamespacePrefix)'==''">true</AbiWinRTAddAbiNamespacePrefix>
+        <AbiWinRTCommandAddAbiNamespacePrefix Condition="'$(AbiWinRTAddAbiNamespacePrefix)'=='true'">-ns-prefix always</AbiWinRTCommandAddAbiNamespacePrefix>
+
+        <!-- If not generating the platform headers, then default to ensure that there is compat -->
+        <AbiWinRTEnsureSDKHeaderCompat Condition="'$(AbiWinRTEnsureSDKHeaderCompat)'=='' and '$(AbiWinRTEnablePlatformProjection)'=='false'">true</AbiWinRTEnsureSDKHeaderCompat>
+        <AbiWinRTCommandEnsureSDKHeaderCompat Condition="'$(AbiWinRTEnsureSDKHeaderCompat)'=='true'">-lowercase-include-guard</AbiWinRTCommandEnsureSDKHeaderCompat>
 
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
         <!--Override SDK's uap.props setting to ensure version-matched headers-->
@@ -388,14 +401,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             Inputs="$(MSBuildAllProjects);@(AbiWinRTPlatformWinMDInputs)"
             Outputs="$(IntDir)AbiWinRT_plat.rsp">
         <PropertyGroup>
-            <AbiWinRTCommand>$(AbiWinRTPath)AbiWinRT %40"$(IntDir)AbiWinRT_plat.rsp"</AbiWinRTCommand>
+            <AbiWinRTCommand>$(AbiWinRTPath)abi.exe %40"$(IntDir)AbiWinRT_plat.rsp"</AbiWinRTCommand>
         </PropertyGroup>
         <ItemGroup>
             <_AbiWinRTInputs Remove="@(_AbiWinRTInputs)"/>
             <_AbiWinRTInputs Include="@(AbiWinRTPlatformWinMDInputs)"/>
         </ItemGroup>
         <PropertyGroup>
-            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters)</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters) $(AbiWinRTCommandAddAbiNamespacePrefix)</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) -out &quot;$(GeneratedFilesDir).&quot;</_AbiWinRTParameters>
         </PropertyGroup>
@@ -415,7 +428,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             Inputs="$(MSBuildAllProjects);@(AbiWinRTDirectWinMDReferences);@(AbiWinRTDynamicProjectWinMDReferences);@(AbiWinRTPlatformWinMDReferences)"
             Outputs="$(IntDir)AbiWinRT_ref.rsp">
         <PropertyGroup>
-            <AbiWinRTCommand>$(AbiWinRTPath)AbiWinRT %40"$(IntDir)AbiWinRT_ref.rsp"</AbiWinRTCommand>
+            <AbiWinRTCommand>$(AbiWinRTPath)abi.exe %40"$(IntDir)AbiWinRT_ref.rsp"</AbiWinRTCommand>
         </PropertyGroup>
         <ItemGroup>
             <_AbiWinRTRefInputs Remove="@(_AbiWinRTRefInputs)"/>
@@ -425,7 +438,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <_AbiWinRTRefRefs Include="@(AbiWinRTPlatformWinMDReferences)"/>
         </ItemGroup>
         <PropertyGroup>
-            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters)</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters) $(AbiWinRTCommandEnsureSDKHeaderCompat) $(AbiWinRTCommandAddAbiNamespacePrefix)</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTRefInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTRefRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) -out &quot;$(GeneratedFilesDir).&quot;</_AbiWinRTParameters>
@@ -446,18 +459,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             Inputs="$(MSBuildAllProjects);@(AbiWinRTMdMergeInputs);@(AbiWinRTStaticProjectWinMDReferences)"
             Outputs="$(IntDir)AbiWinRT_comp.rsp">
         <PropertyGroup>
-            <_PCH>@(ClCompile->Metadata('PrecompiledHeaderFile')->Distinct())</_PCH>
-        </PropertyGroup>
-        <Error Condition="('$(AbiWinRTOverrideSDKReferences)' != 'true') and ('$(TargetPlatformVersion)' &lt; '10.0.17709.0') and ('$(_PCH)' != 'pch.h')"
-            Text="Please retarget to 10.0.17709.0 or later, or rename your PCH to 'pch.h'."/>
-        <PropertyGroup Condition="('$(AbiWinRTOverrideSDKReferences)' == 'true') or ('$(TargetPlatformVersion)' &gt; '10.0.17708.0')">
-            <AbiWinRTUsePrefixes Condition="'$(AbiWinRTUsePrefixes)' == ''">true</AbiWinRTUsePrefixes>
-            <AbiWinRTPrecompiledHeader Condition="'$(AbiWinRTPrecompiledHeader)' == ''">$(_PCH)</AbiWinRTPrecompiledHeader>
-        </PropertyGroup>
-        <PropertyGroup>
-            <AbiWinRTCommandUsePrefixes Condition="'$(AbiWinRTUsePrefixes)' == 'true'">-prefix</AbiWinRTCommandUsePrefixes>
-            <AbiWinRTCommandPrecompiledHeader Condition="'$(AbiWinRTPrecompiledHeader)' != ''">-pch $(AbiWinRTPrecompiledHeader)</AbiWinRTCommandPrecompiledHeader>
-            <AbiWinRTCommand>$(AbiWinRTPath)AbiWinRT %40"$(IntDir)AbiWinRT_comp.rsp"</AbiWinRTCommand>
+            <AbiWinRTCommand>$(AbiWinRTPath)abi.exe %40"$(IntDir)AbiWinRT_comp.rsp"</AbiWinRTCommand>
         </PropertyGroup>
         <ItemGroup>
             <!-- use the output from MdMerge directly to generate the component projection. -->
@@ -479,8 +481,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <_AbiWinRTCompRefs Include="@(AbiWinRTPlatformWinMDReferences)"/>
         </ItemGroup>
         <PropertyGroup>
-            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters) -overwrite -name $(RootNamespace) $(AbiWinRTCommandPrecompiledHeader) $(AbiWinRTCommandUsePrefixes) -comp &quot;$(GeneratedFilesDir)sources&quot;</_AbiWinRTParameters>
-            <_AbiWinRTParameters Condition="'$(AbiWinRTOptimized)'=='true'">$(_AbiWinRTParameters) -opt</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters) $(AbiWinRTCommandEnsureSDKHeaderCompat) $(AbiWinRTCommandAddAbiNamespacePrefix)</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTCompInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTCompRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) -out &quot;$(GeneratedFilesDir).&quot;</_AbiWinRTParameters>
@@ -511,4 +512,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </Link>
     </ItemDefinitionGroup>
   
+    <Import Project="Microsoft.Windows.AbiWinRT.IdlGen.targets" Condition="'$(AbiWinRTModernIDL)' == 'false'"/>
 </Project>
