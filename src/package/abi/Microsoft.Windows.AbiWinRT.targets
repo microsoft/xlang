@@ -19,8 +19,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <AbiWinRTUnmergedDir>$(IntDir)Unmerged\</AbiWinRTUnmergedDir>
         <AbiWinRTSkipUnchangedFiles Condition="'$(AbiWinRTSkipUnchangedFiles)' == ''">true</AbiWinRTSkipUnchangedFiles>
         <AbiWinRTUseHardlinksIfPossible Condition="'$(AbiWinRTUseHardlinksIfPossible)' == ''">false</AbiWinRTUseHardlinksIfPossible>
-        <AbiWinRTWriteOnlyWhenDifferent Condition="('$(AbiWinRTWriteOnlyWhenDifferent)' == '') And (('$(MSBuildToolsVersion)' == 'Current') Or ('$(MSBuildToolsVersion)' &gt;= '15'))">true</AbiWinRTWriteOnlyWhenDifferent>
-        <AbiWinRTWriteOnlyWhenDifferent Condition="'$(AbiWinRTWriteOnlyWhenDifferent)' != 'true'">false</AbiWinRTWriteOnlyWhenDifferent>
         <AbiWinRTPath Condition="'$(AbiWinRTPath)'==''">$(MSBuildThisFileDirectory)..\..\bin\</AbiWinRTPath>
 
         <!-- Default modern idl semantics to false considering that most users probably have not made the switch to the modern idl syntax -->
@@ -41,8 +39,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <AbiWinRTCommandEnsureSDKHeaderCompat Condition="'$(AbiWinRTEnsureSDKHeaderCompat)'=='true'">-lowercase-include-guard</AbiWinRTCommandEnsureSDKHeaderCompat>
 
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
-        <!--Override SDK's uap.props setting to ensure version-matched headers-->
-        <AbiWinRT_IncludePath>$(GeneratedFilesDir)</AbiWinRT_IncludePath>
         <!--TEMP: Override NuGet SDK's erroneous setting in uap.props -->
         <WindowsSDK_MetadataFoundationPath Condition="('$(WindowsSDK_MetadataFoundationPath)'!='') And !Exists($(WindowsSDK_MetadataFoundationPath))">$(WindowsSDK_MetadataPathVersioned)</WindowsSDK_MetadataFoundationPath>
         <!-- CAExcludePath is used to set an environment variable, so make sure this is defined on a single line. -->
@@ -496,9 +492,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <AdditionalMetadataDirectories Condition="'%(AdditionalMetadataDirectories)' == '' And '$(WindowsSDK_MetadataFoundationPath)' == ''">$(WindowsSDK_MetadataPath);%(AdditionalMetadataDirectories)</AdditionalMetadataDirectories>
         <AdditionalOptions>%(AdditionalOptions) /nomidl</AdditionalOptions>
       </Midl>
-      <Link>
-        <AdditionalDependencies Condition="'$(AbiWinRTLibs)' != 'false'">%(AdditionalDependencies);WindowsApp.lib</AdditionalDependencies>
-      </Link>
     </ItemDefinitionGroup>
   
     <Import Project="Microsoft.Windows.AbiWinRT.IdlGen.targets" Condition="'$(AbiWinRTModernIDL)' == 'false'"/>
