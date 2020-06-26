@@ -1,5 +1,3 @@
-# xlang
-
 This repo is the home of the following projects:
 
 * Undocked RegFree WinRT
