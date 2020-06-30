@@ -13,15 +13,15 @@ Example application manifest:
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <file name="TestComponent.dll">
     <activatableClass
-        clsid="TestComponent.Class1"
+        name="TestComponent.Class1"
         threadingModel="Both"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
     <activatableClass
-        clsid="TestComponent.Class2"
+        name="TestComponent.Class2"
         threadingModel="sta"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
     <activatableClass
-        clsid="TestComponent.Class3"
+        name="TestComponent.Class3"
         threadingModel="mta"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
   </file>
