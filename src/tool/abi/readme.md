@@ -13,6 +13,4 @@ Similar to the `Microsoft.Windows.CppWinRT`nuget package, you can add a referenc
 |  Property |  Description |
 |-----------|---------------|
 | `AbiWinRTAddAbiNamespacePrefix` | Adds the `ABI::` prefix to all generated headers. Defaults to `true`. |
-| `AbiWinRTEnablePlatformProjection` | Generates the projection headers for the Windows SDK |
-| `AbiWinRTEnableReferenceProjection` | Generates the projection headers for any referenced winmd files |
-| `AbiWinRTEnsureSDKHeaderCompat` | Passes the `-lowercase-include-guard` switch to `abi.exe` to enable compat with SDK headers. When `AbiWinRTEnablePlatformProjection` is `false` this defaults to `true`, otherwise it defaults to `false`. |
+| `AbiWinRTEnsureSDKHeaderCompat` | Passes the `-lowercase-include-guard` switch to `abi.exe` to enable compat with SDK headers. Defaults to `false`. |
