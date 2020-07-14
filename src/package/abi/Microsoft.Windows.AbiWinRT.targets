@@ -48,7 +48,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Using both c++/winrt and abi/winrt together is unsupported. -->
     <Target Name="AbiWinRTValidateNoCppWinRT">
-        <Error Condition="'$(CppWinRTPackage)' != ''" Text="Abi/WinRT and Cpp/WinRT create competing projections and are not compatible.
+        <Error Condition="'$(CppWinRTPackage)' != ''" Text="Abi/WinRT and C++/WinRT create competing projections and are not compatible.
         Remove a reference to either the Microsoft.Windows.CppWinRT or Microsoft.Windows.AbiWinRT package"/>
     </Target>
 
