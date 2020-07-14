@@ -302,11 +302,12 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     DWORD* subNamespacesCount,
     HSTRING** subNamespaces)
 {
+    HSTRING packageGraphDirectory[1];
+    packageGraphDirectory[0] = Microsoft::WRL::Wrappers::HStringReference(exeFilePath.c_str()).Get();
     HRESULT hr = TrueRoResolveNamespace(name, Microsoft::WRL::Wrappers::HStringReference(exeFilePath.c_str()).Get(),
-        packageGraphDirsCount, packageGraphDirs,
+        1, packageGraphDirectory,
         metaDataFilePathsCount, metaDataFilePaths,
         subNamespacesCount, subNamespaces);
-
     if (FAILED(hr))
     {
         hr = TrueRoResolveNamespace(name, windowsMetaDataDir,
