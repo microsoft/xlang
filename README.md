@@ -1,16 +1,19 @@
-# xlang
+This repo is the home of the following projects:
 
-This repo is the starting point for the xlang project, which enables developers to take existing shared libraries,
-implemented in one programming language and make that library's APIs available to client code using a different programming language. Thus the name "xlang", for cross-language.  
+* Undocked RegFree WinRT
+* WinRT ABI Header Generation Tool
+* Python/WinRT (experimental)
+
+Some of the projects and samples in this repo remain for historical reasons and are not in a usable state.
 
 See these related repos:
 
 * [C++/WinRT](https://github.com/microsoft/cppwinrt)
-* [C++ winmd parser](https://github.com/microsoft/winmd)
+* [C#/WinRT](https://github.com/microsoft/cswinrt)
 * [Rust/WinRT](https://github.com/microsoft/winrt-rs)
+* [C++ winmd parser](https://github.com/microsoft/winmd)
 * [WinRT test component](https://github.com/microsoft/TestWinRT)
-
-Some of the other projects and samples in this repo remain for historical reasons but are not necessarily in a usable state.
+* [Project Reunion](https://github.com/microsoft/projectreunion)
 
 ## License
 
