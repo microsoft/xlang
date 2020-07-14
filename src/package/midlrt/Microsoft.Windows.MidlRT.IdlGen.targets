@@ -1,0 +1,84 @@
+<!--
+***********************************************************************************************
+Copyright (C) Microsoft Corporation. All rights reserved.
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!--
+        This file contains targets for generating IDL files from winmd references. This are only
+        used when the consumer hasn't switched to Modern IDL.
+    -->
+    
+  <!--
+    If not using the newer modern idl semantics, generate the .idl for any referenced winmd files.
+    We need a special target here, because the other Get*References  depends on ResolveReferences
+    being run first. However, MIDL runs before ResolveReferences, so this target uses the References
+    item, not the ReferencePath item.
+  -->
+  <Target Name="GetMidlRTDirectWinMDReferencesForIdl"
+          BeforeTargets="Midl"
+          Returns="@(MidlRTDirectWinMDReferencesForIdl);@(MidlRTDirectWinMDReferenceDirs)">
+    <ItemGroup>
+      <_MidlRTDirectWinMDReferencesForIdl Remove="@(_MidlRTDirectWinMDReferencesForIdl)" />
+      <_MidlRTDirectWinMDReferencesForIdl Include="@(Reference)" Condition="'%(Reference.Extension)' == '.winmd' and '%(Reference.IsSystemReference)' != 'true'" />
+      <MidlRTDirectWinMDReferencesForIdl Remove="@(MidlRTDirectWinMDReferencesForIdl)"/>
+      <MidlRTDirectWinMDReferencesForIdl Include="@(_MidlRTDirectWinMDReferencesForIdl)">
+        <WinMDPath>%(FullPath)</WinMDPath>
+      </MidlRTDirectWinMDReferencesForIdl>
+
+      <!-- Generate list of reference directories to pass into winmdidl.exe -->
+      <_MidlRTDirectWinMDReferenceDirs Include="@(MidlRTDirectWinMDReferencesForIdl->'%(RootDir)%(Directory)')"/>
+    </ItemGroup>
+
+    <!-- Remove any duplicates of file paths (caused by a nuget containing mulitple .winmd files) -->
+    <RemoveDuplicates Inputs="@(_MidlRTDirectWinMDReferenceDirs)">
+      <Output TaskParameter="Filtered" ItemName="MidlRTDirectWinMDReferenceDirs"/>
+    </RemoveDuplicates>
+    <Message Text="MidlRTDirectWinMDReferencesForIdl: @(MidlRTDirectWinMDReferencesForIdl->'%(WinMDPath)')" Importance="$(MidlRTVerbosity)"/>
+  </Target>
+
+    <!-- 
+      Gather the outputs from the target if previously executed. If it hasn't been executed, then this list
+      will be empty and the target will run.
+    -->
+  <Target Name="_GatherExpectedGeneratedFiles" BeforeTargets="MidlRTMakeReferenceIdl" Returns="@(_ExpectedGeneratedIdl)">
+    <ItemGroup>
+      <_ExpectedGeneratedIdl Include="$(GeneratedFilesDir)\*.idl"/>
+    </ItemGroup>
+  </Target>
+
+  <!--Build reference IDL from WinMD project references and dynamic library project references
+      Note that Condition is evaluated before DependsOnTargets are run -->
+  <Target Name="MidlRTMakeReferenceIdl"
+          Condition="'@(MidlRTDirectWinMDReferencesForIdl)' != ''"
+          AfterTargets="GetMidlRTDirectWinMDReferencesForIdl"
+          Inputs="@(MidlRTDirectWinMDReferencesForIdl)"
+          Outputs="@(_ExpectedGeneratedIdl)">
+    <PropertyGroup>
+      <WindowsSdkToolLocation Condition="'$(WindowsSdkToolLocation)'==''">$(WDKBinRoot)\$(PreferredToolArchitecture)</WindowsSdkToolLocation>
+    </PropertyGroup>
+    <ItemGroup>
+      <_MidlRTRefInputs Remove="@(_MidlRTRefInputs)"/>
+      <_MidlRTRefInputs Include="@(MidlRTDirectWinMDReferencesForIdl)"/>
+
+      <_MidlRTMetadataDirInputs Include="$(WindowsSDK_UnionMetadataPath)"/>
+      <_MidlRTMetadataDirInputs Include="@(MidlRTDirectWinMDReferenceDirs)"/>
+    </ItemGroup>
+
+    <!-- Since the backslash is an escape character, we need to append a '.' to the end of each path so that they are properly formed -->
+    <PropertyGroup>
+      <_MidlRTWinmdIdlParams>/outdir:&quot;$(GeneratedFilesDir).&quot;</_MidlRTWinmdIdlParams>
+      <_MidlRTWinmdIdlParams>$(_MidlRTWinmdIdlParams) @(_MidlRTMetadataDirInputs->'/metadata_dir:&quot;%(Identity).&quot;', ' ')</_MidlRTWinmdIdlParams>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(GeneratedFilesDir)" />
+    <Exec Command="&quot;$(WindowsSdkToolLocation)\winmdidl.exe&quot; $(_MidlRTWinmdIdlParams) %(_MidlRTRefInputs.Identity)"
+          Condition="'@(_MidlRTRefInputs)' != ''"/>
+  </Target>
+
+  <ItemDefinitionGroup>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(GeneratedFilesDir)</AdditionalIncludeDirectories>
+    </Midl>
+  </ItemDefinitionGroup>
+</Project>
