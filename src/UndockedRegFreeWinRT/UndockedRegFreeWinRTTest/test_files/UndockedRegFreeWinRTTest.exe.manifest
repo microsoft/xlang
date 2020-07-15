@@ -2,15 +2,15 @@
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <file name="TestComponent.dll">
     <activatableClass
-        clsid="TestComponent.ClassBoth"
+        name="TestComponent.ClassBoth"
         threadingModel="Both"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
     <activatableClass
-        clsid="TestComponent.ClassSta"
+        name="TestComponent.ClassSta"
         threadingModel="sta"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
     <activatableClass
-        clsid="TestComponent.ClassMta"
+        name="TestComponent.ClassMta"
         threadingModel="mta"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
   </file>
