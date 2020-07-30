@@ -15,10 +15,10 @@ Copyright (C) Microsoft Corporation.
     <CleanDependsOn>
       $(CleanDependsOn);MidlRTIdlGenClean
     </CleanDependsOn>
-  </ItemGroup>
+  </PropertyGroup>
 
   <Target Name="MidlRTIdlGenClean">
-    <ReadLinesFromFile File="@(_ExpectedGeneratedIdlFile)" >
+    <ReadLinesFromFile File="$(_MidlRTIdlGenTrackerFile)" >
       <Output TaskParameter="Lines" ItemName="_IdlToDelete"/>
     </ReadLinesFromFile>
 
