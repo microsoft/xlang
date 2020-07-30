@@ -52,7 +52,6 @@ Copyright (C) Microsoft Corporation.
     <Target Name="MidlRTClean">
         <ItemGroup>
             <_FilesToDelete Remove="@(_FilesToDelete)"/>
-            <_FilesToDelete Include="$(GeneratedFilesDir)*.idl"/>
             <_FilesToDelete Include="$(OutDir)*.winmd"/>
             <_FilesToDelete Include="$(IntDir)*.winmd"/>
             <_FilesToDelete Include="$(IntDir)*.rsp"/>

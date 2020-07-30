@@ -4,11 +4,33 @@ Copyright (C) Microsoft Corporation.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <!--
-        This file contains targets for generating IDL files from winmd references. This are only
-        used when the consumer hasn't switched to Modern IDL.
-    -->
-    
+  <!--
+    This file contains targets for generating IDL files from winmd references. This are only
+    used when the consumer hasn't switched to Modern IDL.
+  -->
+
+  <!-- Write a file to disk to keep track of the files that have been generated -->
+  <PropertyGroup>
+    <_MidlRTIdlGenTrackerFile>$(IntermediateOutputPath)MidlRT-GeneratedIdlFiles.txt</_MidlRTIdlGenTrackerFile>
+    <CleanDependsOn>
+      $(CleanDependsOn);MidlRTIdlGenClean
+    </CleanDependsOn>
+  </ItemGroup>
+
+  <Target Name="MidlRTIdlGenClean">
+    <ReadLinesFromFile File="@(_ExpectedGeneratedIdlFile)" >
+      <Output TaskParameter="Lines" ItemName="_IdlToDelete"/>
+    </ReadLinesFromFile>
+
+    <ItemGroup>
+      <_FilesToDelete Remove="@(_FilesToDelete)"/>
+      <_FilesToDelete Include="$(_MidlRTIdlGenTrackerFile)"/>
+      <_FilesToDelete Include="$(_IdlToDelete)"/>
+    </ItemGroup>
+
+    <Delete Files="@(_FilesToDelete)"/>
+  </Target>
+
   <!--
     If not using the newer modern idl semantics, generate the .idl for any referenced winmd files.
     We need a special target here, because the other Get*References  depends on ResolveReferences
@@ -37,13 +59,17 @@ Copyright (C) Microsoft Corporation.
     <Message Text="MidlRTDirectWinMDReferencesForIdl: @(MidlRTDirectWinMDReferencesForIdl->'%(WinMDPath)')" Importance="$(MidlRTVerbosity)"/>
   </Target>
 
-    <!-- 
-      Gather the outputs from the target if previously executed. If it hasn't been executed, then this list
-      will be empty and the target will run.
-    -->
-  <Target Name="_GatherExpectedGeneratedFiles" BeforeTargets="MidlRTMakeReferenceIdl" Returns="@(_ExpectedGeneratedIdl)">
-    <ItemGroup>
-      <_ExpectedGeneratedIdl Include="$(GeneratedFilesDir)\*.idl"/>
+  <Target Name="_GatherExpectedGeneratedFiles"
+          Condition="'@(MidlRTDirectWinMDReferencesForIdl)' != ''"
+          BeforeTargets="MidlRTMakeReferenceIdl"
+          Returns="@(_ExpectedGeneratedIdl)">
+    <ReadLinesFromFile File="$(_MidlRTIdlGenTrackerFile)" >
+      <Output TaskParameter="Lines" ItemName="_ExpectedGeneratedIdl"/>
+    </ReadLinesFromFile>
+
+    <!-- If no files we're read, then we haven't run this target before, so include a fake so the MidlRTMakeReferenceIdl target will execute -->
+     <ItemGroup Condition="'@(_ExpectedGeneratedIdl)'==''">
+      <_ExpectedGeneratedIdl Include="fake.idl"/>
     </ItemGroup>
   </Target>
 
@@ -74,6 +100,11 @@ Copyright (C) Microsoft Corporation.
     <MakeDir Directories="$(GeneratedFilesDir)" />
     <Exec Command="&quot;$(WindowsSdkToolLocation)\winmdidl.exe&quot; $(_MidlRTWinmdIdlParams) %(_MidlRTRefInputs.Identity)"
           Condition="'@(_MidlRTRefInputs)' != ''"/>
+
+    <ItemGroup>
+      <_ActualGeneratedFiles Include="$(GeneratedFilesDir)\*.idl"/>
+    </ItemGroup>
+    <WriteLinesToFile File="$(_MidlRTIdlGenTrackerFile)" Lines="@(_ActualGeneratedFiles)" />
   </Target>
 
   <ItemDefinitionGroup>
