@@ -1,4 +1,4 @@
-## The Windows Runtime (WinRT) API Genaration tool
+## The Windows Runtime (WinRT) API Generation tool
 
 The Microsoft.Windows.MidlRT package provides targets for running the midlrt.exe tool that ships in the Windows SDK. This enables you to build WinRT APIs that generate a .winmd file using either the MIDL2.0 or MIDL3.0 syntax.
 
