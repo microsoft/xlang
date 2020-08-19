@@ -15,7 +15,6 @@ Copyright (C) Microsoft Corporation.
      <PropertyGroup>
         <PreferredToolArchitecture>x64</PreferredToolArchitecture>
         <CanReferenceWinRT>true</CanReferenceWinRT>
-        <IsNativeLanguage>true</IsNativeLanguage>
         <!-- This causes VS to add the platform WinMD references for the target SDK -->
         <WinMDAssembly>true</WinMDAssembly>
     </PropertyGroup>
