@@ -5,7 +5,7 @@ Copyright (C) Microsoft Corporation.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!--
-    This file contains targets for generating IDL files from winmd references. This are only
+    This file contains targets for generating IDL files from winmd references. These are only
     used when the consumer hasn't switched to Modern IDL.
   -->
 
@@ -67,7 +67,7 @@ Copyright (C) Microsoft Corporation.
       <Output TaskParameter="Lines" ItemName="_ExpectedGeneratedIdl"/>
     </ReadLinesFromFile>
 
-    <!-- If no files we're read, then we haven't run this target before, so include a fake so the MidlRTMakeReferenceIdl target will execute -->
+    <!-- If no files were read, then we haven't run this target before, so include a fake so the MidlRTMakeReferenceIdl target will execute -->
      <ItemGroup Condition="'@(_ExpectedGeneratedIdl)'==''">
       <_ExpectedGeneratedIdl Include="fake.idl"/>
     </ItemGroup>
@@ -81,7 +81,7 @@ Copyright (C) Microsoft Corporation.
           Inputs="@(MidlRTDirectWinMDReferencesForIdl)"
           Outputs="@(_ExpectedGeneratedIdl)">
     <PropertyGroup>
-      <WindowsSdkToolLocation Condition="'$(WindowsSdkToolLocation)'==''">$(WDKBinRoot)\$(PreferredToolArchitecture)</WindowsSdkToolLocation>
+      <WindowsSdkToolLocation Condition="'$(WindowsSdkToolLocation)'==''">$(WindowsSdkDir)bin\$(PreferredToolArchitecture)</WindowsSdkToolLocation>
     </PropertyGroup>
     <ItemGroup>
       <_MidlRTRefInputs Remove="@(_MidlRTRefInputs)"/>
