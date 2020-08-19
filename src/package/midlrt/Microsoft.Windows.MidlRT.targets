@@ -17,6 +17,7 @@ Copyright (C) Microsoft Corporation.
         <MidlRTUnmergedDir>$(IntDir)Unmerged\</MidlRTUnmergedDir>
 
         <ModernMidlRT Condition="'$(ModernMidlRT)'==''">true</ModernMidlRT>
+        <ModernMidlRT Condition="'$(ModernMidlRT)'!='true'">false</ModernMidlRT>
 
         <GeneratedFilesDir Condition="'$(GeneratedFilesDir)' == ''">$(IntDir)Generated Files\</GeneratedFilesDir>
         <!--TEMP: Override NuGet SDK's erroneous setting in uap.props -->
@@ -61,67 +62,11 @@ Copyright (C) Microsoft Corporation.
         <Delete Files="@(_FilesToDelete)"/>
     </Target>
 
-    <!-- Target used only to evaluate MidlRTGenerateWindowsMetadata if it doesn't already have a value -->
-    <Target Name="MidlRTComputeGenerateWindowsMetadata"
-            DependsOnTargets="GetMidlRTProjectWinMDReferences;$(MidlRTComputeGenerateWindowsMetadataDependsOn)">
-
-        <PropertyGroup>
-            <!-- For static libraries, only idl causes a winmd to be generated. 
-                 For exe/dll, static libraries that produce a WinMD will be merged, 
-                 so they also cause a WinMD to be generated-->
-            <MidlRTGenerateWindowsMetadata Condition="'$(ConfigurationType)' != 'StaticLibrary' AND '@(MidlRTStaticProjectWinMDReferences)@(Midl)'!= ''">true</MidlRTGenerateWindowsMetadata>
-            <MidlRTGenerateWindowsMetadata Condition="'$(ConfigurationType)' == 'StaticLibrary' AND '@(Midl)'!= ''">true</MidlRTGenerateWindowsMetadata>
-
-            <!-- At this point we checked all cases where we do generate a WinMD.
-                 The remaining option is no WinMD. -->
-            <MidlRTGenerateWindowsMetadata Condition="'$(MidlRTGenerateWindowsMetadata)'== ''">false</MidlRTGenerateWindowsMetadata>
-        </PropertyGroup>
-
-    </Target>
-
-    <Target Name="ComputeGetResolvedWinMD"
-            Condition="'$(MidlRTGenerateWindowsMetadata)' == ''">
-        <!-- If MidlRTGenerateWindowsMetadata is not defined, compute it.-->
-        <!-- We use Calltarget, so we don't run anything including DependsOnTargets
-             targets if $(MidlRTGenerateWindowsMetadata) already has a value.-->
-        <CallTarget Targets="MidlRTComputeGenerateWindowsMetadata" />
-    </Target>
-
     <!-- This target overrides the GetResolvedWinMD target used to resolve the WinMD for native projects
-         so it is aware of the C++/WinRT generated WinMD.
-         Since not every project that consumes C++/WinRT uses it to generate a WinMD,
-         we need to keep the CX logic as well. -->
-    <Target Name="GetResolvedWinMD"
-            DependsOnTargets="ComputeGetResolvedWinMD"
-            Returns="@(WinMDFullPath)">
-
-        <!-- Copied from the CX GetResolvedWinMD target in Microsoft.CppBuild.targets -->
+         so it is aware of the MidlRT generated WinMD. -->
+    <Target Name="GetResolvedWinMD" Returns="@(WinMDFullPath)">
         <ItemGroup>
-            <!-- To evaluate the GenerateWindowsMetadata value we need @(Link) to contains at least one element-->
-            <Link Include="tmp" Condition="'@(Link)'==''">
-                <DeleteSoon>true</DeleteSoon>
-            </Link>
-
-            <!-- Condition is modified to only do this if MidlRTGenerateWindowsMetadata is not true. -->
-            <WinMDFullPath Condition="'%(Link.GenerateWindowsMetadata)' == 'true' AND '$(MidlRTGenerateWindowsMetadata)' != 'true'"
-                           Include="@(Link->Metadata('WindowsMetadataFile')->FullPath()->Distinct()->ClearMetadata())">
-                <TargetPath>$([System.IO.Path]::GetFileName('%(Link.WindowsMetadataFile)'))</TargetPath>
-                <Primary>true</Primary>
-            </WinMDFullPath>
-
-            <WinMDFullPath>
-                <Implementation>$(WinMDImplementationPath)$(TargetName)$(TargetExt)</Implementation>
-                <FileType>winmd</FileType>
-                <WinMDFile>true</WinMDFile>
-                <ProjectType>$(ConfigurationType)</ProjectType>
-            </WinMDFullPath>
-
-            <Link Remove="@(Link)" Condition="'%(Link.DeleteSoon)' == 'true'" />
-        </ItemGroup>
-
-        <!-- Add primary WinMD to the WinMDFullPath if MidlRTGenerateWindowsMetadata is true -->
-        <ItemGroup>
-            <WinMDFullPath Include="$(MidlRTProjectWinMD)"  Condition="'$(MidlRTGenerateWindowsMetadata)' == 'true'">
+            <WinMDFullPath Include="$(MidlRTProjectWinMD)">
                 <TargetPath>$([System.IO.Path]::GetFileName('$(MidlRTProjectWinMD)'))</TargetPath>
                 <Primary>true</Primary>
                 <Implementation Condition="'$(TargetExt)' == '.dll'">$(WinMDImplementationPath)$(TargetName)$(TargetExt)</Implementation>
@@ -227,8 +172,8 @@ Copyright (C) Microsoft Corporation.
                 <WinMDPath>%(Midl.OutputDirectory)%(Midl.MetadataFileName)</WinMDPath>
                 <MdMergeOutputFile>$(MidlRTProjectWinMD)</MdMergeOutputFile>
             </_MdMergeInputs>
-            <!-- Static libraries don't mdmerge other static libraries.
-                 Instead they are passed as independent inputs for the component projection. -->
+            <!-- Static libraries don't mdmerge other static libraries. 
+                 They are however used as references so idl can reference classes from other libs. -->
             <_MdMergeInputs Include="@(MidlRTStaticProjectWinMDReferences)" Condition="'$(ConfigurationType)' != 'StaticLibrary'">
                 <MdMergeOutputFile>$(MidlRTProjectWinMD)</MdMergeOutputFile>
             </_MdMergeInputs>
@@ -285,9 +230,7 @@ Copyright (C) Microsoft Corporation.
             Inputs="$(MSBuildAllProjects);@(MidlRTMdMergeInputs)"
             Outputs="@(_MdMergedOutput);$(IntDir)mdmerge.rsp">
         <PropertyGroup>
-            <!--Note: MidlRTNamespaceMergeDepth supersedes MidlRTMergeDepth-->
             <_MdMergeDepth Condition="'$(MidlRTNamespaceMergeDepth)' != ''">-n:$(MidlRTNamespaceMergeDepth)</_MdMergeDepth>
-            <_MdMergeDepth Condition="'$(_MdMergeDepth)' == ''">$(MidlRTMergeDepth)</_MdMergeDepth>
             <_MdMergeDepth Condition="'$(_MdMergeDepth)' == '' And '$(MidlRTRootNamespaceAutoMerge)' == 'true'">-n:$(RootNamespace.Split('.').length)</_MdMergeDepth>
             <_MdMergeDepth Condition="'$(_MdMergeDepth)' == '' And ('@(Page)' != '' Or '@(ApplicationDefinition)' != '')">-n:1</_MdMergeDepth>
             <_MdMergeCommand>$(MdMergePath)mdmerge %40"$(IntDir)mdmerge.rsp"</_MdMergeCommand>
@@ -313,10 +256,7 @@ Copyright (C) Microsoft Corporation.
         <Message Text="MidlRTMdMerge output: @(MdMergeOutput)" Importance="$(MidlRTVerbosity)"/>
     </Target>
 
-    <!-- Only copy winmd to output folder if MidlRTGenerateWindowsMetadata is true -->
-    <!-- Note that Condition is evaluated before DependsOnTargets are run -->
     <Target Name="MidlRTCopyWinMDToOutputDirectory"
-            Condition="'$(MidlRTGenerateWindowsMetadata)' == 'true'"
             DependsOnTargets="MidlRTMergeProjectWinMDInputs;$(MidlRTCopyWinMDToOutputDirectoryDependsOn)"
             Inputs="@(_MdMergedOutput)"
             Outputs="$(MidlRTProjectWinMD)">
