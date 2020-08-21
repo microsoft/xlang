@@ -6,6 +6,28 @@ Enable non-packaged desktop applications
 to leverage user-defined Windows Runtime types via the use of the 
 application manifests down to RS2. 
 
+To achieve this, the package uses the detours library, detouring RoActivateInstance, RoGetActivationFactory,
+RoGetMetadataFile, and RoResolveNamespace and reimplementing the RegFree WinRT feature that is avaibale on windows version 19h1 and above. 
+The package will automatically place winrtact.dll to your build folder where your exe should be.  
+
+Initializing the detours on winrtact.dll
+- Native
+Initialization of the dll is taken care of automatically through ForceSymbolReferences. 
+
+- Managed
+For Managed code, one will need to call DllImport on winrtact.dll and extern winrtact_Initialize().
+```
+[DllImport("winrtact.dll")]
+static extern void winrtact_Initialize();
+```
+winrtact_Initialize() needs to be called on startup to initialize the detours and load the catalog. 
+
+
+Example application manifest:
+Your application manifest should have the same name as, and be side by side to your executable.
+"your_exe_name".exe.manifest
+
+
 Example application manifest:
  ``` 
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

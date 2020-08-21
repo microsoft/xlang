@@ -1600,6 +1600,14 @@ struct pinterface_python_type<%<%>>
 
     void write_struct_converter_decl(writer& w, TypeDef const& type)
     {
+        auto ns = type.TypeNamespace();
+        auto name = type.TypeName();
+        if ((ns == "Windows.Foundation") && (name == "EventRegistrationToken"))
+        {
+            // The declaration for event_token is baked into pybase.h to address ordering issues.
+            return;
+        }
+        
         w.write("template<>\nstruct converter<%>\n{\n", type);
         {
             writer::indent_guard g{ w };

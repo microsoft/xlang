@@ -49,7 +49,7 @@ static PyType_Slot winrt_base_type_slots[] =
 {
     { Py_tp_new, winrt_base_new },
     { Py_tp_dealloc, winrt_base_dealloc },
-    { Py_tp_doc, winrt_base_doc},
+    { Py_tp_doc, (void*)winrt_base_doc},
     { 0, nullptr },
 };
 

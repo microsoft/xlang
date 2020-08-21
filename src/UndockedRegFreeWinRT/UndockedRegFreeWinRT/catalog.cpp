@@ -140,7 +140,7 @@ HRESULT WinRTLoadComponent(PCWSTR manifest_path)
                             this_component->xmlns = xmlns;
 
                             const WCHAR* activatableClass;
-                            RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"clsid", nullptr));
+                            RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
                             RETURN_IF_FAILED(xmlReader->GetValue(&activatableClass, nullptr));
                             g_types[activatableClass] = this_component;
                         }

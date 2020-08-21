@@ -41,20 +41,8 @@ namespace py
         static constexpr bool value = false;
     };
 
-    template <typename... Args>
-    struct pinterface_checker<winrt::impl::pinterface_category<Args...>>
-    {
-        static constexpr bool value = true;
-    };
-
-    template <typename Category>
-    struct struct_checker
-    {
-        static constexpr bool value = false;
-    };
-
-    template <typename... Args>
-    struct struct_checker<winrt::impl::struct_category<Args...>>
+    template <template <typename... TArgs> typename T, typename ...Args>
+    struct pinterface_checker<T<Args...>>
     {
         static constexpr bool value = true;
     };
@@ -82,7 +70,7 @@ namespace py
     constexpr bool is_delegate_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::delegate_category>;
 
     template<typename T>
-    constexpr bool is_pdelegate_category_v = !std::is_base_of_v<winrt::Windows::Foundation::IInspectable, T> && pinterface_checker<typename winrt::impl::category<T>::type>::value;
+    constexpr bool is_pdelegate_category_v = !std::is_base_of_v<winrt::Windows::Foundation::IInspectable, T> && std::is_base_of_v<winrt::Windows::Foundation::IUnknown, T>;
 
     template<typename T>
     constexpr bool is_enum_category_v = std::is_same_v<winrt::impl::category_t<T>, winrt::impl::enum_category>;
@@ -92,9 +80,6 @@ namespace py
 
     template<typename T>
     constexpr bool is_pinterface_category_v = std::is_base_of_v<winrt::Windows::Foundation::IInspectable, T> && pinterface_checker<typename winrt::impl::category<T>::type>::value;
-
-    template<typename T>
-    constexpr bool is_struct_category_v = struct_checker<typename winrt::impl::category<T>::type>::value;
 
     struct delegate_callable
     {
@@ -218,14 +203,14 @@ namespace py
 
     PyTypeObject* register_python_type(PyObject* module, const char* const type_name, PyType_Spec* type_spec, PyObject* base_type);
 
-    inline WINRT_NOINLINE void set_invalid_activation_error(const char* const type_name)
+    inline __declspec(noinline) void set_invalid_activation_error(const char* const type_name)
     {
         std::string msg{ type_name };
         msg.append(" is not activatable");
         PyErr_SetString(PyExc_TypeError, msg.c_str());
     }
 
-    inline WINRT_NOINLINE void set_invalid_arg_count_error(Py_ssize_t arg_count) noexcept
+    inline __declspec(noinline) void set_invalid_arg_count_error(Py_ssize_t arg_count) noexcept
     {
         if (arg_count != -1)
         {
@@ -233,12 +218,12 @@ namespace py
         }
     }
 
-    inline WINRT_NOINLINE void set_invalid_kwd_args_error() noexcept
+    inline __declspec(noinline) void set_invalid_kwd_args_error() noexcept
     {
         PyErr_SetString(PyExc_TypeError, "keyword arguments not supported");
     }
 
-    inline WINRT_NOINLINE void to_PyErr() noexcept
+    inline __declspec(noinline) void to_PyErr() noexcept
     {
         try
         {
@@ -1201,4 +1186,11 @@ namespace py
 
         return PyObject_GetIter(future.get());
     }
+
+    template<>
+    struct converter<winrt::event_token>
+    {
+        static PyObject* convert(winrt::event_token instance) noexcept;
+        static winrt::event_token convert_to(PyObject* obj);
+    };
 }
