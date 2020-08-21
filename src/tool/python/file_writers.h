@@ -156,7 +156,7 @@ namespace pywinrt
     }
 
     
-    inline void write_setup_py(stdfs::path const& folder, std::vector<std::string> const& namespaces)
+    inline void write_setup_py(stdfs::path const& folder, std::vector<std::string> const& /*namespaces*/)
     {
         writer w;
 
