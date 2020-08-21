@@ -81,7 +81,7 @@ Copyright (C) Microsoft Corporation.
           Inputs="@(MidlRTDirectWinMDReferencesForIdl)"
           Outputs="@(_ExpectedGeneratedIdl)">
     <PropertyGroup>
-      <WindowsSdkToolLocation Condition="'$(WindowsSdkToolLocation)'==''">$(WindowsSdkDir)bin\$(PreferredToolArchitecture)</WindowsSdkToolLocation>
+      <WindowsSdkToolLocation Condition="'$(WindowsSdkToolLocation)'==''">$(WindowsSdkDir)bin\$(TargetPlatformVersion)\$(PreferredToolArchitecture)</WindowsSdkToolLocation>
     </PropertyGroup>
     <ItemGroup>
       <_MidlRTRefInputs Remove="@(_MidlRTRefInputs)"/>
