@@ -2,6 +2,13 @@ parameters:
   architecture: 'amd64'
 
 steps:
+
+- task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+  displayName: 'Component Governance Detection'
+  inputs:
+    scanType: 'Register'
+    failOnAlert: true
+
 - task: PkgESCodeSign@10
   displayName: CodeSign
   env:
