@@ -6,7 +6,7 @@ namespace UndockedRegFreeWinRTManagedTest
 {
     class Program
     {
-        [DllImport("winrtact.dll")]
+        [DllImport("winrtact.dll", PreserveSig = false)]
         static extern void winrtact_Initialize();
 
         public static bool succeeded;

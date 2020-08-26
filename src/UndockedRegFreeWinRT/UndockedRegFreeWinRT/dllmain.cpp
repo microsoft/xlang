@@ -13,6 +13,7 @@
 #include <hstring.h>
 #include <VersionHelpers.h>
 #include "extwinrt.h"
+#include <iostream>
 
 #define WIN1019H1_BLDNUM 18362
 
@@ -284,11 +285,24 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     IMetaDataImport2** metaDataImport,
     mdTypeDef* typeDefToken)
 {
+    std::wcout << "name " << WindowsGetStringRawBuffer(name, nullptr) << std::endl;
+    std::wcout << "dispenser " << metaDataDispenser << std::endl;
+    std::wcout << "import " << metaDataImport << std::endl;
+    std::wcout << "deftoken " << typeDefToken << std::endl;
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     if (FAILED(hr))
     {
-       return TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
+        hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
+        if (metaDataFilePath != nullptr)
+        {
+            HSTRING test = *metaDataFilePath;
+            std::wcout << "path " << WindowsGetStringRawBuffer(test, nullptr) << std::endl;
+        }
     }
+    std::wcout << "name " << WindowsGetStringRawBuffer(name, nullptr) << std::endl;
+    std::wcout << "dispenser " << metaDataDispenser << std::endl;
+    std::wcout << "import " << metaDataImport << std::endl;
+    std::wcout << "deftoken " << typeDefToken << std::endl;
     return hr;
 }
 
