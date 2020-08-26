@@ -21,7 +21,7 @@ steps:
     contents: 'LICENSE'
     targetFolder: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }} 
 
-- script: python $(Build.SourcesDirectory)/src/package/pywinrt/projection/setup.py bdist_wheel --python-tag cp37 --plat-name $(platname)
+- script: python $(Build.SourcesDirectory)/src/package/pywinrt/projection/setup.py bdist_wheel --python-tag cp38 --plat-name $(platname)
   workingDirectory: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }} 
   displayName: python setup.py bdist_wheel (${{ parameters.architecture }})
 
