@@ -17,5 +17,5 @@ jobs:
   - template: steps-build-projection.yml
     parameters:
       architecture: $(buildArchitecture)  
-      pythonVersionSpec: '3.7.x'
+      pythonVersionSpec: '3.8.x'
       projectionType: $(ProjectionType)
