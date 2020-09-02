@@ -9,7 +9,6 @@
 #include <xmllite.h>
 #include <Shlwapi.h>
 #include <comutil.h>
-#include <iostream>
 #include <fstream>
 #include <unordered_map>
 #include <codecvt>
@@ -238,7 +237,6 @@ HRESULT WinRTGetMetadataFile(
                 RETURN_IF_FAILED(spMetaDataDispenser->SetOption(MetaDataRuntimeVersion, &version.GetVARIANT()));
             }
         }
-        std::wcout << "hr41 " << hr << std::endl;
         return UndockedRegFreeWinRT::ResolveThirdPartyType(
             spMetaDataDispenser.Get(),
             pszFullName,
