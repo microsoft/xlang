@@ -186,11 +186,11 @@ HRESULT WinRTGetMetadataFile(
     IMetaDataDispenserEx* metaDataDispenser,
     HSTRING* metaDataFilePath,
     IMetaDataImport2** metaDataImport,
-    mdTypeDef* typeDefToken
-)
+    mdTypeDef* typeDefToken)
 {
     wchar_t szFolderPath[9];
-    HRESULT hr = StringCchCopyW(szFolderPath, _countof(szFolderPath), WindowsGetStringRawBuffer(name, nullptr));
+    PCWSTR pszFullName = WindowsGetStringRawBuffer(name, nullptr);
+    HRESULT hr = StringCchCopyW(szFolderPath, _countof(szFolderPath), pszFullName);
     if (hr != S_OK && hr != STRSAFE_E_INSUFFICIENT_BUFFER)
     {
         return hr;
@@ -238,14 +238,14 @@ HRESULT WinRTGetMetadataFile(
                 RETURN_IF_FAILED(spMetaDataDispenser->SetOption(MetaDataRuntimeVersion, &version.GetVARIANT()));
             }
         }
-
-        PCWSTR pszFullName = WindowsGetStringRawBuffer(name, nullptr);
-        return UndockedRegFreeWinRT::ResolveThirdPartyType(
+        std::wcout << "hr41 " << hr << std::endl;
+        HRESULT hr2 = UndockedRegFreeWinRT::ResolveThirdPartyType(
             spMetaDataDispenser.Get(),
             pszFullName,
             metaDataFilePath,
             metaDataImport,
             typeDefToken);
+        return hr2;
     }
 
     wil::unique_cotaskmem_array_ptr<wil::unique_hstring> metaDataFilePaths;

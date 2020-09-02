@@ -11,6 +11,7 @@
 #include "Synchapi.h"
 #include "TypeResolution.h"
 #include "catalog.h"
+#include <iostream>
 
 namespace UndockedRegFreeWinRT
 {
@@ -72,7 +73,7 @@ namespace UndockedRegFreeWinRT
             ofReadOnly,
             IID_IMetaDataImport2,
             reinterpret_cast<IUnknown**>(&spMetaDataImport));
-
+        std::wcout << "hr3 " << hr << std::endl;
         if (SUCCEEDED(hr))
         {
             const size_t cFullName = wcslen(pszFullName);
