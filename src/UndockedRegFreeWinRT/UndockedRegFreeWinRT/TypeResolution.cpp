@@ -211,7 +211,6 @@ namespace UndockedRegFreeWinRT
 
         wchar_t szCandidateFilePath[MAX_PATH + 1] = { 0 };
         wchar_t szCandidateFileName[MAX_PATH + 1] = { 0 };
-        bool fFileExists = false;
         PWSTR pszLastDot;
 
         hr = StringCchCopy(szCandidateFileName, ARRAYSIZE(szCandidateFileName), pszFullName);
@@ -237,46 +236,26 @@ namespace UndockedRegFreeWinRT
                     pszDirectoryPath,
                     szCandidateFileName);
 
-                fFileExists = true;
-
-                //if (SUCCEEDED(hr))
-                //{
-                //    FileExistenceChecksCache* pFileExistenceChecksCache = FileExistenceChecksCache::GetFileExistenceChecksCacheInstance();
-
-                //    if (pFileExistenceChecksCache != nullptr)
-                //    {
-                //        fFileExists = pFileExistenceChecksCache->DoesFileExist(szCandidateFilePath);
-                //    }
-                //    else
-                //    {
-                //        hr = E_OUTOFMEMORY;
-                //    }
-                //}
-
                 if (SUCCEEDED(hr))
                 {
-                    if (fFileExists)
+                    hr = FindTypeInMetaDataFile(
+                        pMetaDataDispenser,
+                        pszFullName,
+                        szCandidateFilePath,
+                        TRO_RESOLVE_TYPE_AND_NAMESPACE,
+                        ppMetaDataImport,
+                        pmdTypeDef);
+
+                    if (SUCCEEDED(hr))
                     {
-                        hr = FindTypeInMetaDataFile(
-                            pMetaDataDispenser,
-                            pszFullName,
-                            szCandidateFilePath,
-                            TRO_RESOLVE_TYPE_AND_NAMESPACE,
-                            ppMetaDataImport,
-                            pmdTypeDef);
-
-                        if (SUCCEEDED(hr))
+                        if (phstrMetaDataFilePath != nullptr)
                         {
-                            if (phstrMetaDataFilePath != nullptr)
-                            {
-                                hr = WindowsCreateString(
-                                    szCandidateFilePath,
-                                    static_cast<UINT32>(wcslen(szCandidateFilePath)),
-                                    phstrMetaDataFilePath);
-                            }
-
-                            break;
+                            hr = WindowsCreateString(
+                                szCandidateFilePath,
+                                static_cast<UINT32>(wcslen(szCandidateFilePath)),
+                                phstrMetaDataFilePath);
                         }
+                        break;
                     }
                 }
 
