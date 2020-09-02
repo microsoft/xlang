@@ -289,9 +289,11 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     std::wcout << "dispenser " << metaDataDispenser << std::endl;
     std::wcout << "import " << metaDataImport << std::endl;
     std::wcout << "deftoken " << typeDefToken << std::endl;
+    std::wcout << "metaDataFilePath " << metaDataFilePath << std::endl;
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     if (FAILED(hr))
     {
+        std::wcout << "Calling true RoGetMetadata" << std::endl;
         hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
         if (metaDataFilePath != nullptr)
         {
@@ -303,6 +305,7 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     std::wcout << "dispenser " << metaDataDispenser << std::endl;
     std::wcout << "import " << metaDataImport << std::endl;
     std::wcout << "deftoken " << typeDefToken << std::endl;
+    std::wcout << "metaDataFilePath " << metaDataFilePath << std::endl;
     return hr;
 }
 

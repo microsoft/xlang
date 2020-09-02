@@ -28,6 +28,12 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TypeResolution.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TypeResolution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catalog.h">

@@ -15,6 +15,8 @@
 #include <codecvt>
 #include <locale>
 #include "catalog.h"
+#include <RoMetadataApi.h>
+#include "TypeResolution.h"
 
 using namespace std;
 using namespace Microsoft::WRL;
@@ -165,6 +167,17 @@ HRESULT WinRTGetThreadingModel(HSTRING activatableClassId, ABI::Windows::Foundat
     return REGDB_E_CLASSNOTREG;
 }
 
+HRESULT WinRTClassExists(HSTRING activatableClassId)
+{
+    auto raw_class_name = WindowsGetStringRawBuffer(activatableClassId, nullptr);
+    auto component_iter = g_types.find(raw_class_name);
+    if (component_iter != g_types.end())
+    {
+        return S_OK;
+    }
+    return REGDB_E_CLASSNOTREG;
+}
+
 HRESULT WinRTGetActivationFactory(
     HSTRING activatableClassId,
     REFIID  iid,
@@ -187,13 +200,6 @@ HRESULT WinRTGetMetadataFile(
     mdTypeDef* typeDefToken
 )
 {
-    if (metaDataDispenser != nullptr ||
-        metaDataImport != nullptr ||
-        typeDefToken != nullptr)
-    {
-        return E_NOTIMPL;
-    }
-
     wchar_t szFolderPath[9];
     HRESULT hr = StringCchCopyW(szFolderPath, _countof(szFolderPath), WindowsGetStringRawBuffer(name, nullptr));
     if (hr != S_OK && hr != STRSAFE_E_INSUFFICIENT_BUFFER)
@@ -204,7 +210,55 @@ HRESULT WinRTGetMetadataFile(
     {
         return REGDB_E_CLASSNOTREG;
     }
-    
+
+    if (metaDataDispenser != nullptr ||
+        metaDataImport != nullptr ||
+        typeDefToken != nullptr)
+    {
+        if (metaDataFilePath != nullptr)
+        {
+            *metaDataFilePath = nullptr;
+        }
+        if (metaDataImport != nullptr)
+        {
+            *metaDataImport = nullptr;
+        }
+        if (typeDefToken != nullptr)
+        {
+            *typeDefToken = mdTypeDefNil;
+        }
+
+        if (((metaDataImport == nullptr) && (typeDefToken != nullptr)) ||
+            ((metaDataImport != nullptr) && (typeDefToken == nullptr)))
+        {
+            return E_INVALIDARG;
+        }
+
+        ComPtr<IMetaDataDispenserEx> spMetaDataDispenser;
+        // The API uses the caller's passed-in metadata dispenser. If null, it
+        // will create an instance of the metadata reader to dispense metadata files.
+        if (metaDataDispenser == nullptr)
+        {
+            RETURN_IF_FAILED(CoCreateInstance(CLSID_CorMetaDataDispenser,
+                nullptr,
+                CLSCTX_INPROC,
+                IID_IMetaDataDispenser,
+                &spMetaDataDispenser));
+            {
+                variant_t version{ L"WindowsRuntime 1.4" };
+                RETURN_IF_FAILED(spMetaDataDispenser->SetOption(MetaDataRuntimeVersion, &version.GetVARIANT()));
+            }
+        }
+
+        PCWSTR pszFullName = WindowsGetStringRawBuffer(name, nullptr);
+        return UndockedRegFreeWinRT::ResolveThirdPartyType(
+            spMetaDataDispenser.Get(),
+            pszFullName,
+            metaDataFilePath,
+            metaDataImport,
+            typeDefToken);
+    }
+
     wil::unique_cotaskmem_array_ptr<wil::unique_hstring> metaDataFilePaths;
     RETURN_IF_FAILED(RoResolveNamespace(name, HStringReference(exeFilePath.c_str()).Get(),
         0, nullptr,

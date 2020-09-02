@@ -182,6 +182,8 @@
   <ItemGroup>
     <ClCompile Include="catalog.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="TypeResolution.cpp" />
+    <ClCompile Include="TypeResolution.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catalog.h" />
