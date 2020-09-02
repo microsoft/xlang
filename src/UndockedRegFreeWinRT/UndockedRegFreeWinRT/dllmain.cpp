@@ -7,13 +7,12 @@
 #include <wrl.h>
 #include <ctxtcall.h>
 #include <Processthreadsapi.h>
-#include "../detours/detours.h"
-#include "catalog.h"
 #include <activation.h>
 #include <hstring.h>
 #include <VersionHelpers.h>
+#include "../detours/detours.h"
+#include "catalog.h"
 #include "extwinrt.h"
-#include <iostream>
 
 #define WIN1019H1_BLDNUM 18362
 
@@ -285,23 +284,11 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     IMetaDataImport2** metaDataImport,
     mdTypeDef* typeDefToken)
 {
-    //std::wcout << "name " << WindowsGetStringRawBuffer(name, nullptr) << std::endl;
-    //std::wcout << "dispenser " << metaDataDispenser << std::endl;
-    //std::wcout << "import " << metaDataImport << std::endl;
-    //std::wcout << "deftoken " << typeDefToken << std::endl;
-    //std::wcout << "metaDataFilePath " << metaDataFilePath << std::endl;
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    //std::wcout << "hr1 " << hr << std::endl;
     if (FAILED(hr))
     {
         hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-        //std::wcout << "hr2 " << hr << std::endl;
     }
-  /*  std::wcout << "name " << WindowsGetStringRawBuffer(name, nullptr) << std::endl;
-    std::wcout << "dispenser " << metaDataDispenser << std::endl;
-    std::wcout << "import " << metaDataImport << std::endl;
-    std::wcout << "deftoken " << typeDefToken << std::endl;
-    std::wcout << "metaDataFilePath " << metaDataFilePath << std::endl;*/
     return hr;
 }
 

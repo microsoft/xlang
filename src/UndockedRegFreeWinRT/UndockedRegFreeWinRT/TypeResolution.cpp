@@ -5,10 +5,10 @@
 #include <atlbase.h>
 #include <windows.foundation.h>
 #include <Windows.h>
-#include "wil/result.h"
-#include "wil/resource.h"
-#include "wil/filesystem.h"
-#include "Synchapi.h"
+#include <wil/result.h>
+#include <wil/resource.h>
+#include <wil/filesystem.h>
+#include <Synchapi.h>
 #include "TypeResolution.h"
 #include "catalog.h"
 

@@ -13,8 +13,8 @@
 #include <unordered_map>
 #include <codecvt>
 #include <locale>
-#include "catalog.h"
 #include <RoMetadataApi.h>
+#include "catalog.h"
 #include "TypeResolution.h"
 
 using namespace std;
