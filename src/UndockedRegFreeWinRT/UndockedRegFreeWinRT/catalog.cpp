@@ -167,17 +167,6 @@ HRESULT WinRTGetThreadingModel(HSTRING activatableClassId, ABI::Windows::Foundat
     return REGDB_E_CLASSNOTREG;
 }
 
-HRESULT WinRTClassExists(HSTRING activatableClassId)
-{
-    auto raw_class_name = WindowsGetStringRawBuffer(activatableClassId, nullptr);
-    auto component_iter = g_types.find(raw_class_name);
-    if (component_iter != g_types.end())
-    {
-        return S_OK;
-    }
-    return REGDB_E_CLASSNOTREG;
-}
-
 HRESULT WinRTGetActivationFactory(
     HSTRING activatableClassId,
     REFIID  iid,

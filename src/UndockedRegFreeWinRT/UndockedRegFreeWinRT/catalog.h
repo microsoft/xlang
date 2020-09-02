@@ -7,8 +7,6 @@
 
 HRESULT WinRTLoadComponent(PCWSTR componentPath);
 
-HRESULT WinRTClassExists(HSTRING activatableClassId);
-
 HRESULT WinRTGetThreadingModel(
     HSTRING activatableClassId,
     ABI::Windows::Foundation::ThreadingType* threading_model);
