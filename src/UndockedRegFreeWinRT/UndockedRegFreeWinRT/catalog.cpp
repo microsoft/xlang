@@ -239,13 +239,13 @@ HRESULT WinRTGetMetadataFile(
             }
         }
         std::wcout << "hr41 " << hr << std::endl;
-        HRESULT hr2 = UndockedRegFreeWinRT::ResolveThirdPartyType(
+        return UndockedRegFreeWinRT::ResolveThirdPartyType(
             spMetaDataDispenser.Get(),
             pszFullName,
             metaDataFilePath,
             metaDataImport,
             typeDefToken);
-        return hr2;
+        //return hr2;
     }
 
     wil::unique_cotaskmem_array_ptr<wil::unique_hstring> metaDataFilePaths;

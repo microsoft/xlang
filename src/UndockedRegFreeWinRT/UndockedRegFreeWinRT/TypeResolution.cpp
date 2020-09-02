@@ -445,5 +445,6 @@ namespace UndockedRegFreeWinRT
             // behavior that existed before unpackaged type resolution was implemented.
             hr = HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE);
         }
+        return hr;
     }
 }
