@@ -52,6 +52,7 @@ namespace UndockedRegFreeWinRTManagedTest
 
         static int Main(string[] args)
         {
+            Console.WriteLine("Undocked RegFree WinRT Managed Test - Starting");
             winrtact_Initialize();
             System.Threading.Thread testThread;
 
@@ -99,6 +100,7 @@ namespace UndockedRegFreeWinRTManagedTest
                 return 1;
             }
 
+            Console.WriteLine("Undocked RegFree WinRT Managed Test - All tests passed");
             return 0;
         }
     }
