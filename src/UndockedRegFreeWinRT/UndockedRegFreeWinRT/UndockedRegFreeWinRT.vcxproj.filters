@@ -28,10 +28,10 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TypeResolution.h">
+    <ClCompile Include="typeresolution.h">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="TypeResolution.cpp">
+    <ClCompile Include="typeresolution.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
