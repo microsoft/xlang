@@ -517,12 +517,11 @@ namespace UndockedRegFreeWinRT
              {
                  *ppMetaDataImporter = search->second;
              }
-             else 
+             else
              {
                  LeaveCriticalSection(&_csCacheLock);
-                 return ERROR_MOD_NOT_FOUND;
+                 return E_OUTOFMEMORY;
              }
-           
         }
         else
         {
