@@ -9,6 +9,7 @@
 #include "wil/resource.h"
 #include "wil/filesystem.h"
 #include "Synchapi.h"
+#include <unordered_map>
 
 #define METADATA_FILE_EXTENSION L"winmd"
 #define METADATA_FILE_PATH_FORMAT L"%s%s."  METADATA_FILE_EXTENSION
@@ -62,4 +63,81 @@ namespace UndockedRegFreeWinRT
         __out_opt HSTRING* phstrMetaDataFilePath,
         __deref_opt_out_opt IMetaDataImport2** ppMetaDataImport,
         __out_opt mdTypeDef* pmdTypeDef);
+
+    inline PWSTR AllocateAndCopyString(_In_ PCWSTR pszKey)
+    {
+        size_t length = wcslen(pszKey);
+        PWSTR pszKeyCopy = nullptr;
+
+        if (length <= MAX_PATH)
+        {
+            pszKeyCopy = new WCHAR[length + 1];
+            if (pszKeyCopy != nullptr)
+            {
+                SUCCEEDED(StringCchCopyW(pszKeyCopy, length + 1, pszKey));
+            }
+        }
+
+        return pszKeyCopy;
+    }
+
+    //
+    // Metada importers LRU cache. Singleton.
+    //
+    const DWORD g_dwMetaDataImportersLRUCacheSize = 5;
+
+    class MetaDataImportersLRUCache
+    {
+    public:
+        static MetaDataImportersLRUCache* GetMetaDataImportersLRUCacheInstance();
+
+        HRESULT GetMetaDataImporter(
+            _In_ IMetaDataDispenserEx* pMetaDataDispenser,
+            _In_ PCWSTR pszCandidateFilePath,
+            _Outptr_opt_ IMetaDataImport2** ppMetaDataImporter);
+
+    private:
+        MetaDataImportersLRUCache()
+        {
+            InitializeCriticalSection(&_csCacheLock);
+            ZeroMemory(_arFilePaths, sizeof(_arFilePaths));
+        }
+
+        ~MetaDataImportersLRUCache()
+        {
+            _metadataImportersMap.clear();
+            for (int i = 0; i < g_dwMetaDataImportersLRUCacheSize; i++)
+            {
+                if (_arFilePaths[i] != nullptr)
+                {
+                    delete[] _arFilePaths[i];
+                    _arFilePaths[i] = nullptr;
+                }
+            }
+
+            DeleteCriticalSection(&_csCacheLock);
+        }
+
+        static BOOL CALLBACK ConstructLRUCacheIfNecessary(
+            PINIT_ONCE /*initOnce*/,
+            PVOID /*parameter*/,
+            PVOID* /*context*/);
+
+        HRESULT GetNewMetaDataImporter(
+            _In_ IMetaDataDispenserEx* pMetaDataDispenser,
+            _In_ PCWSTR pszCandidateFilePath,
+            _Outptr_opt_ IMetaDataImport2** ppMetaDataImporter);
+
+        bool IsFilePathCached(PCWSTR pszFilePath);
+        int GetFilePathIndex(PCWSTR pszFilePath);
+        void MoveElementToFrontOfList(int elementIndex);
+        HRESULT AddNewFilePathToList(PCWSTR pszFilePath);
+        HRESULT RemoveLeastRecentlyUsedItemIfListIsFull();
+
+        static INIT_ONCE s_initOnce;
+        static MetaDataImportersLRUCache* s_pMetaDataImportersLRUCacheInstance;
+        std::unordered_map<PCWSTR, IMetaDataImport2*> _metadataImportersMap;
+        PWSTR _arFilePaths[g_dwMetaDataImportersLRUCacheSize];
+        CRITICAL_SECTION _csCacheLock;
+    };
 }

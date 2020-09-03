@@ -67,11 +67,19 @@ namespace UndockedRegFreeWinRT
     {
         HRESULT hr = S_OK;
         CComPtr<IMetaDataImport2> spMetaDataImport;
-        hr = pMetaDataDispenser->OpenScope(
-            pszCandidateFilePath,
-            ofReadOnly,
-            IID_IMetaDataImport2,
-            reinterpret_cast<IUnknown**>(&spMetaDataImport));
+        MetaDataImportersLRUCache* pMetaDataImporterCache = MetaDataImportersLRUCache::GetMetaDataImportersLRUCacheInstance();
+        if (pMetaDataImporterCache != nullptr)
+        {
+            hr = pMetaDataImporterCache->GetMetaDataImporter(
+                pMetaDataDispenser,
+                pszCandidateFilePath,
+                &spMetaDataImport);
+        }
+        else
+        {
+            hr = E_OUTOFMEMORY;
+        }
+
         if (SUCCEEDED(hr))
         {
             const size_t cFullName = wcslen(pszFullName);
@@ -443,6 +451,208 @@ namespace UndockedRegFreeWinRT
             // behavior that existed before unpackaged type resolution was implemented.
             hr = HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE);
         }
+        return hr;
+    }
+
+    //
+    // MetaDataImportersLRUCache implementation
+    //
+    INIT_ONCE MetaDataImportersLRUCache::s_initOnce = INIT_ONCE_STATIC_INIT;
+    MetaDataImportersLRUCache* MetaDataImportersLRUCache::s_pMetaDataImportersLRUCacheInstance = nullptr;
+
+    MetaDataImportersLRUCache* MetaDataImportersLRUCache::GetMetaDataImportersLRUCacheInstance()
+    {
+        BOOL fInitializationSucceeded = InitOnceExecuteOnce(
+            &s_initOnce,
+            ConstructLRUCacheIfNecessary,
+            nullptr,
+            nullptr);
+
+        UNREFERENCED_PARAMETER(fInitializationSucceeded);
+
+        return s_pMetaDataImportersLRUCacheInstance;
+    }
+
+    // Called via InitOnceExecuteOnce.
+    BOOL CALLBACK MetaDataImportersLRUCache::ConstructLRUCacheIfNecessary(
+        PINIT_ONCE /*initOnce*/,
+        PVOID /*parameter*/,
+        PVOID* /*context*/)
+    {
+        HRESULT hr = S_OK;
+
+        if (s_pMetaDataImportersLRUCacheInstance == nullptr)
+        {
+            s_pMetaDataImportersLRUCacheInstance = new MetaDataImportersLRUCache();
+
+            if (s_pMetaDataImportersLRUCacheInstance == nullptr)
+            {
+                hr = E_OUTOFMEMORY;
+            }
+        }
+
+        return SUCCEEDED(hr);
+    }
+
+    HRESULT MetaDataImportersLRUCache::GetMetaDataImporter(
+        _In_ IMetaDataDispenserEx* pMetaDataDispenser,
+        _In_ PCWSTR pszCandidateFilePath,
+        _Outptr_opt_ IMetaDataImport2** ppMetaDataImporter)
+    {
+        if (ppMetaDataImporter == nullptr)
+        {
+            return ERROR_BAD_ARGUMENTS;
+        }
+
+        HRESULT hr = S_OK;
+        *ppMetaDataImporter = nullptr;
+
+        EnterCriticalSection(&_csCacheLock);
+
+        if (IsFilePathCached(pszCandidateFilePath))
+        {
+            // Get metadata importer from cache.
+             auto search = _metadataImportersMap.find(pszCandidateFilePath);
+             if (search != _metadataImportersMap.end()) 
+             {
+                 *ppMetaDataImporter = search->second;
+             }
+             else 
+             {
+                 LeaveCriticalSection(&_csCacheLock);
+                 return ERROR_MOD_NOT_FOUND;
+             }
+           
+        }
+        else
+        {
+            // Importer was not found in cache.
+            hr = GetNewMetaDataImporter(
+                pMetaDataDispenser,
+                pszCandidateFilePath,
+                ppMetaDataImporter);
+        }
+
+        LeaveCriticalSection(&_csCacheLock);
+
+        return hr;
+    }
+
+    HRESULT MetaDataImportersLRUCache::GetNewMetaDataImporter(
+        _In_ IMetaDataDispenserEx* pMetaDataDispenser,
+        _In_ PCWSTR pszCandidateFilePath,
+        _Outptr_opt_ IMetaDataImport2** ppMetaDataImporter)
+    {
+        if (ppMetaDataImporter == nullptr)
+        {
+            return ERROR_BAD_ARGUMENTS;
+        }
+
+        HRESULT hr;
+
+        hr = pMetaDataDispenser->OpenScope(
+            pszCandidateFilePath,
+            ofReadOnly,
+            IID_IMetaDataImport2,
+            reinterpret_cast<IUnknown**>(ppMetaDataImporter));
+
+        if (SUCCEEDED(hr))
+        {
+           _metadataImportersMap.emplace(
+                pszCandidateFilePath,
+                *ppMetaDataImporter);
+        }
+
+        if (SUCCEEDED(hr))
+        {
+            hr = AddNewFilePathToList(pszCandidateFilePath);
+        }
+
+        return hr;
+    }
+
+    HRESULT MetaDataImportersLRUCache::AddNewFilePathToList(PCWSTR pszFilePath)
+    {
+        HRESULT hr = RemoveLeastRecentlyUsedItemIfListIsFull();
+
+        if (SUCCEEDED(hr))
+        {
+            // Make room for new element.
+            for (int i = g_dwMetaDataImportersLRUCacheSize - 2; i >= 0; i--)
+            {
+                _arFilePaths[i + 1] = _arFilePaths[i];
+            }
+
+            _arFilePaths[0] = AllocateAndCopyString(pszFilePath);
+
+            if (_arFilePaths[0] == nullptr)
+            {
+                hr = E_OUTOFMEMORY;
+            }
+        }
+
+        return hr;
+    }
+
+    bool MetaDataImportersLRUCache::IsFilePathCached(PCWSTR pszFilePath)
+    {
+        int filePathIndex = GetFilePathIndex(pszFilePath);
+
+        if (filePathIndex != -1)
+        {
+            MoveElementToFrontOfList(filePathIndex);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    int MetaDataImportersLRUCache::GetFilePathIndex(PCWSTR pszFilePath)
+    {
+        int filePathIndex = -1;
+
+        for (int i = 0; (i < g_dwMetaDataImportersLRUCacheSize) && (_arFilePaths[i] != nullptr); i++)
+        {
+            if (wcscmp(pszFilePath, _arFilePaths[i]) == 0)
+            {
+                filePathIndex = i;
+                break;
+            }
+        }
+
+        return filePathIndex;
+    }
+
+    void MetaDataImportersLRUCache::MoveElementToFrontOfList(int elementIndex)
+    {
+        PWSTR pszFoundFilePath = _arFilePaths[elementIndex];
+
+        for (int i = elementIndex - 1; i >= 0; i--)
+        {
+            _arFilePaths[i + 1] = _arFilePaths[i];
+        }
+
+        _arFilePaths[0] = pszFoundFilePath;
+    }
+
+    HRESULT MetaDataImportersLRUCache::RemoveLeastRecentlyUsedItemIfListIsFull()
+    {
+        HRESULT hr = S_OK;
+        PWSTR pszLastFilePathInList = _arFilePaths[g_dwMetaDataImportersLRUCacheSize - 1];
+
+        if (pszLastFilePathInList != nullptr)
+        {
+            if (!_metadataImportersMap.erase(pszLastFilePathInList))
+            {
+                hr = E_UNEXPECTED;
+            }
+
+            delete[] pszLastFilePathInList;
+            _arFilePaths[g_dwMetaDataImportersLRUCacheSize - 1] = nullptr;
+        }
+
         return hr;
     }
 }

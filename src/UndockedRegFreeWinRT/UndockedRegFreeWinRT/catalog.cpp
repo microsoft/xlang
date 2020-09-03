@@ -80,7 +80,7 @@ struct component
     }
 };
 
-static unordered_map < wstring, shared_ptr<component> > g_types;
+static unordered_map<wstring, shared_ptr<component>> g_types;
 
 HRESULT WinRTLoadComponent(PCWSTR manifest_path)
 {
@@ -236,7 +236,6 @@ HRESULT WinRTGetMetadataFile(
             metaDataFilePath,
             metaDataImport,
             typeDefToken);
-        //return hr2;
     }
 
     wil::unique_cotaskmem_array_ptr<wil::unique_hstring> metaDataFilePaths;
