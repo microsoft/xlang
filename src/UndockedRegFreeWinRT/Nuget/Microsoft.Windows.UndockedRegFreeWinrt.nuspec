@@ -24,10 +24,8 @@
     <file src="$winrtactx64debug$" target="runtimes\x64\debug\"/>
     <file src="$winrtactx86release$" target="runtimes\x86\release\"/>
     <file src="$winrtactx86debug$" target="runtimes\x86\debug\"/>
-    <file src="$mwinrtactx64release$" target="runtimes\x64\release\lib\netstandard2.0"/>
-    <file src="$mwinrtactx64debug$" target="runtimes\x64\debug\lib\netstandard2.0"/>
-    <file src="$mwinrtactx86release$" target="runtimes\x86\release\lib\netstandard2.0"/>
-    <file src="$mwinrtactx86debug$" target="runtimes\x86\debug\lib\netstandard2.0"/>
+    <file src="$mwinrtactx64release$" target="runtimes\win10-x64\lib\netstandard2.0"/>
+    <file src="$mwinrtactx86release$" target="runtimes\win10-x86\lib\netstandard2.0"/>
     <file src="$winrtactlibx64release$" target="runtimes\x64\release\"/>
     <file src="$winrtactlibx64debug$" target="runtimes\x64\debug\"/>
     <file src="$winrtactlibx86release$" target="runtimes\x86\release\"/>
