@@ -2,7 +2,7 @@
 
 namespace Microsoft.Windows
 {
-    static class UndockedRegFreeWinrt
+    public static class UndockedRegFreeWinrt
     {
         [DllImport("winrtact.dll")]
         static extern void winrtact_Initialize();

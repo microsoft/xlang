@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using TestComponent;
+using Microsoft.Windows;
 
 namespace UndockedRegFreeWinRTManagedTest
 {
     class Program
     {
-        [DllImport("winrtact.dll")]
-        static extern void winrtact_Initialize();
+        //[DllImport("winrtact.dll")]
+        //static extern void winrtact_Initialize();
 
         public static bool succeeded;
 
@@ -52,7 +53,7 @@ namespace UndockedRegFreeWinRTManagedTest
 
         static int Main(string[] args)
         {
-            winrtact_Initialize();
+            UndockedRegFreeWinrt.Initialize();
             System.Threading.Thread testThread;
 
             succeeded = false;

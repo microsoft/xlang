@@ -20,6 +20,13 @@
   <ItemGroup Condition="'$(Configuration)' == 'Release' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x86\release\winrtact.dll" />
   </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Debug' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x86\debug\mwinrtact.dll" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x86\release\mwinrtact.dll" />
+  </ItemGroup>
+
 
   <!-- x64 -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'x64'">
@@ -28,6 +35,13 @@
   <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64'">
     <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x64\release\winrtact.dll" />
   </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'x64'">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x64\debug\mwinrtact.dll" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release' And '$(Platform)' == 'x64'">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\x64\release\mwinrtact.dll" />
+  </ItemGroup>
+
 
   <!-- arm64 -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug' And '$(Platform)' == 'ARM64'">
