@@ -2083,7 +2083,7 @@ return [delegate = std::move(_delegate)](%)
 
 if (!return_value) 
 {
-    // TODO: propagate Python error
+    PyErr_WriteUnraisable(delegate.callable());
     throw winrt::hresult_invalid_argument();
 }
 )");
