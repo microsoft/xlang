@@ -2,23 +2,17 @@
 
 #include <RoMetadataApi.h>
 #include <hstring.h>
-#include <atlbase.h>
 #include <windows.foundation.h>
 #include <Windows.h>
-#include "wil/result.h"
-#include "wil/resource.h"
-#include "wil/filesystem.h"
-#include "Synchapi.h"
+#include <wil/result.h>
+#include <wil/resource.h>
+#include <wil/filesystem.h>
+#include <wrl.h>
+#include <Synchapi.h>
 #include <unordered_map>
-
-#define METADATA_FILE_EXTENSION L"winmd"
-#define METADATA_FILE_PATH_FORMAT L"%s%s."  METADATA_FILE_EXTENSION
-#define METADATA_FILE_SEARCH_FORMAT L"%s%s*."  METADATA_FILE_EXTENSION
 
 namespace UndockedRegFreeWinRT
 {
-    static const UINT32 g_uiMaxTypeName = 512;
-
     typedef enum
     {
         TRO_NONE = 0x00,
@@ -26,8 +20,6 @@ namespace UndockedRegFreeWinRT
         TRO_RESOLVE_NAMESPACE = 0x02,
         TRO_RESOLVE_TYPE_AND_NAMESPACE = TRO_RESOLVE_TYPE | TRO_RESOLVE_NAMESPACE
     } TYPE_RESOLUTION_OPTIONS;
-
-    static wil::unique_process_heap_string g_cachedProcessExeDir;
 
     // Returned string is cached globally, and should not be freed by the caller.
     HRESULT GetProcessExeDir(PCWSTR* path);

@@ -1,19 +1,17 @@
 #pragma once
 
-#include <RoMetadataApi.h>
-#include <hstring.h>
-#include <atlbase.h>
-#include <windows.foundation.h>
-#include <Windows.h>
-#include <wil/result.h>
-#include <wil/resource.h>
-#include <wil/filesystem.h>
-#include <Synchapi.h>
 #include "TypeResolution.h"
 #include "catalog.h"
 
+#define METADATA_FILE_EXTENSION L"winmd"
+#define METADATA_FILE_PATH_FORMAT L"%s%s."  METADATA_FILE_EXTENSION
+#define METADATA_FILE_SEARCH_FORMAT L"%s%s*."  METADATA_FILE_EXTENSION
+
 namespace UndockedRegFreeWinRT
 {
+    static const UINT32 g_uiMaxTypeName = 512;
+    static wil::unique_process_heap_string g_cachedProcessExeDir;
+
     BOOL CALLBACK GetProcessExeDirInitOnceCallback(
         _Inout_     PINIT_ONCE,
         _Inout_opt_ PVOID,
@@ -62,7 +60,7 @@ namespace UndockedRegFreeWinRT
         __out_opt mdTypeDef* pmdTypeDef)
     {
         HRESULT hr = S_OK;
-        CComPtr<IMetaDataImport2> spMetaDataImport;
+        Microsoft::WRL::ComPtr<IMetaDataImport2> spMetaDataImport;
         MetaDataImportersLRUCache* pMetaDataImporterCache = MetaDataImportersLRUCache::GetMetaDataImportersLRUCacheInstance();
         if (pMetaDataImporterCache != nullptr)
         {
