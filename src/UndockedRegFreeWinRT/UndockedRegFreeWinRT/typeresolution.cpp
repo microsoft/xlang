@@ -19,10 +19,6 @@ namespace UndockedRegFreeWinRT
         _Inout_opt_ PVOID,
         _Out_opt_   PVOID*)
     {
-        // The raw GetModuleFileName API doesn't have any way of telling the caller how large of a buffer is needed.
-        // Historically, this has driven people to use it with MAX_PATH, but MAX_PATH is evil because we want to support
-        // long filenames. So instead, call this WIL wrapper, which allocates successively larger buffers until it finds one
-        // that's big enough.
         wil::unique_process_heap_string localExePath;
         HRESULT hr = wil::GetModuleFileNameW(nullptr, localExePath);
         if (FAILED_LOG(hr))
