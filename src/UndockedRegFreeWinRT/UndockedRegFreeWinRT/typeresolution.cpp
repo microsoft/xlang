@@ -427,25 +427,36 @@ namespace UndockedRegFreeWinRT
         UINT32 dwPackagesCount = 0;
         UINT32 dwBufferLength = 0;
 
-        PCWSTR exeDir = nullptr;  // Never freed; owned by process global.
-        RETURN_IF_FAILED(GetProcessExeDir(&exeDir));
-
-        hr = FindTypeInDirectoryWithNormalization(
-            pMetaDataDispenser,
-            pszFullName,
-            exeDir,
-            phstrMetaDataFilePath,
-            ppMetaDataImport,
-            pmdTypeDef);
-
-        if (hr == RO_E_METADATA_NAME_NOT_FOUND)
+        const UINT32 filter = PACKAGE_FILTER_HEAD | PACKAGE_FILTER_DIRECT | PACKAGE_FILTER_IS_IN_RELATED_SET;
+        hr = HRESULT_FROM_WIN32(GetCurrentPackageInfo(filter, &dwBufferLength, nullptr, &dwPackagesCount));
+        // Only find the type if the it is a unpacakged app. Packaged apps can have their exe on their package graph, 
+        // which will allow type resolution against adjacent WinMDs.
+        if (hr == HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE))
         {
-            // For compatibility purposes, if we fail to find the type in the unpackaged location, we should return
-            // HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE) instead of a "not found" error. This preserves the
-            // behavior that existed before unpackaged type resolution was implemented.
-            hr = HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE);
+            PCWSTR exeDir = nullptr;  // Never freed; owned by process global.
+            RETURN_IF_FAILED(GetProcessExeDir(&exeDir));
+
+            hr = FindTypeInDirectoryWithNormalization(
+                pMetaDataDispenser,
+                pszFullName,
+                exeDir,
+                phstrMetaDataFilePath,
+                ppMetaDataImport,
+                pmdTypeDef);
+
+            if (hr == RO_E_METADATA_NAME_NOT_FOUND)
+            {
+                // For compatibility purposes, if we fail to find the type in the unpackaged location, we should return
+                // HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE) instead of a "not found" error. This preserves the
+                // behavior that existed before unpackaged type resolution was implemented.
+                hr = HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE);
+            }
+            return hr;
         }
-        return hr;
+        else
+        {
+            return RO_E_METADATA_NAME_NOT_FOUND;
+        }
     }
 
     //

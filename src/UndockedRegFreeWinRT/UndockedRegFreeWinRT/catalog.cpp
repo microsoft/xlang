@@ -180,16 +180,16 @@ HRESULT WinRTGetMetadataFile(
     IMetaDataImport2** metaDataImport,
     mdTypeDef* typeDefToken)
 {
-    wchar_t szFolderPath[9];
+    wchar_t folderPrefix[9];
     PCWSTR pszFullName = WindowsGetStringRawBuffer(name, nullptr);
-    HRESULT hr = StringCchCopyW(szFolderPath, _countof(szFolderPath), pszFullName);
+    HRESULT hr = StringCchCopyW(folderPrefix, _countof(folderPrefix), pszFullName);
     if (hr != S_OK && hr != STRSAFE_E_INSUFFICIENT_BUFFER)
     {
         return hr;
     }
-    if (CompareStringOrdinal(szFolderPath, -1, L"Windows.", -1, false) == CSTR_EQUAL)
+    if (CompareStringOrdinal(folderPrefix, -1, L"Windows.", -1, false) == CSTR_EQUAL)
     {
-        return REGDB_E_CLASSNOTREG;
+        return RO_E_METADATA_NAME_NOT_FOUND;
     }
 
     if (metaDataDispenser != nullptr ||
@@ -220,6 +220,7 @@ HRESULT WinRTGetMetadataFile(
         // will create an instance of the metadata reader to dispense metadata files.
         if (metaDataDispenser == nullptr)
         {
+            RETURN_IF_FAILED(CoInitialize(nullptr));
             RETURN_IF_FAILED(CoCreateInstance(CLSID_CorMetaDataDispenser,
                 nullptr,
                 CLSCTX_INPROC,

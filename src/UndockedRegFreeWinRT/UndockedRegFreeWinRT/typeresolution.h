@@ -10,6 +10,7 @@
 #include <wrl.h>
 #include <Synchapi.h>
 #include <unordered_map>
+#include <Appmodel.h>
 
 namespace UndockedRegFreeWinRT
 {
