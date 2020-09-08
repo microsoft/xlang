@@ -17,7 +17,6 @@
 
 namespace UndockedRegFreeWinRT
 {
-    // This number comes from (c_cchTypeNameMax = 512) in //depot/fbl_ie_dev1/com/WinRT/buildtools/mdmerge/MetadataScope.h
     static const UINT32 g_uiMaxTypeName = 512;
 
     typedef enum
