@@ -192,71 +192,45 @@ HRESULT WinRTGetMetadataFile(
         return RO_E_METADATA_NAME_NOT_FOUND;
     }
 
-    if (metaDataDispenser != nullptr ||
-        metaDataImport != nullptr ||
-        typeDefToken != nullptr)
+    if (metaDataFilePath != nullptr)
     {
-        if (metaDataFilePath != nullptr)
-        {
-            *metaDataFilePath = nullptr;
-        }
-        if (metaDataImport != nullptr)
-        {
-            *metaDataImport = nullptr;
-        }
-        if (typeDefToken != nullptr)
-        {
-            *typeDefToken = mdTypeDefNil;
-        }
-
-        if (((metaDataImport == nullptr) && (typeDefToken != nullptr)) ||
-            ((metaDataImport != nullptr) && (typeDefToken == nullptr)))
-        {
-            return E_INVALIDARG;
-        }
-
-        ComPtr<IMetaDataDispenserEx> spMetaDataDispenser;
-        // The API uses the caller's passed-in metadata dispenser. If null, it
-        // will create an instance of the metadata reader to dispense metadata files.
-        if (metaDataDispenser == nullptr)
-        {
-            RETURN_IF_FAILED(CoInitialize(nullptr));
-            RETURN_IF_FAILED(CoCreateInstance(CLSID_CorMetaDataDispenser,
-                nullptr,
-                CLSCTX_INPROC,
-                IID_IMetaDataDispenser,
-                &spMetaDataDispenser));
-            {
-                variant_t version{ L"WindowsRuntime 1.4" };
-                RETURN_IF_FAILED(spMetaDataDispenser->SetOption(MetaDataRuntimeVersion, &version.GetVARIANT()));
-            }
-        }
-        return UndockedRegFreeWinRT::ResolveThirdPartyType(
-            spMetaDataDispenser.Get(),
-            pszFullName,
-            metaDataFilePath,
-            metaDataImport,
-            typeDefToken);
+        *metaDataFilePath = nullptr;
+    }
+    if (metaDataImport != nullptr)
+    {
+        *metaDataImport = nullptr;
+    }
+    if (typeDefToken != nullptr)
+    {
+        *typeDefToken = mdTypeDefNil;
     }
 
-    wil::unique_cotaskmem_array_ptr<wil::unique_hstring> metaDataFilePaths;
-    RETURN_IF_FAILED(RoResolveNamespace(name, HStringReference(exeFilePath.c_str()).Get(),
-        0, nullptr,
-        metaDataFilePaths.size_address<DWORD>(), &metaDataFilePaths,
-        0, nullptr));
-
-    DWORD bestMatch = 0;
-    int bestMatchLength = 0;
-    for (DWORD i = 0; i < metaDataFilePaths.size(); i++)
+    if (((metaDataImport == nullptr) && (typeDefToken != nullptr)) ||
+        ((metaDataImport != nullptr) && (typeDefToken == nullptr)))
     {
-        int length = WindowsGetStringLen(metaDataFilePaths[i]);
-        if (length > bestMatchLength)
+        return E_INVALIDARG;
+    }
+
+    ComPtr<IMetaDataDispenserEx> spMetaDataDispenser;
+    // The API uses the caller's passed-in metadata dispenser. If null, it
+    // will create an instance of the metadata reader to dispense metadata files.
+    if (metaDataDispenser == nullptr)
+    {
+        RETURN_IF_FAILED(CoInitialize(nullptr));
+        RETURN_IF_FAILED(CoCreateInstance(CLSID_CorMetaDataDispenser,
+            nullptr,
+            CLSCTX_INPROC,
+            IID_IMetaDataDispenser,
+            &spMetaDataDispenser));
         {
-            bestMatch = i;
-            bestMatchLength = length;
+            variant_t version{ L"WindowsRuntime 1.4" };
+            RETURN_IF_FAILED(spMetaDataDispenser->SetOption(MetaDataRuntimeVersion, &version.GetVARIANT()));
         }
     }
-    *metaDataFilePath = metaDataFilePaths[bestMatch];
-    metaDataFilePaths[bestMatch] = nullptr; // Null this out to transfer ownership to parameter
-    return S_OK;
+    return UndockedRegFreeWinRT::ResolveThirdPartyType(
+        spMetaDataDispenser.Get(),
+        pszFullName,
+        metaDataFilePath,
+        metaDataImport,
+        typeDefToken);
 }

@@ -517,16 +517,12 @@ namespace UndockedRegFreeWinRT
         if (IsFilePathCached(pszCandidateFilePath))
         {
             // Get metadata importer from cache.
-             auto search = _metadataImportersMap.find(pszCandidateFilePath);
-             if (search != _metadataImportersMap.end()) 
-             {
-                 *ppMetaDataImporter = search->second;
-             }
-             else
-             {
-                 LeaveCriticalSection(&_csCacheLock);
-                 return E_OUTOFMEMORY;
-             }
+            *ppMetaDataImporter = _metadataImportersMap[pszCandidateFilePath];
+            IMetaDataImport2* value = *ppMetaDataImporter;
+            if (value != nullptr)
+            {
+                value->AddRef();
+            }
         }
         else
         {
@@ -565,6 +561,11 @@ namespace UndockedRegFreeWinRT
            _metadataImportersMap.emplace(
                 pszCandidateFilePath,
                 *ppMetaDataImporter);
+           IMetaDataImport2* value = *ppMetaDataImporter;
+           if (value != nullptr)
+           {
+               value->AddRef();
+           }
         }
 
         if (SUCCEEDED(hr))
@@ -648,6 +649,12 @@ namespace UndockedRegFreeWinRT
 
         if (pszLastFilePathInList != nullptr)
         {
+            IMetaDataImport2* value = _metadataImportersMap[pszLastFilePathInList];
+            if (value != nullptr)
+            {
+                value->Release();
+                value = nullptr;
+            }
             if (!_metadataImportersMap.erase(pszLastFilePathInList))
             {
                 hr = E_UNEXPECTED;
