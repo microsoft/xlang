@@ -20,6 +20,17 @@ TEST_CASE("Undocked Regfree WinRT Activation")
 {
     RegFreeWinRTInitializeForTest();
 
+    SECTION("Test Get Metadata File on Type")
+    {
+        HString result;
+        REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent.ClassSta").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
+        REQUIRE(wcsstr(WindowsGetStringRawBuffer(result.Get(), 0), L"TestComponent.winmd") != nullptr);
+    }
+    SECTION("Test Get Metadata File on Namespace")
+    {
+        HString result;
+        REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == RO_E_METADATA_NAME_IS_NAMESPACE);
+    }
     SECTION("Both To Current STA")
     {
         winrt::init_apartment(winrt::apartment_type::single_threaded);
@@ -51,17 +62,6 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassSta").Get(), (IInspectable**)winrt::put_abi(c)) == RO_E_UNSUPPORTED_FROM_MTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
-    }
-    SECTION("Test Get Metadata File on Type")
-    {
-        HString result;
-        REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent.ClassSta").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
-        REQUIRE(wcsstr(WindowsGetStringRawBuffer(result.Get(), 0), L"TestComponent.winmd") != nullptr);
-    }
-    SECTION("Test Get Metadata File on Namespace")
-    {
-        HString result;
-        REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == RO_E_METADATA_NAME_IS_NAMESPACE);
     }
     RegFreeWinRTUninitializeForTest();
 }
