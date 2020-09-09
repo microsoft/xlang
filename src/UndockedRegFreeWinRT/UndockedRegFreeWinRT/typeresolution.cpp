@@ -52,12 +52,12 @@ namespace UndockedRegFreeWinRT
     }
 
     HRESULT FindTypeInMetaDataFile(
-        __in IMetaDataDispenserEx* pMetaDataDispenser,
-        __in PCWSTR pszFullName,
-        __in PCWSTR pszCandidateFilePath,
-        __in TYPE_RESOLUTION_OPTIONS resolutionOptions,
-        __deref_opt_out_opt IMetaDataImport2** ppMetaDataImport,
-        __out_opt mdTypeDef* pmdTypeDef)
+        _In_ IMetaDataDispenserEx* pMetaDataDispenser,
+        _In_ PCWSTR pszFullName,
+        _In_ PCWSTR pszCandidateFilePath,
+        _In_ TYPE_RESOLUTION_OPTIONS resolutionOptions,
+        _COM_Outptr_opt_result_maybenull_ IMetaDataImport2** ppMetaDataImport,
+        _Out_opt_ mdTypeDef* pmdTypeDef)
     {
         HRESULT hr = S_OK;
         Microsoft::WRL::ComPtr<IMetaDataImport2> spMetaDataImport;
@@ -201,12 +201,12 @@ namespace UndockedRegFreeWinRT
     }
 
     HRESULT FindTypeInDirectory(
-        __in IMetaDataDispenserEx* pMetaDataDispenser,
-        __in PCWSTR pszFullName,
-        __in PCWSTR pszDirectoryPath,
-        __out_opt HSTRING* phstrMetaDataFilePath,
-        __deref_opt_out_opt IMetaDataImport2** ppMetaDataImport,
-        __out_opt mdTypeDef* pmdTypeDef)
+        _In_ IMetaDataDispenserEx* pMetaDataDispenser,
+        _In_ PCWSTR pszFullName,
+        _In_ PCWSTR pszDirectoryPath,
+        _Out_opt_ HSTRING* phstrMetaDataFilePath,
+        _COM_Outptr_opt_result_maybenull_ IMetaDataImport2** ppMetaDataImport,
+        _Out_opt_ mdTypeDef* pmdTypeDef)
     {
         HRESULT hr;
 
@@ -368,12 +368,12 @@ namespace UndockedRegFreeWinRT
     }
 
     HRESULT FindTypeInDirectoryWithNormalization(
-        __in IMetaDataDispenserEx* pMetaDataDispenser,
-        __in PCWSTR pszFullName,
-        __in PCWSTR pszDirectoryPath,
-        __out_opt HSTRING* phstrMetaDataFilePath,
-        __deref_opt_out_opt IMetaDataImport2** ppMetaDataImport,
-        __out_opt mdTypeDef* pmdTypeDef)
+        _In_ IMetaDataDispenserEx* pMetaDataDispenser,
+        _In_ PCWSTR pszFullName,
+        _In_ PCWSTR pszDirectoryPath,
+        _Out_opt_ HSTRING* phstrMetaDataFilePath,
+        _COM_Outptr_opt_result_maybenull_ IMetaDataImport2** ppMetaDataImport,
+        _Out_opt_ mdTypeDef* pmdTypeDef)
     {
         wchar_t pszPackagePath[MAX_PATH + 1];
         PWSTR pszPackagePathWritePtr = pszPackagePath;
@@ -417,11 +417,11 @@ namespace UndockedRegFreeWinRT
     }
 
     HRESULT ResolveThirdPartyType(
-        __in IMetaDataDispenserEx* pMetaDataDispenser,
-        __in PCWSTR pszFullName,
-        __out_opt HSTRING* phstrMetaDataFilePath,
-        __deref_opt_out_opt IMetaDataImport2** ppMetaDataImport,
-        __out_opt mdTypeDef* pmdTypeDef)
+        _In_ IMetaDataDispenserEx* pMetaDataDispenser,
+        _In_ PCWSTR pszFullName,
+        _Out_opt_ HSTRING* phstrMetaDataFilePath,
+        _COM_Outptr_opt_result_maybenull_ IMetaDataImport2** ppMetaDataImport,
+        _Out_opt_ mdTypeDef* pmdTypeDef)
     {
         HRESULT hr = HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE);
         UINT32 dwPackagesCount = 0;
