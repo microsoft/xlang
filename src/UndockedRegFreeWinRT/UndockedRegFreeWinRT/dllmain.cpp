@@ -284,7 +284,8 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     mdTypeDef* typeDefToken)
 {
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    if (FAILED(hr))
+    // Don't fallback on RO_E_METADATA_NAME_IS_NAMESPACE failure. This is the intended behavior for namespace names.
+    if (FAILED(hr) && hr != RO_E_METADATA_NAME_IS_NAMESPACE)
     {
         hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     }
