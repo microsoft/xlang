@@ -128,7 +128,7 @@ namespace UndockedRegFreeWinRT
 
         static INIT_ONCE s_initOnce;
         static MetaDataImportersLRUCache* s_pMetaDataImportersLRUCacheInstance;
-        std::unordered_map<PCWSTR, IMetaDataImport2*> _metadataImportersMap;
+        std::unordered_map<std::wstring, IMetaDataImport2*> _metadataImportersMap;
         PWSTR _arFilePaths[g_dwMetaDataImportersLRUCacheSize];
         CRITICAL_SECTION _csCacheLock;
     };
