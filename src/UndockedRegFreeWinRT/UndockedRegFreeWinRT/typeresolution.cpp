@@ -2,7 +2,7 @@
 
 #include "TypeResolution.h"
 #include "catalog.h"
-
+#include <iostream>
 #define METADATA_FILE_EXTENSION L"winmd"
 #define METADATA_FILE_PATH_FORMAT L"%s%s."  METADATA_FILE_EXTENSION
 #define METADATA_FILE_SEARCH_FORMAT L"%s%s*."  METADATA_FILE_EXTENSION
@@ -423,7 +423,7 @@ namespace UndockedRegFreeWinRT
         _COM_Outptr_opt_result_maybenull_ IMetaDataImport2** ppMetaDataImport,
         _Out_opt_ mdTypeDef* pmdTypeDef)
     {
-        HRESULT hr = HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE);
+        HRESULT hr = S_OK;
         UINT32 dwPackagesCount = 0;
         UINT32 dwBufferLength = 0;
 
@@ -431,6 +431,7 @@ namespace UndockedRegFreeWinRT
         hr = HRESULT_FROM_WIN32(GetCurrentPackageInfo(filter, &dwBufferLength, nullptr, &dwPackagesCount));
         // Only find the type if the it is a unpacakged app. Packaged apps can have their exe on their package graph, 
         // which will allow type resolution against adjacent WinMDs.
+        std::cout << "hr: " << hr << std::endl;
         if (hr == HRESULT_FROM_WIN32(APPMODEL_ERROR_NO_PACKAGE))
         {
             PCWSTR exeDir = nullptr;  // Never freed; owned by process global.
