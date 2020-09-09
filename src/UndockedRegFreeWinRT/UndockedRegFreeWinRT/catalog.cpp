@@ -216,7 +216,6 @@ HRESULT WinRTGetMetadataFile(
     // will create an instance of the metadata reader to dispense metadata files.
     if (metaDataDispenser == nullptr)
     {
-        RETURN_IF_FAILED(CoInitialize(nullptr));
         RETURN_IF_FAILED(CoCreateInstance(CLSID_CorMetaDataDispenser,
             nullptr,
             CLSCTX_INPROC,
