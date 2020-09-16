@@ -672,6 +672,63 @@ namespace py
     };
 
     template <>
+    struct converter<winrt::guid>
+    {
+        static PyObject* convert(winrt::guid value) noexcept
+        {
+            PyObject* valueAsBytes = PyBytes_FromStringAndSize((char*)&value, sizeof(value));
+            PyObject* uuidModule = PyImport_ImportModule("uuid");
+            PyObject* uuidClass = PyObject_GetAttrString(uuidModule, "UUID");
+            PyObject* args = PyTuple_New(0);
+            PyObject* kwargs = PyDict_New();
+            PyDict_SetItemString(kwargs,
+#if PY_LITTLE_ENDIAN
+                "bytes_le",
+#else
+                "bytes",
+#endif
+                valueAsBytes);
+            PyObject* uuidInstance = PyObject_Call(uuidClass, args, kwargs);
+            Py_DECREF(kwargs);
+            Py_DECREF(args);
+            Py_DECREF(uuidClass);
+            Py_DECREF(uuidModule);
+            Py_DECREF(valueAsBytes);
+            return uuidInstance;
+        }
+
+        static winrt::guid convert_to(PyObject* obj)
+        {
+            throw_if_pyobj_null(obj);
+
+            PyObject* bytes = PyObject_GetAttrString(obj,
+#if PY_LITTLE_ENDIAN
+                "bytes_le");
+#else
+                "bytes");
+#endif
+            if (bytes == NULL)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            winrt::guid result;
+            char* buffer;
+            Py_ssize_t size;
+            if (PyBytes_AsStringAndSize(bytes, &buffer, &size) == -1 || size != sizeof(result))
+            {
+                Py_DECREF(bytes);
+                throw winrt::hresult_invalid_argument();
+            }
+
+            memcpy(&result, buffer, size);
+            Py_DECREF(bytes);
+
+            return result;
+        }
+    };
+
+    template <>
     struct converter<winrt::Windows::Foundation::IInspectable>
     {
         static PyObject* convert(winrt::Windows::Foundation::IInspectable const& value) noexcept
