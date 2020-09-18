@@ -15,6 +15,7 @@
 #include "extwinrt.h"
 #include "TypeResolution.h"
 #include "iostream"
+
 #define WIN1019H1_BLDNUM 18362
 
 // Ensure that metadata resolution functions are imported so they can be detoured
