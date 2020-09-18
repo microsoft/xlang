@@ -7,6 +7,8 @@
 
 HRESULT WinRTLoadComponent(PCWSTR componentPath);
 
+HRESULT WinRTLoadEmbeddedComponent(std::string componentPath);
+
 HRESULT WinRTGetThreadingModel(
     HSTRING activatableClassId,
     ABI::Windows::Foundation::ThreadingType* threading_model);

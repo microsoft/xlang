@@ -14,7 +14,7 @@
 #include "catalog.h"
 #include "extwinrt.h"
 #include "TypeResolution.h"
-
+#include "iostream"
 #define WIN1019H1_BLDNUM 18362
 
 // Ensure that metadata resolution functions are imported so they can be detoured
@@ -349,14 +349,32 @@ void RemoveHooks()
     DetourTransactionCommit();
 }
 
+std::wstring s2ws(const std::string& s)
+{
+    int len;
+    int slength = (int)s.length() + 1;
+    len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+    wchar_t* buf = new wchar_t[len];
+    MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+    std::wstring wstr(buf);
+    delete[] buf;
+    return wstr;
+}
+
 HRESULT ExtRoLoadCatalog()
 {
     WCHAR filePath[MAX_PATH];
     GetModuleFileNameW(nullptr, filePath, _countof(filePath));
     std::wstring manifestPath(filePath);
+    std::wstring ass(filePath);
     manifestPath += L".manifest";
-
-    return WinRTLoadComponent(manifestPath.c_str());
+    HMODULE handle = LoadLibraryExW(ass.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(1), RT_MANIFEST);
+    HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
+    void* data = LockResource(embeddedManifest);
+    DWORD length = SizeofResource(NULL, hrsc);
+    std::string result = std::string((char*)data, length);
+    return WinRTLoadEmbeddedComponent(result);
 }
 
 

@@ -37,4 +37,7 @@
     <None Include="packages.config" />
     <None Include="directory.build.props" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="UndockedRegFreeWinRTTest.exe.manifest" />
+  </ItemGroup>
 </Project>
