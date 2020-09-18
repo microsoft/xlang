@@ -5,9 +5,11 @@
 #include "wil/result.h"
 #include "wil/resource.h"
 
-HRESULT WinRTLoadComponent(PCWSTR componentPath);
+HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath);
 
-HRESULT WinRTLoadEmbeddedComponent(std::string componentPath);
+HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue);
+
+HRESULT WinRTLoadComponent(IUnknown* pInput);
 
 HRESULT WinRTGetThreadingModel(
     HSTRING activatableClassId,

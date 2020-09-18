@@ -186,10 +186,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <!-- <ContentWithTargetPath Include="test_files\UndockedRegFreeWinRTTest.exe.manifest">
+    <ContentWithTargetPath Include="test_files\UndockedRegFreeWinRTTest.exe.manifest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>UndockedRegFreeWinRTTest.exe.manifest</TargetPath>
-    </ContentWithTargetPath> -->
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="test_files\UndockedRegFreeWinRTTest.exe.manifest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>UndockedRegFreeWinRTManagedTest.exe.manifest</TargetPath>

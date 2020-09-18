@@ -82,89 +82,32 @@ struct component
 
 static unordered_map<wstring, shared_ptr<component>> g_types;
 
-HRESULT WinRTLoadComponent(PCWSTR manifest_path)
+HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
 {
     ComPtr<IStream> fileStream;
-    ComPtr<IXmlReader> xmlReader;
-    XmlNodeType nodeType;
-    LPCWSTR localName = nullptr;
-    LPCWSTR fileName = nullptr;
-    auto locale = _create_locale(LC_ALL, "C");
-
-    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifest_path, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
-    RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
-    RETURN_IF_FAILED(xmlReader->SetInput(fileStream.Get()));
-    while (S_OK == xmlReader->Read(&nodeType))
-    {
-        if (nodeType == XmlNodeType_Element)
-        {
-            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
-
-            if (_wcsicmp_l(localName, L"file", locale) == 0)
-            {
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
-            }
-            if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
-            {
-                auto this_component = make_shared<component>();
-                this_component->module_name = fileName;
-
-                const WCHAR* threadingModel;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
-
-                if (_wcsicmp_l(L"sta", threadingModel, locale) == 0)
-                {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
-                }
-                else if (_wcsicmp_l(L"mta", threadingModel, locale) == 0)
-                {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
-                }
-                else if (_wcsicmp_l(L"both", threadingModel, locale) == 0)
-                {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
-                }
-                else
-                {
-                    return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
-                }
-
-                const WCHAR* xmlns;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"xmlns", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&xmlns, nullptr));
-                this_component->xmlns = xmlns;
-
-                const WCHAR* activatableClass;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&activatableClass, nullptr));
-                g_types[activatableClass] = this_component;
-            }
-        }
-    }
-
-    return S_OK;
+    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifestPath, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
+    return WinRTLoadComponent(fileStream.Get());;
 }
 
-HRESULT WinRTLoadEmbeddedComponent(std::string manifest)
+HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
 {
-    XmlNodeType nodeType;
-    LPCWSTR localName = nullptr;
-    LPCWSTR fileName = nullptr;
-    auto locale = _create_locale(LC_ALL, "C");
-    PCSTR xmlStringValue = manifest.c_str();
     ComPtr<IStream> xmlStream = nullptr;
     xmlStream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(xmlStringValue), strlen(xmlStringValue) * sizeof(CHAR)));
     RETURN_HR_IF_NULL(E_OUTOFMEMORY, xmlStream);
-    ComPtr<IXmlReader> xmlReader;
     ComPtr<IXmlReaderInput> xmlReaderInput;
-    //ComPtr<IStream> fileStream = SHCreateMemStream(nullptr, 0);
-    //RETURN_IF_FAILED(fileStream->Write(manifest.c_str(), std::strlen(manifest.c_str()), nullptr));
+    RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));\
+    return WinRTLoadComponent(xmlReaderInput.Get());
+}
+
+HRESULT WinRTLoadComponent(IUnknown* input)
+{
+    XmlNodeType nodeType;
+    LPCWSTR localName = nullptr;
+    LPCWSTR fileName = nullptr;
+    auto locale = _create_locale(LC_ALL, "C");
+    ComPtr<IXmlReader> xmlReader;
     RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
-    RETURN_IF_FAILED(xmlReader->SetProperty(XmlReaderProperty_DtdProcessing, DtdProcessing_Prohibit));
-    RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));
-    RETURN_IF_FAILED(xmlReader->SetInput(xmlReaderInput.Get()));
+    RETURN_IF_FAILED(xmlReader->SetInput(input));
     while (S_OK == xmlReader->Read(&nodeType))
     {
         if (nodeType == XmlNodeType_Element)

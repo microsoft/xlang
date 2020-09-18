@@ -367,15 +367,17 @@ HRESULT ExtRoLoadCatalog()
     WCHAR filePath[MAX_PATH];
     GetModuleFileNameW(nullptr, filePath, _countof(filePath));
     std::wstring manifestPath(filePath);
-    std::wstring ass(filePath);
+/*    std::wstring ass(filePath);
     manifestPath += L".manifest";
-    HMODULE handle = LoadLibraryExW(ass.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+    return WinRTLoadComponentFromFilePath(manifestPath.c_str())*/;
+
+    HMODULE handle = LoadLibraryExW(manifestPath.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
     HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(1), RT_MANIFEST);
     HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
     void* data = LockResource(embeddedManifest);
     DWORD length = SizeofResource(NULL, hrsc);
     std::string result = std::string((char*)data, length);
-    return WinRTLoadEmbeddedComponent(result);
+    return WinRTLoadComponentFromString(result.c_str());
 }
 
 
