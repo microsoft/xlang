@@ -362,24 +362,51 @@ std::wstring s2ws(const std::string& s)
     return wstr;
 }
 
+HRESULT LoadFromSxSManifest(PCWSTR path)
+{
+    return WinRTLoadComponentFromFilePath(path);
+}
+
+HRESULT LoadFromEmbeddedManifest(PCWSTR path)
+{
+    HMODULE handle = LoadLibraryExW(path, nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+    if (!handle)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(1), RT_MANIFEST);
+    if (!hrsc)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
+    if (!embeddedManifest)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    DWORD length = SizeofResource(NULL, hrsc);
+    void* data = LockResource(embeddedManifest);
+    if (!data)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    std::string result = std::string((char*)data, length);
+    return WinRTLoadComponentFromString(result.c_str());
+}
+
 HRESULT ExtRoLoadCatalog()
 {
     WCHAR filePath[MAX_PATH];
     GetModuleFileNameW(nullptr, filePath, _countof(filePath));
     std::wstring manifestPath(filePath);
-/*    std::wstring ass(filePath);
-    manifestPath += L".manifest";
-    return WinRTLoadComponentFromFilePath(manifestPath.c_str())*/;
-
-    HMODULE handle = LoadLibraryExW(manifestPath.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
-    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(1), RT_MANIFEST);
-    HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
-    void* data = LockResource(embeddedManifest);
-    DWORD length = SizeofResource(NULL, hrsc);
-    std::string result = std::string((char*)data, length);
-    return WinRTLoadComponentFromString(result.c_str());
+    HRESULT hr = LoadFromEmbeddedManifest(manifestPath.c_str());
+    if (hr == ERROR_FILE_NOT_FOUND)
+    {
+        manifestPath += L".manifest";
+        return LoadFromSxSManifest(manifestPath.c_str());
+    }
+    return hr;
 }
-
 
 BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 {

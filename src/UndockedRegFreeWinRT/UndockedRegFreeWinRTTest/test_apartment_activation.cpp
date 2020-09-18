@@ -18,7 +18,7 @@ using namespace Microsoft::WRL::Wrappers;
 
 TEST_CASE("Undocked Regfree WinRT Activation")
 {
-    RegFreeWinRTInitializeForTest();
+    //RegFreeWinRTInitializeForTest();
 
     SECTION("Both To Current STA")
     {
@@ -69,5 +69,5 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
-    RegFreeWinRTUninitializeForTest();
+    //RegFreeWinRTUninitializeForTest();
 }
