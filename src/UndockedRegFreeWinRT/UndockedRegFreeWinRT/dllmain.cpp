@@ -14,7 +14,6 @@
 #include "catalog.h"
 #include "extwinrt.h"
 #include "TypeResolution.h"
-#include "iostream"
 
 #define WIN1019H1_BLDNUM 18362
 
