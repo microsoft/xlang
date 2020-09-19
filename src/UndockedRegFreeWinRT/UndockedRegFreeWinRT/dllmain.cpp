@@ -349,16 +349,51 @@ void RemoveHooks()
     DetourTransactionCommit();
 }
 
+HRESULT LoadFromSxSManifest(PCWSTR path)
+{
+    return WinRTLoadComponentFromFilePath(path);
+}
+
+HRESULT LoadFromEmbeddedManifest(PCWSTR path)
+{
+    HMODULE handle = LoadLibraryExW(path, nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+    if (!handle)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(1), RT_MANIFEST);
+    if (!hrsc)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
+    if (!embeddedManifest)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    DWORD length = SizeofResource(NULL, hrsc);
+    void* data = LockResource(embeddedManifest);
+    if (!data)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    std::string result = std::string((char*)data, length);
+    return WinRTLoadComponentFromString(result.c_str());
+}
+
 HRESULT ExtRoLoadCatalog()
 {
     WCHAR filePath[MAX_PATH];
     GetModuleFileNameW(nullptr, filePath, _countof(filePath));
     std::wstring manifestPath(filePath);
-    manifestPath += L".manifest";
-
-    return WinRTLoadComponent(manifestPath.c_str());
+    HRESULT hr = LoadFromEmbeddedManifest(manifestPath.c_str());
+    if (hr == ERROR_FILE_NOT_FOUND)
+    {
+        manifestPath += L".manifest";
+        return LoadFromSxSManifest(manifestPath.c_str());
+    }
+    return hr;
 }
-
 
 BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 {
@@ -377,19 +412,6 @@ BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
         RemoveHooks();
     }
     return true;
-}
-
-HRESULT WINAPI RegFreeWinRTInitializeForTest()
-{
-    InstallHooks();
-    ExtRoLoadCatalog();
-    return S_OK;
-}
-
-HRESULT WINAPI RegFreeWinRTUninitializeForTest()
-{
-    RemoveHooks();
-    return S_OK;
 }
 
 extern "C" void WINAPI winrtact_Initialize()

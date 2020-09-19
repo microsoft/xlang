@@ -82,18 +82,32 @@ struct component
 
 static unordered_map<wstring, shared_ptr<component>> g_types;
 
-HRESULT WinRTLoadComponent(PCWSTR manifest_path)
+HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
 {
     ComPtr<IStream> fileStream;
-    ComPtr<IXmlReader> xmlReader;
+    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifestPath, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
+    return WinRTLoadComponent(fileStream.Get());;
+}
+
+HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
+{
+    ComPtr<IStream> xmlStream = nullptr;
+    xmlStream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(xmlStringValue), strlen(xmlStringValue) * sizeof(CHAR)));
+    RETURN_HR_IF_NULL(E_OUTOFMEMORY, xmlStream);
+    ComPtr<IXmlReaderInput> xmlReaderInput;
+    RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));\
+    return WinRTLoadComponent(xmlReaderInput.Get());
+}
+
+HRESULT WinRTLoadComponent(IUnknown* input)
+{
     XmlNodeType nodeType;
     LPCWSTR localName = nullptr;
     LPCWSTR fileName = nullptr;
     auto locale = _create_locale(LC_ALL, "C");
-
-    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifest_path, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
+    ComPtr<IXmlReader> xmlReader;
     RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
-    RETURN_IF_FAILED(xmlReader->SetInput(fileStream.Get()));
+    RETURN_IF_FAILED(xmlReader->SetInput(input));
     while (S_OK == xmlReader->Read(&nodeType))
     {
         if (nodeType == XmlNodeType_Element)
