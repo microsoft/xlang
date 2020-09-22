@@ -26,6 +26,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndockedRegFreeWinRTManaged
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EmbeddedManifestTest", "EmbeddedManifestTest\EmbeddedManifestTest.vcxproj", "{48786E53-ACFE-4B61-A739-A9CF366C85DC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EmbeddedTestComponent", "EmbeddedTestComponent\EmbeddedTestComponent.vcxproj", "{5893A945-2C61-4CF5-A433-2FD1A0D04E09}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,20 @@ Global
 		{48786E53-ACFE-4B61-A739-A9CF366C85DC}.Release|x64.Build.0 = Release|x64
 		{48786E53-ACFE-4B61-A739-A9CF366C85DC}.Release|x86.ActiveCfg = Release|Win32
 		{48786E53-ACFE-4B61-A739-A9CF366C85DC}.Release|x86.Build.0 = Release|Win32
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Debug|ARM.ActiveCfg = Debug|ARM
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Debug|ARM.Build.0 = Debug|ARM
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Debug|x64.ActiveCfg = Debug|x64
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Debug|x64.Build.0 = Debug|x64
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Debug|x86.ActiveCfg = Debug|Win32
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Debug|x86.Build.0 = Debug|Win32
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Release|Any CPU.ActiveCfg = Release|Win32
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Release|ARM.ActiveCfg = Release|ARM
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Release|ARM.Build.0 = Release|ARM
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Release|x64.ActiveCfg = Release|x64
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Release|x64.Build.0 = Release|x64
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Release|x86.ActiveCfg = Release|Win32
+		{5893A945-2C61-4CF5-A433-2FD1A0D04E09}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
