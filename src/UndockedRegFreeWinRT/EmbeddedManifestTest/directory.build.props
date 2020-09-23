@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TestComponent\TestComponent.vcxproj" />
+    <ProjectReference Include="..\EmbeddedTestComponent\EmbeddedTestComponent.vcxproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 </Project>
