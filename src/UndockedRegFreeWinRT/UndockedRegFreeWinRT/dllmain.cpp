@@ -349,38 +349,6 @@ void RemoveHooks()
     DetourTransactionCommit();
 }
 
-HRESULT LoadFromSxSManifest(PCWSTR path)
-{
-    return WinRTLoadComponentFromFilePath(path);
-}
-
-HRESULT LoadFromEmbeddedManifest(PCWSTR path)
-{
-    HMODULE handle = LoadLibraryExW(path, nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
-    if (!handle)
-    {
-        return ERROR_FILE_NOT_FOUND;
-    }
-    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(1), RT_MANIFEST);
-    if (!hrsc)
-    {
-        return ERROR_FILE_NOT_FOUND;
-    }
-    HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
-    if (!embeddedManifest)
-    {
-        return ERROR_FILE_NOT_FOUND;
-    }
-    DWORD length = SizeofResource(NULL, hrsc);
-    void* data = LockResource(embeddedManifest);
-    if (!data)
-    {
-        return ERROR_FILE_NOT_FOUND;
-    }
-    std::string result = std::string((char*)data, length);
-    return WinRTLoadComponentFromString(result.c_str());
-}
-
 HRESULT ExtRoLoadCatalog()
 {
     WCHAR filePath[MAX_PATH];

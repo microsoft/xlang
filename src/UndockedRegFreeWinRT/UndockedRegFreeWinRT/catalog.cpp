@@ -82,11 +82,63 @@ struct component
 
 static unordered_map<wstring, shared_ptr<component>> g_types;
 
+HRESULT LoadFromSxSManifest(std::wstring path)
+{
+    return WinRTLoadComponentFromFilePath(path.c_str());
+}
+
+HRESULT LoadFromEmbeddedManifest(std::wstring path)
+{
+    int resource = 0;
+    if (path.size() < 4)
+    {
+        return COR_E_ARGUMENT;
+    }
+    std::wstring ext = path.substr(path.size() - 4, path.size());
+    if (ext.compare(L".exe") == 0)
+    {
+        resource = 1;
+    }
+    else if (ext.compare(L".dll") == 0)
+    {
+        resource = 2;
+    }
+    else
+    {
+        return COR_E_ARGUMENT;
+    }
+
+    HMODULE handle = LoadLibraryExW(path.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+    if (!handle)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+
+    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(resource), RT_MANIFEST);
+    if (!hrsc)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
+    if (!embeddedManifest)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    DWORD length = SizeofResource(handle, hrsc);
+    void* data = LockResource(embeddedManifest);
+    if (!data)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    std::string result = std::string((char*)data, length);
+    return WinRTLoadComponentFromString(result.c_str());
+}
+
 HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
 {
     ComPtr<IStream> fileStream;
     RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifestPath, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
-    return WinRTLoadComponent(fileStream.Get());;
+    return ParseXmlReaderManfestInput(fileStream.Get());;
 }
 
 HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
@@ -96,14 +148,13 @@ HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
     RETURN_HR_IF_NULL(E_OUTOFMEMORY, xmlStream);
     ComPtr<IXmlReaderInput> xmlReaderInput;
     RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));\
-    return WinRTLoadComponent(xmlReaderInput.Get());
+    return ParseXmlReaderManfestInput(xmlReaderInput.Get());
 }
 
-HRESULT WinRTLoadComponent(IUnknown* input)
+HRESULT ParseXmlReaderManfestInput(IUnknown* input)
 {
     XmlNodeType nodeType;
     LPCWSTR localName = nullptr;
-    LPCWSTR fileName = nullptr;
     auto locale = _create_locale(LC_ALL, "C");
     ComPtr<IXmlReader> xmlReader;
     RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
@@ -116,9 +167,32 @@ HRESULT WinRTLoadComponent(IUnknown* input)
 
             if (_wcsicmp_l(localName, L"file", locale) == 0)
             {
+                LPCWSTR fileName = nullptr;
                 RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
                 RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
+                ParseFileTag(xmlReader, fileName);
             }
+          
+            if (_wcsicmp_l(localName, L"dependentAssembly", locale) == 0)
+            {
+                ParseDependentAssemblyTag(xmlReader);
+            }
+        }
+    }
+
+    return S_OK;
+}
+
+HRESULT ParseFileTag(ComPtr<IXmlReader> xmlReader, LPCWSTR fileName)
+{
+    XmlNodeType nodeType;
+    LPCWSTR localName = nullptr;
+    auto locale = _create_locale(LC_ALL, "C");
+    while (S_OK == xmlReader->Read(&nodeType))
+    {
+        if (nodeType == XmlNodeType_Element)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
             if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
             {
                 auto this_component = make_shared<component>();
@@ -156,8 +230,51 @@ HRESULT WinRTLoadComponent(IUnknown* input)
                 g_types[activatableClass] = this_component;
             }
         }
+        else if (nodeType == XmlNodeType_EndElement)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (_wcsicmp_l(localName, L"file", locale) == 0)
+            {
+                return S_OK;
+            }
+        }
     }
+    return S_OK;
+}
 
+HRESULT ParseDependentAssemblyTag(ComPtr<IXmlReader> xmlReader)
+{
+    XmlNodeType nodeType;
+    LPCWSTR localName = nullptr;
+    auto locale = _create_locale(LC_ALL, "C");
+    while (S_OK == xmlReader->Read(&nodeType))
+    {
+        if (nodeType == XmlNodeType_Element)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (_wcsicmp_l(localName, L"assemblyIdentity", locale) == 0)
+            {
+                LPCWSTR dependentAssemblyFileName = nullptr;
+                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
+                RETURN_IF_FAILED(xmlReader->GetValue(&dependentAssemblyFileName, nullptr));
+                PCWSTR exeFilePath = nullptr;
+                UndockedRegFreeWinRT::GetProcessExeDir(&exeFilePath);
+                std::wstring path = exeFilePath;
+                path += L"\\";
+                path += dependentAssemblyFileName;
+                path += L".dll";
+                RETURN_IF_FAILED(LoadFromEmbeddedManifest(path));
+            }
+        }
+        else if (nodeType == XmlNodeType_EndElement)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (_wcsicmp_l(localName, L"dependentAssembly", locale) == 0)
+            {
+                return S_OK;
+            }
+        }
+    }
     return S_OK;
 }
 

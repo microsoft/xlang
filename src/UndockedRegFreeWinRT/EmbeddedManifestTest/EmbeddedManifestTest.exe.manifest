@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity
+      type="win32"
+      name="EmbeddedManifestTest"
+      version="1.0.0.0" />
   <file name="TestComponent.dll">
     <activatableClass
         name="TestComponent.ClassBoth"
@@ -14,4 +18,10 @@
         threadingModel="mta"
         xmlns="urn:schemas-microsoft-com:winrt.v1" />
   </file>
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity
+          type='win32' name="EmbeddedTestComponent" version="1.0.0.0" />
+    </dependentAssembly>
+  </dependency>
 </assembly>

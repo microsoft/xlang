@@ -1,3 +1,5 @@
+#define ISOLATION_AWARE_ENABLED 1
+
 #include "pch.h"
 #include <iostream>
 
