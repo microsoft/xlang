@@ -21,6 +21,10 @@ HRESULT ParseFileTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader, LPCWSTR fileN
 
 HRESULT ParseDependentAssemblyTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
 
+HRESULT ParseActivatableClassTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader, LPCWSTR fileName);
+
+HRESULT ParseAssemblyIdentityTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
+
 HRESULT WinRTGetThreadingModel(
     HSTRING activatableClassId,
     ABI::Windows::Foundation::ThreadingType* threading_model);
