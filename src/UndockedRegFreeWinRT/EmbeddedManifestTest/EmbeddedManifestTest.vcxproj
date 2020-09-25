@@ -177,7 +177,6 @@
     <ClCompile Include="embedded_manifest_test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="catch.hpp" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
