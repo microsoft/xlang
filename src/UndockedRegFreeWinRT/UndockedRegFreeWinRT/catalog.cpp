@@ -347,6 +347,52 @@ HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader)
     {
         return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
     }
+    return SearchAssembly(dependentAssemblyFileName);
+}
+
+
+HRESULT SearchAssembly(std::wstring dependentAssemblyFileName)
+{
+    // Following the pattern in https://docs.microsoft.com/en-us/windows/win32/sbscs/assembly-searching-sequence
+    // RegFree also does not support looking in winSxS folder
+    HRESULT hr = S_OK;
+    wchar_t buffer[2048];
+    unsigned long cchBuffer = ARRAYSIZE(buffer);
+    unsigned long cLanguages;
+    GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &cLanguages, buffer, &cchBuffer);
+    std::wstring lang = buffer;
+    // Search for the preferred UI language
+    hr = SearchAssembly(dependentAssemblyFileName, lang);
+    if (hr == S_OK)
+    {
+        return hr;
+    }
+    if (hr == COR_E_FILENOTFOUND || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND))
+    {
+        hr = SearchAssembly(dependentAssemblyFileName, lang.substr(0, 2));
+        if (hr == S_OK)
+        {
+            return hr;
+        }
+    }
+    // This wasn't clear in the docs but it seems to fallback to en-US first
+    if (lang != L"en-US")
+    {
+        hr = SearchAssembly(dependentAssemblyFileName, L"en-US");
+        if (hr == S_OK)
+        {
+            return hr;
+        }
+        if (hr == COR_E_FILENOTFOUND || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND))
+        {
+            hr = SearchAssembly(dependentAssemblyFileName, L"en");
+            if (hr == S_OK)
+            {
+                return hr;
+            }
+        }
+    }
+    // Finally search for a no language version
     return SearchAssembly(dependentAssemblyFileName, L"");
 }
 
@@ -360,9 +406,6 @@ HRESULT SearchAssembly(std::wstring dependentAssemblyFileName, std::wstring lang
     PCWSTR exeFilePath = nullptr;
     UndockedRegFreeWinRT::GetProcessExeDir(&exeFilePath);
     std::wstring path = std::wstring(exeFilePath) + L"\\" + lang;
-
-    // Following the pattern in https://docs.microsoft.com/en-us/windows/win32/sbscs/assembly-searching-sequence
-    // RegFree also does not support looking in winSxS folder
     std::wstring dllPath = path + dependentAssemblyFileName + L".dll";
     hr = LoadFromEmbeddedManifest(dllPath);
     if (hr == ERROR_FILE_NOT_FOUND)
@@ -370,7 +413,7 @@ HRESULT SearchAssembly(std::wstring dependentAssemblyFileName, std::wstring lang
         std::wstring sxsManifestPath = path + dependentAssemblyFileName + L".manifest";
         hr = LoadFromSxSManifest(sxsManifestPath.c_str());
 
-        if (hr == COR_E_FILENOTFOUND)
+        if (hr == COR_E_FILENOTFOUND || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND))
         {
             std::wstring dllPathWithAssemblyFolder
                 = path + dependentAssemblyFileName + L"\\" + dependentAssemblyFileName + L".dll";
@@ -379,10 +422,11 @@ HRESULT SearchAssembly(std::wstring dependentAssemblyFileName, std::wstring lang
             if (hr == ERROR_FILE_NOT_FOUND)
             {
                 std::wstring sxsManifestPathWithAssemblyFolder = path + dependentAssemblyFileName + L"\\" + dependentAssemblyFileName + L".manifest";
-                RETURN_IF_FAILED(LoadFromSxSManifest(sxsManifestPathWithAssemblyFolder.c_str()));
+                hr = LoadFromSxSManifest(sxsManifestPathWithAssemblyFolder.c_str());
             }
         }
     }
+    return hr;
 }
 
 HRESULT WinRTGetThreadingModel(HSTRING activatableClassId, ABI::Windows::Foundation::ThreadingType* threading_model)
