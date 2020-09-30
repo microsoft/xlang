@@ -105,6 +105,14 @@ TEST_CASE("Manifest Parser")
         REQUIRE(component_iter->second->module_name == L"sub.dll");
     }
 
+    SECTION("Circular Dependent Assembly")
+    {
+        // If there is a circular dependent assembly, we are not failing completely. 
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\validateDependentManifestCircular.root.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == S_OK);
+        REQUIRE(g_types.size() == 1);
+    }
+
     //Failures
     SECTION("Negative Missing ThreadingModel")
     {

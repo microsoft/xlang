@@ -11,6 +11,7 @@
 #include <comutil.h>
 #include <fstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <codecvt>
 #include <locale>
 #include <RoMetadataApi.h>
@@ -81,6 +82,7 @@ struct component
 };
 
 static unordered_map<wstring, shared_ptr<component>> g_types;
+static unordered_set<wstring> g_assemblies;
 
 HRESULT LoadFromSxSManifest(std::wstring path)
 {
@@ -139,7 +141,7 @@ HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
 {
     ComPtr<IStream> fileStream;
     RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifestPath, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
-    return ParseXmlReaderManfestInput(fileStream.Get());;
+    return ParseRootXmlReaderManfestInput(fileStream.Get());;
 }
 
 HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
@@ -149,10 +151,10 @@ HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
     RETURN_HR_IF_NULL(E_OUTOFMEMORY, xmlStream);
     ComPtr<IXmlReaderInput> xmlReaderInput;
     RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));\
-    return ParseXmlReaderManfestInput(xmlReaderInput.Get());
+    return ParseRootXmlReaderManfestInput(xmlReaderInput.Get());
 }
 
-HRESULT ParseXmlReaderManfestInput(IUnknown* input)
+HRESULT ParseRootXmlReaderManfestInput(IUnknown* input)
 {
     XmlNodeType nodeType;
     LPCWSTR localName = nullptr;
@@ -166,8 +168,14 @@ HRESULT ParseXmlReaderManfestInput(IUnknown* input)
         {
             RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
 
+            if (_wcsicmp_l(localName, L"assemblyIdentity", locale) == 0)
+            {
+                RETURN_IF_FAILED(ParseAssemblyIdentityTag(xmlReader, false));
+            }
+
             if (_wcsicmp_l(localName, L"file", locale) == 0)
             {
+
                 RETURN_IF_FAILED(ParseFileTag(xmlReader));
             }
           
@@ -227,7 +235,7 @@ HRESULT ParseActivatableClassTag(ComPtr<IXmlReader> xmlReader, LPCWSTR fileName)
     auto this_component = make_shared<component>();
     this_component->module_name = fileName;
     HRESULT hr = xmlReader->MoveToFirstAttribute();
-    // Using this pattern intead of MoveToAttributeByName improves performance
+    // Using this pattern intead of calling multiple MoveToAttributeByName improves performance
     const WCHAR* activatableClass = nullptr;
     const WCHAR* threadingModel = nullptr;
     const WCHAR* xmlns = nullptr;
@@ -318,7 +326,7 @@ HRESULT ParseDependentAssemblyTag(ComPtr<IXmlReader> xmlReader)
             RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
             if (_wcsicmp_l(localName, L"assemblyIdentity", locale) == 0)
             {
-                RETURN_IF_FAILED(ParseAssemblyIdentityTag(xmlReader));
+                RETURN_IF_FAILED(ParseAssemblyIdentityTag(xmlReader, true));
             }
         }
         else if (nodeType == XmlNodeType_EndElement)
@@ -333,7 +341,7 @@ HRESULT ParseDependentAssemblyTag(ComPtr<IXmlReader> xmlReader)
     return S_OK;
 }
 
-HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader)
+HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader, bool searchDependentAssembly)
 {
     HRESULT hr = S_OK;
     LPCWSTR dependentAssemblyFileName = nullptr;
@@ -347,7 +355,20 @@ HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader)
     {
         return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
     }
-    return SearchAssembly(dependentAssemblyFileName);
+    // Look out for assemblies that have already been parsed so we don't have circular dependencies
+    auto itr = g_assemblies.find(dependentAssemblyFileName);
+    if (itr != g_assemblies.end())
+    {
+        return S_OK; // We've already look through this assembly, no need to look insert or search for it again. 
+    }
+    g_assemblies.insert(dependentAssemblyFileName);;
+    if (searchDependentAssembly)
+    {
+        // Don't fail if we don't find the assembly, in the realworld, manifests may have 
+        // dependentAssembly ref to WinSxS assemblies which this code won't find.
+        SearchAssembly(dependentAssemblyFileName);
+    }
+    return hr;
 }
 
 
@@ -362,14 +383,14 @@ HRESULT SearchAssembly(std::wstring dependentAssemblyFileName)
     GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &cLanguages, buffer, &cchBuffer);
     std::wstring lang = buffer;
     // Search for the preferred UI language
-    hr = SearchAssembly(dependentAssemblyFileName, lang);
+    hr = SearchAssemblyWithLang(dependentAssemblyFileName, lang);
     if (hr == S_OK)
     {
         return hr;
     }
     if (hr == COR_E_FILENOTFOUND || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND))
     {
-        hr = SearchAssembly(dependentAssemblyFileName, lang.substr(0, 2));
+        hr = SearchAssemblyWithLang(dependentAssemblyFileName, lang.substr(0, 2));
         if (hr == S_OK)
         {
             return hr;
@@ -378,14 +399,14 @@ HRESULT SearchAssembly(std::wstring dependentAssemblyFileName)
     // This wasn't clear in the docs but it seems to fallback to en-US first
     if (lang != L"en-US")
     {
-        hr = SearchAssembly(dependentAssemblyFileName, L"en-US");
+        hr = SearchAssemblyWithLang(dependentAssemblyFileName, L"en-US");
         if (hr == S_OK)
         {
             return hr;
         }
         if (hr == COR_E_FILENOTFOUND || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND))
         {
-            hr = SearchAssembly(dependentAssemblyFileName, L"en");
+            hr = SearchAssemblyWithLang(dependentAssemblyFileName, L"en");
             if (hr == S_OK)
             {
                 return hr;
@@ -393,10 +414,10 @@ HRESULT SearchAssembly(std::wstring dependentAssemblyFileName)
         }
     }
     // Finally search for a no language version
-    return SearchAssembly(dependentAssemblyFileName, L"");
+    return SearchAssemblyWithLang(dependentAssemblyFileName, L"");
 }
 
-HRESULT SearchAssembly(std::wstring dependentAssemblyFileName, std::wstring lang)
+HRESULT SearchAssemblyWithLang(std::wstring dependentAssemblyFileName, std::wstring lang)
 {
     if (!lang.empty())
     {

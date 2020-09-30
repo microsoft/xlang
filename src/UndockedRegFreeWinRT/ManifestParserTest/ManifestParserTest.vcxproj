@@ -200,21 +200,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>validateDependentManifestMix.sub2.manifest</TargetPath>
     </ContentWithTargetPath>
-    <ContentWithTargetPath Include="validateDllPathLayout.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>validateDllPathLayout.manifest</TargetPath>
-    </ContentWithTargetPath>
     <ContentWithTargetPath Include="winrtActivation.dll1.manifest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>winrtActivation.dll1.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="winrtActivation.dll2.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>winrtActivation.dll2.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="winrtActivation.merged.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>winrtActivation.merged.manifest</TargetPath>
     </ContentWithTargetPath>
     <ContentWithTargetPath Include="basicParse.negative.missingFileName.manifest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -231,6 +219,10 @@
     <ContentWithTargetPath Include="validateDependentManifestAssemblyHuntSequence.sub.manifest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>validateDependentManifestAssemblyHuntSequence.sub/validateDependentManifestAssemblyHuntSequence.sub.manifest</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="validateDependentManifestCircular.root.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>validateDependentManifestCircular.root.manifest</TargetPath>
     </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>

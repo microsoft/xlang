@@ -15,7 +15,7 @@ HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath);
 
 HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue);
 
-HRESULT ParseXmlReaderManfestInput(IUnknown* pInput);
+HRESULT ParseRootXmlReaderManfestInput(IUnknown* pInput);
 
 HRESULT ParseFileTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
 
@@ -23,11 +23,11 @@ HRESULT ParseDependentAssemblyTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
 
 HRESULT ParseActivatableClassTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader, LPCWSTR fileName);
 
-HRESULT ParseAssemblyIdentityTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
+HRESULT ParseAssemblyIdentityTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader, bool searchDependentAssembly);
 
 HRESULT SearchAssembly(std::wstring dependentAssemblyFileName);
 
-HRESULT SearchAssembly(std::wstring dependentAssemblyFileName, std::wstring lang);
+HRESULT SearchAssemblyWithLang(std::wstring dependentAssemblyFileName, std::wstring lang);
 
 HRESULT WinRTGetThreadingModel(
     HSTRING activatableClassId,
