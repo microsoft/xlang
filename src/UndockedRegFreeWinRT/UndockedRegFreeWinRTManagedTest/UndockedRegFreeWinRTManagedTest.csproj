@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\mwinrtact\mwinrtact.csproj" />
     <ProjectReference Include="..\TestComponent\TestComponent.vcxproj" />
     <ProjectReference Include="..\UndockedRegFreeWinRT\UndockedRegFreeWinRT.vcxproj" />
   </ItemGroup>
