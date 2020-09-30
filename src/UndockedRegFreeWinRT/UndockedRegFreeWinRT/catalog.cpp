@@ -168,10 +168,7 @@ HRESULT ParseXmlReaderManfestInput(IUnknown* input)
 
             if (_wcsicmp_l(localName, L"file", locale) == 0)
             {
-                LPCWSTR fileName = nullptr;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
-                ParseFileTag(xmlReader, fileName);
+                ParseFileTag(xmlReader);
             }
           
             if (_wcsicmp_l(localName, L"dependentAssembly", locale) == 0)
@@ -184,10 +181,13 @@ HRESULT ParseXmlReaderManfestInput(IUnknown* input)
     return S_OK;
 }
 
-HRESULT ParseFileTag(ComPtr<IXmlReader> xmlReader, LPCWSTR fileName)
+HRESULT ParseFileTag(ComPtr<IXmlReader> xmlReader)
 {
     XmlNodeType nodeType;
     LPCWSTR localName = nullptr;
+    LPCWSTR fileName = nullptr;
+    RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
+    RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
     auto locale = _create_locale(LC_ALL, "C");
     while (S_OK == xmlReader->Read(&nodeType))
     {
@@ -289,11 +289,15 @@ HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader)
     }
     PCWSTR exeFilePath = nullptr;
     UndockedRegFreeWinRT::GetProcessExeDir(&exeFilePath);
-    std::wstring path = exeFilePath;
-    path += L"\\";
-    path += dependentAssemblyFileName;
-    path += L".dll";
-    RETURN_IF_FAILED(LoadFromEmbeddedManifest(path));
+    std::wstring path = std::wstring(exeFilePath) + L"\\";
+    std::wstring dllPath = path + std::wstring(dependentAssemblyFileName) + L".dll";
+    HRESULT hr = LoadFromEmbeddedManifest(dllPath);
+    if (hr == ERROR_FILE_NOT_FOUND)
+    {
+        std::wstring sxsManifestPath = path + std::wstring(dependentAssemblyFileName) + L".manifest";
+        return LoadFromSxSManifest(sxsManifestPath.c_str());
+    }
+    return hr;
 }
 
 HRESULT WinRTGetThreadingModel(HSTRING activatableClassId, ABI::Windows::Foundation::ThreadingType* threading_model)
