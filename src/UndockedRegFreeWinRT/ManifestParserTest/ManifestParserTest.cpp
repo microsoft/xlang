@@ -1,16 +1,9 @@
-// ManifestParserTest.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include "..\UndockedRegFreeWinRT\catalog.h"
 #include "..\UndockedRegFreeWinRT\catalog.cpp"
 #include "..\UndockedRegFreeWinRT\typeresolution.h"
 #include "..\UndockedRegFreeWinRT\typeresolution.cpp"
 #include "pch.h"
-
-#define RegFreeWinrtInprocComponents1 L"RegFreeWinrtInprocComponents.1.dll"
-#define FakeDllName L"FakeDllName.dll"
-#define OtherFakeDllName L"OtherFakeDllName.dll"
 
 TEST_CASE("Manifest Parser")
 {
@@ -21,7 +14,7 @@ TEST_CASE("Manifest Parser")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\winrtActivation.dll1.manifest";
         REQUIRE(LoadFromSxSManifest(manifest.c_str()) == S_OK);
-        std::wstring moduleName = RegFreeWinrtInprocComponents1;
+        std::wstring moduleName = L"RegFreeWinrtInprocComponents.1.dll";
         REQUIRE(g_types.size() == 4);
         auto component_iter = g_types.find(L"RegFreeWinrt.1.threading_both");
         REQUIRE(component_iter != g_types.end());
@@ -43,11 +36,12 @@ TEST_CASE("Manifest Parser")
         REQUIRE(component_iter->second->module_name == moduleName);
         REQUIRE(component_iter->second->threading_model == ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH);
     }
+
     SECTION("Multiple file")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.Positive.manifest";
         REQUIRE(LoadFromSxSManifest(manifest.c_str()) == S_OK);
-        std::wstring moduleName = FakeDllName;
+        std::wstring moduleName = L"FakeDllName.dll";
         REQUIRE(g_types.size() == 6);
         auto component_iter = g_types.find(L"FakeActivatableClass");
         REQUIRE(component_iter != g_types.end());
@@ -65,7 +59,7 @@ TEST_CASE("Manifest Parser")
         REQUIRE(component_iter != g_types.end());
         REQUIRE(component_iter->second->module_name == moduleName);
 
-        moduleName = OtherFakeDllName;
+        moduleName = L"OtherFakeDllName.dll";
         component_iter = g_types.find(L"OtherFakeActivatableClass");
         REQUIRE(component_iter != g_types.end());
         REQUIRE(component_iter->second->module_name == moduleName);
@@ -74,6 +68,7 @@ TEST_CASE("Manifest Parser")
         REQUIRE(component_iter != g_types.end());
         REQUIRE(component_iter->second->module_name == moduleName);
     }
+
     SECTION("Dependent Assembly")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\validateDependentManifestMix.root.manifest";
@@ -94,5 +89,36 @@ TEST_CASE("Manifest Parser")
         component_iter = g_types.find(L"sub1_1ActivatableClass");
         REQUIRE(component_iter != g_types.end());
         REQUIRE(component_iter->second->module_name == L"sub1_1.dll");
+    }
+
+    //Failures
+    SECTION("Negative Missing ThreadingModel")
+    {
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.missingThreadingModel.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+    }
+
+    SECTION("Negative Missing Name")
+    {
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.missingName.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+    }
+
+    SECTION("Negative Invalid ThreadingModel")
+    {
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.invalidThreadingModel.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+    }
+    
+    SECTION("Negative Blank Name")
+    {
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.duplicateAcid.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_DUPLICATE_ACTIVATABLE_CLASS));
+    }
+
+    SECTION("Negative Blank Name")
+    {
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.blankName.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
 }

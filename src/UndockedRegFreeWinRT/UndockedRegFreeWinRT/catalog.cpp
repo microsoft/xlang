@@ -168,12 +168,12 @@ HRESULT ParseXmlReaderManfestInput(IUnknown* input)
 
             if (_wcsicmp_l(localName, L"file", locale) == 0)
             {
-                ParseFileTag(xmlReader);
+                RETURN_IF_FAILED(ParseFileTag(xmlReader));
             }
           
             if (_wcsicmp_l(localName, L"dependentAssembly", locale) == 0)
             {
-                ParseDependentAssemblyTag(xmlReader);
+                RETURN_IF_FAILED(ParseDependentAssemblyTag(xmlReader));
             }
         }
     }
@@ -189,6 +189,7 @@ HRESULT ParseFileTag(ComPtr<IXmlReader> xmlReader)
     RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
     RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
     auto locale = _create_locale(LC_ALL, "C");
+    HRESULT hr = S_OK;
     while (S_OK == xmlReader->Read(&nodeType))
     {
         if (nodeType == XmlNodeType_Element)
@@ -196,7 +197,7 @@ HRESULT ParseFileTag(ComPtr<IXmlReader> xmlReader)
             RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
             if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
             {
-                ParseActivatableClassTag(xmlReader, fileName);
+                RETURN_IF_FAILED(ParseActivatableClassTag(xmlReader, fileName));
             }
         }
         else if (nodeType == XmlNodeType_EndElement)
@@ -217,11 +218,54 @@ HRESULT ParseActivatableClassTag(ComPtr<IXmlReader> xmlReader, LPCWSTR fileName)
     auto locale = _create_locale(LC_ALL, "C");
     auto this_component = make_shared<component>();
     this_component->module_name = fileName;
+    HRESULT hr = xmlReader->MoveToFirstAttribute();
+    // Using this pattern intead of MoveToAttributeByName improves performance
+    const WCHAR* activatableClass = nullptr;
+    const WCHAR* threadingModel = nullptr;
+    const WCHAR* xmlns = nullptr
+    if (S_FALSE == hr)
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    else
+    {
+        while (TRUE)
+        {
+            const WCHAR* pwszLocalName;
+            const WCHAR* pwszValue;
+            if (FAILED(hr = xmlReader->GetLocalName(&pwszLocalName, NULL)))
+            {
+                wprintf(L"Error getting local name, error is %08.8lx", hr);
+                return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+            }
+            if (FAILED(hr = xmlReader->GetValue(&pwszValue, NULL)))
+            {
+                wprintf(L"Error getting value, error is %08.8lx", hr);
+                return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+            }
+            if (_wcsicmp_l(L"threadingModel", pwszLocalName, locale) == 0)
+            {
+                threadingModel = pwszValue;
+            }
+            else if (_wcsicmp_l(L"name", pwszLocalName, locale) == 0)
+            {
+                activatableClass = pwszValue;
+            }
+            else if (_wcsicmp_l(L"xmlns", pwszLocalName, locale) == 0)
+            {
+                xmlns = pwszValue;
+            }
 
-    const WCHAR* threadingModel;
-    RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
-    RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
-
+            if (xmlReader->MoveToNextAttribute() != S_OK)
+            {
+                break;
+            }
+        }
+    }
+    if (threadingModel == nullptr)
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
     if (_wcsicmp_l(L"sta", threadingModel, locale) == 0)
     {
         this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
@@ -239,14 +283,17 @@ HRESULT ParseActivatableClassTag(ComPtr<IXmlReader> xmlReader, LPCWSTR fileName)
         return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
     }
 
-    const WCHAR* xmlns;
-    RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"xmlns", nullptr));
-    RETURN_IF_FAILED(xmlReader->GetValue(&xmlns, nullptr));
-    this_component->xmlns = xmlns;
-
-    const WCHAR* activatableClass;
-    RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
-    RETURN_IF_FAILED(xmlReader->GetValue(&activatableClass, nullptr));
+    if (activatableClass == nullptr || (activatableClass && !activatableClass[0]))
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    this_component->xmlns = xmlns; // Should we care about this value?
+    // Check for duplicate activatable classes
+    auto component_iter = g_types.find(activatableClass);
+    if (component_iter != g_types.end()) 
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_DUPLICATE_ACTIVATABLE_CLASS);
+    }
     g_types[activatableClass] = this_component;
     return S_OK;
 }
@@ -263,7 +310,7 @@ HRESULT ParseDependentAssemblyTag(ComPtr<IXmlReader> xmlReader)
             RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
             if (_wcsicmp_l(localName, L"assemblyIdentity", locale) == 0)
             {
-                ParseAssemblyIdentityTag(xmlReader);
+                RETURN_IF_FAILED(ParseAssemblyIdentityTag(xmlReader));
             }
         }
         else if (nodeType == XmlNodeType_EndElement)
