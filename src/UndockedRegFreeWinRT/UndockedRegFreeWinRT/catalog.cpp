@@ -350,12 +350,28 @@ HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader)
     PCWSTR exeFilePath = nullptr;
     UndockedRegFreeWinRT::GetProcessExeDir(&exeFilePath);
     std::wstring path = std::wstring(exeFilePath) + L"\\";
+
+    // Following the pattern in https://docs.microsoft.com/en-us/windows/win32/sbscs/assembly-searching-sequence
+    // RegFree also does not support looking in winSxS folder
     std::wstring dllPath = path + std::wstring(dependentAssemblyFileName) + L".dll";
     hr = LoadFromEmbeddedManifest(dllPath);
     if (hr == ERROR_FILE_NOT_FOUND)
     {
         std::wstring sxsManifestPath = path + std::wstring(dependentAssemblyFileName) + L".manifest";
-        return LoadFromSxSManifest(sxsManifestPath.c_str());
+        hr = LoadFromSxSManifest(sxsManifestPath.c_str());
+
+        if (hr == COR_E_FILENOTFOUND)
+        {
+            std::wstring dllPathWithAssemblyFolder
+                = path + std::wstring(dependentAssemblyFileName) + L"\\" + std::wstring(dependentAssemblyFileName) + L".dll";
+            hr = LoadFromEmbeddedManifest(dllPathWithAssemblyFolder);
+
+            if (hr == ERROR_FILE_NOT_FOUND)
+            {
+                std::wstring sxsManifestPathWithAssemblyFolder = path + std::wstring(dependentAssemblyFileName) + L"\\" + std::wstring(dependentAssemblyFileName) + L".manifest";
+                RETURN_IF_FAILED(LoadFromSxSManifest(sxsManifestPathWithAssemblyFolder.c_str()));
+            }
+        }
     }
     return hr;
 }

@@ -91,6 +91,20 @@ TEST_CASE("Manifest Parser")
         REQUIRE(component_iter->second->module_name == L"sub1_1.dll");
     }
 
+    SECTION("Dependent Assembly in Asssembly Folder")
+    {
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\validateDependentManifestAssemblyHuntSequence.root.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == S_OK);
+        REQUIRE(g_types.size() == 2);
+        auto component_iter = g_types.find(L"RootActivatableClass");
+        REQUIRE(component_iter != g_types.end());
+        REQUIRE(component_iter->second->module_name == L"root.dll");
+
+        component_iter = g_types.find(L"SubActivatableClass");
+        REQUIRE(component_iter != g_types.end());
+        REQUIRE(component_iter->second->module_name == L"sub.dll");
+    }
+
     //Failures
     SECTION("Negative Missing ThreadingModel")
     {

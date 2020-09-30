@@ -224,6 +224,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>basicParse.negative.blankFileName.manifest</TargetPath>
     </ContentWithTargetPath>
+    <ContentWithTargetPath Include="validateDependentManifestAssemblyHuntSequence.root.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>validateDependentManifestAssemblyHuntSequence.root.manifest</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="validateDependentManifestAssemblyHuntSequence.sub.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>validateDependentManifestAssemblyHuntSequence.sub/validateDependentManifestAssemblyHuntSequence.sub.manifest</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
