@@ -222,7 +222,7 @@ HRESULT ParseActivatableClassTag(ComPtr<IXmlReader> xmlReader, LPCWSTR fileName)
     // Using this pattern intead of MoveToAttributeByName improves performance
     const WCHAR* activatableClass = nullptr;
     const WCHAR* threadingModel = nullptr;
-    const WCHAR* xmlns = nullptr
+    const WCHAR* xmlns = nullptr;
     if (S_FALSE == hr)
     {
         return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
