@@ -183,13 +183,21 @@ HRESULT ParseXmlReaderManfestInput(IUnknown* input)
 
 HRESULT ParseFileTag(ComPtr<IXmlReader> xmlReader)
 {
+    HRESULT hr = S_OK;
     XmlNodeType nodeType;
     LPCWSTR localName = nullptr;
     LPCWSTR fileName = nullptr;
-    RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
+    hr = xmlReader->MoveToAttributeByName(L"name", nullptr);
+    if (hr != S_OK)
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
     RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
+    if (fileName == nullptr || !fileName[0])
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
     auto locale = _create_locale(LC_ALL, "C");
-    HRESULT hr = S_OK;
     while (S_OK == xmlReader->Read(&nodeType))
     {
         if (nodeType == XmlNodeType_Element)
@@ -283,11 +291,11 @@ HRESULT ParseActivatableClassTag(ComPtr<IXmlReader> xmlReader, LPCWSTR fileName)
         return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
     }
 
-    if (activatableClass == nullptr || (activatableClass && !activatableClass[0]))
+    if (activatableClass == nullptr || !activatableClass[0])
     {
         return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
     }
-    this_component->xmlns = xmlns; // Should we care about this value?
+    this_component->xmlns = xmlns; // Should we care if this value is blank or missing?
     // Check for duplicate activatable classes
     auto component_iter = g_types.find(activatableClass);
     if (component_iter != g_types.end()) 
@@ -327,18 +335,23 @@ HRESULT ParseDependentAssemblyTag(ComPtr<IXmlReader> xmlReader)
 
 HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader)
 {
+    HRESULT hr = S_OK;
     LPCWSTR dependentAssemblyFileName = nullptr;
-    RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
-    RETURN_IF_FAILED(xmlReader->GetValue(&dependentAssemblyFileName, nullptr));
-    if (dependentAssemblyFileName == nullptr)
+    hr = xmlReader->MoveToAttributeByName(L"name", nullptr);
+    if (hr != S_OK)
     {
-        return S_OK; // Malformed, should we fail?
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    RETURN_IF_FAILED(xmlReader->GetValue(&dependentAssemblyFileName, nullptr));
+    if (dependentAssemblyFileName == nullptr || !dependentAssemblyFileName[0])
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
     }
     PCWSTR exeFilePath = nullptr;
     UndockedRegFreeWinRT::GetProcessExeDir(&exeFilePath);
     std::wstring path = std::wstring(exeFilePath) + L"\\";
     std::wstring dllPath = path + std::wstring(dependentAssemblyFileName) + L".dll";
-    HRESULT hr = LoadFromEmbeddedManifest(dllPath);
+    hr = LoadFromEmbeddedManifest(dllPath);
     if (hr == ERROR_FILE_NOT_FOUND)
     {
         std::wstring sxsManifestPath = path + std::wstring(dependentAssemblyFileName) + L".manifest";

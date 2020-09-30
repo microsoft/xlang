@@ -216,6 +216,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>winrtActivation.merged.manifest</TargetPath>
     </ContentWithTargetPath>
+    <ContentWithTargetPath Include="basicParse.negative.missingFileName.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>basicParse.negative.missingFileName.manifest</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="basicParse.negative.blankFileName.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>basicParse.negative.blankFileName.manifest</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

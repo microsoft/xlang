@@ -110,7 +110,7 @@ TEST_CASE("Manifest Parser")
         REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
     
-    SECTION("Negative Blank Name")
+    SECTION("Negative Duplicate Acid")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.duplicateAcid.manifest";
         REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_DUPLICATE_ACTIVATABLE_CLASS));
@@ -119,6 +119,18 @@ TEST_CASE("Manifest Parser")
     SECTION("Negative Blank Name")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.blankName.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+    }
+
+    SECTION("Negative Blank FileName")
+    {
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.blankFileName.manifest";
+        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+    }
+
+    SECTION("Negative Missing FileName")
+    {
+        std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.missingFileName.manifest";
         REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
 }
