@@ -1,11 +1,33 @@
 #include <activationregistration.h>
 #include <string>
 #include <cor.h>
+#include <xmllite.h>
+#include <Shlwapi.h>
 
 #include "wil/result.h"
 #include "wil/resource.h"
 
-HRESULT WinRTLoadComponent(PCWSTR componentPath);
+HRESULT LoadFromSxSManifest(std::wstring path);
+
+HRESULT LoadFromEmbeddedManifest(std::wstring path);
+
+HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath);
+
+HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue);
+
+HRESULT ParseRootXmlReaderManfestInput(IUnknown* pInput);
+
+HRESULT ParseFileTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
+
+HRESULT ParseDependentAssemblyTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
+
+HRESULT ParseActivatableClassTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader, LPCWSTR fileName);
+
+HRESULT ParseAssemblyIdentityTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader, bool searchDependentAssembly);
+
+HRESULT SearchAssembly(std::wstring dependentAssemblyFileName);
+
+HRESULT SearchAssemblyWithLang(std::wstring dependentAssemblyFileName, std::wstring lang);
 
 HRESULT WinRTGetThreadingModel(
     HSTRING activatableClassId,
@@ -22,5 +44,3 @@ HRESULT WinRTGetMetadataFile(
     HSTRING* metaDataFilePath,
     IMetaDataImport2** metaDataImport,
     mdTypeDef* typeDefToken);
-
-extern std::wstring exeFilePath;

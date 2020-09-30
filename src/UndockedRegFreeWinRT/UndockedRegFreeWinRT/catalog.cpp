@@ -11,6 +11,7 @@
 #include <comutil.h>
 #include <fstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <codecvt>
 #include <locale>
 #include <RoMetadataApi.h>
@@ -81,70 +82,372 @@ struct component
 };
 
 static unordered_map<wstring, shared_ptr<component>> g_types;
+static unordered_set<wstring> g_assemblies;
 
-HRESULT WinRTLoadComponent(PCWSTR manifest_path)
+HRESULT LoadFromSxSManifest(std::wstring path)
+{
+    return WinRTLoadComponentFromFilePath(path.c_str());
+}
+
+HRESULT LoadFromEmbeddedManifest(std::wstring path)
+{
+    int resource = 0;
+    if (path.size() < 4)
+    {
+        return COR_E_ARGUMENT;
+    }
+    std::wstring ext = path.substr(path.size() - 4, path.size());
+    if (ext.compare(L".exe") == 0)
+    {
+        resource = 1;
+    }
+    else if (ext.compare(L".dll") == 0)
+    {
+        // I notice in testing, the original sxs allows this number to be also 1. 
+        resource = 2;
+    }
+    else
+    {
+        return COR_E_ARGUMENT;
+    }
+
+    HMODULE handle = LoadLibraryExW(path.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+    if (!handle)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+
+    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(resource), RT_MANIFEST);
+    if (!hrsc)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
+    if (!embeddedManifest)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    DWORD length = SizeofResource(handle, hrsc);
+    void* data = LockResource(embeddedManifest);
+    if (!data)
+    {
+        return ERROR_FILE_NOT_FOUND;
+    }
+    std::string result = std::string((char*)data, length);
+    return WinRTLoadComponentFromString(result.c_str());
+}
+
+HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
 {
     ComPtr<IStream> fileStream;
-    ComPtr<IXmlReader> xmlReader;
+    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifestPath, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
+    return ParseRootXmlReaderManfestInput(fileStream.Get());;
+}
+
+HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
+{
+    ComPtr<IStream> xmlStream = nullptr;
+    xmlStream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(xmlStringValue), strlen(xmlStringValue) * sizeof(CHAR)));
+    RETURN_HR_IF_NULL(E_OUTOFMEMORY, xmlStream);
+    ComPtr<IXmlReaderInput> xmlReaderInput;
+    RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));\
+    return ParseRootXmlReaderManfestInput(xmlReaderInput.Get());
+}
+
+HRESULT ParseRootXmlReaderManfestInput(IUnknown* input)
+{
     XmlNodeType nodeType;
     LPCWSTR localName = nullptr;
-    LPCWSTR fileName = nullptr;
     auto locale = _create_locale(LC_ALL, "C");
-
-    RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifest_path, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
+    ComPtr<IXmlReader> xmlReader;
     RETURN_IF_FAILED(CreateXmlReader(__uuidof(IXmlReader), (void**)&xmlReader, nullptr));
-    RETURN_IF_FAILED(xmlReader->SetInput(fileStream.Get()));
+    RETURN_IF_FAILED(xmlReader->SetInput(input));
     while (S_OK == xmlReader->Read(&nodeType))
     {
         if (nodeType == XmlNodeType_Element)
         {
             RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
 
+            if (_wcsicmp_l(localName, L"assemblyIdentity", locale) == 0)
+            {
+                RETURN_IF_FAILED(ParseAssemblyIdentityTag(xmlReader, false));
+            }
+
             if (_wcsicmp_l(localName, L"file", locale) == 0)
             {
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
+
+                RETURN_IF_FAILED(ParseFileTag(xmlReader));
             }
-            if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
+          
+            if (_wcsicmp_l(localName, L"dependentAssembly", locale) == 0)
             {
-                auto this_component = make_shared<component>();
-                this_component->module_name = fileName;
-
-                const WCHAR* threadingModel;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"threadingModel", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&threadingModel, nullptr));
-
-                if (_wcsicmp_l(L"sta", threadingModel, locale) == 0)
-                {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
-                }
-                else if (_wcsicmp_l(L"mta", threadingModel, locale) == 0)
-                {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
-                }
-                else if (_wcsicmp_l(L"both", threadingModel, locale) == 0)
-                {
-                    this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
-                }
-                else
-                {
-                    return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
-                }
-
-                const WCHAR* xmlns;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"xmlns", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&xmlns, nullptr));
-                this_component->xmlns = xmlns;
-
-                const WCHAR* activatableClass;
-                RETURN_IF_FAILED(xmlReader->MoveToAttributeByName(L"name", nullptr));
-                RETURN_IF_FAILED(xmlReader->GetValue(&activatableClass, nullptr));
-                g_types[activatableClass] = this_component;
+                RETURN_IF_FAILED(ParseDependentAssemblyTag(xmlReader));
             }
         }
     }
 
     return S_OK;
+}
+
+HRESULT ParseFileTag(ComPtr<IXmlReader> xmlReader)
+{
+    HRESULT hr = S_OK;
+    XmlNodeType nodeType;
+    LPCWSTR localName = nullptr;
+    LPCWSTR fileName = nullptr;
+    hr = xmlReader->MoveToAttributeByName(L"name", nullptr);
+    if (hr != S_OK)
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    RETURN_IF_FAILED(xmlReader->GetValue(&fileName, nullptr));
+    if (fileName == nullptr || !fileName[0])
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    auto locale = _create_locale(LC_ALL, "C");
+    while (S_OK == xmlReader->Read(&nodeType))
+    {
+        if (nodeType == XmlNodeType_Element)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (_wcsicmp_l(localName, L"activatableClass", locale) == 0)
+            {
+                RETURN_IF_FAILED(ParseActivatableClassTag(xmlReader, fileName));
+            }
+        }
+        else if (nodeType == XmlNodeType_EndElement)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (_wcsicmp_l(localName, L"file", locale) == 0)
+            {
+                return S_OK;
+            }
+        }
+    }
+    return S_OK;
+}
+
+HRESULT ParseActivatableClassTag(ComPtr<IXmlReader> xmlReader, LPCWSTR fileName)
+{
+    LPCWSTR localName = nullptr;
+    auto locale = _create_locale(LC_ALL, "C");
+    auto this_component = make_shared<component>();
+    this_component->module_name = fileName;
+    HRESULT hr = xmlReader->MoveToFirstAttribute();
+    // Using this pattern intead of calling multiple MoveToAttributeByName improves performance
+    const WCHAR* activatableClass = nullptr;
+    const WCHAR* threadingModel = nullptr;
+    const WCHAR* xmlns = nullptr;
+    if (S_FALSE == hr)
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    else
+    {
+        while (TRUE)
+        {
+            const WCHAR* pwszLocalName;
+            const WCHAR* pwszValue;
+            if (FAILED(hr = xmlReader->GetLocalName(&pwszLocalName, NULL)))
+            {
+                wprintf(L"Error getting local name, error is %08.8lx", hr);
+                return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+            }
+            if (FAILED(hr = xmlReader->GetValue(&pwszValue, NULL)))
+            {
+                wprintf(L"Error getting value, error is %08.8lx", hr);
+                return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+            }
+            if (_wcsicmp_l(L"threadingModel", pwszLocalName, locale) == 0)
+            {
+                threadingModel = pwszValue;
+            }
+            else if (_wcsicmp_l(L"name", pwszLocalName, locale) == 0)
+            {
+                activatableClass = pwszValue;
+            }
+            else if (_wcsicmp_l(L"xmlns", pwszLocalName, locale) == 0)
+            {
+                xmlns = pwszValue;
+            }
+
+            if (xmlReader->MoveToNextAttribute() != S_OK)
+            {
+                break;
+            }
+        }
+    }
+    if (threadingModel == nullptr)
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    if (_wcsicmp_l(L"sta", threadingModel, locale) == 0)
+    {
+        this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_STA;
+    }
+    else if (_wcsicmp_l(L"mta", threadingModel, locale) == 0)
+    {
+        this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_MTA;
+    }
+    else if (_wcsicmp_l(L"both", threadingModel, locale) == 0)
+    {
+        this_component->threading_model = ABI::Windows::Foundation::ThreadingType::ThreadingType_BOTH;
+    }
+    else
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+
+    if (activatableClass == nullptr || !activatableClass[0])
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    this_component->xmlns = xmlns; // Should we care if this value is blank or missing?
+    // Check for duplicate activatable classes
+    auto component_iter = g_types.find(activatableClass);
+    if (component_iter != g_types.end()) 
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_DUPLICATE_ACTIVATABLE_CLASS);
+    }
+    g_types[activatableClass] = this_component;
+    return S_OK;
+}
+
+HRESULT ParseDependentAssemblyTag(ComPtr<IXmlReader> xmlReader)
+{
+    XmlNodeType nodeType;
+    LPCWSTR localName = nullptr;
+    auto locale = _create_locale(LC_ALL, "C");
+    while (S_OK == xmlReader->Read(&nodeType))
+    {
+        if (nodeType == XmlNodeType_Element)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (_wcsicmp_l(localName, L"assemblyIdentity", locale) == 0)
+            {
+                RETURN_IF_FAILED(ParseAssemblyIdentityTag(xmlReader, true));
+            }
+        }
+        else if (nodeType == XmlNodeType_EndElement)
+        {
+            RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
+            if (_wcsicmp_l(localName, L"dependentAssembly", locale) == 0)
+            {
+                return S_OK;
+            }
+        }
+    }
+    return S_OK;
+}
+
+HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader, bool searchDependentAssembly)
+{
+    HRESULT hr = S_OK;
+    LPCWSTR dependentAssemblyFileName = nullptr;
+    hr = xmlReader->MoveToAttributeByName(L"name", nullptr);
+    if (hr != S_OK)
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    RETURN_IF_FAILED(xmlReader->GetValue(&dependentAssemblyFileName, nullptr));
+    if (dependentAssemblyFileName == nullptr || !dependentAssemblyFileName[0])
+    {
+        return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
+    }
+    // Look out for assemblies that have already been parsed so we don't have circular dependencies
+    auto itr = g_assemblies.find(dependentAssemblyFileName);
+    if (itr != g_assemblies.end())
+    {
+        return S_OK; // We've already look through this assembly, no need to look insert or search for it again. 
+    }
+    g_assemblies.insert(dependentAssemblyFileName);;
+    if (searchDependentAssembly)
+    {
+        // Don't fail if we don't find the assembly, in the realworld, manifests may have 
+        // dependentAssembly ref to WinSxS assemblies which this code won't find.
+        SearchAssembly(dependentAssemblyFileName);
+    }
+    return hr;
+}
+
+
+HRESULT SearchAssembly(std::wstring dependentAssemblyFileName)
+{
+    // Following the pattern in https://docs.microsoft.com/en-us/windows/win32/sbscs/assembly-searching-sequence
+    // RegFree also does not support looking in winSxS folder
+    HRESULT hr = S_OK;
+    wchar_t buffer[2048];
+    unsigned long cchBuffer = ARRAYSIZE(buffer);
+    unsigned long cLanguages;
+    GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &cLanguages, buffer, &cchBuffer);
+    std::wstring lang = buffer;
+    // Search for the preferred UI language
+    hr = SearchAssemblyWithLang(dependentAssemblyFileName, lang);
+    if (hr == S_OK)
+    {
+        return hr;
+    }
+    if (hr == COR_E_FILENOTFOUND || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND))
+    {
+        hr = SearchAssemblyWithLang(dependentAssemblyFileName, lang.substr(0, 2));
+        if (hr == S_OK)
+        {
+            return hr;
+        }
+    }
+    // This wasn't clear in the docs but it seems to fallback to en-US first
+    if (lang != L"en-US")
+    {
+        hr = SearchAssemblyWithLang(dependentAssemblyFileName, L"en-US");
+        if (hr == S_OK)
+        {
+            return hr;
+        }
+        if (hr == COR_E_FILENOTFOUND || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND))
+        {
+            hr = SearchAssemblyWithLang(dependentAssemblyFileName, L"en");
+            if (hr == S_OK)
+            {
+                return hr;
+            }
+        }
+    }
+    // Finally search for a no language version
+    return SearchAssemblyWithLang(dependentAssemblyFileName, L"");
+}
+
+HRESULT SearchAssemblyWithLang(std::wstring dependentAssemblyFileName, std::wstring lang)
+{
+    if (!lang.empty())
+    {
+        lang += L"\\";
+    }
+    HRESULT hr = S_OK;
+    PCWSTR exeFilePath = nullptr;
+    UndockedRegFreeWinRT::GetProcessExeDir(&exeFilePath);
+    std::wstring path = std::wstring(exeFilePath) + L"\\" + lang;
+    std::wstring dllPath = path + dependentAssemblyFileName + L".dll";
+    hr = LoadFromEmbeddedManifest(dllPath);
+    if (hr == ERROR_FILE_NOT_FOUND)
+    {
+        std::wstring sxsManifestPath = path + dependentAssemblyFileName + L".manifest";
+        hr = LoadFromSxSManifest(sxsManifestPath.c_str());
+
+        if (hr == COR_E_FILENOTFOUND || hr == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND))
+        {
+            std::wstring dllPathWithAssemblyFolder
+                = path + dependentAssemblyFileName + L"\\" + dependentAssemblyFileName + L".dll";
+            hr = LoadFromEmbeddedManifest(dllPathWithAssemblyFolder);
+
+            if (hr == ERROR_FILE_NOT_FOUND)
+            {
+                std::wstring sxsManifestPathWithAssemblyFolder = path + dependentAssemblyFileName + L"\\" + dependentAssemblyFileName + L".manifest";
+                hr = LoadFromSxSManifest(sxsManifestPathWithAssemblyFolder.c_str());
+            }
+        }
+    }
+    return hr;
 }
 
 HRESULT WinRTGetThreadingModel(HSTRING activatableClassId, ABI::Windows::Foundation::ThreadingType* threading_model)

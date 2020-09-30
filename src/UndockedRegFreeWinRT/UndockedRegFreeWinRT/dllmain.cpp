@@ -354,11 +354,14 @@ HRESULT ExtRoLoadCatalog()
     WCHAR filePath[MAX_PATH];
     GetModuleFileNameW(nullptr, filePath, _countof(filePath));
     std::wstring manifestPath(filePath);
-    manifestPath += L".manifest";
-
-    return WinRTLoadComponent(manifestPath.c_str());
+    HRESULT hr = LoadFromEmbeddedManifest(manifestPath.c_str());
+    if (hr == ERROR_FILE_NOT_FOUND)
+    {
+        manifestPath += L".manifest";
+        return LoadFromSxSManifest(manifestPath.c_str());
+    }
+    return hr;
 }
-
 
 BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 {
@@ -377,19 +380,6 @@ BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
         RemoveHooks();
     }
     return true;
-}
-
-HRESULT WINAPI RegFreeWinRTInitializeForTest()
-{
-    InstallHooks();
-    ExtRoLoadCatalog();
-    return S_OK;
-}
-
-HRESULT WINAPI RegFreeWinRTUninitializeForTest()
-{
-    RemoveHooks();
-    return S_OK;
 }
 
 extern "C" void WINAPI winrtact_Initialize()
