@@ -347,33 +347,42 @@ HRESULT ParseAssemblyIdentityTag(ComPtr<IXmlReader> xmlReader)
     {
         return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
     }
+    return SearchAssembly(dependentAssemblyFileName, L"");
+}
+
+HRESULT SearchAssembly(std::wstring dependentAssemblyFileName, std::wstring lang)
+{
+    if (!lang.empty())
+    {
+        lang += L"\\";
+    }
+    HRESULT hr = S_OK;
     PCWSTR exeFilePath = nullptr;
     UndockedRegFreeWinRT::GetProcessExeDir(&exeFilePath);
-    std::wstring path = std::wstring(exeFilePath) + L"\\";
+    std::wstring path = std::wstring(exeFilePath) + L"\\" + lang;
 
     // Following the pattern in https://docs.microsoft.com/en-us/windows/win32/sbscs/assembly-searching-sequence
     // RegFree also does not support looking in winSxS folder
-    std::wstring dllPath = path + std::wstring(dependentAssemblyFileName) + L".dll";
+    std::wstring dllPath = path + dependentAssemblyFileName + L".dll";
     hr = LoadFromEmbeddedManifest(dllPath);
     if (hr == ERROR_FILE_NOT_FOUND)
     {
-        std::wstring sxsManifestPath = path + std::wstring(dependentAssemblyFileName) + L".manifest";
+        std::wstring sxsManifestPath = path + dependentAssemblyFileName + L".manifest";
         hr = LoadFromSxSManifest(sxsManifestPath.c_str());
 
         if (hr == COR_E_FILENOTFOUND)
         {
             std::wstring dllPathWithAssemblyFolder
-                = path + std::wstring(dependentAssemblyFileName) + L"\\" + std::wstring(dependentAssemblyFileName) + L".dll";
+                = path + dependentAssemblyFileName + L"\\" + dependentAssemblyFileName + L".dll";
             hr = LoadFromEmbeddedManifest(dllPathWithAssemblyFolder);
 
             if (hr == ERROR_FILE_NOT_FOUND)
             {
-                std::wstring sxsManifestPathWithAssemblyFolder = path + std::wstring(dependentAssemblyFileName) + L"\\" + std::wstring(dependentAssemblyFileName) + L".manifest";
+                std::wstring sxsManifestPathWithAssemblyFolder = path + dependentAssemblyFileName + L"\\" + dependentAssemblyFileName + L".manifest";
                 RETURN_IF_FAILED(LoadFromSxSManifest(sxsManifestPathWithAssemblyFolder.c_str()));
             }
         }
     }
-    return hr;
 }
 
 HRESULT WinRTGetThreadingModel(HSTRING activatableClassId, ABI::Windows::Foundation::ThreadingType* threading_model)

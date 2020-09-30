@@ -25,6 +25,8 @@ HRESULT ParseActivatableClassTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader, L
 
 HRESULT ParseAssemblyIdentityTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
 
+HRESULT SearchAssembly(std::wstring dependentAssemblyFileName, std::wstring lang);
+
 HRESULT WinRTGetThreadingModel(
     HSTRING activatableClassId,
     ABI::Windows::Foundation::ThreadingType* threading_model);
