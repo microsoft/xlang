@@ -15,7 +15,7 @@ HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath);
 
 HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue);
 
-HRESULT ParseRootXmlReaderManfestInput(IUnknown* pInput);
+HRESULT ParseRootManifestFromXmlReaderInput(IUnknown* pInput);
 
 HRESULT ParseFileTag(Microsoft::WRL::ComPtr<IXmlReader> xmlReader);
 

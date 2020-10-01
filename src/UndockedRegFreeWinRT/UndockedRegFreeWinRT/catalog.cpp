@@ -141,7 +141,7 @@ HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
 {
     ComPtr<IStream> fileStream;
     RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifestPath, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
-    return ParseRootXmlReaderManfestInput(fileStream.Get());;
+    return ParseRootManifestFromXmlReaderInput(fileStream.Get());;
 }
 
 HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
@@ -151,10 +151,10 @@ HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
     RETURN_HR_IF_NULL(E_OUTOFMEMORY, xmlStream);
     ComPtr<IXmlReaderInput> xmlReaderInput;
     RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));\
-    return ParseRootXmlReaderManfestInput(xmlReaderInput.Get());
+    return ParseRootManifestFromXmlReaderInput(xmlReaderInput.Get());
 }
 
-HRESULT ParseRootXmlReaderManfestInput(IUnknown* input)
+HRESULT ParseRootManifestFromXmlReaderInput(IUnknown* input)
 {
     XmlNodeType nodeType;
     LPCWSTR localName = nullptr;
@@ -175,7 +175,6 @@ HRESULT ParseRootXmlReaderManfestInput(IUnknown* input)
 
             if (_wcsicmp_l(localName, L"file", locale) == 0)
             {
-
                 RETURN_IF_FAILED(ParseFileTag(xmlReader));
             }
           

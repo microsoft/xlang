@@ -354,6 +354,8 @@ HRESULT ExtRoLoadCatalog()
     WCHAR filePath[MAX_PATH];
     GetModuleFileNameW(nullptr, filePath, _countof(filePath));
     std::wstring manifestPath(filePath);
+    // First look for embedded manifest in the exe, if it doesn't find it
+    // we will look at the exe directory for it. 
     HRESULT hr = LoadFromEmbeddedManifest(manifestPath.c_str());
     if (hr == ERROR_FILE_NOT_FOUND)
     {

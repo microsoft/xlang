@@ -1,5 +1,3 @@
-#define ISOLATION_AWARE_ENABLED 1
-
 #include "pch.h"
 #include <iostream>
 
@@ -12,8 +10,6 @@
 #include <wrl\wrappers\corewrappers.h>
 #include "winrt\TestComponent.h"
 #include "winrt\EmbeddedTestComponent.h"
-
-#include "../UndockedRegFreeWinRT/extwinrt.h"
 
 using namespace Microsoft::WRL;
 using namespace ABI::Windows::Foundation;

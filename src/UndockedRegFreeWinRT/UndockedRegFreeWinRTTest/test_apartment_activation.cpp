@@ -10,8 +10,6 @@
 #include <wrl\wrappers\corewrappers.h>
 #include "winrt\TestComponent.h"
 
-#include "../UndockedRegFreeWinRT/extwinrt.h"
-
 using namespace Microsoft::WRL;
 using namespace ABI::Windows::Foundation;
 using namespace Microsoft::WRL::Wrappers;
