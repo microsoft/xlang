@@ -49,6 +49,10 @@ https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.codeanalysis.notn
 
 Rust is explicit about error propagation and about nullability. What that means for WinRT in practice (at call sites) is that a method that returns a nullable type requires something like `method().unwrap().unwrap()` - the first `unwrap` deals with unpacking the `Result<T>` that might report failure and the second `unwrap` deals with resolving the `Option<T>` that may or may not be a null return value. This double `unwrap` is gross to say the least. The `NoException` WinRT attribute previously introduced deals with the first `unwrap` and the `NotNull` deals with the second. This significantly improves the quality of life for Rust developers. It is perhaps the only complaint we’ve heard about WinRT from the Rust community.
 
+https://doc.rust-lang.org/std/result/enum.Result.html
+
+https://doc.rust-lang.org/std/option/enum.Option.html
+
 ## Impact on Other Languages
 
 Other languages will be unaffected but may in future choose to apply an appropriate use for the NotNull attribute.
