@@ -36,6 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Catch", "Catch", "{388CB1AF
 	ProjectSection(SolutionItems) = preProject
 		Catch\catch.hpp = Catch\catch.hpp
 	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mwinrtact", "mwinrtact\mwinrtact.csproj", "{61857961-CD9B-4948-AC31-26B0806FA7A3}"
 EndProject
 Global
