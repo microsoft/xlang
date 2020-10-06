@@ -391,11 +391,11 @@ HRESULT ExtRoLoadCatalog()
             ReleaseActCtx(hActCtx);
         }
     });
-
-    HMODULE hExeModule = GetModuleHandleW(nullptr);
+    wil::unique_hmodule exeModule;
+    RETURN_IF_WIN32_BOOL_FALSE(GetModuleHandleExW(0, nullptr, &exeModule));
     ACTCTXW acw = { sizeof(acw) };
     acw.lpSource = manifestPath.c_str();
-    acw.hModule = hExeModule;
+    acw.hModule = exeModule.get();
     acw.lpResourceName = MAKEINTRESOURCEW(1);
     acw.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
 
@@ -417,9 +417,7 @@ HRESULT ExtRoLoadCatalog()
         actCtxInfo,
         bufferSize,
         nullptr));
-
-    RETURN_IF_FAILED(LoadManifestFromPath(actCtxInfo->lpRootManifestPath));
-    for (DWORD index = 2; index <= actCtxInfo->ulAssemblyCount; index++)
+    for (DWORD index = 1; index <= actCtxInfo->ulAssemblyCount; index++)
     {
 
         PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION asmInfo;
@@ -438,10 +436,8 @@ HRESULT ExtRoLoadCatalog()
             asmInfo,
             bufferSize,
             nullptr));
-
         RETURN_IF_FAILED(LoadManifestFromPath(asmInfo->lpAssemblyManifestPath));
     }
-
     return S_OK;
 }
 

@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Catch", "Catch", "{388CB1AF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mwinrtact", "mwinrtact\mwinrtact.csproj", "{61857961-CD9B-4948-AC31-26B0806FA7A3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ManifestParserTest", "ManifestParserTest\ManifestParserTest.vcxproj", "{7DC750DE-F43C-4A3B-9FBF-8D964458829A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -152,6 +154,18 @@ Global
 		{61857961-CD9B-4948-AC31-26B0806FA7A3}.Release|x64.Build.0 = Release|Any CPU
 		{61857961-CD9B-4948-AC31-26B0806FA7A3}.Release|x86.ActiveCfg = Release|Any CPU
 		{61857961-CD9B-4948-AC31-26B0806FA7A3}.Release|x86.Build.0 = Release|Any CPU
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Debug|ARM.ActiveCfg = Debug|Win32
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Debug|x64.ActiveCfg = Debug|x64
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Debug|x64.Build.0 = Debug|x64
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Debug|x86.ActiveCfg = Debug|Win32
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Debug|x86.Build.0 = Debug|Win32
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|Any CPU.ActiveCfg = Release|Win32
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|ARM.ActiveCfg = Release|Win32
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|x64.ActiveCfg = Release|x64
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|x64.Build.0 = Release|x64
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|x86.ActiveCfg = Release|Win32
+		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
