@@ -11,7 +11,6 @@
 #include <comutil.h>
 #include <fstream>
 #include <unordered_map>
-#include <unordered_set>
 #include <codecvt>
 #include <locale>
 #include <RoMetadataApi.h>
