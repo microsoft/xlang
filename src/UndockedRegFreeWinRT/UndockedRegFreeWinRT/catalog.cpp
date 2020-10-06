@@ -108,31 +108,27 @@ HRESULT LoadFromSxSManifest(std::wstring const& path)
 
 HRESULT LoadFromEmbeddedManifest(std::wstring const& path)
 {
-    HMODULE handle = LoadLibraryExW(path.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+    wil::unique_hmodule handle(LoadLibraryExW(path.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE));
     if (!handle)
     {
         return ERROR_FILE_NOT_FOUND;
     }
-    auto exit = wil::scope_exit([&]
-    {
-        FreeLibrary(handle);
-    });
     // Try both just to be on the safe side
-    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(1), RT_MANIFEST);
+    HRSRC hrsc = FindResourceW(handle.get(), MAKEINTRESOURCEW(1), RT_MANIFEST);
     if (!hrsc)
     {
-        hrsc = FindResourceW(handle, MAKEINTRESOURCEW(2), RT_MANIFEST);
+        hrsc = FindResourceW(handle.get(), MAKEINTRESOURCEW(2), RT_MANIFEST);
         if (!hrsc)
         {
             return ERROR_FILE_NOT_FOUND;
         }
     }
-    HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
+    HGLOBAL embeddedManifest = LoadResource(handle.get(), hrsc);
     if (!embeddedManifest)
     {
         return ERROR_FILE_NOT_FOUND;
     }
-    DWORD length = SizeofResource(handle, hrsc);
+    DWORD length = SizeofResource(handle.get(), hrsc);
     void* data = LockResource(embeddedManifest);
     if (!data)
     {
