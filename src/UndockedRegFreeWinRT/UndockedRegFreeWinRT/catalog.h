@@ -1,5 +1,6 @@
 #include <activationregistration.h>
 #include <string>
+#include <string_view>
 #include <cor.h>
 #include <xmllite.h>
 #include <Shlwapi.h>
@@ -15,7 +16,7 @@ HRESULT LoadFromEmbeddedManifest(std::wstring const& path);
 
 HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath);
 
-HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue);
+HRESULT WinRTLoadComponentFromString(std::string_view xmlStringValue);
 
 HRESULT ParseRootManifestFromXmlReaderInput(IUnknown* pInput);
 

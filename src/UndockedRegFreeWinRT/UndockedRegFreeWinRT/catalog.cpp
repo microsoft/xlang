@@ -138,8 +138,7 @@ HRESULT LoadFromEmbeddedManifest(std::wstring const& path)
     {
         return ERROR_FILE_NOT_FOUND;
     }
-    std::string result = std::string((char*)data, length);
-    return WinRTLoadComponentFromString(result.c_str());
+    return WinRTLoadComponentFromString(std::string_view((char*)data, length));
 }
 
 HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
@@ -149,10 +148,10 @@ HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
     return ParseRootManifestFromXmlReaderInput(fileStream.Get());;
 }
 
-HRESULT WinRTLoadComponentFromString(PCSTR xmlStringValue)
+HRESULT WinRTLoadComponentFromString(std::string_view xmlStringValue)
 {
     ComPtr<IStream> xmlStream = nullptr;
-    xmlStream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(xmlStringValue), strlen(xmlStringValue) * sizeof(CHAR)));
+    xmlStream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(xmlStringValue.data()), strlen(xmlStringValue.data()) * sizeof(CHAR)));
     RETURN_HR_IF_NULL(E_OUTOFMEMORY, xmlStream);
     ComPtr<IXmlReaderInput> xmlReaderInput;
     RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));\
@@ -234,11 +233,11 @@ HRESULT ParseActivatableClassTag(ComPtr<IXmlReader> xmlReader, PCWSTR fileName)
         {
             const WCHAR* pwszLocalName;
             const WCHAR* pwszValue;
-            if (FAILED_LOG(hr = xmlReader->GetLocalName(&pwszLocalName, NULL)))
+            if (FAILED_LOG(xmlReader->GetLocalName(&pwszLocalName, NULL)))
             {
                 return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
             }
-            if (FAILED_LOG(hr = xmlReader->GetValue(&pwszValue, NULL)))
+            if (FAILED_LOG(xmlReader->GetValue(&pwszValue, NULL)))
             {
                 return HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR);
             }
