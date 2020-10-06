@@ -184,22 +184,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>basicParse.positive.manifest</TargetPath>
     </ContentWithTargetPath>
-    <ContentWithTargetPath Include="validateDependentManifestMix.root.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>validateDependentManifestMix.root.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="validateDependentManifestMix.sub1.1.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>validateDependentManifestMix.sub1.1.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="validateDependentManifestMix.sub1.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>validateDependentManifestMix.sub1.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="validateDependentManifestMix.sub2.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>validateDependentManifestMix.sub2.manifest</TargetPath>
-    </ContentWithTargetPath>
     <ContentWithTargetPath Include="winrtActivation.dll1.manifest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>winrtActivation.dll1.manifest</TargetPath>
@@ -211,18 +195,6 @@
     <ContentWithTargetPath Include="basicParse.negative.blankFileName.manifest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>basicParse.negative.blankFileName.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="validateDependentManifestAssemblyHuntSequence.root.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>validateDependentManifestAssemblyHuntSequence.root.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="validateDependentManifestAssemblyHuntSequence.sub.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>validateDependentManifestAssemblyHuntSequence.sub/validateDependentManifestAssemblyHuntSequence.sub.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="validateDependentManifestCircular.root.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>validateDependentManifestCircular.root.manifest</TargetPath>
     </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
