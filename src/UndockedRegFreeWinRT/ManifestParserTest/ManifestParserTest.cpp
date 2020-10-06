@@ -13,7 +13,7 @@ TEST_CASE("Manifest Parser")
     SECTION("Multiple activatableClass")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\winrtActivation.dll1.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == S_OK);
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == S_OK);
         std::wstring moduleName = L"RegFreeWinrtInprocComponents.1.dll";
         REQUIRE(g_types.size() == 4);
         auto component_iter = g_types.find(L"RegFreeWinrt.1.threading_both");
@@ -40,7 +40,7 @@ TEST_CASE("Manifest Parser")
     SECTION("Multiple file")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.Positive.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == S_OK);
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == S_OK);
         std::wstring moduleName = L"FakeDllName.dll";
         REQUIRE(g_types.size() == 6);
         auto component_iter = g_types.find(L"FakeActivatableClass");
@@ -73,42 +73,42 @@ TEST_CASE("Manifest Parser")
     SECTION("Negative Missing ThreadingModel")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.missingThreadingModel.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
 
     SECTION("Negative Missing Name")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.missingName.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
 
     SECTION("Negative Invalid ThreadingModel")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.invalidThreadingModel.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
     
     SECTION("Negative Duplicate Acid")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.duplicateAcid.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_DUPLICATE_ACTIVATABLE_CLASS));
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_DUPLICATE_ACTIVATABLE_CLASS));
     }
 
     SECTION("Negative Blank Name")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.blankName.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
 
     SECTION("Negative Blank FileName")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.blankFileName.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
 
     SECTION("Negative Missing FileName")
     {
         std::wstring manifest = std::wstring(exeFilePath) + L"\\basicParse.negative.missingFileName.manifest";
-        REQUIRE(LoadFromSxSManifest(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
+        REQUIRE(LoadManifestFromPath(manifest.c_str()) == HRESULT_FROM_WIN32(ERROR_SXS_MANIFEST_PARSE_ERROR));
     }
 }
