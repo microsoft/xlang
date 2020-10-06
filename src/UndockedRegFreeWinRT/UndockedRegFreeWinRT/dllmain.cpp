@@ -349,39 +349,13 @@ void RemoveHooks()
     DetourTransactionCommit();
 }
 
-//template <typename PAutoSxSStruct>
-//HRESULT QueryActCtxWHelper(HANDLE handle, ULONG infoClass, PAutoSxSStruct& actCtxInfo, DWORD actCtxIndex)
-//{
-//    size_t bufferSize = 0;
-//    (void)QueryActCtxW(0,
-//        handle,
-//        &actCtxIndex,
-//        infoClass,
-//        nullptr,
-//        0,
-//        &bufferSize); // Expected to fail
-//
-//    if (bufferSize == 0)
-//    {
-//        // Yeah, QueryActCtxW says buffer too small but asks for 0 size if there's no associated manifest
-//        return ERROR_SXS_ASSEMBLY_MISSING;
-//    }
-//
-//    pAsmInfo = (PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION) new BYTE[cbActCtxInfo];
-//    RETURN_IF_WIN32_BOOL_FALSE(QueryActCtxW(0,
-//        handle,
-//        &actCtxIndex,
-//        infoClass,
-//        actCtxInfo,
-//        bufferSize,
-//        nullptr));
-//}
-
-
 HRESULT ExtRoLoadCatalog()
 {
     WCHAR filePath[MAX_PATH];
-    GetModuleFileNameW(nullptr, filePath, _countof(filePath));
+    if (!GetModuleFileNameW(nullptr, filePath, _countof(filePath)))
+    {
+        return HRESULT_FROM_WIN32(GetLastError());
+    }
     std::wstring manifestPath(filePath);
     HANDLE hActCtx = INVALID_HANDLE_VALUE;
     auto exit = wil::scope_exit([&]
