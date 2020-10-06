@@ -374,7 +374,13 @@ HRESULT ExtRoLoadCatalog()
     acw.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
 
     hActCtx = CreateActCtxW(&acw);
-    PACTIVATION_CONTEXT_DETAILED_INFORMATION actCtxInfo;
+    if (hActCtx == INVALID_HANDLE_VALUE)
+    {
+        SetLastError(ERROR_OUTOFMEMORY);
+        return HRESULT_FROM_WIN32(GetLastError());
+    }
+
+    PACTIVATION_CONTEXT_DETAILED_INFORMATION actCtxInfo = nullptr;
     SIZE_T bufferSize = 0;
     (void)QueryActCtxW(0,
         hActCtx,
@@ -383,7 +389,15 @@ HRESULT ExtRoLoadCatalog()
         nullptr,
         0,
         &bufferSize);
+    RETURN_HR_IF(HRESULT_FROM_WIN32(GetLastError()), bufferSize == 0);
+
     actCtxInfo = (PACTIVATION_CONTEXT_DETAILED_INFORMATION) new BYTE[bufferSize];
+    if (!actCtxInfo)
+    {
+        SetLastError(ERROR_OUTOFMEMORY);
+        return HRESULT_FROM_WIN32(GetLastError());
+    }
+
     RETURN_IF_WIN32_BOOL_FALSE(QueryActCtxW(0,
         hActCtx,
         nullptr,
@@ -391,10 +405,11 @@ HRESULT ExtRoLoadCatalog()
         actCtxInfo,
         bufferSize,
         nullptr));
+
     for (DWORD index = 1; index <= actCtxInfo->ulAssemblyCount; index++)
     {
-
-        PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION asmInfo;
+        bufferSize = 0;
+        PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION asmInfo = nullptr;
         (void)QueryActCtxW(0,
             hActCtx,
             &index,
@@ -402,7 +417,15 @@ HRESULT ExtRoLoadCatalog()
             nullptr,
             0,
             &bufferSize);
+        RETURN_HR_IF(HRESULT_FROM_WIN32(GetLastError()), bufferSize == 0);
+
         asmInfo = (PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION) new BYTE[bufferSize];
+        if (!asmInfo)
+        {
+            SetLastError(ERROR_OUTOFMEMORY);
+            return HRESULT_FROM_WIN32(GetLastError());
+        }
+
         RETURN_IF_WIN32_BOOL_FALSE(QueryActCtxW(0,
             hActCtx,
             &index,
