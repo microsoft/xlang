@@ -85,7 +85,6 @@ static unordered_map<wstring, shared_ptr<component>> g_types;
 
 HRESULT LoadManifestFromPath(std::wstring path)
 {
-    int resource = 0;
     if (path.size() < 4)
     {
         return COR_E_ARGUMENT;
