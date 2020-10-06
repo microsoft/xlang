@@ -10,9 +10,9 @@
 
 HRESULT LoadManifestFromPath(std::wstring path);
 
-HRESULT LoadFromSxSManifest(std::wstring const& path);
+HRESULT LoadFromSxSManifest(PCWSTR path);
 
-HRESULT LoadFromEmbeddedManifest(std::wstring const& path);
+HRESULT LoadFromEmbeddedManifest(PCWSTR path);
 
 HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath);
 

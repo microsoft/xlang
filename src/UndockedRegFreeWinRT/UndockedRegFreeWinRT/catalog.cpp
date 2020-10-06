@@ -89,25 +89,25 @@ HRESULT LoadManifestFromPath(std::wstring path)
     {
         return COR_E_ARGUMENT;
     }
-    std::wstring ext = path.substr(path.size() - 4, path.size());
+    std::wstring ext(path.substr(path.size() - 4, path.size()));
     if (ext.compare(L".exe") == 0 || ext.compare(L".dll") == 0)
     {
-        return LoadFromEmbeddedManifest(path);
+        return LoadFromEmbeddedManifest(path.c_str());
     }
     else
     {
-        return LoadFromSxSManifest(path);
+        return LoadFromSxSManifest(path.c_str());
     }
 }
 
-HRESULT LoadFromSxSManifest(std::wstring const& path)
+HRESULT LoadFromSxSManifest(PCWSTR path)
 {
-    return WinRTLoadComponentFromFilePath(path.c_str());
+    return WinRTLoadComponentFromFilePath(path);
 }
 
-HRESULT LoadFromEmbeddedManifest(std::wstring const& path)
+HRESULT LoadFromEmbeddedManifest(PCWSTR path)
 {
-    wil::unique_hmodule handle(LoadLibraryExW(path.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE));
+    wil::unique_hmodule handle(LoadLibraryExW(path, nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE));
     RETURN_HR_IF(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND), !handle);
 
     // Try both just to be on the safe side
