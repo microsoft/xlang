@@ -349,20 +349,100 @@ void RemoveHooks()
     DetourTransactionCommit();
 }
 
+//template <typename PAutoSxSStruct>
+//HRESULT QueryActCtxWHelper(HANDLE handle, ULONG infoClass, PAutoSxSStruct& actCtxInfo, DWORD actCtxIndex)
+//{
+//    size_t bufferSize = 0;
+//    (void)QueryActCtxW(0,
+//        handle,
+//        &actCtxIndex,
+//        infoClass,
+//        nullptr,
+//        0,
+//        &bufferSize); // Expected to fail
+//
+//    if (bufferSize == 0)
+//    {
+//        // Yeah, QueryActCtxW says buffer too small but asks for 0 size if there's no associated manifest
+//        return ERROR_SXS_ASSEMBLY_MISSING;
+//    }
+//
+//    pAsmInfo = (PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION) new BYTE[cbActCtxInfo];
+//    RETURN_IF_WIN32_BOOL_FALSE(QueryActCtxW(0,
+//        handle,
+//        &actCtxIndex,
+//        infoClass,
+//        actCtxInfo,
+//        bufferSize,
+//        nullptr));
+//}
+
+
 HRESULT ExtRoLoadCatalog()
 {
     WCHAR filePath[MAX_PATH];
     GetModuleFileNameW(nullptr, filePath, _countof(filePath));
     std::wstring manifestPath(filePath);
-    // First look for embedded manifest in the exe, if it doesn't find it
-    // we will look at the exe directory for it. 
-    HRESULT hr = LoadFromEmbeddedManifest(manifestPath.c_str());
-    if (hr == ERROR_FILE_NOT_FOUND)
+    HANDLE hActCtx = INVALID_HANDLE_VALUE;
+    auto exit = wil::scope_exit([&]
     {
-        manifestPath += L".manifest";
-        return LoadFromSxSManifest(manifestPath.c_str());
+        if (hActCtx != INVALID_HANDLE_VALUE)
+        {
+            ReleaseActCtx(hActCtx);
+        }
+    });
+
+    HMODULE hExeModule = GetModuleHandleW(nullptr);
+    ACTCTXW acw = { sizeof(acw) };
+    acw.lpSource = manifestPath.c_str();
+    acw.hModule = hExeModule;
+    acw.lpResourceName = MAKEINTRESOURCEW(1);
+    acw.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
+
+    hActCtx = CreateActCtxW(&acw);
+    PACTIVATION_CONTEXT_DETAILED_INFORMATION actCtxInfo;
+    SIZE_T bufferSize = 0;
+    (void)QueryActCtxW(0,
+        hActCtx,
+        nullptr,
+        ActivationContextDetailedInformation,
+        nullptr,
+        0,
+        &bufferSize);
+    actCtxInfo = (PACTIVATION_CONTEXT_DETAILED_INFORMATION) new BYTE[bufferSize];
+    RETURN_IF_WIN32_BOOL_FALSE(QueryActCtxW(0,
+        hActCtx,
+        nullptr,
+        ActivationContextDetailedInformation,
+        actCtxInfo,
+        bufferSize,
+        nullptr));
+
+    RETURN_IF_FAILED(LoadManifestFromPath(actCtxInfo->lpRootManifestPath));
+    for (DWORD index = 2; index <= actCtxInfo->ulAssemblyCount; index++)
+    {
+
+        PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION asmInfo;
+        (void)QueryActCtxW(0,
+            hActCtx,
+            &index,
+            AssemblyDetailedInformationInActivationContext,
+            nullptr,
+            0,
+            &bufferSize);
+        asmInfo = (PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION) new BYTE[bufferSize];
+        RETURN_IF_WIN32_BOOL_FALSE(QueryActCtxW(0,
+            hActCtx,
+            &index,
+            AssemblyDetailedInformationInActivationContext,
+            asmInfo,
+            bufferSize,
+            nullptr));
+
+        RETURN_IF_FAILED(LoadManifestFromPath(asmInfo->lpAssemblyManifestPath));
     }
-    return hr;
+
+    return S_OK;
 }
 
 BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)

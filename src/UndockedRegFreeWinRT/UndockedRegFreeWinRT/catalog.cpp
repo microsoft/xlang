@@ -84,12 +84,7 @@ struct component
 static unordered_map<wstring, shared_ptr<component>> g_types;
 static unordered_set<wstring> g_assemblies;
 
-HRESULT LoadFromSxSManifest(std::wstring path)
-{
-    return WinRTLoadComponentFromFilePath(path.c_str());
-}
-
-HRESULT LoadFromEmbeddedManifest(std::wstring path)
+HRESULT LoadManifestFromPath(std::wstring path)
 {
     int resource = 0;
     if (path.size() < 4)
@@ -97,30 +92,37 @@ HRESULT LoadFromEmbeddedManifest(std::wstring path)
         return COR_E_ARGUMENT;
     }
     std::wstring ext = path.substr(path.size() - 4, path.size());
-    if (ext.compare(L".exe") == 0)
+    if (ext.compare(L".exe") == 0 || ext.compare(L".dll") == 0)
     {
-        resource = 1;
-    }
-    else if (ext.compare(L".dll") == 0)
-    {
-        // I notice in testing, the original sxs allows this number to be also 1. 
-        resource = 2;
+        LoadFromEmbeddedManifest(path);
     }
     else
     {
-        return COR_E_ARGUMENT;
+        LoadFromSxSManifest(path);
     }
+}
 
+HRESULT LoadFromSxSManifest(std::wstring path)
+{
+    return WinRTLoadComponentFromFilePath(path.c_str());
+}
+
+HRESULT LoadFromEmbeddedManifest(std::wstring path)
+{
     HMODULE handle = LoadLibraryExW(path.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
     if (!handle)
     {
         return ERROR_FILE_NOT_FOUND;
     }
 
-    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(resource), RT_MANIFEST);
+    HRSRC hrsc = FindResourceW(handle, MAKEINTRESOURCEW(1), RT_MANIFEST);
     if (!hrsc)
     {
-        return ERROR_FILE_NOT_FOUND;
+        hrsc = FindResourceW(handle, MAKEINTRESOURCEW(2), RT_MANIFEST);
+        if (!hrsc)
+        {
+            return ERROR_FILE_NOT_FOUND;
+        }
     }
     HGLOBAL embeddedManifest = LoadResource(handle, hrsc);
     if (!embeddedManifest)
@@ -168,19 +170,9 @@ HRESULT ParseRootManifestFromXmlReaderInput(IUnknown* input)
         {
             RETURN_IF_FAILED((xmlReader->GetLocalName(&localName, nullptr)));
 
-            if (_wcsicmp_l(localName, L"assemblyIdentity", locale) == 0)
-            {
-                RETURN_IF_FAILED(ParseAssemblyIdentityTag(xmlReader, false));
-            }
-
             if (_wcsicmp_l(localName, L"file", locale) == 0)
             {
                 RETURN_IF_FAILED(ParseFileTag(xmlReader));
-            }
-          
-            if (_wcsicmp_l(localName, L"dependentAssembly", locale) == 0)
-            {
-                RETURN_IF_FAILED(ParseDependentAssemblyTag(xmlReader));
             }
         }
     }

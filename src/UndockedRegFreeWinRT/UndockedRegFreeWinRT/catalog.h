@@ -7,6 +7,8 @@
 #include "wil/result.h"
 #include "wil/resource.h"
 
+HRESULT LoadManifestFromPath(std::wstring path);
+
 HRESULT LoadFromSxSManifest(std::wstring path);
 
 HRESULT LoadFromEmbeddedManifest(std::wstring path);
