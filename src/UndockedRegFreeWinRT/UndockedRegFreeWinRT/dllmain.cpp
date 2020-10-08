@@ -1,4 +1,3 @@
-#include "targetver.h"
 #include <Windows.h>
 #include <synchapi.h>
 #include <roapi.h>
@@ -352,12 +351,12 @@ void RemoveHooks()
 
 HRESULT ExtRoLoadCatalog()
 {
-    WCHAR filePath[MAX_PATH];
-    if (!GetModuleFileNameW(nullptr, filePath, _countof(filePath)))
+    CHAR filePath[MAX_PATH];
+    if (!GetModuleFileNameA(nullptr, filePath, _countof(filePath)))
     {
         return HRESULT_FROM_WIN32(GetLastError());
     }
-    std::wstring manifestPath(filePath);
+    std::string manifestPath(filePath);
     HANDLE hActCtx = INVALID_HANDLE_VALUE;
     auto exit = wil::scope_exit([&]
     {
@@ -367,14 +366,14 @@ HRESULT ExtRoLoadCatalog()
         }
     });
     wil::unique_hmodule exeModule;
-    RETURN_IF_WIN32_BOOL_FALSE(GetModuleHandleExW(0, nullptr, &exeModule));
-    ACTCTXW acw = { sizeof(acw) };
+    RETURN_IF_WIN32_BOOL_FALSE(GetModuleHandleExA(0, nullptr, &exeModule));
+    ACTCTXA acw = { sizeof(acw) };
     acw.lpSource = manifestPath.c_str();
     acw.hModule = exeModule.get();
-    acw.lpResourceName = MAKEINTRESOURCEW(1);
+    acw.lpResourceName = MAKEINTRESOURCEA(1);
     acw.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
 
-    hActCtx = CreateActCtxW(&acw);
+    hActCtx = CreateActCtxA(&acw);
     if (hActCtx == INVALID_HANDLE_VALUE)
     {
         SetLastError(ERROR_OUTOFMEMORY);
