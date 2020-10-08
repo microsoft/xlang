@@ -26,12 +26,34 @@ jobs:
 
   - template: steps-package-projection.yml
     parameters:
-      architecture: x86  
+      architecture: x86
+      pythonVersionSpec: '3.7.x'
 
   - template: steps-package-projection.yml
     parameters:
-      architecture: amd64  
-      
+      architecture: amd64
+      pythonVersionSpec: '3.7.x'
+
+  - template: steps-package-projection.yml
+    parameters:
+      architecture: x86
+      pythonVersionSpec: '3.8.x'
+
+  - template: steps-package-projection.yml
+    parameters:
+      architecture: amd64
+      pythonVersionSpec: '3.8.x'
+
+  - template: steps-package-projection.yml
+    parameters:
+      architecture: x86
+      pythonVersionSpec: '3.9.x'
+
+  - template: steps-package-projection.yml
+    parameters:
+      architecture: amd64
+      pythonVersionSpec: '3.9.x'
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: wheel'
     inputs:
