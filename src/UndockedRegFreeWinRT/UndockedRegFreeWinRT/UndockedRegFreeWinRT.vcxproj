@@ -192,6 +192,7 @@
   <ItemGroup>
     <ClInclude Include="catalog.h" />
     <ClInclude Include="extwinrt.h" />
+    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\detours\detours.vcxproj">

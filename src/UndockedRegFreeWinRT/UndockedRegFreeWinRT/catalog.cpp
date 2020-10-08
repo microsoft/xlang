@@ -110,10 +110,10 @@ HRESULT LoadFromEmbeddedManifest(PCWSTR path)
     RETURN_HR_IF(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND), !handle);
 
     // Try both just to be on the safe side
-    HRSRC hrsc = FindResourceW(handle.get(), MAKEINTRESOURCEW(1), RT_MANIFEST);
+    HRSRC hrsc = FindResourceA(handle.get(), MAKEINTRESOURCEA(1), MAKEINTRESOURCEA(24));
     if (!hrsc)
     {
-        hrsc = FindResourceW(handle.get(), MAKEINTRESOURCEW(2), RT_MANIFEST);
+        hrsc = FindResourceA(handle.get(), MAKEINTRESOURCEA(2), MAKEINTRESOURCEA(24));
         RETURN_HR_IF(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND), !hrsc);
     }
     HGLOBAL embeddedManifest = LoadResource(handle.get(), hrsc);
