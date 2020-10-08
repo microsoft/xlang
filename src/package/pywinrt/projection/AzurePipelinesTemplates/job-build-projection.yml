@@ -7,15 +7,33 @@ jobs:
   strategy:
     maxParallel: 10
     matrix:
-      Release_x86:
+      Release_x86_py37:
         buildArchitecture: 'x86'
         buildConfiguration: 'Release'
-      Release_x64:
+        pythonVersion: '3.7.x'
+      Release_x64_py37:
         buildArchitecture: 'amd64'
         buildConfiguration: 'Release'
+        pythonVersion: '3.7.x'
+      Release_x86_py38:
+        buildArchitecture: 'x86'
+        buildConfiguration: 'Release'
+        pythonVersion: '3.8.x'
+      Release_x64_py38:
+        buildArchitecture: 'amd64'
+        buildConfiguration: 'Release'
+        pythonVersion: '3.8.x'
+      Release_x86_py39:
+        buildArchitecture: 'x86'
+        buildConfiguration: 'Release'
+        pythonVersion: '3.9.x'
+      Release_x64_py39:
+        buildArchitecture: 'amd64'
+        buildConfiguration: 'Release'
+        pythonVersion: '3.9.x'
   steps:
   - template: steps-build-projection.yml
     parameters:
       architecture: $(buildArchitecture)  
-      pythonVersionSpec: '3.9.x'
+      pythonVersionSpec: $(pythonVersion)
       projectionType: $(ProjectionType)
