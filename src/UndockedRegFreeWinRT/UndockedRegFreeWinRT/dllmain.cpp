@@ -15,6 +15,7 @@
 #include "catalog.h"
 #include "extwinrt.h"
 #include "TypeResolution.h"
+#include <iostream>
 
 #define WIN1019H1_BLDNUM 18362
 
@@ -436,6 +437,7 @@ HRESULT ExtRoLoadCatalog()
             nullptr));
         RETURN_IF_FAILED(LoadManifestFromPath(asmInfo->lpAssemblyManifestPath));
     }
+    std::cout << "size: " << GetModuleSize() << std::endl;
     return S_OK;
 }
 

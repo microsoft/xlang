@@ -129,12 +129,15 @@
     </ClCompile>
     <Link>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">EmbeddedTestComponent.manifest</ManifestFile>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
     </Link>
     <Link>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EmbeddedTestComponent.manifest</ManifestFile>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
     </Link>
     <Link>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EmbeddedTestComponent.manifest</ManifestFile>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
     </Link>
     <Manifest>
       <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">-manifest EmbeddedTestComponent.manifest</AdditionalManifestFiles>
@@ -157,6 +160,9 @@
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">EmbeddedTestComponent.manifest</ManifestFile>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">EmbeddedTestComponent.manifest</ManifestFile>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">EmbeddedTestComponent.manifest</ManifestFile>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
     </Link>
     <Manifest>
       <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">-manifest EmbeddedTestComponent.manifest</AdditionalManifestFiles>

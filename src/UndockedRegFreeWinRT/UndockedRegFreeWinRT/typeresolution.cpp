@@ -24,19 +24,19 @@ namespace UndockedRegFreeWinRT
             SetLastError(hr);
             return FALSE;
         }
-        std::wstring test(localExePath.get());
-        test = test.substr(test.size() - 4, test.size());
-        wil::unique_process_heap_string test2 = wil::make_process_heap_string_nothrow(test.c_str(), test.size());
+        //std::wstring test(localExePath.get());
+        //test = test.substr(test.size(), test.size() - 4);
+        //wil::unique_process_heap_string test2 = wil::make_process_heap_string_nothrow(test.c_str(), test.size());
         // Modify the retrieved string to truncate the actual exe name and leave the containing directory path. This API
         // expects a buffer size including the terminating null, so add 1 to the string length.
-        //hr = PathCchRemoveFileSpec(localExePath.get(), wcslen(localExePath.get()) + 1);
-        //if (FAILED_LOG(hr))
-        //{
-        //    SetLastError(hr);
-        //    return FALSE;
-        //}
+        hr = PathCchRemoveFileSpec(localExePath.get(), wcslen(localExePath.get()) + 1);
+        if (FAILED_LOG(hr))
+        {
+            SetLastError(hr);
+            return FALSE;
+        }
 
-        g_cachedProcessExeDir = std::move(test2);
+        g_cachedProcessExeDir = std::move(localExePath);
         return TRUE;
     }
 

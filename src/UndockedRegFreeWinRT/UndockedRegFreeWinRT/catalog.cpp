@@ -50,6 +50,7 @@ struct component
     {
         if (handle == nullptr)
         {
+            LoadLibraryW(module_name.c_str());
             handle = LoadLibraryExW(module_name.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
             if (handle == nullptr)
             {
@@ -81,6 +82,11 @@ struct component
 };
 
 static unordered_map<wstring, shared_ptr<component>> g_types;
+
+int GetModuleSize()
+{
+    return g_types.size();
+}
 
 HRESULT LoadManifestFromPath(std::wstring path)
 {

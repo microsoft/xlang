@@ -8,6 +8,8 @@
 #include "wil/result.h"
 #include "wil/resource.h"
 
+int GetModuleSize();
+
 HRESULT LoadManifestFromPath(std::wstring path);
 
 HRESULT LoadFromSxSManifest(PCWSTR path);
