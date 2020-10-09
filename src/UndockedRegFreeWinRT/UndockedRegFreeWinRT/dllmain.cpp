@@ -1,3 +1,4 @@
+#include "targetver.h"
 #include <Windows.h>
 #include <synchapi.h>
 #include <roapi.h>
