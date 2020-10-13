@@ -10,6 +10,7 @@
 #include <activation.h>
 #include <hstring.h>
 #include <VersionHelpers.h>
+#include <memory>
 #include "../detours/detours.h"
 #include "catalog.h"
 #include "extwinrt.h"
@@ -374,6 +375,7 @@ HRESULT ExtRoLoadCatalog()
     acw.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
 
     hActCtx = CreateActCtxW(&acw);
+    RETURN_LAST_ERROR_IF(!hActCtx);
     if (hActCtx == INVALID_HANDLE_VALUE)
     {
         SetLastError(ERROR_OUTOFMEMORY);
@@ -390,8 +392,8 @@ HRESULT ExtRoLoadCatalog()
         0,
         &bufferSize);
     RETURN_HR_IF(HRESULT_FROM_WIN32(GetLastError()), bufferSize == 0);
-
-    actCtxInfo = (PACTIVATION_CONTEXT_DETAILED_INFORMATION) new BYTE[bufferSize];
+    auto actCtxInfoBuffer = std::make_unique<BYTE[]>(bufferSize);
+    actCtxInfo = reinterpret_cast<PACTIVATION_CONTEXT_DETAILED_INFORMATION>(actCtxInfoBuffer.get());
     if (!actCtxInfo)
     {
         SetLastError(ERROR_OUTOFMEMORY);
@@ -418,8 +420,8 @@ HRESULT ExtRoLoadCatalog()
             0,
             &bufferSize);
         RETURN_HR_IF(HRESULT_FROM_WIN32(GetLastError()), bufferSize == 0);
-
-        asmInfo = (PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION) new BYTE[bufferSize];
+        auto asmInfobuffer = std::make_unique<BYTE[]>(bufferSize);
+        asmInfo = reinterpret_cast<PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION>(asmInfobuffer.get());
         if (!asmInfo)
         {
             SetLastError(ERROR_OUTOFMEMORY);
@@ -448,7 +450,15 @@ BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
     {
         DisableThreadLibraryCalls(hmodule);
         InstallHooks();
-        ExtRoLoadCatalog();
+        try
+        {
+            ExtRoLoadCatalog();
+        }
+        catch (...)
+        {
+            LOG_CAUGHT_EXCEPTION();
+            return false;
+        }
     }
     if (reason == DLL_PROCESS_DETACH)
     {

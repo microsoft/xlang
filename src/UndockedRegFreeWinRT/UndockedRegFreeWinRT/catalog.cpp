@@ -130,7 +130,15 @@ HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
 {
     ComPtr<IStream> fileStream;
     RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifestPath, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
-    return ParseRootManifestFromXmlReaderInput(fileStream.Get());
+    try
+    {
+        return ParseRootManifestFromXmlReaderInput(fileStream.Get());
+    }
+    catch(...)
+    {
+        LOG_CAUGHT_EXCEPTION();
+        return ERROR_SXS_MANIFEST_PARSE_ERROR;
+    }
 }
 
 HRESULT WinRTLoadComponentFromString(std::string_view xmlStringValue)
@@ -139,8 +147,16 @@ HRESULT WinRTLoadComponentFromString(std::string_view xmlStringValue)
     xmlStream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(xmlStringValue.data()), strlen(xmlStringValue.data()) * sizeof(CHAR)));
     RETURN_HR_IF_NULL(E_OUTOFMEMORY, xmlStream);
     ComPtr<IXmlReaderInput> xmlReaderInput;
-    RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));\
-    return ParseRootManifestFromXmlReaderInput(xmlReaderInput.Get());
+    RETURN_IF_FAILED(CreateXmlReaderInputWithEncodingName(xmlStream.Get(), nullptr, L"utf-8", FALSE, nullptr, &xmlReaderInput));
+    try
+    {
+        return ParseRootManifestFromXmlReaderInput(xmlReaderInput.Get());
+    }
+    catch (...)
+    {
+        LOG_CAUGHT_EXCEPTION();
+        return ERROR_SXS_MANIFEST_PARSE_ERROR;
+    }
 }
 
 HRESULT ParseRootManifestFromXmlReaderInput(IUnknown* input)
