@@ -30,7 +30,7 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         winrt::TestComponent::ClassBoth c;
         REQUIRE(c.Apartment() == APTTYPE_MTA);
         winrt::clear_factory_cache();
-        winrt::uninit_apartment();
+        winrt::uninit_partment();
     }
     SECTION("Cross Apartment MTA Activation")
     {
@@ -39,7 +39,8 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         REQUIRE(c.Apartment() == APTTYPE_MTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
-    }
+    }    
+
     SECTION("BLOCK STA To Current MTA")
     {
         winrt::init_apartment();

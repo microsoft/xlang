@@ -21,3 +21,4 @@ namespace TestComponent
         Int32 Apartment;
     }
 }
+

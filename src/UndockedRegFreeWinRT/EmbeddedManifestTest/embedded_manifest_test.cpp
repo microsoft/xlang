@@ -35,7 +35,7 @@ TEST_CASE("Embedded Exe Manifest Test")
     }
     SECTION("Activate TestComponent.MTA")
     {
-        winrt::init_apartment(winrt::apartment_type::single_threaded);
+        winrt::init_apartment();
         winrt::TestComponent::ClassMta c;
         REQUIRE(c.Apartment() == APTTYPE_MTA);
         winrt::clear_factory_cache();
@@ -63,7 +63,7 @@ TEST_CASE("Embedded Dll Manifest Test")
     }
     SECTION("Activate TestComponent.MTA")
     {
-        winrt::init_apartment(winrt::apartment_type::single_threaded);
+        winrt::init_apartment();
         winrt::EmbeddedTestComponent::ClassMta c;
         REQUIRE(c.Apartment() == APTTYPE_MTA);
         winrt::clear_factory_cache();

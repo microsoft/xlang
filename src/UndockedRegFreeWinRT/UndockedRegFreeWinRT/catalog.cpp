@@ -50,7 +50,6 @@ struct component
     {
         if (handle == nullptr)
         {
-            LoadLibraryW(module_name.c_str());
             handle = LoadLibraryExW(module_name.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
             if (handle == nullptr)
             {
@@ -68,7 +67,6 @@ struct component
     HRESULT GetActivationFactory(HSTRING className, REFIID  iid, void** factory)
     {
         RETURN_IF_FAILED(LoadModule());
-
         IActivationFactory* ifactory = nullptr;
         HRESULT hr = this->get_activation_factory(className, &ifactory);
         // optimize for IActivationFactory?

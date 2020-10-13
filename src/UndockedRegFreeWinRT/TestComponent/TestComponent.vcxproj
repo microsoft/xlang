@@ -131,21 +131,24 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DENTRY_PREFIX=Proxy;DPROXY_CLSID_IS={0xc02907ca, 0x97e8, 0x4a6c, 0xac, 0x41, 0x44, 0xd7, 0xe6, 0xcc, 0x25, 0xd9};%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Link>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Link>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DENTRY_PREFIX=Proxy;DPROXY_CLSID_IS={0xc02907ca, 0x97e8, 0x4a6c, 0xac, 0x41, 0x44, 0xd7, 0xe6, 0xcc, 0x25, 0xd9};%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
     </ClCompile>
     <Link>
@@ -154,6 +157,9 @@
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">shlwapi.lib;runtimeobject.lib;Ole32.lib;kernel32.Lib;OleAut32.lib;</AdditionalDependencies>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Bscmake>
       <PreserveSbr Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</PreserveSbr>

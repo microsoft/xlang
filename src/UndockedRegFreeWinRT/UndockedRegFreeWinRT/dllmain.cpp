@@ -437,7 +437,6 @@ HRESULT ExtRoLoadCatalog()
             nullptr));
         RETURN_IF_FAILED(LoadManifestFromPath(asmInfo->lpAssemblyManifestPath));
     }
-    std::cout << "size: " << GetModuleSize() << std::endl;
     return S_OK;
 }
 
