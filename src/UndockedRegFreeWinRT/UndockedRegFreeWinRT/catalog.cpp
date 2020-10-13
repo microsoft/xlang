@@ -130,7 +130,7 @@ HRESULT WinRTLoadComponentFromFilePath(PCWSTR manifestPath)
 {
     ComPtr<IStream> fileStream;
     RETURN_IF_FAILED(SHCreateStreamOnFileEx(manifestPath, STGM_READ, FILE_ATTRIBUTE_NORMAL, false, nullptr, &fileStream));
-    return ParseRootManifestFromXmlReaderInput(fileStream.Get());;
+    return ParseRootManifestFromXmlReaderInput(fileStream.Get());
 }
 
 HRESULT WinRTLoadComponentFromString(std::string_view xmlStringValue)
