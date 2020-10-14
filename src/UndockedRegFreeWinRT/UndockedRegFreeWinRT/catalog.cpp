@@ -14,6 +14,7 @@
 #include <codecvt>
 #include <locale>
 #include <RoMetadataApi.h>
+#include <algorithm>
 #include "catalog.h"
 #include "TypeResolution.h"
 
@@ -82,6 +83,13 @@ struct component
 
 static unordered_map<wstring, shared_ptr<component>> g_types;
 
+std::wstring_view wstr_tolower(std::wstring& s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+        [](unsigned char c) { return std::tolower(c); } // correct
+    );
+    return s;
+}
+
 HRESULT LoadManifestFromPath(std::wstring path)
 {
     if (path.size() < 4)
@@ -89,6 +97,7 @@ HRESULT LoadManifestFromPath(std::wstring path)
         return COR_E_ARGUMENT;
     }
     std::wstring ext(path.substr(path.size() - 4, path.size()));
+    ext = wstr_tolower(ext);
     if (ext.compare(L".exe") == 0 || ext.compare(L".dll") == 0)
     {
         return LoadFromEmbeddedManifest(path.c_str());
