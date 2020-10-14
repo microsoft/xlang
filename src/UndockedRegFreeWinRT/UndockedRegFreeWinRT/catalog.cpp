@@ -98,7 +98,6 @@ HRESULT LoadManifestFromPath(std::wstring path)
     }
     std::wstring ext(path.substr(path.size() - 4, path.size()));
     ext = wstr_tolower(ext);
-    HRESULT hr;
     if (ext.compare(L".exe") == 0 || ext.compare(L".dll") == 0)
     {
         return LoadFromEmbeddedManifest(path.c_str());

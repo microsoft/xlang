@@ -90,7 +90,7 @@ namespace UndockedRegFreeWinRTManagedTest
                 testsFailed++;
             }
 
-            Console.WriteLine("Undocked RegFree Embedded Manifest Managed Test - " + (testsRan - testsFailed) + " out of " + testsRan + " tests passed");
+            Console.WriteLine("Undocked RegFree WinRT Managed Test - " + (testsRan - testsFailed) + " out of " + testsRan + " tests passed");
             return testsFailed == 0 ? 0 : 1;
         }
     }
