@@ -8,6 +8,8 @@ namespace UndockedRegFreeWinRTManagedTest
     class Program
     {
         public static bool succeeded;
+        private static int testsRan;
+        private static int testsFailed;
 
         static void TestClassBoth(int expected)
         {
@@ -48,58 +50,48 @@ namespace UndockedRegFreeWinRTManagedTest
             }
         }
 
+        static bool RunTest(System.Threading.ThreadStart testThreadStart, System.Threading.ApartmentState apartmentState)
+        {
+            testsRan++;
+            System.Threading.Thread testThread = new System.Threading.Thread(testThreadStart);
+            succeeded = false;
+            testThread.SetApartmentState(apartmentState);
+            testThread.Start();
+            testThread.Join();
+            return succeeded;
+        }
+
         static int Main(string[] args)
         {
             UndockedRegFreeWinrt.Initialize();
             Console.WriteLine("Undocked RegFree WinRT Managed Test - Starting");
-            System.Threading.Thread testThread;
 
-            succeeded = false;
-            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassBoth(3)));
-            testThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            testThread.Start();
-            testThread.Join();
-            if (!succeeded)
+            if (!RunTest(new System.Threading.ThreadStart(() => TestClassBoth(3)), System.Threading.ApartmentState.STA))
             {
                 Console.WriteLine("Both to STA test failed");
-                return 1;
+                testsFailed++;
             }
 
-            succeeded = false;
-            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassBoth(1)));
-            testThread.SetApartmentState(System.Threading.ApartmentState.MTA);
-            testThread.Start();
-            testThread.Join();
-            if (!succeeded)
+            if (!RunTest(new System.Threading.ThreadStart(() => TestClassBoth(1)), System.Threading.ApartmentState.MTA))
             {
                 Console.WriteLine("Both to MTA test failed");
-                return 1;
+                testsFailed++;
             }
 
-            succeeded = false;
-            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassMta(1)));
-            testThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            testThread.Start();
-            testThread.Join();
-            if (!succeeded)
+            if (!RunTest(new System.Threading.ThreadStart(() => TestClassMta(1)), System.Threading.ApartmentState.STA))
             {
                 Console.WriteLine("MTA to STA test failed");
-                return 1;
+                testsFailed++;
             }
 
-            succeeded = false;
-            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassSta(1)));
-            testThread.SetApartmentState(System.Threading.ApartmentState.MTA);
-            testThread.Start();
-            testThread.Join();
-            if (succeeded)
+            if (RunTest(new System.Threading.ThreadStart(() => TestClassSta(1)), System.Threading.ApartmentState.MTA))
             {
                 Console.WriteLine("STA to MTA should failed");
-                return 1;
+                testsFailed++;
             }
 
-            Console.WriteLine("Undocked RegFree WinRT Managed Test - All tests passed");
-            return 0;
+            Console.WriteLine("Undocked RegFree Embedded Manifest Managed Test - " + (testsRan - testsFailed) + " out of " + testsRan + " tests passed");
+            return testsFailed == 0 ? 0 : 1;
         }
     }
 }

@@ -39,6 +39,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mwinrtact", "mwinrtact\mwin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ManifestParserTest", "ManifestParserTest\ManifestParserTest.vcxproj", "{7DC750DE-F43C-4A3B-9FBF-8D964458829A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmbeddedManifestManagedTest", "EmbeddedManifestManagedTest\EmbeddedManifestManagedTest.csproj", "{F92E8478-FA44-4DB0-8D86-366EBB09AA14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -166,6 +168,18 @@ Global
 		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|x64.Build.0 = Release|x64
 		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|x86.ActiveCfg = Release|Win32
 		{7DC750DE-F43C-4A3B-9FBF-8D964458829A}.Release|x86.Build.0 = Release|Win32
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Debug|ARM.ActiveCfg = Debug|x86
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Debug|x64.ActiveCfg = Debug|x64
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Debug|x64.Build.0 = Debug|x64
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Debug|x86.ActiveCfg = Debug|x86
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Debug|x86.Build.0 = Debug|x86
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Release|Any CPU.ActiveCfg = Release|x86
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Release|ARM.ActiveCfg = Release|x86
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Release|x64.ActiveCfg = Release|x64
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Release|x64.Build.0 = Release|x64
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Release|x86.ActiveCfg = Release|x86
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -178,6 +192,7 @@ Global
 		{5893A945-2C61-4CF5-A433-2FD1A0D04E09} = {301A3B2F-6A25-4BCE-9656-7F36D32B8F7A}
 		{388CB1AF-5D79-4EFE-9EFF-31B48784CEAE} = {301A3B2F-6A25-4BCE-9656-7F36D32B8F7A}
 		{7DC750DE-F43C-4A3B-9FBF-8D964458829A} = {301A3B2F-6A25-4BCE-9656-7F36D32B8F7A}
+		{F92E8478-FA44-4DB0-8D86-366EBB09AA14} = {301A3B2F-6A25-4BCE-9656-7F36D32B8F7A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A5F87D4F-D55E-43CD-8BE3-E2E1BF2E2A72}
