@@ -49,10 +49,10 @@ https://docs.microsoft.com/en-us/windows/win32/sysinfo/targeting-your-applicatio
 
 
 Windows 8.1 Support (10/16/2020)
-Undocked egFreeWinRT can now activate types down to Windows 8.1. However, there are some minor things to account for on Windows 8.1. 
+Undocked RegFreeWinRT can now activate types down to Windows 8.1. However, there are some minor things to account for on Windows 8.1. 
 
 1) On Windows 8.1. you may encounter 0x8007109A (This operation is only valid in the context of an app container) error when activating your type. This is caused by the app container check that exists in windows 8.1 but not on later versions.
-This can be fixed by, setting the linker option of your component that you're activating to /APPCONTAINER:NO
+This can be fixed by setting the linker option of your component that you're activating to /APPCONTAINER:NO
 Refer to 
 https://docs.microsoft.com/en-us/cpp/build/reference/appcontainer-windows-store-app?view=vs-2019
 https://docs.microsoft.com/en-us/windows/uwp/debug-test-perf/windows-app-certification-kit-tests#appcontainercheck
