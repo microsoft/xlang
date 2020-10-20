@@ -940,6 +940,9 @@ namespace py
     struct is_specalized_interface<winrt::Windows::Foundation::Collections::IIterable<TItem>> : std::true_type {};
 
     template <typename T>
+    struct is_specalized_interface<winrt::Windows::Foundation::IReference<T>> : std::true_type {};
+
+    template <typename T>
     struct converter<T, typename std::enable_if_t<(is_interface_category_v<T> || is_pinterface_category_v<T>) && !is_specalized_interface_v<T>>>
     {
         static PyObject* convert(T const& instance) noexcept
@@ -1038,6 +1041,32 @@ namespace py
             }
 
             return std::move(items);
+        }
+    };
+
+    template <typename T>
+    struct converter<winrt::Windows::Foundation::IReference<T>>
+    {
+        static PyObject* convert(winrt::Windows::Foundation::IReference<T> const& reference) noexcept
+        {
+            if (reference == nullptr)
+            {
+                Py_RETURN_NONE;
+            }
+
+            return converter<T>::convert(reference.Value());
+        }
+
+        static winrt::Windows::Foundation::IReference<T> convert_to(PyObject* obj)
+        {
+            throw_if_pyobj_null(obj);
+
+            if (obj == Py_None)
+            {
+                return nullptr;
+            }
+
+            return converter<T>::convert_to(obj);
         }
     };
 
