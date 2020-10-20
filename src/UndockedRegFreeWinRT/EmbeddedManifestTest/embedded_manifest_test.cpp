@@ -9,14 +9,15 @@
 #include <wrl\client.h>
 #include <wrl\wrappers\corewrappers.h>
 #include "winrt\TestComponent.h"
+#include "winrt\EmbeddedTestComponent.h"
 
 using namespace Microsoft::WRL;
 using namespace ABI::Windows::Foundation;
 using namespace Microsoft::WRL::Wrappers;
 
-TEST_CASE("Undocked Regfree WinRT Activation")
+TEST_CASE("Embedded Exe Manifest Test")
 {
-    SECTION("Both To Current STA")
+    SECTION("Activate TestComponent.Both")
     {
         winrt::init_apartment(winrt::apartment_type::single_threaded);
         winrt::TestComponent::ClassBoth c;
@@ -24,15 +25,15 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
-    SECTION("Both To Current MTA")
+    SECTION("Activate TestComponent.Both")
     {
-        winrt::init_apartment();
-        winrt::TestComponent::ClassBoth c;
-        REQUIRE(c.Apartment() == APTTYPE_MTA);
+        winrt::init_apartment(winrt::apartment_type::single_threaded);
+        winrt::TestComponent::ClassSta c;
+        REQUIRE(c.Apartment() == APTTYPE_MAINSTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
-    SECTION("Cross Apartment MTA Activation")
+    SECTION("Activate TestComponent.MTA")
     {
         winrt::init_apartment(winrt::apartment_type::single_threaded);
         winrt::TestComponent::ClassMta c;
@@ -40,28 +41,31 @@ TEST_CASE("Undocked Regfree WinRT Activation")
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
-    SECTION("BLOCK STA To Current MTA")
+}
+
+TEST_CASE("Embedded Dll Manifest Test")
+{
+    SECTION("Activate TestComponent.Both")
     {
-        winrt::init_apartment();
-        winrt::TestComponent::ClassSta c;
-        REQUIRE(RoActivateInstance(HStringReference(L"TestComponent.ClassSta").Get(), (IInspectable**)winrt::put_abi(c)) == RO_E_UNSUPPORTED_FROM_MTA);
+        winrt::init_apartment(winrt::apartment_type::single_threaded);
+        winrt::EmbeddedTestComponent::ClassBoth c;
+        REQUIRE(c.Apartment() == APTTYPE_MAINSTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
-    SECTION("Test Get Metadata File on Type")
+    SECTION("Activate TestComponent.Both")
     {
         winrt::init_apartment(winrt::apartment_type::single_threaded);
-        HString result;
-        REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent.ClassSta").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == S_OK);
-        REQUIRE(wcsstr(WindowsGetStringRawBuffer(result.Get(), 0), L"TestComponent.winmd") != nullptr);
+        winrt::EmbeddedTestComponent::ClassSta c;
+        REQUIRE(c.Apartment() == APTTYPE_MAINSTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }
-    SECTION("Test Get Metadata File on Namespace")
+    SECTION("Activate TestComponent.MTA")
     {
         winrt::init_apartment(winrt::apartment_type::single_threaded);
-        HString result;
-        REQUIRE(RoGetMetaDataFile(HStringReference(L"TestComponent").Get(), nullptr, result.GetAddressOf(), nullptr, nullptr) == RO_E_METADATA_NAME_IS_NAMESPACE);
+        winrt::EmbeddedTestComponent::ClassMta c;
+        REQUIRE(c.Apartment() == APTTYPE_MTA);
         winrt::clear_factory_cache();
         winrt::uninit_apartment();
     }

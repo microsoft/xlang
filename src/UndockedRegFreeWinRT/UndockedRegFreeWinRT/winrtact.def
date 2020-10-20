@@ -2,5 +2,3 @@ LIBRARY winrtact
 
 EXPORTS
     winrtact_Initialize
-    RegFreeWinRTInitializeForTest
-    RegFreeWinRTUninitializeForTest
