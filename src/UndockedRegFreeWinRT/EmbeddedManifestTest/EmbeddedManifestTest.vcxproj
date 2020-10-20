@@ -21,9 +21,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{DD92B07F-ED53-4318-A775-017AEEF2324F}</ProjectGuid>
+    <ProjectGuid>{48786E53-ACFE-4B61-A739-A9CF366C85DC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>UndockedRegFreeWinRTTest</RootNamespace>
+    <RootNamespace>EmbeddedManifestTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -75,28 +75,28 @@
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
     <OutDir>$(BuildOutDir)</OutDir>
-    <GenerateManifest>false</GenerateManifest>
+    <GenerateManifest>true</GenerateManifest>
     <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
-    <GenerateManifest>false</GenerateManifest>
+    <GenerateManifest>true</GenerateManifest>
     <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
     <OutDir>$(BuildOutDir)</OutDir>
-    <GenerateManifest>false</GenerateManifest>
+    <GenerateManifest>true</GenerateManifest>
     <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
-    <GenerateManifest>false</GenerateManifest>
+    <GenerateManifest>true</GenerateManifest>
     <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -174,7 +174,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="test_apartment_activation.cpp" />
+    <ClCompile Include="embedded_manifest_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -185,18 +185,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ContentWithTargetPath Include="test_files\UndockedRegFreeWinRTTest.exe.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>UndockedRegFreeWinRTTest.exe.manifest</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="test_files\UndockedRegFreeWinRTTest.exe.manifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>UndockedRegFreeWinRTManagedTest.exe.manifest</TargetPath>
-    </ContentWithTargetPath>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="directory.build.props" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="EmbeddedManifestTest.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

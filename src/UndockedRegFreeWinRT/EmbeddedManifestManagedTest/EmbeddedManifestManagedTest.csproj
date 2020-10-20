@@ -4,7 +4,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Platforms>x64;x86</Platforms>
-    <NoWin32Manifest>true</NoWin32Manifest>
+    <ApplicationIcon />
+    <Win32Resource></Win32Resource>
+    <ApplicationManifest>EmbeddedManifestManagedTest.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -20,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EmbeddedTestComponent\EmbeddedTestComponent.vcxproj" />
     <ProjectReference Include="..\mwinrtact\mwinrtact.csproj" />
     <ProjectReference Include="..\TestComponent\TestComponent.vcxproj" />
     <ProjectReference Include="..\UndockedRegFreeWinRT\UndockedRegFreeWinRT.vcxproj" />

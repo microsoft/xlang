@@ -16,12 +16,9 @@ Initializing the detours on winrtact.dll
 Initialization of the dll is taken care of automatically through ForceSymbolReferences. 
 
 - Managed
-For Managed code, one will need to call DllImport on winrtact.dll and extern winrtact_Initialize().
-
-[DllImport("winrtact.dll")]
-static extern void winrtact_Initialize();
-
-winrtact_Initialize() needs to be called on startup to initialize the detours and load the catalog. 
+For Managed code, one will have to initialize it manually by calling 
+Microsoft.Windows.UndockedRegFreeWinrt.Initialize();
+This will initialize the detours and load the catalog. 
 
 
 Example application manifest:
