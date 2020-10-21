@@ -47,6 +47,24 @@ Your application manifest should have the same name as, and be side by side to y
 Starting with Windows 10 19h1, the operating system has this feature by default and will use this information directly. Be sure to  target your application for windows so that the package automatically disables itself when this feature is available by default.
 https://docs.microsoft.com/en-us/windows/win32/sysinfo/targeting-your-application-at-windows-8-1
 
+
+Windows 8.1 Support (10/16/2020)
+Undocked RegFreeWinRT can now activate types down to Windows 8.1. However, there are some minor things to account for on Windows 8.1. 
+
+1) On Windows 8.1. you may encounter error 0x8007109A (This operation is only valid in the context of an app container) when activating your type. This is caused by the app container check that exists in windows 8.1 but not on later versions.
+This can be fixed by setting the linker option of your component that you're activating to /APPCONTAINER:NO
+Refer to 
+https://docs.microsoft.com/en-us/cpp/build/reference/appcontainer-windows-store-app?view=vs-2019
+https://docs.microsoft.com/en-us/windows/uwp/debug-test-perf/windows-app-certification-kit-tests#appcontainercheck
+for more information. 
+
+2) MTA to STA cross apartment activation needs additional advanced manifest and dll work on Windows 8.1. This work isn't required on later versions of Windows because of a feature called metadata based marshaling. 
+For cross apartment activation to work on Windows 8.1, you'll need to author your own proxy/stub dll for the component you're activating and include a classic COM registration in the manifest to register that proxy.
+Refer to 
+https://docs.microsoft.com/en-us/windows/win32/com/building-and-registering-a-proxy-dll
+for more information.
+
+
 ========================================================================
 For more information, visit:
 https://github.com/microsoft/xlang/tree/undocked_winrt_activation
