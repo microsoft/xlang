@@ -7,12 +7,14 @@
 #include <wrl.h>
 #include <ctxtcall.h>
 #include <Processthreadsapi.h>
-#include "../detours/detours.h"
-#include "catalog.h"
 #include <activation.h>
 #include <hstring.h>
 #include <VersionHelpers.h>
+#include <memory>
+#include "../detours/detours.h"
+#include "catalog.h"
 #include "extwinrt.h"
+#include "TypeResolution.h"
 
 #define WIN1019H1_BLDNUM 18362
 
@@ -57,8 +59,6 @@ static decltype(RoActivateInstance)* TrueRoActivateInstance = RoActivateInstance
 static decltype(RoGetActivationFactory)* TrueRoGetActivationFactory = RoGetActivationFactory;
 static decltype(RoGetMetaDataFile)* TrueRoGetMetaDataFile = RoGetMetaDataFile;
 static decltype(RoResolveNamespace)* TrueRoResolveNamespace = RoResolveNamespace;
-
-std::wstring exeFilePath;
 
 enum class ActivationLocation
 {
@@ -285,9 +285,10 @@ HRESULT WINAPI RoGetMetaDataFileDetour(
     mdTypeDef* typeDefToken)
 {
     HRESULT hr = WinRTGetMetadataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
-    if (FAILED(hr))
+    // Don't fallback on RO_E_METADATA_NAME_IS_NAMESPACE failure. This is the intended behavior for namespace names.
+    if (FAILED(hr) && hr != RO_E_METADATA_NAME_IS_NAMESPACE)
     {
-       return TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
+        hr = TrueRoGetMetaDataFile(name, metaDataDispenser, metaDataFilePath, metaDataImport, typeDefToken);
     }
     return hr;
 }
@@ -302,7 +303,9 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     DWORD* subNamespacesCount,
     HSTRING** subNamespaces)
 {
-    auto pathReference = Microsoft::WRL::Wrappers::HStringReference(exeFilePath.c_str());
+    PCWSTR exeFilePath = nullptr;
+    UndockedRegFreeWinRT::GetProcessExeDir(&exeFilePath);
+    auto pathReference = Microsoft::WRL::Wrappers::HStringReference(exeFilePath);
     HSTRING packageGraphDirectories[] = { pathReference.Get() };
     HRESULT hr = TrueRoResolveNamespace(name, pathReference.Get(),
         ARRAYSIZE(packageGraphDirectories), packageGraphDirectories,
@@ -323,11 +326,6 @@ void InstallHooks()
     if (DetourIsHelperProcess()) {
         return;
     }
-
-    WCHAR filePath[MAX_PATH];
-    GetModuleFileNameW(nullptr, filePath, _countof(filePath));
-    std::wstring::size_type pos = std::wstring(filePath).find_last_of(L"\\/");
-    exeFilePath = std::wstring(filePath).substr(0, pos);
 
     DetourRestoreAfterWith();
 
@@ -355,13 +353,92 @@ void RemoveHooks()
 HRESULT ExtRoLoadCatalog()
 {
     WCHAR filePath[MAX_PATH];
-    GetModuleFileNameW(nullptr, filePath, _countof(filePath));
+    if (!GetModuleFileNameW(nullptr, filePath, _countof(filePath)))
+    {
+        return HRESULT_FROM_WIN32(GetLastError());
+    }
     std::wstring manifestPath(filePath);
-    manifestPath += L".manifest";
+    HANDLE hActCtx = INVALID_HANDLE_VALUE;
+    auto exit = wil::scope_exit([&]
+    {
+        if (hActCtx != INVALID_HANDLE_VALUE)
+        {
+            ReleaseActCtx(hActCtx);
+        }
+    });
+    wil::unique_hmodule exeModule;
+    RETURN_IF_WIN32_BOOL_FALSE(GetModuleHandleExW(0, nullptr, &exeModule));
+    ACTCTXW acw = { sizeof(acw) };
+    acw.lpSource = manifestPath.c_str();
+    acw.hModule = exeModule.get();
+    acw.lpResourceName = MAKEINTRESOURCEW(1);
+    acw.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
 
-    return WinRTLoadComponent(manifestPath.c_str());
+    hActCtx = CreateActCtxW(&acw);
+    RETURN_LAST_ERROR_IF(!hActCtx);
+    if (hActCtx == INVALID_HANDLE_VALUE)
+    {
+        SetLastError(ERROR_OUTOFMEMORY);
+        return HRESULT_FROM_WIN32(GetLastError());
+    }
+
+    PACTIVATION_CONTEXT_DETAILED_INFORMATION actCtxInfo = nullptr;
+    SIZE_T bufferSize = 0;
+    (void)QueryActCtxW(0,
+        hActCtx,
+        nullptr,
+        ActivationContextDetailedInformation,
+        nullptr,
+        0,
+        &bufferSize);
+    RETURN_HR_IF(HRESULT_FROM_WIN32(GetLastError()), bufferSize == 0);
+    auto actCtxInfoBuffer = std::make_unique<BYTE[]>(bufferSize);
+    actCtxInfo = reinterpret_cast<PACTIVATION_CONTEXT_DETAILED_INFORMATION>(actCtxInfoBuffer.get());
+    if (!actCtxInfo)
+    {
+        SetLastError(ERROR_OUTOFMEMORY);
+        return HRESULT_FROM_WIN32(GetLastError());
+    }
+
+    RETURN_IF_WIN32_BOOL_FALSE(QueryActCtxW(0,
+        hActCtx,
+        nullptr,
+        ActivationContextDetailedInformation,
+        actCtxInfo,
+        bufferSize,
+        nullptr));
+
+    for (DWORD index = 1; index <= actCtxInfo->ulAssemblyCount; index++)
+    {
+        bufferSize = 0;
+        PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION asmInfo = nullptr;
+        (void)QueryActCtxW(0,
+            hActCtx,
+            &index,
+            AssemblyDetailedInformationInActivationContext,
+            nullptr,
+            0,
+            &bufferSize);
+        RETURN_HR_IF(HRESULT_FROM_WIN32(GetLastError()), bufferSize == 0);
+        auto asmInfobuffer = std::make_unique<BYTE[]>(bufferSize);
+        asmInfo = reinterpret_cast<PACTIVATION_CONTEXT_ASSEMBLY_DETAILED_INFORMATION>(asmInfobuffer.get());
+        if (!asmInfo)
+        {
+            SetLastError(ERROR_OUTOFMEMORY);
+            return HRESULT_FROM_WIN32(GetLastError());
+        }
+
+        RETURN_IF_WIN32_BOOL_FALSE(QueryActCtxW(0,
+            hActCtx,
+            &index,
+            AssemblyDetailedInformationInActivationContext,
+            asmInfo,
+            bufferSize,
+            nullptr));
+        RETURN_IF_FAILED(LoadManifestFromPath(asmInfo->lpAssemblyManifestPath));
+    }
+    return S_OK;
 }
-
 
 BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 {
@@ -373,26 +450,21 @@ BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
     {
         DisableThreadLibraryCalls(hmodule);
         InstallHooks();
-        ExtRoLoadCatalog();
+        try
+        {
+            ExtRoLoadCatalog();
+        }
+        catch (...)
+        {
+            LOG_CAUGHT_EXCEPTION();
+            return false;
+        }
     }
     if (reason == DLL_PROCESS_DETACH)
     {
         RemoveHooks();
     }
     return true;
-}
-
-HRESULT WINAPI RegFreeWinRTInitializeForTest()
-{
-    InstallHooks();
-    ExtRoLoadCatalog();
-    return S_OK;
-}
-
-HRESULT WINAPI RegFreeWinRTUninitializeForTest()
-{
-    RemoveHooks();
-    return S_OK;
 }
 
 extern "C" void WINAPI winrtact_Initialize()

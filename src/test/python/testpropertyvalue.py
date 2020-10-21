@@ -1,6 +1,8 @@
 import sys
 sys.path.append("./generated")
 
+from uuid import UUID
+
 import unittest
 
 import winrt.windows.foundation as wf
@@ -91,7 +93,12 @@ class TestPropertyValue(unittest.TestCase):
         self.assertEqual(ipv.type, wf.PropertyType.TIME_SPAN)
         self.assertEqual(ipv.get_time_span().duration, 0)        
 
-    # # TODO: CreateGuid
+    def test_create_Guid(self):
+        u = UUID('01234567-89ab-cdef-0123456789abcdef')
+        o = wf.PropertyValue.create_guid(u)
+        ipv = wf.IPropertyValue._from(o)
+        self.assertEqual(ipv.type, wf.PropertyType.GUID)
+        self.assertEqual(ipv.get_guid(), u)
 
     def test_create_Point(self):
         o = wf.PropertyValue.create_point(wf.Point(2, 4))

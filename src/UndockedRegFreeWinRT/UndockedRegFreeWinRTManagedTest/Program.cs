@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using TestComponent;
+using Microsoft.Windows;
 
 namespace UndockedRegFreeWinRTManagedTest
 {
     class Program
     {
-        [DllImport("winrtact.dll")]
-        static extern void winrtact_Initialize();
-
         public static bool succeeded;
+        private static int testsRan;
+        private static int testsFailed;
 
         static void TestClassBoth(int expected)
         {
@@ -26,7 +26,7 @@ namespace UndockedRegFreeWinRTManagedTest
 
         static void TestClassMta(int expected)
         {
-            try 
+            try
             {
                 TestComponent.ClassMta c = new ClassMta();
                 succeeded = (expected == c.Apartment);
@@ -50,40 +50,48 @@ namespace UndockedRegFreeWinRTManagedTest
             }
         }
 
+        static bool RunTest(System.Threading.ThreadStart testThreadStart, System.Threading.ApartmentState apartmentState)
+        {
+            testsRan++;
+            System.Threading.Thread testThread = new System.Threading.Thread(testThreadStart);
+            succeeded = false;
+            testThread.SetApartmentState(apartmentState);
+            testThread.Start();
+            testThread.Join();
+            return succeeded;
+        }
+
         static int Main(string[] args)
         {
-            winrtact_Initialize();
-            System.Threading.Thread testThread;
+            UndockedRegFreeWinrt.Initialize();
+            Console.WriteLine("Undocked RegFree WinRT Managed Test - Starting");
 
-            succeeded = false;
-            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassBoth(3)));
-            testThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            testThread.Start();
-            testThread.Join();
-            if (!succeeded) return 1;
+            if (!RunTest(new System.Threading.ThreadStart(() => TestClassBoth(3)), System.Threading.ApartmentState.STA))
+            {
+                Console.WriteLine("Both to STA test failed");
+                testsFailed++;
+            }
 
-            succeeded = false;
-            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassBoth(1)));
-            testThread.SetApartmentState(System.Threading.ApartmentState.MTA);
-            testThread.Start();
-            testThread.Join();
-            if (!succeeded) return 1;
+            if (!RunTest(new System.Threading.ThreadStart(() => TestClassBoth(1)), System.Threading.ApartmentState.MTA))
+            {
+                Console.WriteLine("Both to MTA test failed");
+                testsFailed++;
+            }
 
-            succeeded = false;
-            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassMta(1)));
-            testThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            testThread.Start();
-            testThread.Join();
-            if (!succeeded) return 1;
+            if (!RunTest(new System.Threading.ThreadStart(() => TestClassMta(1)), System.Threading.ApartmentState.STA))
+            {
+                Console.WriteLine("MTA to STA test failed");
+                testsFailed++;
+            }
 
-            succeeded = false;
-            testThread = new System.Threading.Thread(new System.Threading.ThreadStart(() => TestClassSta(1)));
-            testThread.SetApartmentState(System.Threading.ApartmentState.MTA);
-            testThread.Start();
-            testThread.Join();
-            if (succeeded) return 1;
+            if (RunTest(new System.Threading.ThreadStart(() => TestClassSta(1)), System.Threading.ApartmentState.MTA))
+            {
+                Console.WriteLine("STA to MTA should failed");
+                testsFailed++;
+            }
 
-            return 0;
+            Console.WriteLine("Undocked RegFree WinRT Managed Test - " + (testsRan - testsFailed) + " out of " + testsRan + " tests passed");
+            return testsFailed == 0 ? 0 : 1;
         }
     }
 }

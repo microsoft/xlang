@@ -75,21 +75,29 @@
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
     <OutDir>$(BuildOutDir)</OutDir>
+    <GenerateManifest>false</GenerateManifest>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
+    <GenerateManifest>false</GenerateManifest>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
     <OutDir>$(BuildOutDir)</OutDir>
+    <GenerateManifest>false</GenerateManifest>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
+    <GenerateManifest>false</GenerateManifest>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -169,7 +177,6 @@
     <ClCompile Include="test_apartment_activation.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="catch.hpp" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
