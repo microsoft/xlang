@@ -672,6 +672,63 @@ namespace py
     };
 
     template <>
+    struct converter<winrt::guid>
+    {
+        static PyObject* convert(winrt::guid value) noexcept
+        {
+            PyObject* valueAsBytes = PyBytes_FromStringAndSize((char*)&value, sizeof(value));
+            PyObject* uuidModule = PyImport_ImportModule("uuid");
+            PyObject* uuidClass = PyObject_GetAttrString(uuidModule, "UUID");
+            PyObject* args = PyTuple_New(0);
+            PyObject* kwargs = PyDict_New();
+            PyDict_SetItemString(kwargs,
+#if PY_LITTLE_ENDIAN
+                "bytes_le",
+#else
+                "bytes",
+#endif
+                valueAsBytes);
+            PyObject* uuidInstance = PyObject_Call(uuidClass, args, kwargs);
+            Py_DECREF(kwargs);
+            Py_DECREF(args);
+            Py_DECREF(uuidClass);
+            Py_DECREF(uuidModule);
+            Py_DECREF(valueAsBytes);
+            return uuidInstance;
+        }
+
+        static winrt::guid convert_to(PyObject* obj)
+        {
+            throw_if_pyobj_null(obj);
+
+            PyObject* bytes = PyObject_GetAttrString(obj,
+#if PY_LITTLE_ENDIAN
+                "bytes_le");
+#else
+                "bytes");
+#endif
+            if (bytes == NULL)
+            {
+                throw winrt::hresult_invalid_argument();
+            }
+
+            winrt::guid result;
+            char* buffer;
+            Py_ssize_t size;
+            if (PyBytes_AsStringAndSize(bytes, &buffer, &size) == -1 || size != sizeof(result))
+            {
+                Py_DECREF(bytes);
+                throw winrt::hresult_invalid_argument();
+            }
+
+            memcpy(&result, buffer, size);
+            Py_DECREF(bytes);
+
+            return result;
+        }
+    };
+
+    template <>
     struct converter<winrt::Windows::Foundation::IInspectable>
     {
         static PyObject* convert(winrt::Windows::Foundation::IInspectable const& value) noexcept
@@ -940,6 +997,9 @@ namespace py
     struct is_specalized_interface<winrt::Windows::Foundation::Collections::IIterable<TItem>> : std::true_type {};
 
     template <typename T>
+    struct is_specalized_interface<winrt::Windows::Foundation::IReference<T>> : std::true_type {};
+
+    template <typename T>
     struct converter<T, typename std::enable_if_t<(is_interface_category_v<T> || is_pinterface_category_v<T>) && !is_specalized_interface_v<T>>>
     {
         static PyObject* convert(T const& instance) noexcept
@@ -1038,6 +1098,32 @@ namespace py
             }
 
             return std::move(items);
+        }
+    };
+
+    template <typename T>
+    struct converter<winrt::Windows::Foundation::IReference<T>>
+    {
+        static PyObject* convert(winrt::Windows::Foundation::IReference<T> const& reference) noexcept
+        {
+            if (reference == nullptr)
+            {
+                Py_RETURN_NONE;
+            }
+
+            return converter<T>::convert(reference.Value());
+        }
+
+        static winrt::Windows::Foundation::IReference<T> convert_to(PyObject* obj)
+        {
+            throw_if_pyobj_null(obj);
+
+            if (obj == Py_None)
+            {
+                return nullptr;
+            }
+
+            return converter<T>::convert_to(obj);
         }
     };
 
