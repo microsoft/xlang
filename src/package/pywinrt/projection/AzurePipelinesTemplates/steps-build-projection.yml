@@ -4,6 +4,11 @@ parameters: # defaults for any parameters that aren't specified
   projectionType: 'partial'
 
 steps:
+- script: echo "=== Parameters - steps-build-projection.yml ==="
+- ${{ each parameter in parameters }}:
+  - script: echo ${{ parameter.Key }} 
+  - script: echo ${{ parameter.Value }}
+
 - task: DownloadBuildArtifacts@0 
   inputs: 
     buildType: 'current'
@@ -42,6 +47,7 @@ steps:
 
 - ${{ if eq(parameters.architecture, 'amd64') }}:
   - task: UsePythonVersion@0
+    displayName: 'Select python version (x64)'
     inputs:
       versionSpec: ${{ parameters.pythonVersionSpec }}
       addToPath: true 
@@ -49,6 +55,7 @@ steps:
 
 - ${{ if eq(parameters.architecture, 'x86') }}:
   - task: UsePythonVersion@0
+    displayName: 'Select python version (x86)'
     inputs:
       versionSpec: ${{ parameters.pythonVersionSpec }}
       addToPath: true 
