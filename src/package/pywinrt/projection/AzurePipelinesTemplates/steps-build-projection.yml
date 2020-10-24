@@ -58,7 +58,7 @@ steps:
   displayName: 'Generate python projection build files via cmake'
   inputs:
     cwd: '.'
-    cmakeArgs: '-S src/package/pywinrt/projection -B_build -GNinja -DCMAKE_BUILD_TYPE=$(buildConfiguration) -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl'
+    cmakeArgs: '-S src/package/pywinrt/projection/ -B_build -GNinja -DCMAKE_BUILD_TYPE=$(buildConfiguration) -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl'
 
 - task: CMake@1
   displayName: 'build python projection'
@@ -76,7 +76,7 @@ steps:
   inputs:
     sourceFolder: src/package/pywinrt/projection/pywinrt/
     contents: '**'
-    targetFolder: $(Build.ArtifactStagingDirectory)/projection/$(buildArchitecture)
+    targetFolder: $(Build.ArtifactStagingDirectory)/projection/$(pythonVersionSpec)/$(buildArchitecture)
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish artifact: projection'

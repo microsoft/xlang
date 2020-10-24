@@ -6,6 +6,15 @@ jobs:
   dependsOn: ${{ parameters.dependsOn }}
   pool:
     vmImage: 'windows-2019'
+  strategy:
+    maxParallel: 10
+    matrix:
+      Release_37_py:
+        PyMajorVer: '3'
+        PyMinorVer: '7'
+      Release_38_py:
+        PyMajorVer: '3'
+        PyMinorVer: '8'
 
   steps:
   
@@ -18,7 +27,7 @@ jobs:
 
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.8.x'
+      versionSpec: '$(PyMajorVer).$(PyMinorVer).x'
       addToPath: true 
 
   - script: pip install wheel
@@ -27,32 +36,12 @@ jobs:
   - template: steps-package-projection.yml
     parameters:
       architecture: x86
-      pythonVersionSpec: '3.7.x'
+      pythonVersionSpec: '$(PyMajorVer).$(PyMinorVer).x'
 
   - template: steps-package-projection.yml
     parameters:
       architecture: amd64
-      pythonVersionSpec: '3.7.x'
-
-  - template: steps-package-projection.yml
-    parameters:
-      architecture: x86
-      pythonVersionSpec: '3.8.x'
-
-  - template: steps-package-projection.yml
-    parameters:
-      architecture: amd64
-      pythonVersionSpec: '3.8.x'
-
-  - template: steps-package-projection.yml
-    parameters:
-      architecture: x86
-      pythonVersionSpec: '3.9.x'
-
-  - template: steps-package-projection.yml
-    parameters:
-      architecture: amd64
-      pythonVersionSpec: '3.9.x'
+      pythonVersionSpec: '$(PyMajorVer).$(PyMinorVer).x'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: wheel'
