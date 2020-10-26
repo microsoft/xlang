@@ -2,6 +2,7 @@ parameters: # defaults for any parameters that aren't specified
   architecture: 'x86'
   pythonVersionSpec: '3.9.x'
   projectionType: 'partial'
+  pythonArchSpec: 'x86'
 
 steps:
 - script: echo "=== Parameters - steps-build-projection.yml ==="
@@ -45,21 +46,11 @@ steps:
     buildArchitecture: $(buildArchitecture)  
     hostArchitecture: 'amd64'
 
-- ${{ if eq(parameters.architecture, 'amd64') }}:
-  - task: UsePythonVersion@0
-    displayName: 'Select python version (x64)'
-    inputs:
-      versionSpec: ${{ parameters.pythonVersionSpec }}
-      addToPath: true 
-      architecture: x64
-
-- ${{ if eq(parameters.architecture, 'x86') }}:
-  - task: UsePythonVersion@0
-    displayName: 'Select python version (x86)'
-    inputs:
-      versionSpec: ${{ parameters.pythonVersionSpec }}
-      addToPath: true 
-      architecture: x86
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: ${{ parameters.pythonVersionSpec }}
+    addToPath: true 
+    architecture: ${{ parameters.pythonArchSpec }}
 
 - task: CMake@1
   displayName: 'Generate python projection build files via cmake'
