@@ -4,11 +4,12 @@ parameters: # defaults for any parameters that aren't specified
   projectionType: 'partial'
   pythonArchSpec: 'x86'
 
-steps:
-- script: echo "=== Parameters - steps-build-projection.yml ==="
-- ${{ each parameter in parameters }}:
-  - script: echo ${{ parameter.Key }} 
-  - script: echo ${{ parameter.Value }}
+# Diagnostics logging - enable as needed on private runs.
+# steps:
+# - script: echo "=== Parameters - steps-build-projection.yml ==="
+# - ${{ each parameter in parameters }}:
+#   - script: echo ${{ parameter.Key }} 
+#   - script: echo ${{ parameter.Value }}
 
 - task: DownloadBuildArtifacts@0 
   inputs: 
