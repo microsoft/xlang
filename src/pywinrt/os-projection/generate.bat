@@ -1,20 +1,19 @@
-@echo on
+@echo off
 :: Generate the Windows Runtime Projection DLL
 :: Usage
 ::   generate.bat <pywinrt folder> <cppwinrt folder> <output path>
 
 set windows_sdk=10.0.19041.0
 
-set pywinrt_path="%~1"
-set cppwinrt_path="%~2"
-set output_path="%~3"
-
-set pywinrt_exe=%pywinrt_path%\pywinrt.exe
-set cppwinrt_exe=%cppwinrt_path%\cppwinrt.exe
+set pywinrt_exe="%~1\pywinrt.exe"
+set cppwinrt_exe="%~2\cppwinrt.exe"
+set cpp_output_path="%~3\cppwinrt"
+set py_output_path="%~3\pywinrt"
 
 :: clean output folder
-:: TODO: fake version...
-echo erase /s /q %output_path%\*
+echo cleaning old output
+echo erase /s /q %cpp_output_path%\*
+echo erase /s /q %py_output_path%\*
 
 :: TODO: swap this later once basically working.
 :: set %namespaces%="Windows."
@@ -22,7 +21,7 @@ set namespaces=-include Windows.Data.Json -include Windows.Devices.Geolocation -
 set exclude=-exclude Windows.UI.Composition -exclude Windows.UI.Xaml
 
 
-echo %cppwinrt_exe% -input %windows_sdk% -output %output_path%\cppwinrt -verbose
-%cppwinrt_exe% -input %windows_sdk% -output %output_path%\cppwinrt -verbose
-echo %pywinrt_exe% -input %windows_sdk% %namespaces% %exclude% -output %output_path% -verbose 
-%pywinrt_exe% -input %windows_sdk% %namespaces% %exclude% -output %output_path%\pywinrt -verbose 
+echo %cppwinrt_exe% -input %windows_sdk% -output %cpp_output_path% -verbose
+%cppwinrt_exe% -input %windows_sdk% -output %cpp_output_path% -verbose
+echo %pywinrt_exe% -input %windows_sdk% %namespaces% %exclude% -output %py_output_path% -verbose 
+%pywinrt_exe% -input %windows_sdk% %namespaces% %exclude% -output %py_output_path% -verbose 
