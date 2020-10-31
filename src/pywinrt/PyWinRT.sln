@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pywinrt", "pywinrt\pywinrt.vcxproj", "{FAD2990B-FB0C-4561-BEEF-388CE8A89E03}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "os-projection", "os-projection\os-projection.vcxproj", "{281BE11D-F66E-4FE6-BEF4-8A2C20493D24}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FAD2990B-FB0C-4561-BEEF-388CE8A89E03} = {FAD2990B-FB0C-4561-BEEF-388CE8A89E03}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

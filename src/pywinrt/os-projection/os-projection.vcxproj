@@ -85,7 +85,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <CustomBuildStep>
-      <Command>echo build projection</Command>
+      <Command>$(ProjectDir)generate.bat $(SolutionDir)\x64\Release\ $(CppWinRTPath) $(GeneratedFilesDir)</Command>
       <Outputs>generated\strings.h</Outputs>
       <Inputs>$(ProjectDir)\strings</Inputs>
     </CustomBuildStep>
