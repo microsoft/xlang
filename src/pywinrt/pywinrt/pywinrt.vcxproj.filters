@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="strings">
+      <UniqueIdentifier>{73ba18ed-f415-4061-a0e1-f2f19ff05946}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated">
+      <UniqueIdentifier>{1dfa8866-b427-4c2d-8b89-633f45033710}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{0dc89b36-32bf-4262-a90f-ca73be64f932}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util\impl">
+      <UniqueIdentifier>{cb123793-0e55-4013-8dd8-bd3467ae5d56}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="helpers.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code_writers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="file_writers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="type_writers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\pybase.h">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\strings.h">
+      <Filter>Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="util\cmd_reader.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\task_group.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\text_writer.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\meta_reader.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="strings\enter_function.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
+    <ClCompile Include="strings\module_methods.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
+    <ClCompile Include="strings\ns_module_def.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
+    <ClCompile Include="strings\custom_struct_convert.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\strings.cpp">
+      <Filter>Generated</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="pywinrt.pch">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="strings\package_init.py">
+      <Filter>strings</Filter>
+    </None>
+    <None Include="strings\setup.py">
+      <Filter>strings</Filter>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>
