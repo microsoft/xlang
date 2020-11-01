@@ -39,12 +39,12 @@ to the console.
 ``` python
 import winrt.windows.foundation as wf
 u = wf.Uri("https://github.com/")
-u2 = u.combine_uri("Microsoft/xlang/tree/master/src/tool/python")
+u2 = u.combine_uri("Microsoft/xlang/tree/master/src/")
 print(str(u2))
 ```
 
 For more information on accessing Windows Runtime APIs from Python, please visit
-[Python/WinRT's homepage](https://github.com/Microsoft/xlang/tree/master/src/package/pywinrt/projection). 
+[Python/WinRT's homepage](https://github.com/Microsoft/xlang/tree/master/src/pywinrt). 
 
 For an end-to-end sample of using Python/WinRT, please see the
 [WinML Tutorial](https://github.com/Microsoft/xlang/tree/master/samples/python/winml_tutorial)
