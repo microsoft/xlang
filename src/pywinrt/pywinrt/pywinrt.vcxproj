@@ -22,7 +22,6 @@
   <ItemGroup>
     <ClInclude Include="code_writers.h" />
     <ClInclude Include="file_writers.h" />
-    <ClInclude Include="generated\strings.h" />
     <ClInclude Include="helpers.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="settings.h" />

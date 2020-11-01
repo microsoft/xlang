@@ -15,8 +15,8 @@ echo cleaning old output
 echo erase /s /q %cpp_output_path%\*
 echo erase /s /q %py_output_path%\*
 
-:: TODO: swap this later once basically working.
-:: set %namespaces%="Windows."
+:: To create a tighter inner loop, use the minimal set of namespaces below.
+:: set namespaces=-include Windows.
 set namespaces=-include Windows.Data.Json -include Windows.Devices.Geolocation -include Windows.Foundation -include Windows.Graphics.DirectX
 set exclude=-exclude Windows.UI.Composition -exclude Windows.UI.Xaml
 

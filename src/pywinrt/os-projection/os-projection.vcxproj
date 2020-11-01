@@ -85,14 +85,14 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
-    <CustomBuildStep>
+    <CustomBuildStep >
       <Command>$(ProjectDir)generate.bat $(SolutionDir)\x64\Release\ $(CppWinRTPath) "$(GeneratedFilesDir)"</Command>
       <Outputs>generated\strings.h</Outputs>
       <Inputs>$(ProjectDir)\strings</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <PropertyGroup>
-    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+    <CustomBuildBeforeTargets>BuildGenerateSources</CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -166,19 +166,23 @@
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="$(GeneratedFilesDir)\pywinrt\winrt\src\*.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="$(GeneratedFilesDir)\pywinrt\winrt\src\py.*.cpp" />
-    <ClCompile Include="$(GeneratedFilesDir)\pywinrt\winrt\src\_winrt.cpp" />
-    <ClCompile Include="$(GeneratedFilesDir)\pywinrt\winrt\src\pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-  </ItemGroup>
+  <Target Name="AddWildCardItems" AfterTargets="BuildGenerateSources">
+    <ItemGroup>
+      <_WildCardClInclude Include="$(GeneratedFilesDir)\pywinrt\winrt\src\*.h" />
+      <_WildCardClCompile Include="$(GeneratedFilesDir)\pywinrt\winrt\src\py.*.cpp" />
+      <_WinRTClCompile Include="$(GeneratedFilesDir)\pywinrt\winrt\src\_winrt.cpp" />
+      <ClInclude Include="@(_WildCardClInclude)" />
+      <ClCompile Include="@(_WildCardClCompile)" />
+      <ClCompile Include="@(_WinRTClCompile)" />
+      <ClCompile Include="@(_PCHClCompile)" />
+      <ClCompile Include="$(GeneratedFilesDir)\pywinrt\winrt\src\pch.cpp">
+        <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+        <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+        <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+        <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      </ClCompile>
+    </ItemGroup>
+  </Target>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

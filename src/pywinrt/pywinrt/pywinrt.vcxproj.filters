@@ -16,9 +16,6 @@
     <Filter Include="strings">
       <UniqueIdentifier>{73ba18ed-f415-4061-a0e1-f2f19ff05946}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Generated">
-      <UniqueIdentifier>{1dfa8866-b427-4c2d-8b89-633f45033710}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\util">
       <UniqueIdentifier>{0dc89b36-32bf-4262-a90f-ca73be64f932}</UniqueIdentifier>
     </Filter>
@@ -47,9 +44,6 @@
     </ClInclude>
     <ClInclude Include="strings\pybase.h">
       <Filter>strings</Filter>
-    </ClInclude>
-    <ClInclude Include="generated\strings.h">
-      <Filter>Generated</Filter>
     </ClInclude>
     <ClInclude Include="util\cmd_reader.h">
       <Filter>Header Files\util</Filter>
@@ -84,7 +78,7 @@
       <Filter>strings</Filter>
     </ClCompile>
     <ClCompile Include="generated\strings.cpp">
-      <Filter>Generated</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
