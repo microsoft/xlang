@@ -74,7 +74,7 @@ steps:
   inputs:
     sourceFolder: src/package/pywinrt/projection/pywinrt/
     contents: '**'
-    targetFolder: $(Build.ArtifactStagingDirectory)/projection/$(pythonVersionSpec)/$(buildArchitecture)
+    targetFolder: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.pythonVersionSpec }}/$(buildArchitecture)
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish artifact: projection'
