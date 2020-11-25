@@ -3,7 +3,7 @@ parameters:
 
 jobs:
 
-- job: download_projection
+- job: sign_projection
   dependsOn: ${{ parameters.dependsOn }}
   pool:
     name: Package ES Lab E
