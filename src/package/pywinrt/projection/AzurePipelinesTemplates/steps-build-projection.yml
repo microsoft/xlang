@@ -2,8 +2,14 @@ parameters: # defaults for any parameters that aren't specified
   architecture: 'x86'
   pythonVersionSpec: '3.9.x'
   projectionType: 'partial'
+  pythonArchSpec: 'x86'
 
+# Diagnostics logging - enable as needed on private runs.
 steps:
+# - script: echo "=== Parameters - steps-build-projection.yml ==="
+# - ${{ each parameter in parameters }}:
+#   - script: echo ${{ parameter.Key }} 
+#   - script: echo ${{ parameter.Value }}
 - task: DownloadBuildArtifacts@0 
   inputs: 
     buildType: 'current'
@@ -40,25 +46,17 @@ steps:
     buildArchitecture: $(buildArchitecture)  
     hostArchitecture: 'amd64'
 
-- ${{ if eq(parameters.architecture, 'amd64') }}:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: ${{ parameters.pythonVersionSpec }}
-      addToPath: true 
-      architecture: x64
-
-- ${{ if eq(parameters.architecture, 'x86') }}:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: ${{ parameters.pythonVersionSpec }}
-      addToPath: true 
-      architecture: x86
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: ${{ parameters.pythonVersionSpec }}
+    addToPath: true 
+    architecture: ${{ parameters.pythonArchSpec }}
 
 - task: CMake@1
   displayName: 'Generate python projection build files via cmake'
   inputs:
     cwd: '.'
-    cmakeArgs: '-S src/package/pywinrt/projection -B_build -GNinja -DCMAKE_BUILD_TYPE=$(buildConfiguration) -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl'
+    cmakeArgs: '-S src/package/pywinrt/projection/ -B_build -GNinja -DCMAKE_BUILD_TYPE=$(buildConfiguration) -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl'
 
 - task: CMake@1
   displayName: 'build python projection'
@@ -76,7 +74,7 @@ steps:
   inputs:
     sourceFolder: src/package/pywinrt/projection/pywinrt/
     contents: '**'
-    targetFolder: $(Build.ArtifactStagingDirectory)/projection/$(buildArchitecture)
+    targetFolder: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.pythonVersionSpec }}/$(buildArchitecture)
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish artifact: projection'

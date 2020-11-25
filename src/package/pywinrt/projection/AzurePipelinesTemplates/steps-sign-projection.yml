@@ -1,6 +1,3 @@
-parameters:
-  architecture: 'amd64'
-
 steps:
 
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
@@ -9,11 +6,42 @@ steps:
     scanType: 'Register'
     failOnAlert: true
 
-- task: PkgESCodeSign@10
-  displayName: CodeSign
-  env:
-    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  displayName: 'ESRP CodeSigning'
   inputs:
-    signConfigXml: '$(Build.SourcesDirectory)/src/package/pywinrt/projection/SignConfig.xml'
-    inPathRoot: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}'
-    outPathRoot: '$(Build.ArtifactStagingDirectory)/projection/${{ parameters.architecture }}'
+    ConnectedServiceName: 'Xlang Code Signing'
+    FolderPath: '$(Build.ArtifactStagingDirectory)/projection'
+    signConfigType: inlineSignParams
+    Pattern: '*.dll,*.exe,*.pyd'
+    inlineOperation: |
+     [
+       {
+         "keyCode": "CP-230012",
+         "operationSetCode": "SigntoolSign",
+         "parameters": [
+           {
+             "parameterName": "OpusName",
+             "parameterValue": "Microsoft"
+           },
+           {
+             "parameterName": "OpusInfo",
+             "parameterValue": "http://www.microsoft.com"
+           },
+           {
+             "parameterName": "PageHash",
+             "parameterValue": "/NPH"
+           },
+           {
+             "parameterName": "FileDigest",
+             "parameterValue": "/fd sha256"
+           },
+           {
+             "parameterName": "TimeStamp",
+             "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+           }
+         ],
+         "toolName": "signtool.exe",
+         "toolVersion": "6.2.9304.0"
+       }
+     ]
+
