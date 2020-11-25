@@ -1,5 +1,6 @@
 parameters:
   architecture: 'amd64'
+  pythonVersionSpec: '3.9.x'
 
 steps:
 
@@ -19,14 +20,14 @@ steps:
   inputs:
     sourceFolder: src/package/pywinrt/
     contents: 'LICENSE'
-    targetFolder: $(Build.ArtifactStagingDirectory)/projection/$(pythonVersionSpec)/${{ parameters.architecture }} 
+    targetFolder: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.pythonVersionSpec}}/${{ parameters.architecture }} 
 
 - script: python $(Build.SourcesDirectory)/src/package/pywinrt/projection/setup.py bdist_wheel --python-tag cp$(PyMajorVer)$(PyMinorVer) --plat-name $(platname)
-  workingDirectory: $(Build.ArtifactStagingDirectory)/projection/$(pythonVersionSpec)/${{ parameters.architecture }} 
+  workingDirectory: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.pythonVersionSpec}}/${{ parameters.architecture }} 
   displayName: python setup.py bdist_wheel (${{ parameters.architecture }})
 
 - task: CopyFiles@2
   inputs:
-    sourceFolder: $(Build.ArtifactStagingDirectory)/projection/$(pythonVersionSpec)/${{ parameters.architecture }}/dist
+    sourceFolder: $(Build.ArtifactStagingDirectory)/projection/${{ parameters.pythonVersionSpec}}/${{ parameters.architecture }}/dist
     contents: '*'
-    targetFolder: $(Build.ArtifactStagingDirectory)/wheel
+    targetFolder: $(Build.ArtifactStagingDirectory)/wheel/
