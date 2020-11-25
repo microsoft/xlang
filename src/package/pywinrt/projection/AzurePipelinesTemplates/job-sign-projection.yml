@@ -35,6 +35,12 @@ jobs:
       Release_x64_py38:
         buildArchitecture: 'amd64'
         pythonVersion: '3.8.x'
+      Release_x86_py39:
+        buildArchitecture: 'x86'
+        pythonVersion: '3.9.x'
+      Release_x64_py39:
+        buildArchitecture: 'amd64'
+        pythonVersion: '3.9.x'
 
   steps:
   - template: steps-sign-projection.yml
