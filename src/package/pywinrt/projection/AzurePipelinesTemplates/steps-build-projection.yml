@@ -5,12 +5,11 @@ parameters: # defaults for any parameters that aren't specified
   pythonArchSpec: 'x86'
 
 # Diagnostics logging - enable as needed on private runs.
-# steps:
+steps:
 # - script: echo "=== Parameters - steps-build-projection.yml ==="
 # - ${{ each parameter in parameters }}:
 #   - script: echo ${{ parameter.Key }} 
 #   - script: echo ${{ parameter.Value }}
-
 - task: DownloadBuildArtifacts@0 
   inputs: 
     buildType: 'current'
