@@ -26,7 +26,7 @@ jobs:
       $pywinrtVersion = "0.9.$yy$mmdd.$rev"
       Write-Host "##vso[task.setvariable variable=pywinrtVersion]$pywinrtVersion"
       Write-Host pywinrtVersion=$pywinrtVersion
-    displayName: 'Get pywinrt version nuber from build number'
+    displayName: 'Get pywinrt version number from build number'
 
   - task: CMake@1
     displayName: 'Generate xlang build files via cmake'

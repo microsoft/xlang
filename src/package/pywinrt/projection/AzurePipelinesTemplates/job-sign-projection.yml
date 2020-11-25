@@ -2,7 +2,8 @@ parameters:
   dependsOn: build_projection
 
 jobs:
-- job: sign_projection
+
+- job: download_projection
   dependsOn: ${{ parameters.dependsOn }}
   pool:
     name: Package ES Lab E
@@ -15,16 +16,40 @@ jobs:
       artifactName: projection
       downloadPath: '$(Build.ArtifactStagingDirectory)'
 
+- job: sign_projection
+  dependsOn: download_projection 
+  pool:
+    name: Package ES Lab E
+  strategy:
+    maxParallel: 10
+    matrix:
+      Release_x86_py37:
+        buildArchitecture: 'x86'
+        pythonVersion: '3.7.x'
+      Release_x64_py37:
+        buildArchitecture: 'amd64'
+        pythonVersion: '3.7.x'
+      Release_x86_py38:
+        buildArchitecture: 'x86'
+        pythonVersion: '3.8.x'
+      Release_x64_py38:
+        buildArchitecture: 'amd64'
+        pythonVersion: '3.8.x'
+
+  steps:
   - template: steps-sign-projection.yml
     parameters:
-      architecture: amd64
+      architecture: $(buildArchitecture)
+      pythonVersion: $(pythonVersion)
 
-  - template: steps-sign-projection.yml
-    parameters:
-      architecture: x86
+- job: publish_projection
+  dependsOn: sign_projection
+  pool:
+    name: Package ES Lab E
 
+  steps:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: projection'
     inputs:
-      PathtoPublish: $(Build.ArtifactStagingDirectory)/projection
+      pathToPublish: $(Build.ArtifactStagingDirectory)/projection
       artifactName: projection
