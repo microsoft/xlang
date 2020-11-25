@@ -17,34 +17,6 @@ jobs:
       downloadPath: '$(Build.ArtifactStagingDirectory)'
 
   - template: steps-sign-projection.yml
-    parameters:
-      architecture: 'x86'
-      pythonVersion: '3.7.x'
-
-  - template: steps-sign-projection.yml
-    parameters:
-      architecture: 'amd64'
-      pythonVersion: '3.7.x'
-
-  - template: steps-sign-projection.yml
-    parameters:
-      architecture: 'x86'
-      pythonVersion: '3.8.x'
-
-  - template: steps-sign-projection.yml
-    parameters:
-      architecture: 'amd64'
-      pythonVersion: '3.8.x'
-
-  - template: steps-sign-projection.yml
-    parameters:
-      architecture: 'x86'
-      pythonVersion: '3.9.x'
-
-  - template: steps-sign-projection.yml
-    parameters:
-      architecture: 'amd64'
-      pythonVersion: '3.9.x'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact: projection'
