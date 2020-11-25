@@ -6,9 +6,9 @@
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <CppWinRTGenerateWindowsMetadata>true</CppWinRTGenerateWindowsMetadata>
     <MinimalCoreWin>true</MinimalCoreWin>
-    <ProjectGuid>{e63dc9f0-834c-42c8-9392-13b0531a9959}</ProjectGuid>
-    <ProjectName>TestComponent</ProjectName>
-    <RootNamespace>TestComponent</RootNamespace>
+    <ProjectGuid>{5893A945-2C61-4CF5-A433-2FD1A0D04E09}</ProjectGuid>
+    <ProjectName>EmbeddedTestComponent</ProjectName>
+    <RootNamespace>EmbeddedTestComponent</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>
@@ -76,26 +76,32 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)</IntDir>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -114,7 +120,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <ModuleDefinitionFile>TestComponent.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>EmbeddedTestComponent.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -122,17 +128,29 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
+      <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">EmbeddedTestComponent.manifest</ManifestFile>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">shlwapi.lib;runtimeobject.lib;ole32.lib;kernel32.Lib;oleaut32.lib;</AdditionalDependencies>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Link>
+      <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EmbeddedTestComponent.manifest</ManifestFile>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">shlwapi.lib;runtimeobject.lib;ole32.lib;kernel32.Lib;oleaut32.lib;</AdditionalDependencies>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Link>
+      <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EmbeddedTestComponent.manifest</ManifestFile>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">shlwapi.lib;runtimeobject.lib;ole32.lib;kernel32.Lib;oleaut32.lib;</AdditionalDependencies>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">-manifest EmbeddedTestComponent.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <Manifest>
+      <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">-manifest EmbeddedTestComponent.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <Manifest>
+      <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-manifest EmbeddedTestComponent.manifest</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
@@ -141,6 +159,9 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">EmbeddedTestComponent.manifest</ManifestFile>
+      <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">EmbeddedTestComponent.manifest</ManifestFile>
+      <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">EmbeddedTestComponent.manifest</ManifestFile>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">shlwapi.lib;runtimeobject.lib;ole32.lib;kernel32.Lib;oleaut32.lib;</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">shlwapi.lib;runtimeobject.lib;ole32.lib;kernel32.Lib;oleaut32.lib;</AdditionalDependencies>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">shlwapi.lib;runtimeobject.lib;ole32.lib;kernel32.Lib;oleaut32.lib;</AdditionalDependencies>
@@ -148,12 +169,22 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/APPCONTAINER:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">-manifest EmbeddedTestComponent.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <Manifest>
+      <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">-manifest EmbeddedTestComponent.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <Manifest>
+      <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-manifest EmbeddedTestComponent.manifest</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="Class.h">
       <DependentUpon>Class.idl</DependentUpon>
     </ClInclude>
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -169,13 +200,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="TestComponent.def" />
+    <None Include="EmbeddedTestComponent.def" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
     <Text Include="readme.txt">
       <DeploymentContent>false</DeploymentContent>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
