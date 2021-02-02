@@ -48,7 +48,7 @@ add_compile_options(/await /bigobj /GR- /permissive-)
 
 project(_winrt)
 
-find_package (Python3 COMPONENTS Interpreter Development)
+find_package (Python3 ${PYTHON_VERSION} EXACT COMPONENTS Interpreter Development)
 
 Python3_add_library (_winrt MODULE ${sources})
 
