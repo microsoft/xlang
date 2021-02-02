@@ -6,31 +6,40 @@ Code in this repository provides infrastructure and tooling related to basic met
 
 ### Metadata & Infrastructure
 
-* Undocked RegFree WinRT (this repo)
-* WinRT ABI Header Generation Tool (this repo)
-* [WinRT test component](https://github.com/microsoft/TestWinRT) - Provides a compact but thorough test suite for validating projection support for consuming and implementing Windows Runtime-style APIs
+* [Undocked RegFree WinRT](https://github.com/microsoft/xlang/tree/master/src/UndockedRegFreeWinRT) - Provides access to user-defined WinRT types for versions of Windows prior to Windows 10 May 2019 update.
+
+* [WinRT test component](https://github.com/microsoft/TestWinRT) - Provides a compact but thorough test suite for validating projection support for consuming and implementing Windows Runtime-style APIs.
+
+* [Win32 & COM Metadata](https://github.com/microsoft/win32metadata) - Tooling that analyzes Windows C/C++ headers, and provides metadata describing the Win32 & COM API surface of Windows. This metadata is used to provide access to Win32 from other programming languages such as C# & Rust.
 
 ### C++
 
-* [C++/WinRT](https://github.com/microsoft/cppwinrt)
-* [C++ winmd parser](https://github.com/microsoft/winmd)
+* [C++/WinRT](https://github.com/microsoft/cppwinrt) - A tool that provides C++ support for calling Windows Runtime APIs that has a modern C++ feel.
+
+* [C++ winmd parser](https://github.com/microsoft/winmd) - A C++ parser library for efficiently parsing WinRT metadata.
+
+* [WinRT ABI (C with classes) Header Generation Tool ](https://github.com/microsoft/xlang/tree/master/src/tool/abi) - Tool that generates the C++ representation of the raw "COM-style" interfaces that make WinRT work.
+
+* [C++ /Win32](https://github.com/microsoft/cppwin32) - Tooling that leverages the Win32 metadata to provide a modern C++ development experience for Windows APIs.
+
+* [Windows Implementation Libraries](https://github.com/microsoft/wil) - A set of helper libraries that provide RAII and other helpful abstractions for many existing SDK headers & types.
 
 ### C#
 
-* [C#/WinRT](https://github.com/microsoft/cswinrt)
-
+* [C#/WinRT](https://github.com/microsoft/cswinrt) - Interop support for WinRT APIs and .NET 5.
+* [C#/Wi3n2](https://github.com/microsoft/cswin32) - A metadata-based projection of Win32 and COM APIs.
 
 ### Rust
 
-* [Rust/WinRT](https://github.com/microsoft/winrt-rs)
+* [Rust/WinRT](https://github.com/microsoft/winrt-rs) - Tooling that creates WinRT, Win32 and COM APIs for the Rust programming language.
 
 ### Python
 
-* Python/WinRT (experimental, this repo)
+* [Python/WinRT (experimental)](https://github.com/microsoft/xlang/tree/master/src/tool/python) - Support for calling most (non-XAML) APIs from the Python programming language.
 
 ### Cross-platform WinRT
 
-When this repository first created, we used this space to explore what it would take to bring Windows Runtime APIs to other platforms. While that investment has been put on hold for the time being, some of the projects and samples in this repo remain for but may be in disrepair.
+When this repository first created, we used this space to explore what it would take to bring Windows Runtime APIs to other platforms. While that investment has been put on hold for the time being, some of the project code and samples in this repo remain but may be in disrepair.
 
 ## Related projects
 
