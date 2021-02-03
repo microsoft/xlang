@@ -32,7 +32,7 @@ Code in this repository provides infrastructure and tooling related to basic met
 
 ### Rust
 
-* [Rust/WinRT](https://github.com/microsoft/winrt-rs) - Tooling that creates WinRT, Win32 and COM APIs for the Rust programming language.
+* [Rust for Windows](https://github.com/microsoft/windows-rs) - Tooling that creates WinRT, Win32 and COM APIs for the Rust programming language.
 
 ### Python
 
@@ -66,4 +66,3 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
