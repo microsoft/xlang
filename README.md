@@ -20,14 +20,15 @@ Code in this repository provides infrastructure and tooling related to basic met
 
 * [WinRT ABI (C with classes) Header Generation Tool ](https://github.com/microsoft/xlang/tree/master/src/tool/abi) - Tool that generates the C++ representation of the raw "COM-style" interfaces that make WinRT work.
 
-* [C++ /Win32](https://github.com/microsoft/cppwin32) - Tooling that leverages the Win32 metadata to provide a modern C++ development experience for Windows APIs.
+* [C++/Win32](https://github.com/microsoft/cppwin32) - Tooling that leverages the Win32 metadata to provide a modern C++ development experience for Windows APIs.
 
 * [Windows Implementation Libraries](https://github.com/microsoft/wil) - A set of helper libraries that provide RAII and other helpful abstractions for many existing SDK headers & types.
 
 ### C#
 
 * [C#/WinRT](https://github.com/microsoft/cswinrt) - Interop support for WinRT APIs and .NET 5.
-* [C#/Wi3n2](https://github.com/microsoft/cswin32) - A metadata-based projection of Win32 and COM APIs.
+
+* [C#/Win32](https://github.com/microsoft/cswin32) - A metadata-based projection of Win32 and COM APIs.
 
 ### Rust
 
