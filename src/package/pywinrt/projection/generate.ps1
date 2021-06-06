@@ -1,6 +1,6 @@
 param ([switch]$clean, [switch]$fullProjection)
 
-$windows_sdk = '10.0.17763.0'
+$windows_sdk = '10.0.18362.0'
 $repoRootPath = (get-item $PSScriptRoot).parent.Parent.parent.Parent.FullName
 $projectionPath = "$PSScriptRoot"
 
