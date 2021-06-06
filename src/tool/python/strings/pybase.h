@@ -676,38 +676,59 @@ namespace py
     {
         static PyObject* convert(winrt::guid value) noexcept
         {
-            PyObject* valueAsBytes = PyBytes_FromStringAndSize((char*)&value, sizeof(value));
-            PyObject* uuidModule = PyImport_ImportModule("uuid");
-            PyObject* uuidClass = PyObject_GetAttrString(uuidModule, "UUID");
-            PyObject* args = PyTuple_New(0);
-            PyObject* kwargs = PyDict_New();
-            PyDict_SetItemString(kwargs,
+            pyobj_handle valueAsBytes { PyBytes_FromStringAndSize((char*)&value, sizeof(value)) };
+            if (!valueAsBytes)
+            {
+                return nullptr;
+            }
+            pyobj_handle uuidModule { PyImport_ImportModule("uuid") };
+            if (!uuidModule)
+            {
+                return nullptr;
+            }
+            pyobj_handle uuidClass { PyObject_GetAttrString(uuidModule.get(), "UUID") };
+            if (!uuidClass)
+            {
+                return nullptr;
+            }
+            pyobj_handle args { PyTuple_New(0) };
+            if (!args)
+            {
+                return nullptr;
+            }
+            pyobj_handle kwargs { PyDict_New() };
+            if (!kwargs)
+            {
+                return nullptr;
+            }
+
+            auto result = PyDict_SetItemString(kwargs.get(),
 #if PY_LITTLE_ENDIAN
                 "bytes_le",
 #else
                 "bytes",
 #endif
-                valueAsBytes);
-            PyObject* uuidInstance = PyObject_Call(uuidClass, args, kwargs);
-            Py_DECREF(kwargs);
-            Py_DECREF(args);
-            Py_DECREF(uuidClass);
-            Py_DECREF(uuidModule);
-            Py_DECREF(valueAsBytes);
-            return uuidInstance;
+                valueAsBytes.get());
+
+            if (result == -1)
+            {
+                return nullptr;
+            }
+
+            return PyObject_Call(uuidClass.get(), args.get(), kwargs.get());
         }
 
         static winrt::guid convert_to(PyObject* obj)
         {
             throw_if_pyobj_null(obj);
 
-            PyObject* bytes = PyObject_GetAttrString(obj,
+            pyobj_handle bytes { PyObject_GetAttrString(obj,
 #if PY_LITTLE_ENDIAN
-                "bytes_le");
+                "bytes_le") };
 #else
-                "bytes");
+                "bytes") };
 #endif
-            if (bytes == NULL)
+            if (!bytes)
             {
                 throw winrt::hresult_invalid_argument();
             }
@@ -715,14 +736,12 @@ namespace py
             winrt::guid result;
             char* buffer;
             Py_ssize_t size;
-            if (PyBytes_AsStringAndSize(bytes, &buffer, &size) == -1 || size != sizeof(result))
+            if (PyBytes_AsStringAndSize(bytes.get(), &buffer, &size) == -1 || size != sizeof(result))
             {
-                Py_DECREF(bytes);
                 throw winrt::hresult_invalid_argument();
             }
 
             memcpy(&result, buffer, size);
-            Py_DECREF(bytes);
 
             return result;
         }
