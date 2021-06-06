@@ -244,6 +244,15 @@ struct winrt_type<%>
             type.TypeName(),
             type.TypeName(),
             bind<write_type_base>(type));
+
+        if (implements_ibuffer(type)) {
+            // workaround for https://bugs.python.org/issue40724
+            w.write("#if PY_VERSION_HEX < 0x03090000\n");
+            w.write("py::winrt_type<%>::python_type->tp_as_buffer = &_PyBufferProcs_@;\n",
+                bind<write_python_wrapper_template_type>(type),
+                type.TypeName());
+            w.write("#endif\n");
+        }
     }
 
     void write_ns_module_exec_func(writer& w, cache::namespace_members const& members)
@@ -970,6 +979,21 @@ return 0;
             w.write("}\n");
         }
 
+        if (implements_ibuffer(type))
+        {
+            w.write("\nstatic int _get_buffer_@(%* self, Py_buffer* view, int flags) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
+            {
+                writer::indent_guard g{ w };
+                w.write("return PyBuffer_FillInfo(view, (PyObject*)self, (void*)self->obj.data(), (Py_ssize_t)self->obj.Length(), 0, flags);\n");
+            }
+            w.write("}\n");
+
+            // workaround for https://bugs.python.org/issue40724
+            w.write("\n#if PY_VERSION_HEX < 0x03090000\n");
+            w.write("static PyBufferProcs _PyBufferProcs_@ = { (getbufferproc)_get_buffer_@, (releasebufferproc)NULL };\n", type.TypeName(), type.TypeName());
+            w.write("#endif\n");
+        }
+
         if (implements_istringable(type))
         {
             w.write("\nstatic PyObject* _str_@(%* self) noexcept\n{\n", type.TypeName(), bind<write_pywrapper_type>(type));
@@ -1220,6 +1244,15 @@ return 0;
                 w.write("{ Py_tp_methods, _methods_@ },\n", name);
             }
             w.write("{ Py_tp_getset, _getset_@ },\n", name);
+
+            if (implements_ibuffer(type))
+            {
+                // this slot was enabled in 3.9 - https://bugs.python.org/issue40724
+                w.write("#if PY_VERSION_HEX >= 0x03090000\n");
+                w.write("{ Py_bf_getbuffer, _get_buffer_@ },\n", name);
+                w.write("#endif\n");
+            }
+
             if (implements_istringable(type))
             {
                 w.write("{ Py_tp_str, _str_@ },\n", name);

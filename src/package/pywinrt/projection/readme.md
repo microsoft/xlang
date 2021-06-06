@@ -109,6 +109,17 @@ async def get_current_latitude():
     return pos.coordinate.latitude
 ```
 
+### Buffer Protocol
+
+Buffers ([IBuffer](https://docs.microsoft.com/uwp/api/Windows.Storage.Streams.IBuffer)) implement
+the CPython [buffer protocol](https://docs.python.org/3/c-api/buffer.html). They can be passed
+to a [memoryview()](https://docs.python.org/3/library/stdtypes.html#typememoryview) to access
+the memory directly. The [struct](https://docs.python.org/3/library/struct.html) module can
+also use the buffer objects directly for packing and unpacking formatted binary data. Using
+native Python classes to access the memory is significantly more efficient than using the WinRT
+[IDataReader](https://docs.microsoft.com/uwp/api/Windows.Storage.Streams.IDataReader)
+or [IDataWriter](https://docs.microsoft.com/uwp/api/Windows.Storage.Streams.IDataWriter) classes.
+
 ### Collection Protocols
 
 WinRT and Python both have standard definitions of iterators, sequences and maps. Python/WinRT automatically

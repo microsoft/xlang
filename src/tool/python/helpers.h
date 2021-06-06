@@ -305,6 +305,11 @@ namespace xlang
         return false;
     }
 
+    bool implements_ibuffer(TypeDef const& type)
+    {
+        return implements_interface(type, "Windows.Storage.Streams", "IBuffer");
+    }
+
     bool implements_istringable(TypeDef const& type)
     {
         return implements_interface(type, "Windows.Foundation", "IStringable");
