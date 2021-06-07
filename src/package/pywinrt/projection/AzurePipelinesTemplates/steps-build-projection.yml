@@ -22,9 +22,9 @@ steps:
 - script: |
     echo %ProjectionType%
     IF %ProjectionType%==full (
-        $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+        $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.18362.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows. -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     ) ELSE (
-        $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -include Windows.Graphics.DirectX -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
+        $(Build.ArtifactStagingDirectory)/pywinrt/pywinrt.exe -input 10.0.18362.0 -output src/package/pywinrt/projection/pywinrt -verbose -include Windows.Foundation -include Windows.Data.Json -include Windows.Devices.Geolocation -include Windows.Graphics.DirectX -exclude Windows.UI.Composition -exclude Windows.UI.Xaml
     )
   displayName: 'Generate $(ProjectionType) Python/WinRT Projection'
   env:
@@ -38,7 +38,7 @@ steps:
     command: custom
     arguments: 'install Microsoft.Windows.CppWinRT -ExcludeVersion -OutputDirectory _tools'
 
-- script: _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.17763.0 -output src/package/pywinrt/projection/cppwinrt -verbose
+- script: _tools\Microsoft.Windows.CppWinRT\bin\cppwinrt.exe -input 10.0.18362.0 -output src/package/pywinrt/projection/cppwinrt -verbose
   displayName: 'Generate C++/WinRT Projection'
 
 - template: task-vsdevcmd.yml

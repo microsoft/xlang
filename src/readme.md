@@ -15,7 +15,7 @@ Building xlang for Windows requires the following to be installed:
   * Visual Studio's Desktop Development with C++ workload includes CMake 3.11
 * [Ninja](https://ninja-build.org/), version 1.8 or later
   * Visual Studio's Desktop Development with C++ workload includes Ninja 1.8.2
-* [Windows 10 SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk), Version 1809 or later (Build Number 10.0.17763.0)
+* [Windows 10 SDK](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk), Version 1903 or later (Build Number 10.0.18362.0)
   * Visual Studio does not install this by default with version 15.8.7 or 15.8.8. It is an optional component in Visual Studio 15.8
 * [Visual Studio SDK](https://docs.microsoft.com/en-us/visualstudio/extensibility/installing-the-visual-studio-sdk?view=vs-2017)
   * The Visual Studio SDK is an optional component installed through Visual Studio setup
