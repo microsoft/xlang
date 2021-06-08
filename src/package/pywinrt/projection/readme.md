@@ -109,6 +109,87 @@ async def get_current_latitude():
     return pos.coordinate.latitude
 ```
 
+### Event Handlers
+
+Events in the Python projection are exposed as an `add_<event_name>` method
+for adding a handler and `remove_<event_name>` for removing a handler. The
+`add_<event_name>` methods return an event token object that must be passed to
+the corresponding `remove_<event_name>` method.
+
+Event callbacks will be called on a background WinRT thread. Consider using
+[call_soon_threadsafe] to ensure the handler is synchronized with the event loop.
+
+[call_soon_threadsafe]: https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.call_soon_threadsafe
+
+```python
+import asyncio
+
+from winrt.windows.devices.bluetooth.advertisement import BluetoothLEAdvertisementWatcher
+
+
+async def scan():
+    watcher = BluetoothLEAdvertisementWatcher()
+
+    event_loop = asyncio.get_running_loop()
+    received_queue = asyncio.Queue()
+
+    # this event is expected zero or more times, so we use a queue to pipe the results
+    def handle_received(sender, event_args):
+      received_queue.put_nowait(event_args)
+
+    stopped_future = event_loop.create_future()
+
+    # this event is expected *exactly* once, so we use a future to capture the result
+    def handle_stopped(sender, event_args):
+      stopped_future.set_result(event_args)
+
+    received_token = watcher.add_received(
+        lambda s, e: event_loop.call_soon_threadsafe(handle_received, s, e)
+    )
+    stopped_token = watcher.add_stopped(
+        lambda s, e: event_loop.call_soon_threadsafe(handle_stopped, s, e)
+    )
+
+    try:
+        print("scanning...")
+        watcher.start()
+
+        # this is the consumer for the received event queue
+        async def print_received():
+          while True:
+            event_args = await received_queue.get()
+            print(
+                "received:",
+                event_args.bluetooth_address.to_bytes(6, "big").hex(":"),
+                event_args.raw_signal_strength_in_d_bm, "dBm",
+            )
+
+        printer_task = asyncio.create_task(print_received())
+
+        # since the print task is an infinite loop, we have to cancel it when we don't need it anymore
+        stopped_future.add_done_callback(printer_task.cancel)
+
+        # scan for 10 seconds or until an unexpected stopped event (due to error)
+        done, pending = await asyncio.wait(
+            [stopped_future, printer_task], timeout=10, return_when=asyncio.FIRST_COMPLETED
+        )
+
+        if stopped_future in done:
+            print("unexpected stopped event", stopped_future.result().error)
+        else:
+            print("stopping...")
+            watcher.stop()
+            await stopped_future
+    finally:
+        # event handler are removed in a finally block to ensure we don't leak
+        watcher.remove_received(received_token)
+        watcher.remove_stopped(stopped_token)
+
+    print("done.")
+
+asyncio.run(scan())
+```
+
 ### Collection Protocols
 
 WinRT and Python both have standard definitions of iterators, sequences and maps. Python/WinRT automatically
