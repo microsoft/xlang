@@ -36,7 +36,7 @@ Code in this repository provides infrastructure and tooling related to basic met
 
 ### Python
 
-* [Python/WinRT (experimental)](https://github.com/microsoft/xlang/tree/master/src/tool/python) - Support for calling most (non-XAML) APIs from the Python programming language.
+* [Python/WinRT (experimental)](/src/package/pywinrt/projection) - Support for calling most (non-XAML) APIs from the Python programming language.
 
 ### Cross-platform WinRT
 
