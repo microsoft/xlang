@@ -1145,8 +1145,8 @@ return 0;
 
             if (implements_iclosable(type))
             {
-                w.write("{ \"__enter__\", (PyCFunction)_enter_@, METH_O, nullptr },\n", type.TypeName());
-                w.write("{ \"__exit__\",  (PyCFunction)_exit_@,  METH_O, nullptr },\n", type.TypeName());
+                w.write("{ \"__enter__\", (PyCFunction)_enter_@, METH_NOARGS, nullptr },\n", type.TypeName());
+                w.write("{ \"__exit__\",  (PyCFunction)_exit_@, METH_VARARGS, nullptr },\n", type.TypeName());
             }
 
             w.write("{ nullptr }\n");
