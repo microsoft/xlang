@@ -325,7 +325,7 @@ self->obj%;
 
             w.write(format,
                 is_ptype(type) ? "self->obj->hash()" : "std::hash<winrt::Windows::Foundation::IInspectable>{}(self->obj)",
-                is_ptype(type) ? ".release()" : " = nullptr");
+                is_ptype(type) ? ".reset()" : " = nullptr");
         }
         w.write("}\n");
     }
