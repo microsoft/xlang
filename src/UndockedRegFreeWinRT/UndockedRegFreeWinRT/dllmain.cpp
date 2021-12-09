@@ -442,12 +442,10 @@ HRESULT ExtRoLoadCatalog()
 
 BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 {
-    /*
     if (IsWindows1019H1OrGreater())
     {
         return true;
     }
-    */
     if (reason == DLL_PROCESS_ATTACH)
     {
         DisableThreadLibraryCalls(hmodule);
