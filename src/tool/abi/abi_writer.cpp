@@ -136,7 +136,7 @@ void writer::push_contract_guard(contract_history vers)
     write("#if % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.current_contract.version });
     for (auto const& prev : vers.previous_contracts)
     {
-        auto [prevNs, prevName] = decompose_type(prev.type_name);
+        auto [prevNs, prevName] = decompose_type(prev.from_contract);
         write(" || \\\n    % >= % && % < %",
             bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.version_introduced },
             bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.version_removed });
@@ -155,7 +155,7 @@ void writer::pop_contract_guards(std::size_t count)
         write("#endif // % >= %", bind<write_contract_macro>(ns, name), format_hex{ vers.current_contract.version });
         for (auto const& prev : vers.previous_contracts)
         {
-            auto [prevNs, prevName] = decompose_type(prev.type_name);
+            auto [prevNs, prevName] = decompose_type(prev.from_contract);
             write(" || \\\n       // % >= % && % < %",
                 bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.version_introduced },
                 bind<write_contract_macro>(prevNs, prevName), format_hex{ prev.version_removed });
