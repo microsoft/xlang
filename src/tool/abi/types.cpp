@@ -558,7 +558,7 @@ static void write_cpp_interface_definition(writer& w, T const& type)
 
     w.write(R"^-^(%};
 
-%MIDL_CONST_ID IID& IID_% = _uuidof(%);
+%MIDL_CONST_ID IID& IID_% = __uuidof(%);
 )^-^", indent{}, indent{}, type.cpp_abi_name(), type.cpp_abi_name());
 
     w.pop_namespace();
