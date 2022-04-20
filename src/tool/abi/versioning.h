@@ -123,9 +123,10 @@ inline version version_from_attribute(xlang::meta::reader::CustomAttribute const
 
 struct previous_contract
 {
-    std::string_view type_name;
+    std::string_view from_contract;
     std::uint32_t version_introduced;
     std::uint32_t version_removed;
+    std::string_view to_contract;
 };
 
 struct contract_history
@@ -152,6 +153,7 @@ inline std::optional<contract_history> get_contract_history(T const& value)
     contract_history result;
     result.current_contract = decode_contract_version(contractAttr);
 
+    std::size_t mostRecentContractIndex = std::numeric_limits<std::size_t>::max();
     for_each_attribute(value, metadata_namespace, "PreviousContractVersionAttribute"sv,
         [&](bool /*first*/, auto const& attr)
     {
@@ -168,23 +170,52 @@ inline std::optional<contract_history> get_contract_history(T const& value)
         };
         if (prevArgs.size() == 4)
         {
-            // This contract "came before" a later contract. If we've already added that contract to the list, we
-            // need to insert this one before it
-            auto toName = std::get<std::string_view>(std::get<ElemSig>(prevArgs[3].value).value);
-            auto itr = std::find_if(result.previous_contracts.begin(), result.previous_contracts.end(),
-                [&](auto const& prevContract)
+            prev.to_contract = std::get<std::string_view>(std::get<ElemSig>(prevArgs[3].value).value);
+            if (prev.to_contract == result.current_contract.type_name)
             {
-                return prevContract.type_name == toName;
-            });
-            result.previous_contracts.insert(itr, prev);
+                XLANG_ASSERT(mostRecentContractIndex == std::numeric_limits<std::size_t>::max());
+                mostRecentContractIndex = result.previous_contracts.size();
+            }
+
+            result.previous_contracts.push_back(prev);
         }
         else
         {
             // This is the last contract that the type was in before moving to its current contract. Always insert
             // it at the tail
+            prev.to_contract = result.current_contract.type_name;
+            XLANG_ASSERT(mostRecentContractIndex == std::numeric_limits<std::size_t>::max());
+            mostRecentContractIndex = result.previous_contracts.size();
             result.previous_contracts.push_back(prev);
         }
     });
+
+    if (!result.previous_contracts.empty())
+    {
+        if (mostRecentContractIndex == std::numeric_limits<std::size_t>::max())
+        {
+            // Not a great error message, however this scenario should not be allowable by mildlrt
+            xlang::throw_invalid("Invalid contract history");
+        }
+
+        // NOTE: The following loop is N^2, however contract history should be rare and short when present, so this
+        // should likely beat out any alternative graph creating algorithm in terms of wall clock execution time
+        std::swap(result.previous_contracts[mostRecentContractIndex], result.previous_contracts.back());
+        for (std::size_t size = result.previous_contracts.size() - 1; size; --size)
+        {
+            auto& last = result.previous_contracts[size];
+            auto end = result.previous_contracts.begin() + size;
+            auto itr = std::find_if(result.previous_contracts.begin(), end, [&](auto const& test)
+            {
+                return test.to_contract == last.from_contract;
+            });
+            if (itr == end)
+            {
+                xlang::throw_invalid("Invalid contract history");
+            }
+            std::swap(*itr, result.previous_contracts[size - 1]);
+        }
+    }
 
     return result;
 }
@@ -205,7 +236,7 @@ std::optional<version> match_versioning_scheme(version const& ver, T const& valu
             }
 
             auto range = history->previous_contracts.front();
-            return contract_version{ range.type_name, range.version_introduced };
+            return contract_version{ range.from_contract, range.version_introduced };
         }
 
         return std::nullopt;
