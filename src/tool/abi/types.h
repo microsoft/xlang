@@ -451,7 +451,7 @@ struct typedef_base : metadata_type
         std::size_t result = 0;
         for (auto& prev : m_contractHistory->previous_contracts)
         {
-            if ((prev.type_name == typeName) && (prev.version_introduced <= version) && (prev.version_removed > version))
+            if ((prev.from_contract == typeName) && (prev.version_introduced <= version) && (prev.version_removed > version))
             {
                 return result;
             }
@@ -480,7 +480,7 @@ struct typedef_base : metadata_type
         {
             if (index-- == 0)
             {
-                return contract_version{ prev.type_name, prev.version_introduced };
+                return contract_version{ prev.from_contract, prev.version_introduced };
             }
         }
 
