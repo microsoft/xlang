@@ -182,7 +182,7 @@ jobs:
     condition: and(eq(variables['BuildPlatform'], 'x86'), eq(variables['BuildConfiguration'], 'release'), in(variables['Build.Reason'], 'Manual'))
     inputs:
       artifactName: $(BuildConfiguration)_x86
-      downloadPath: $(Build.SourcesDirectory)\x86
+      downloadPath: $(Build.ArtifactStagingDirectory)\x86
 
   # - task: CmdLine@2
   #   displayName: Touch Tools
