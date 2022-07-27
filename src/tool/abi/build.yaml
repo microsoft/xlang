@@ -182,18 +182,18 @@ jobs:
     condition: and(eq(variables['BuildPlatform'], 'x86'), eq(variables['BuildConfiguration'], 'release'), in(variables['Build.Reason'], 'Manual'))
     inputs:
       artifactName: $(BuildConfiguration)_x86
-      downloadPath: $(Build.ArtifactStagingDirectory)\x86
+      downloadPath: $(Build.SourcesDirectory)\x86
 
-  # - task: CmdLine@2
-  #   displayName: Touch Tools
-  #   condition: and(eq(variables['BuildPlatform'], 'x86'), eq(variables['BuildConfiguration'], 'release'), in(variables['Build.Reason'], 'Manual'))
-  #   inputs:
-  #     script: >
-  #       rem Signing service stamps binary with a future (GMT) timestamp, breaking build dependencies
+  - task: CmdLine@2
+    displayName: Touch Tools
+    condition: and(eq(variables['BuildPlatform'], 'x86'), eq(variables['BuildConfiguration'], 'release'), in(variables['Build.Reason'], 'Manual'))
+    inputs:
+      script: >
+        rem Signing service stamps binary with a future (GMT) timestamp, breaking build dependencies
 
-  #       copy /b $(Build.SourcesDirectory)\x86\abi\abi.exe+,, abi.exe
-  #     workingDirectory: $(Build.ArtifactStagingDirectory)
-  #     failOnStderr: true
+        copy /b $(Build.SourcesDirectory)\x86\abi\abi.exe+,, abi.exe
+      workingDirectory: $(Build.ArtifactStagingDirectory)
+      failOnStderr: true
 
   - task: NuGetCommand@2
     displayName: Build NuGet
