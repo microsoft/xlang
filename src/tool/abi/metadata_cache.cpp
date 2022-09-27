@@ -185,7 +185,7 @@ static void process_contract_dependencies(namespace_cache& target, T const& type
         target.dependent_namespaces.emplace(decompose_type(attr->current_contract.type_name).first);
         for (auto const& prevContract : attr->previous_contracts)
         {
-            target.dependent_namespaces.emplace(decompose_type(prevContract.type_name).first);
+            target.dependent_namespaces.emplace(decompose_type(prevContract.from_contract).first);
         }
     }
 
