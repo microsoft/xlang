@@ -200,6 +200,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>basicParse.negative.blankFileName.manifest</TargetPath>
     </ContentWithTargetPath>
+    <ContentWithTargetPath Include="basicParse.largefile.manifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>basicParse.largefile.manifest</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
