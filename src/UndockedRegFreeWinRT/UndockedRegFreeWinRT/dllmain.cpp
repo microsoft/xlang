@@ -323,19 +323,20 @@ HRESULT WINAPI RoResolveNamespaceDetour(
 
 void InstallHooks()
 {
-    if (DetourIsHelperProcess()) {
+    // If this is loaded in a Detours helper process and not the actual process
+    // to be hooked, just return without performing any other operations.
+    if (DetourIsHelperProcess())
         return;
-    }
 
     DetourRestoreAfterWith();
 
-    DetourTransactionBegin();
-    DetourUpdateThread(GetCurrentThread());
-    DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour);
-    DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour);
-    DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour);
-    DetourAttach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour);
-    DetourTransactionCommit();
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourTransactionBegin()));
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourUpdateThread(GetCurrentThread())));
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour)));
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour)));
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour)));
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourAttach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour)));
+    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourTransactionCommit()));
 }
 
 void RemoveHooks()
@@ -443,16 +444,27 @@ HRESULT ExtRoLoadCatalog()
 BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 {
     if (IsWindows1019H1OrGreater())
-    {
         return true;
-    }
+
     if (reason == DLL_PROCESS_ATTACH)
     {
+
         DisableThreadLibraryCalls(hmodule);
-        InstallHooks();
+
         try
         {
-            ExtRoLoadCatalog();
+            InstallHooks();
+        }
+        catch (...)
+        {
+            LOG_CAUGHT_EXCEPTION();
+            return false;
+        }
+
+        try
+        {
+            if (!SUCCEEDED(ExtRoLoadCatalog()))
+                return false;
         }
         catch (...)
         {
@@ -460,10 +472,12 @@ BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
             return false;
         }
     }
+
     if (reason == DLL_PROCESS_DETACH)
     {
         RemoveHooks();
     }
+
     return true;
 }
 
