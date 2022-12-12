@@ -321,7 +321,7 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     return hr;
 }
 
-void InstallHooks()
+HRESULT InstallHooks()
 {
     // If this is loaded in a Detours helper process and not the actual process
     // to be hooked, just return without performing any other operations.
