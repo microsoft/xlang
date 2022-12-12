@@ -330,13 +330,14 @@ HRESULT InstallHooks()
 
     DetourRestoreAfterWith();
 
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourTransactionBegin()));
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourUpdateThread(GetCurrentThread())));
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour)));
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour)));
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour)));
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourAttach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour)));
-    THROW_IF_FAILED(HRESULT_FROM_WIN32(DetourTransactionCommit()));
+    RETURN_IF_WIN32_ERROR(DetourTransactionBegin());
+    RETURN_IF_WIN32_ERROR(DetourUpdateThread(GetCurrentThread()));
+    RETURN_IF_WIN32_ERROR(DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour));
+    RETURN_IF_WIN32_ERROR(DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour));
+    RETURN_IF_WIN32_ERROR(DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour));
+    RETURN_IF_WIN32_ERROR(DetourAttach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour));
+    RETURN_IF_WIN32_ERROR(DetourTransactionCommit());
+    return S_OK;
 }
 
 void RemoveHooks()
