@@ -326,7 +326,7 @@ HRESULT InstallHooks()
     // If this is loaded in a Detours helper process and not the actual process
     // to be hooked, just return without performing any other operations.
     if (DetourIsHelperProcess())
-        return;
+        return S_OK;
 
     DetourRestoreAfterWith();
 
