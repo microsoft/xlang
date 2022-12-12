@@ -464,7 +464,7 @@ BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 
         try
         {
-            if (!SUCCEEDED(ExtRoLoadCatalog()))
+            if (!SUCCEEDED(InstallHooks()) || !SUCCEEDED(ExtRoLoadCatalog()))
                 return false;
         }
         catch (...)
