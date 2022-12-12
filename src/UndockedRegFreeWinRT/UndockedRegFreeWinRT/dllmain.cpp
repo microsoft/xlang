@@ -321,21 +321,23 @@ HRESULT WINAPI RoResolveNamespaceDetour(
     return hr;
 }
 
-void InstallHooks()
+HRESULT InstallHooks()
 {
-    if (DetourIsHelperProcess()) {
-        return;
-    }
+    // If this is loaded in a Detours helper process and not the actual process
+    // to be hooked, just return without performing any other operations.
+    if (DetourIsHelperProcess())
+        return S_OK;
 
     DetourRestoreAfterWith();
 
-    DetourTransactionBegin();
-    DetourUpdateThread(GetCurrentThread());
-    DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour);
-    DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour);
-    DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour);
-    DetourAttach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour);
-    DetourTransactionCommit();
+    RETURN_IF_WIN32_ERROR(DetourTransactionBegin());
+    RETURN_IF_WIN32_ERROR(DetourUpdateThread(GetCurrentThread()));
+    RETURN_IF_WIN32_ERROR(DetourAttach(&(PVOID&)TrueRoActivateInstance, RoActivateInstanceDetour));
+    RETURN_IF_WIN32_ERROR(DetourAttach(&(PVOID&)TrueRoGetActivationFactory, RoGetActivationFactoryDetour));
+    RETURN_IF_WIN32_ERROR(DetourAttach(&(PVOID&)TrueRoGetMetaDataFile, RoGetMetaDataFileDetour));
+    RETURN_IF_WIN32_ERROR(DetourAttach(&(PVOID&)TrueRoResolveNamespace, RoResolveNamespaceDetour));
+    RETURN_IF_WIN32_ERROR(DetourTransactionCommit());
+    return S_OK;
 }
 
 void RemoveHooks()
@@ -443,16 +445,17 @@ HRESULT ExtRoLoadCatalog()
 BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 {
     if (IsWindows1019H1OrGreater())
-    {
         return true;
-    }
+
     if (reason == DLL_PROCESS_ATTACH)
     {
+
         DisableThreadLibraryCalls(hmodule);
-        InstallHooks();
+
         try
         {
-            ExtRoLoadCatalog();
+            if (!SUCCEEDED(InstallHooks()) || !SUCCEEDED(ExtRoLoadCatalog()))
+                return false;
         }
         catch (...)
         {
@@ -460,10 +463,12 @@ BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
             return false;
         }
     }
+
     if (reason == DLL_PROCESS_DETACH)
     {
         RemoveHooks();
     }
+
     return true;
 }
 
