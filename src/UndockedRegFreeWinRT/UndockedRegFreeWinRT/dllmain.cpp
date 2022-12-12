@@ -454,16 +454,6 @@ BOOL WINAPI DllMain(HINSTANCE hmodule, DWORD reason, LPVOID /*lpvReserved*/)
 
         try
         {
-            InstallHooks();
-        }
-        catch (...)
-        {
-            LOG_CAUGHT_EXCEPTION();
-            return false;
-        }
-
-        try
-        {
             if (!SUCCEEDED(InstallHooks()) || !SUCCEEDED(ExtRoLoadCatalog()))
                 return false;
         }
