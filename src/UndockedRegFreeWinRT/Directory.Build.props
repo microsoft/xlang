@@ -9,5 +9,7 @@
     <CsWinRTExe>$(CsWinRTDir)cswinrt.exe</CsWinRTExe>
     <OutDir>$(BuildOutDir)</OutDir>
     <IntDir>$(OutDir)$(ProjectName)\</IntDir>
+    <PlatformToolset Condition="'$(PlatformToolset)'=='' and '$(VisualStudioVersion)' == '16.0'">v142</PlatformToolset>
+    <PlatformToolset Condition="'$(PlatformToolset)'==''">v143</PlatformToolset>    
   </PropertyGroup>
 </Project>
