@@ -1,5 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
+  <!-- To suport custom configruations, only test against Debug or !Debug. 
+    Any other configuration is assumed to be a release configuration -->
   <ItemDefinitionGroup>
     <Link>
       <AdditionalDependencies Condition="'$(Configuration)' == 'Debug' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(MSBuildThisFileDirectory)..\..\runtimes\x86\debug\winrtact.lib;%(AdditionalDependencies)</AdditionalDependencies>
