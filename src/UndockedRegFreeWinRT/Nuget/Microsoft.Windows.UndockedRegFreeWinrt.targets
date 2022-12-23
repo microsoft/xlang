@@ -1,5 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <!-- If a project has custom conifigurations other tha debug or release, it can use URFW_Configuration to
+    indicate whether that configuration should use the debug or release version of RegFreeWinRT support. -->
   <PropertyGroup Condition="'$(URFW_Configuration)' == ''">
     <URFW_Configuration>$(Configuration)</URFW_Configuration>
   </PropertyGroup>
