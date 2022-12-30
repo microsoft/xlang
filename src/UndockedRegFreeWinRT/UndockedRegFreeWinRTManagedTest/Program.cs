@@ -2,14 +2,21 @@
 using System.Runtime.InteropServices;
 using TestComponent;
 using Microsoft.Windows;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UndockedRegFreeWinRTManagedTest
 {
-    class Program
+    [TestClass]
+    public class Program
     {
         public static bool succeeded;
         private static int testsRan;
-        private static int testsFailed;
+        //private static int testsFailed;
+
+        public Program()
+        {
+            UndockedRegFreeWinrt.Initialize();
+        }
 
         static void TestClassBoth(int expected)
         {
@@ -18,8 +25,9 @@ namespace UndockedRegFreeWinRTManagedTest
                 TestComponent.ClassBoth c = new ClassBoth();
                 succeeded = (expected == c.Apartment);
             }
-            catch
+            catch(Exception e)
             {
+                Console.WriteLine(e.Message);
                 succeeded = false;
             }
         }
@@ -61,37 +69,44 @@ namespace UndockedRegFreeWinRTManagedTest
             return succeeded;
         }
 
-        static int Main(string[] args)
+        [TestMethod]
+        public void TestBothFromSTA()
         {
-            UndockedRegFreeWinrt.Initialize();
-            Console.WriteLine("Undocked RegFree WinRT Managed Test - Starting");
+            Assert.IsTrue(RunTest(new System.Threading.ThreadStart(() => TestClassBoth(3)), System.Threading.ApartmentState.STA));
+        }
 
-            if (!RunTest(new System.Threading.ThreadStart(() => TestClassBoth(3)), System.Threading.ApartmentState.STA))
-            {
-                Console.WriteLine("Both to STA test failed");
-                testsFailed++;
-            }
+        [TestMethod]
+        public void TestBothFromMTA()
+        {
+            Assert.IsTrue(RunTest(new System.Threading.ThreadStart(() => TestClassBoth(1)), System.Threading.ApartmentState.MTA));
+        }
 
-            if (!RunTest(new System.Threading.ThreadStart(() => TestClassBoth(1)), System.Threading.ApartmentState.MTA))
-            {
-                Console.WriteLine("Both to MTA test failed");
-                testsFailed++;
-            }
+        [TestMethod]
+        public void TestMTAFromSTA()
+        {
+            Assert.IsTrue(RunTest(new System.Threading.ThreadStart(() => TestClassMta(1)), System.Threading.ApartmentState.STA));
+        }
 
-            if (!RunTest(new System.Threading.ThreadStart(() => TestClassMta(1)), System.Threading.ApartmentState.STA))
-            {
-                Console.WriteLine("MTA to STA test failed");
-                testsFailed++;
-            }
+        [TestMethod]
+        public void TestSTAFromMTA()
+        {
+            Assert.IsTrue(RunTest(new System.Threading.ThreadStart(() => TestClassSta(1)), System.Threading.ApartmentState.MTA));
+        }
 
-            if (RunTest(new System.Threading.ThreadStart(() => TestClassSta(1)), System.Threading.ApartmentState.MTA))
-            {
-                Console.WriteLine("STA to MTA should failed");
-                testsFailed++;
-            }
+        public static int Main()
+        {
+            Program p = new Program();
+            p.TestBothFromMTA();
+            p.TestBothFromSTA();
+            p.TestMTAFromSTA();
+            p.TestSTAFromMTA();
 
-            Console.WriteLine("Undocked RegFree WinRT Managed Test - " + (testsRan - testsFailed) + " out of " + testsRan + " tests passed");
-            return testsFailed == 0 ? 0 : 1;
+            Console.WriteLine("Done!");
+            
+            return 0;
         }
     }
+
 }
+
+
