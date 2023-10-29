@@ -1,0 +1,7 @@
+variables:
+  MajorVersion: "2"
+  MinorVersion: "0"
+  ENABLE_PRS_DELAYSIGN: 1
+  # Docker image which is used to build the project https://aka.ms/obpipelines/containers
+  WindowsContainerImage: 'onebranch.azurecr.io/windows/ltsc2019/vse2022:latest' 
+  system.debug: ${{ parameters.debug }}

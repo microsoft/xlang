@@ -1,0 +1,104 @@
+parameters:
+  - name: "BuildConfiguration"
+    type: string
+    default: "release"
+  - name: "BuildPlatform"
+    type: string
+    default: "x86"
+  - name: 'debug'
+    displayName: 'Enable debug output'
+    type: boolean
+    default: false
+
+variables:
+- template: Variables.yml
+  parameters:
+    debug: ${{ parameters.debug }}
+
+trigger: none
+
+name: $(MajorVersion).$(MinorVersion).$(date:yyMMdd)$(rev:.r)
+
+resources:
+  repositories: 
+    - repository: templates
+      type: git
+      name: OneBranch.Pipelines/GovernedTemplates
+      ref: refs/heads/main
+
+extends:
+  template: v2/Microsoft.Official.yml@templates
+  parameters:
+    platform:
+      name: 'windows_undocked'
+      product: 'build_tools'
+            
+    cloudvault:
+      enabled: false
+    
+    globalSdl:
+      tsa:
+        enabled: false
+    
+    nugetPublishing:
+      feeds:
+        name: xlang
+
+    stages:
+    - stage: stage
+      pool:
+        type: windows
+
+      jobs:
+
+      - template: .pipelines/Build-Job.yml@self
+        parameters:
+          BuildConfiguration: ${{ parameters.BuildConfiguration }}
+          BuildPlatform: ${{ parameters.BuildPlatform }}
+          OfficialBuild: true
+
+      - job: Build_Internal_Packages
+        displayName: Build Internal Packages (VPacks)
+        condition: and(eq('${{ parameters.BuildPlatform }}', 'x86'), eq('${{ parameters.BuildConfiguration }}', 'release'), in(variables['Build.Reason'], 'Manual'))
+        dependsOn: Build_ABI_Tool
+        pool:
+          type: windows
+        variables:
+          ob_outputDirectory: '$(Build.SourcesDirectory)\x86\abi'
+
+          ob_createvpack_enabled: true
+          ob_createvpack_packagename: WinrtAbiTool
+          ob_createvpack_owneralias: AmuseDev
+          ob_createvpack_description: WinRT ABI Tool
+          ob_createvpack_provData: true
+          ob_createvpack_versionAs: parts
+          ob_createvpack_majorVer: $(MajorVersion)
+          ob_createvpack_minorVer: $(MinorVersion)
+          ob_createvpack_patchVer: $(PatchVersion)
+          ob_createvpack_metadata: $(Build.SourceBranchName).$(Build.BuildNumber).$(Build.SourceVersion)
+          ob_createvpack_verbose: true
+          ob_createvpack_target: $(OSBuildToolsRoot)\abi
+          ob_createvpack_prereleaseVer: $(Build.SourceBranchName).${{ parameters.BuildPlatform }}.${{ parameters.BuildConfiguration }}.$(Build.BuildNumber).$(Build.SourceVersion)
+
+        steps:
+
+        - task: DownloadPipelineArtifact@2
+          displayName: Download x86 Artifacts
+          inputs:
+            artifactName: drop_stage_Build_ABI_Toolrelease_x86
+            targetPath: $(Build.SourcesDirectory)\x86
+
+        - task: CmdLine@2
+          displayName: Parse PatchVersion
+          inputs:
+            script: 'for /f "tokens=3,4 delims=." %%i in ("$(Build.BuildNumber)") do @echo ##vso[task.setvariable variable=PatchVersion;]%%i%%j '
+            failOnStderr: true
+
+      - ${{ if and(eq(parameters.BuildPlatform, 'x86'), eq(parameters.BuildConfiguration, 'release')) }}:
+        - template: .pipelines/AbiWinRT-Job.yml@self
+          parameters:
+            OfficialBuild: true
+
+      - template: .pipelines/MidlRT-Job.yml@self
+        parameters:
+          OfficialBuild: true

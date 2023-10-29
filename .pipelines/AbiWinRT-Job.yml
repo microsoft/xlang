@@ -1,0 +1,60 @@
+parameters:
+  - name: OfficialBuild
+    type: boolean
+    default: false
+
+jobs:
+  - job: Build_External_Packages
+    displayName: Build External Packages (NuGet)
+    cancelTimeoutInMinutes: 1
+    dependsOn: Build_ABI_Tool
+    pool:
+      type: windows
+
+    variables:
+      ob_outputDirectory: '$(Build.SourcesDirectory)\out'
+      ob_nugetPublishing_enabled: ${{ parameters.OfficialBuild }}
+      PackageVersion: $(Build.BuildNumber)
+
+    steps:
+
+    - task: NuGetToolInstaller@1
+      displayName: Use NuGet 6.7
+      continueOnError: True
+      inputs:
+        versionSpec: 6.7
+
+    - task: DownloadPipelineArtifact@2
+      displayName: Download x86 Artifacts
+      inputs:
+        artifactName: drop_stage_Build_ABI_Toolrelease_x86
+        targetPath: $(Build.SourcesDirectory)\x86
+
+    - task: CmdLine@2
+      displayName: Touch Tools
+      inputs:
+        script: >
+
+          rem Signing service stamps binary with a future (GMT) timestamp, breaking build dependencies
+
+          copy /b $(Build.SourcesDirectory)\x86\abi\abi.exe+,, abi.exe
+        workingDirectory: $(Build.ArtifactStagingDirectory)
+        failOnStderr: true
+
+    - task: NuGetCommand@2
+      displayName: Build NuGet
+      inputs:
+        command: pack
+        searchPatternPack: src/package/abi/Microsoft.Windows.AbiWinRT.nuspec
+        versioningScheme: byBuildNumber
+        buildProperties: abiwinrt_exe=$(Build.ArtifactStagingDirectory)\abi.exe
+        packDestination: $(ob_outputDirectory)\packages
+
+    - task: onebranch.pipeline.signing@1
+      displayName: '🔒 Onebranch Signing for AbiWinRT nuget package'
+      condition: eq(${{ parameters.OfficialBuild }}, 'true')
+      inputs:
+        command: sign
+        signing_profile: external_distribution
+        files_to_sign: 'Microsoft.Windows.AbiWinRT.*.nupkg'
+        search_root: $(ob_outputDirectory)\packages
