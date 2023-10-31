@@ -25,5 +25,10 @@ else()
     target_link_libraries(abi -lpthread)
 endif()
 
+if (MSVC)
+    target_compile_options(abi PUBLIC /guard:cf /Qspectre /sdl)
+    target_link_options(abi PUBLIC /guard:cf /DYNAMICBASE /CETCOMPAT /debugtype:cv,fixup)
+endif()
+
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/abi.exe" abiwinrt_exe)
 set_target_properties(abi PROPERTIES "abiwinrt_exe" ${abiwinrt_exe})

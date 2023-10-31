@@ -1,0 +1,40 @@
+parameters:
+  - name: OfficialBuild
+    type: boolean
+    default: false
+
+jobs:
+  - job: Build_MidlRT_Nuget
+    displayName: Build MidlRT Package (Nuget)
+    pool:
+      type: windows
+
+    variables:
+      ob_outputDirectory: '$(Build.SourcesDirectory)\out'
+      ob_nugetPublishing_enabled: ${{ parameters.OfficialBuild }}
+      PackageVersion: $(Build.BuildNumber)
+
+    steps:
+
+    - task: NuGetToolInstaller@1
+      displayName: Use NuGet 6.7
+      continueOnError: True
+      inputs:
+        versionSpec: 6.7
+
+    - task: NuGetCommand@2
+      displayName: Build NuGet
+      inputs:
+        command: pack
+        searchPatternPack: src/package/midlrt/Microsoft.Windows.MidlRT.nuspec
+        versioningScheme: byBuildNumber
+        packDestination: $(ob_outputDirectory)\packages
+
+    - task: onebranch.pipeline.signing@1
+      displayName: '🔒 Onebranch Signing for MidlRT nuget package'
+      condition: eq(${{ parameters.OfficialBuild }}, 'true')
+      inputs:
+        command: sign
+        signing_profile: external_distribution
+        files_to_sign: 'Microsoft.Windows.MidlRT.*.nupkg'
+        search_root: $(ob_outputDirectory)\packages

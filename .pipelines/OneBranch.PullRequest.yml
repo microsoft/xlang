@@ -1,0 +1,62 @@
+parameters:
+  - name: "BuildConfiguration"
+    type: string
+    default: "release"
+  - name: "BuildPlatform"
+    type: string
+    default: "x86"
+  - name: 'debug'
+    displayName: 'Enable debug output'
+    type: boolean
+    default: false
+
+variables:
+- template: Variables.yml
+  parameters:
+    debug: ${{ parameters.debug }}
+
+trigger: none
+
+name: $(MajorVersion).$(MinorVersion).$(date:yyMMdd)$(rev:.r)-PR
+
+resources:
+  repositories: 
+    - repository: templates
+      type: git
+      name: OneBranch.Pipelines/GovernedTemplates
+      ref: refs/heads/main
+
+extends:
+  template: v2/Microsoft.NonOfficial.yml@templates
+  parameters:
+    platform:
+      name: 'windows_undocked'
+      product: 'build_tools'
+
+    globalSdl:
+      tsa:
+        enabled: false
+      sbom:
+        enabled: true
+
+    stages:
+    - stage: stage
+      pool:
+        type: windows
+
+      jobs:
+
+      - template: .pipelines/Build-Job.yml@self
+        parameters:
+          BuildConfiguration: ${{ parameters.BuildConfiguration }}
+          BuildPlatform: ${{ parameters.BuildPlatform }}
+          OfficialBuild: false
+
+      - ${{ if and(eq(parameters.BuildPlatform, 'x86'), eq(parameters.BuildConfiguration, 'release')) }}:
+        - template: .pipelines/AbiWinRT-Job.yml@self
+          parameters:
+            OfficialBuild: false
+
+      - template: .pipelines/MidlRT-Job.yml@self
+        parameters:
+          OfficialBuild: false
