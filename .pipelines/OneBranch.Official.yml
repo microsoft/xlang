@@ -42,7 +42,7 @@ extends:
     
     nugetPublishing:
       feeds:
-        name: xlang
+      - name: xlang
 
     stages:
     - stage: stage
