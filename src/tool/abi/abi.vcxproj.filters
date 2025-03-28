@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\strings">
+      <UniqueIdentifier>{f7c8e852-805c-4f77-8f33-800c9313304b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="abi_writer.cpp">
@@ -61,6 +64,48 @@
     </ClInclude>
     <ClInclude Include="versioning.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\constexpr_definitions.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\constexpr_end_definitions.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\deprecated_header_end.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\deprecated_header_start.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\include_guard_end.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\include_guard_start.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\enum_class.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\file_header.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\ns_prefix_always.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\ns_prefix_definitions.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\ns_prefix_never.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\ns_prefix_optional.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\optional_ns_prefix_definitions.h">
+      <Filter>Header Files\strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\optional_ns_prefix_end_definitions.h">
+      <Filter>Header Files\strings</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
