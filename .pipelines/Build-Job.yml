@@ -35,7 +35,7 @@ jobs:
   - task: VSBuild@1
     displayName: Build Tools
     inputs:
-      solution: '$(Build.SourcesDirectory)\src\abi\abi.sln'
+      solution: '$(Build.SourcesDirectory)\src\tool\abi\abi.sln'
       msbuildArgs: /p:XlangBuildVersion="$(Build.BuildNumber)"
       platform: ${{ parameters.BuildPlatform }}
       configuration: ${{ parameters.BuildConfiguration }}
