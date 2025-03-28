@@ -36,19 +36,13 @@ jobs:
     displayName: Build Tools
     inputs:
       solution: '$(Build.SourcesDirectory)\src\tool\abi\abi.sln'
-      msbuildArgs: /p:XlangBuildVersion="$(Build.BuildNumber)" /binaryLogger:$(ob_outputDirectory)\abi\abi.binlog
+      msbuildArgs: >-
+        /p:XlangBuildVersion="$(Build.BuildNumber)"
+        /p:OutDir=$(ob_outputDirectory)\abi
+        /binaryLogger:$(ob_outputDirectory)\abi\abi.binlog
       platform: ${{ parameters.BuildPlatform }}
       configuration: ${{ parameters.BuildConfiguration }}
       clean: true      
-
-  - task: CopyFiles@2
-    displayName: Stage abi.*
-    inputs:
-      SourceFolder: $(Build.SourcesDirectory)\src\tool\abi\${{ parameters.BuildConfiguration }}
-      Contents: >-
-        abi.exe
-        abi.pdb
-      TargetFolder: $(ob_outputDirectory)\abi
 
   - task: onebranch.pipeline.signing@1
     displayName: '🔒 Onebranch Signing for abi.exe'
