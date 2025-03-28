@@ -40,8 +40,6 @@ extends:
         useDynamicRouting: true
       sbom:
         enabled: true
-      prefast:
-        enabled: true
 
     stages:
     - stage: stage
