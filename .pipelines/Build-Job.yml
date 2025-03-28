@@ -38,7 +38,7 @@ jobs:
       solution: '$(Build.SourcesDirectory)\src\tool\abi\abi.sln'
       msbuildArgs: >-
         /p:XlangBuildVersion="$(Build.BuildNumber)"
-        /p:OutDir=$(ob_outputDirectory)\abi
+        /p:OutDir=$(ob_outputDirectory)\abi\
         /binaryLogger:$(ob_outputDirectory)\abi\abi.binlog
       platform: ${{ parameters.BuildPlatform }}
       configuration: ${{ parameters.BuildConfiguration }}
