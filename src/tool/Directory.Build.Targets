@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="..\Directory.Build.targets" Condition="Exists('..\Directory.Build.targets')"/>
+
+  <PropertyGroup>
+    <BeforeClCompileTargets>
+      $(BeforeClCompileTargets);CollectStringLiteralInputs;GenerateStringLiteralFiles;
+    </BeforeClCompileTargets>
+    
+    <StringLiteralOutputHeader>$(IntermediateOutputPath)strings.h</StringLiteralOutputHeader>
+    <StringLiteralOutputCode>$(IntermediateOutputPath)strings.cpp</StringLiteralOutputCode>
+
+    <!-- TEMP TESTING -->
+    <StringLiteralInputFolder>$(MSBuildProjectDirectory)\strings</StringLiteralInputFolder>
+    <StringLiteralNamespace>abi</StringLiteralNamespace>
+  </PropertyGroup>
+
+  <!-- Generate string literals into strings.h/strings.cpp -->
+  <Target Name="CollectStringLiteralInputs"
+          BeforeTargets="GenerateStringLiteralFiles">
+    <ItemGroup>
+      <StringLiteralInputs Include="$(StringLiteralInputFolder)\*.h" />
+    </ItemGroup>
+    <!--<CreateItem Include="$(StringLiteralInputFolder)\*.h">
+      <Output TaskParameter="Include" ItemName="StringLiteralInputs"/>
+    </CreateItem>-->
+  </Target>
+  
+  <Target Name="GenerateStringLiteralFiles"
+          Inputs="@(StringLiteralInputs)"
+          Outputs="$(StringLiteralOutputHeader);$(StringLiteralOutputCode)"
+          DependsOnTargets="CollectStringLiteralInputs"
+          Condition="'@(StringLiteralInputs)' != ''">
+    <Error Text="Setting StringLiteralNamespace is required when supplying StringLiteralInputs"
+           Condition="'$(StringLiteralNamespace)' == ''" />
+
+    <ReadLinesFromFile File="%(StringLiteralInputs.FullPath)">
+      <Output TaskParameter="Lines" ItemName="StringLiteralLines"/>
+    </ReadLinesFromFile>
+
+    <WriteLinesToFile File="$(StringLiteralOutputHeader)"
+                      Overwrite="true"
+                      Lines="#pragma once\n\nnamespace {"/>
+  </Target>
+</Project>
