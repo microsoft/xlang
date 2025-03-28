@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="..\Directory.Build.targets" Condition="Exists('..\Directory.Build.targets')"/>
+
+  <PropertyGroup>
+    <BeforeClCompileTargets>
+      $(BeforeClCompileTargets);GenerateStringLiteralFiles;
+    </BeforeClCompileTargets>
+    
+    <StringLiteralOutputHeader>$(IntermediateOutputPath)strings.h</StringLiteralOutputHeader>
+    <StringLiteralOutputCode>$(IntermediateOutputPath)strings.cpp</StringLiteralOutputCode>
+  </PropertyGroup>
+  
+  <!-- Clean string strings.h/strings.cpp -->
+  <Target Name="CleanStringLiteralFiles"
+          BeforeTargets="Clean">
+    <Delete Files="$(StringLiteralOutputHeader);$(StringLiteralOutputCode)"/>
+  </Target>
+  
+  <Target Name="GenerateStringLiteralFiles"
+          Inputs="@(StringLiteralInputs)"
+          Outputs="$(StringLiteralOutputHeader);$(StringLiteralOutputCode)"
+          Condition="'@(StringLiteralInputs)' != ''">
+    <Error Text="Setting StringLiteralNamespace is required when supplying StringLiteralInputs"
+           Condition="'$(StringLiteralNamespace)' == ''" />
+
+    <ItemGroup>
+      <ClInclude Include="$(StringLiteralOutputHeader)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ClCompile Include="$(StringLiteralOutputCode)">
+        <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      </ClCompile>
+    </ItemGroup>
+
+    <!-- strings.h prologue-->
+    <WriteLinesToFile File="$(StringLiteralOutputHeader)"
+                      Overwrite="true"
+                      Lines="#pragma once
+
+namespace $(StringLiteralNamespace) {
+"/>
+    <!-- strings.h entries-->
+    <WriteLinesToFile File="$(StringLiteralOutputHeader)"
+                      Lines="extern const char %(StringLiteralInputs.FileName)[]%3b"/>
+    <!-- strings.h epilogue-->
+    <WriteLinesToFile File="$(StringLiteralOutputHeader)"
+                      Lines="}"/>
+
+    <!-- strings.cpp prologue-->
+    <WriteLinesToFile File="$(StringLiteralOutputCode)"
+                      Overwrite="true"
+                      Lines="namespace $(StringLiteralNamespace) {
+
+"/>
+    <!-- strings.cpp entries-->
+    <ReadLinesFromFile File="%(StringLiteralInputs.FullPath)">
+      <Output TaskParameter="Lines" ItemName="StringLiteralLines"/>
+    </ReadLinesFromFile>
+    <WriteLinesToFile File="$(StringLiteralOutputCode)"
+                      Lines="%0d
+extern const char %(StringLiteralInputs.FileName)[] = R&quot;xyz%28$([System.IO.File]::ReadAllText('%(StringLiteralInputs.FullPath)'))%29xyz&quot;%3b"/>
+    <!-- strings.cpp epilogue-->
+    <WriteLinesToFile File="$(StringLiteralOutputCode)"
+                      Lines="}"/>
+  </Target>
+</Project>

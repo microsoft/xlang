@@ -37,8 +37,16 @@ extends:
       enabled: false
     
     globalSdl:
+      isNativeCode: true
+      asyncSdl:
+        enabled: true
       tsa:
-        enabled: false
+        enabled: true
+        useDynamicRouting: true
+      codeql:
+        compiled:
+          enabled: true
+        tsaEnabled: true
     
     nugetPublishing:
       feeds:

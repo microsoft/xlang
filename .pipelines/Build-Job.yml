@@ -19,6 +19,10 @@ jobs:
     ob_outputDirectory: '$(Build.SourcesDirectory)\out'
     ob_artifactSuffix: ${{ parameters.BuildConfiguration }}_${{ parameters.BuildPlatform }}
     StagingFolder: $(ob_outputDirectory)
+      
+    ob_sdl_prefast_enabled: true
+    ob_sdl_prefast_runDuring: 'Build'
+    ob_sdl_checkCompliantCompilerWarnings: true
 
   steps:
 
@@ -28,29 +32,17 @@ jobs:
     inputs:
       versionSpec: 6.7
 
-  - task: CmdLine@2
+  - task: VSBuild@1
     displayName: Build Tools
-    inputs: 
-      script: >
-        if "%VSCMD_VER%"=="" (
-            pushd c:
-            call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" >nul 2>&1
-            popd
-        )
-
-        build.cmd -v -b ${{ parameters.BuildConfiguration }} -f --build-version "$(Build.BuildNumber)" abi make_abiwinrt_nupkg
-      workingDirectory: $(Build.SourcesDirectory)\src\scripts\windows
-      failOnStderr: true
-
-  - task: CopyFiles@2
-    displayName: Stage abi.*
     inputs:
-      SourceFolder: $(Build.SourcesDirectory)\_build\Windows\${{ parameters.BuildPlatform }}\${{ parameters.BuildConfiguration }}\tool\abi
-      Contents: >-
-        abi.exe
-
-        abi.pdb
-      TargetFolder: $(ob_outputDirectory)\abi
+      solution: '$(Build.SourcesDirectory)\src\tool\abi\abi.sln'
+      msbuildArgs: >-
+        /p:XlangBuildVersion="$(Build.BuildNumber)"
+        /p:OutDir=$(ob_outputDirectory)\abi\
+        /binaryLogger:$(ob_outputDirectory)\abi\abi.binlog
+      platform: ${{ parameters.BuildPlatform }}
+      configuration: ${{ parameters.BuildConfiguration }}
+      clean: true      
 
   - task: onebranch.pipeline.signing@1
     displayName: '🔒 Onebranch Signing for abi.exe'

@@ -34,8 +34,10 @@ extends:
       product: 'build_tools'
 
     globalSdl:
+      isNativeCode: true
       tsa:
         enabled: false
+        useDynamicRouting: true
       sbom:
         enabled: true
 

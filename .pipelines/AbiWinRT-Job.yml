@@ -15,7 +15,7 @@ jobs:
       ob_outputDirectory: '$(Build.SourcesDirectory)\out'
       ob_nugetPublishing_enabled: ${{ parameters.OfficialBuild }}
       PackageVersion: $(Build.BuildNumber)
-
+      
     steps:
 
     - task: NuGetToolInstaller@1
