@@ -23,6 +23,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{f025d704-ca01-4c93-9097-d0c7bf9cca07}</ProjectGuid>
     <RootNamespace>abi</RootNamespace>
+    <StringLiteralNamespace>xlang::strings</StringLiteralNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -155,6 +156,9 @@
     <ClInclude Include="type_banners.h" />
     <ClInclude Include="type_names.h" />
     <ClInclude Include="versioning.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <StringLiteralInputs Include="strings\*.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

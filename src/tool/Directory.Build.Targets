@@ -4,29 +4,22 @@
 
   <PropertyGroup>
     <BeforeClCompileTargets>
-      $(BeforeClCompileTargets);CollectStringLiteralInputs;GenerateStringLiteralFiles;
+      $(BeforeClCompileTargets);GenerateStringLiteralFiles;
     </BeforeClCompileTargets>
     
     <StringLiteralOutputHeader>$(IntermediateOutputPath)strings.h</StringLiteralOutputHeader>
     <StringLiteralOutputCode>$(IntermediateOutputPath)strings.cpp</StringLiteralOutputCode>
-
-    <!-- TEMP TESTING -->
-    <StringLiteralInputFolder>$(MSBuildProjectDirectory)\strings</StringLiteralInputFolder>
-    <StringLiteralNamespace>strings</StringLiteralNamespace>
   </PropertyGroup>
-
-  <!-- Generate string literals into strings.h/strings.cpp -->
-  <Target Name="CollectStringLiteralInputs"
-          BeforeTargets="GenerateStringLiteralFiles">
-    <ItemGroup>
-      <StringLiteralInputs Include="$(StringLiteralInputFolder)\*.h" />
-    </ItemGroup>
+  
+  <!-- Clean string strings.h/strings.cpp -->
+  <Target Name="CleanStringLiteralFiles"
+          BeforeTargets="Clean">
+    <Delete Files="$(StringLiteralOutputHeader);$(StringLiteralOutputCode)"/>
   </Target>
   
   <Target Name="GenerateStringLiteralFiles"
           Inputs="@(StringLiteralInputs)"
           Outputs="$(StringLiteralOutputHeader);$(StringLiteralOutputCode)"
-          DependsOnTargets="CollectStringLiteralInputs"
           Condition="'@(StringLiteralInputs)' != ''">
     <Error Text="Setting StringLiteralNamespace is required when supplying StringLiteralInputs"
            Condition="'$(StringLiteralNamespace)' == ''" />
@@ -36,7 +29,7 @@
                       Overwrite="true"
                       Lines="#pragma once
 
-namespace xlang::$(StringLiteralNamespace) {
+namespace $(StringLiteralNamespace) {
 "/>
     <!-- strings.h entries-->
     <WriteLinesToFile File="$(StringLiteralOutputHeader)"
@@ -48,22 +41,13 @@ namespace xlang::$(StringLiteralNamespace) {
     <!-- strings.cpp prologue-->
     <WriteLinesToFile File="$(StringLiteralOutputCode)"
                       Overwrite="true"
-                      Lines="namespace xlang::$(StringLiteralNamespace) {
+                      Lines="namespace $(StringLiteralNamespace) {
 
 "/>
-
     <!-- strings.cpp entries-->
     <ReadLinesFromFile File="%(StringLiteralInputs.FullPath)">
       <Output TaskParameter="Lines" ItemName="StringLiteralLines"/>
     </ReadLinesFromFile>
-
-    <!--<WriteLinesToFile File="$(StringLiteralOutputCode)"
-                      Lines="
-$([System.String]::Concat(
-'extern const char %(StringLiteralInputs.FileName)[] = R&quot;xyz%28',
-$([System.IO.File]::ReadAllText('%(StringLiteralInputs.FullPath)')),
-'%29xyz&quot;%3b'))"/>-->
-
     <WriteLinesToFile File="$(StringLiteralOutputCode)"
                       Lines="%0d
 extern const char %(StringLiteralInputs.FileName)[] = R&quot;xyz%28$([System.IO.File]::ReadAllText('%(StringLiteralInputs.FullPath)'))%29xyz&quot;%3b"/>
