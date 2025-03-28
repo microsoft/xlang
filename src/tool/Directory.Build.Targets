@@ -57,12 +57,16 @@ namespace xlang::$(StringLiteralNamespace) {
       <Output TaskParameter="Lines" ItemName="StringLiteralLines"/>
     </ReadLinesFromFile>
 
-    <WriteLinesToFile File="$(StringLiteralOutputCode)"
+    <!--<WriteLinesToFile File="$(StringLiteralOutputCode)"
                       Lines="
 $([System.String]::Concat(
 'extern const char %(StringLiteralInputs.FileName)[] = R&quot;xyz%28',
 $([System.IO.File]::ReadAllText('%(StringLiteralInputs.FullPath)')),
-'%29xyz&quot;%3b'))"/>
+'%29xyz&quot;%3b'))"/>-->
+
+    <WriteLinesToFile File="$(StringLiteralOutputCode)"
+                      Lines="%0d
+extern const char %(StringLiteralInputs.FileName)[] = R&quot;xyz%28$([System.IO.File]::ReadAllText('%(StringLiteralInputs.FullPath)'))%29xyz&quot;%3b"/>
     <!-- strings.cpp epilogue-->
     <WriteLinesToFile File="$(StringLiteralOutputCode)"
                       Lines="}"/>
