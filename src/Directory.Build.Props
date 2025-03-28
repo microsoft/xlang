@@ -6,6 +6,10 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <SpectreMitigation>Spectre</SpectreMitigation>
+  </PropertyGroup>
+
   <PropertyGroup>
     <XlangBuildVersion Condition="'$(XlangBuildVersion)'==''">0.0.0</XlangBuildVersion>
   </PropertyGroup>
@@ -32,5 +36,8 @@
       <ControlFlowGuard>Guard</ControlFlowGuard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
+    <Link>
+      <CETCompat>true</CETCompat>
+    </Link>
   </ItemDefinitionGroup>
 </Project>
