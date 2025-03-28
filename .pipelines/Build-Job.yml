@@ -36,7 +36,7 @@ jobs:
     displayName: Build Tools
     inputs:
       solution: '$(Build.SourcesDirectory)\src\tool\abi\abi.sln'
-      msbuildArgs: /p:XlangBuildVersion="$(Build.BuildNumber)"
+      msbuildArgs: /p:XlangBuildVersion="$(Build.BuildNumber)" /binaryLogger:$(ob_outputDirectory)\abi\abi.binlog
       platform: ${{ parameters.BuildPlatform }}
       configuration: ${{ parameters.BuildConfiguration }}
       clean: true      
