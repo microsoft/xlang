@@ -24,6 +24,16 @@
     <Error Text="Setting StringLiteralNamespace is required when supplying StringLiteralInputs"
            Condition="'$(StringLiteralNamespace)' == ''" />
 
+    <ItemGroup>
+      <ClInclude Include="$(StringLiteralOutputHeader)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ClCompile Include="$(StringLiteralOutputCode)">
+        <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      </ClCompile>
+    </ItemGroup>
+
     <!-- strings.h prologue-->
     <WriteLinesToFile File="$(StringLiteralOutputHeader)"
                       Overwrite="true"
