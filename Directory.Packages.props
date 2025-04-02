@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.VCRTForwarders.140" Version="1.0.5" />
+  </ItemGroup>
+</Project>
