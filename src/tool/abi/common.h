@@ -241,6 +241,30 @@ inline std::optional<deprecation_info> is_deprecated(T const& type)
     };
 }
 
+template <typename T>
+inline bool is_removed(T const& type)
+{
+    using namespace std::literals;
+    using namespace xlang::meta::reader;
+
+    auto attr = get_attribute(type, metadata_namespace, "DeprecatedAttribute"sv);
+    if (!attr)
+    {
+        return false;
+    }
+
+    auto sig = attr.Value();
+    auto const& fixedArgs = sig.FixedArgs();
+    if (fixedArgs.size() >= 2)
+    {
+        // DeprecationType enum: Deprecate=0, Remove=1
+        auto const& elemSig = std::get<ElemSig>(fixedArgs[1].value);
+        auto const& enumVal = std::get<ElemSig::EnumValue>(elemSig.value);
+        return std::visit([](auto v) -> bool { return static_cast<int32_t>(v) == 1; }, enumVal.value);
+    }
+    return false;
+}
+
 inline bool is_flags_enum(xlang::meta::reader::TypeDef const& type)
 {
     using namespace std::literals;

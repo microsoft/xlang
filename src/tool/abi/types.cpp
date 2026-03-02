@@ -124,6 +124,11 @@ void enum_type::write_c_abi_param(writer& w) const
 
 void enum_type::write_cpp_definition(writer& w) const
 {
+    if (is_removed(m_type))
+    {
+        return;
+    }
+
     auto name = cpp_abi_name();
     auto contractDepth = begin_type_definition(w, *this);
     w.push_namespace(clr_abi_namespace());
@@ -149,6 +154,11 @@ void enum_type::write_cpp_definition(writer& w) const
     {
         if (auto value = field.Constant())
         {
+            if (is_removed(field))
+            {
+                continue;
+            }
+
             auto isExperimental = ::is_experimental(field);
             if (isExperimental)
             {
@@ -209,6 +219,11 @@ void enum_type::write_cpp_definition(writer& w) const
 
 void enum_type::write_c_definition(writer& w) const
 {
+    if (is_removed(m_type))
+    {
+        return;
+    }
+
     auto contractDepth = begin_type_definition(w, *this);
 
     w.write("enum");
@@ -230,6 +245,11 @@ void enum_type::write_c_definition(writer& w) const
     {
         if (auto value = field.Constant())
         {
+            if (is_removed(field))
+            {
+                continue;
+            }
+
             auto isExperimental = ::is_experimental(field);
             if (isExperimental)
             {
@@ -301,6 +321,11 @@ void struct_type::write_c_abi_param(writer& w) const
 
 void struct_type::write_cpp_definition(writer& w) const
 {
+    if (is_removed(m_type))
+    {
+        return;
+    }
+
     auto contractDepth = begin_type_definition(w, *this);
     w.push_namespace(clr_abi_namespace());
 
@@ -338,6 +363,11 @@ void struct_type::write_cpp_definition(writer& w) const
 
 void struct_type::write_c_definition(writer& w) const
 {
+    if (is_removed(m_type))
+    {
+        return;
+    }
+
     auto contractDepth = begin_type_definition(w, *this);
 
     w.write("struct");
@@ -827,7 +857,10 @@ interface %
 
     for (auto const& func : type.functions)
     {
-        write_c_function_declaration_macro(w, type, func);
+        if (!is_removed(func.def))
+        {
+            write_c_function_declaration_macro(w, type, func);
+        }
     }
 
     if constexpr (is_interface)
@@ -865,7 +898,10 @@ interface %
 
                 for (auto const& func : iface->functions)
                 {
-                    write_c_function_declaration_macro(w, type, func);
+                    if (!is_removed(func.def))
+                    {
+                        write_c_function_declaration_macro(w, type, func);
+                    }
                 }
             }
 
