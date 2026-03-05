@@ -275,6 +275,7 @@ static void write_cpp_interface_forward_declarations(writer& w, type_cache const
 
     for (auto const& type : types.delegates)
     {
+        if (is_removed(type.get().type())) { continue; }
         if (!type.get().is_generic())
         {
             type.get().write_cpp_forward_declaration(w);
@@ -283,6 +284,7 @@ static void write_cpp_interface_forward_declarations(writer& w, type_cache const
 
     for (auto const& type : types.interfaces)
     {
+        if (is_removed(type.get().type())) { continue; }
         if (!type.get().is_generic())
         {
             type.get().write_cpp_forward_declaration(w);
@@ -320,26 +322,31 @@ static void write_cpp_type_definitions(writer& w, type_cache const& types)
 {
     for (auto const& enumType : types.enums)
     {
+        if (is_removed(enumType.get().type())) { continue; }
         enumType.get().write_cpp_definition(w);
     }
 
     for (auto const& structType : types.structs)
     {
+        if (is_removed(structType.get().type())) { continue; }
         structType.get().write_cpp_definition(w);
     }
 
     for (auto const& delegateType : types.delegates)
     {
+        if (is_removed(delegateType.get().type())) { continue; }
         delegateType.get().write_cpp_definition(w);
     }
 
     for (auto const& interfaceType : types.interfaces)
     {
+        if (is_removed(interfaceType.get().type())) { continue; }
         interfaceType.get().write_cpp_definition(w);
     }
 
     for (auto const& classType : types.classes)
     {
+        if (is_removed(classType.get().type())) { continue; }
         classType.get().write_cpp_definition(w);
     }
 }
@@ -350,6 +357,7 @@ static void write_c_interface_forward_declarations(writer& w, type_cache const& 
 
     for (auto const& type : types.delegates)
     {
+        if (is_removed(type.get().type())) { continue; }
         if (!type.get().is_generic())
         {
             type.get().write_c_forward_declaration(w);
@@ -358,6 +366,7 @@ static void write_c_interface_forward_declarations(writer& w, type_cache const& 
 
     for (auto const& type : types.interfaces)
     {
+        if (is_removed(type.get().type())) { continue; }
         if (!type.get().is_generic())
         {
             type.get().write_c_forward_declaration(w);
@@ -396,26 +405,31 @@ static void write_c_type_definitions(writer& w, type_cache const& types)
 {
     for (auto const& enumType : types.enums)
     {
+        if (is_removed(enumType.get().type())) { continue; }
         enumType.get().write_c_definition(w);
     }
 
     for (auto const& structType : types.structs)
     {
+        if (is_removed(structType.get().type())) { continue; }
         structType.get().write_c_definition(w);
     }
 
     for (auto const& delegateType : types.delegates)
     {
+        if (is_removed(delegateType.get().type())) { continue; }
         delegateType.get().write_c_definition(w);
     }
 
     for (auto const& interfaceType : types.interfaces)
     {
+        if (is_removed(interfaceType.get().type())) { continue; }
         interfaceType.get().write_c_definition(w);
     }
 
     for (auto const& classType : types.classes)
     {
+        if (is_removed(classType.get().type())) { continue; }
         classType.get().write_c_definition(w);
     }
 }

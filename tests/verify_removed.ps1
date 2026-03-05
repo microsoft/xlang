@@ -125,9 +125,19 @@ if (!(Test-Path $WinMDPath)) {
 
     Write-Host "`n=== Removed types: excluded from output ===" -ForegroundColor Cyan
     Assert-NotContains $content "RemovedEnum_GoneValueA" "RemovedEnum values excluded"
-    # Note: IRemovedInterface is preserved in ABI headers for binary compatibility
-    # (interfaces define vtable layout which must be stable)
-    Assert-Contains $content "interface IRemovedInterface" "IRemovedInterface preserved (ABI binary compat)" -Regex
+    Assert-NotContains $content "interface IRemovedInterface" "IRemovedInterface excluded (removed types are always gone)"
+
+    Write-Host "`n=== abi_writer.cpp: type-level removed exclusion ===" -ForegroundColor Cyan
+    # The abi_writer fix ensures removed types don't generate type definitions.
+    # Interfaces for removed classes are preserved (ABI compat), but enum/struct definitions are not.
+    Assert-NotContains $content "RemovedEnum_GoneValueB" "RemovedEnum values not in type definitions"
+    Assert-Contains $content "NormalEnum_ValueA" "NormalEnum values still generated" -Regex
+
+    Write-Host "`n=== abi_writer.cpp: source code guards ===" -ForegroundColor Cyan
+    $abiWriter = Get-Content "src\tool\abi\abi_writer.cpp" -Raw
+    Assert-Contains $abiWriter "is_removed(type.get().type())" "abi_writer.cpp has is_removed() guard checks"
+    Assert-Contains $abiWriter "is_removed(enumType.get().type())" "abi_writer.cpp filters removed enums"
+    Assert-Contains $abiWriter "is_removed(classType.get().type())" "abi_writer.cpp filters removed classes"
 
     Write-Host "`n=== Normal types: present ===" -ForegroundColor Cyan
     Assert-Contains $content "NormalEnum_ValueA" "NormalEnum values present" -Regex
