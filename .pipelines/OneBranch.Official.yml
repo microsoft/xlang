@@ -54,9 +54,6 @@ extends:
 
     stages:
     - stage: stage
-      pool:
-        type: windows
-
       jobs:
 
       - template: .pipelines/Build-Job.yml@self
