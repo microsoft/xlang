@@ -130,7 +130,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <_AbiWinRTInputs Remove="@(_AbiWinRTRefInputs)"/>
             <_AbiWinRTInputs Include="@(AbiWinRTDirectWinMDReferences)"/>
             <_AbiWinRTInputs Include="@(AbiWinRTProjectWinMDReferences)"/>
-            <_AbiWinRTInputs Include="@(AbiWinRTPlatformWinMDReferences)"/>
+            <_AbiWinRTInputs Include="@(AbiWinRTPlatformWinMDReferences)" Condition="'$(AbiWinRTEnablePlatformProjection)' != 'false'" />
+
 
             <!-- Fix: '_AbiWinRTRefs' is used by the property group below for -ref arguments, the original '_AbiWinRTRefRefs' was never referenced. -->
             <_AbiWinRTRefs Remove="@(_AbiWinRTRefs)"/>
