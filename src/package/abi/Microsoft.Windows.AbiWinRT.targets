@@ -132,13 +132,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <_AbiWinRTInputs Include="@(AbiWinRTProjectWinMDReferences)"/>
             <_AbiWinRTInputs Include="@(AbiWinRTPlatformWinMDReferences)"/>
 
-            <_AbiWinRTRefs Remove="@(_AbiWinRTRefRefs)"/>
+            <!-- Fix: '_AbiWinRTRefs' is used by the property group below for -ref arguments, the original '_AbiWinRTRefRefs' was never referenced. -->
+            <_AbiWinRTRefs Remove="@(_AbiWinRTRefs)"/>
             <_AbiWinRTRefs Include="@(AbiWinRTPlatformWinMDReferences)"/>
         </ItemGroup>
         <PropertyGroup>
             <_AbiWinRTParameters>$(AbiWinRTCommandVerbosity) $(AbiWinRTParameters) $(AbiWinRTCommandEnsureSDKHeaderCompat) $(AbiWinRTCommandAddAbiNamespacePrefix)</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTInputs->'-in &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
-            <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTRefRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
+            <_AbiWinRTParameters>$(_AbiWinRTParameters) @(_AbiWinRTRefs->'-ref &quot;%(WinMDPath)&quot;', '&#x0d;&#x0a;')</_AbiWinRTParameters>
             <_AbiWinRTParameters>$(_AbiWinRTParameters) -out &quot;$(GeneratedFilesDir).&quot;</_AbiWinRTParameters>
         </PropertyGroup>
         <!-- Always write the AbiWinRT_projection.rsp file when the target runs, because the file is used as the output of this target. -->
