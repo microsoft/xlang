@@ -128,8 +128,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         </PropertyGroup>
         <ItemGroup>
             <_AbiWinRTInputs Remove="@(_AbiWinRTRefInputs)"/>
-            <_AbiWinRTInputs Include="@(AbiWinRTDirectWinMDReferences)"/>
-            <_AbiWinRTInputs Include="@(AbiWinRTProjectWinMDReferences)"/>
+            <_AbiWinRTInputs Include="@(AbiWinRTDirectWinMDReferences)" Condition="'$(AbiWinRTEnableDirectProjection)' != 'false'" />
+            <_AbiWinRTInputs Include="@(AbiWinRTProjectWinMDReferences)" Condition="'$(AbiWinRTEnableProjectProjection)' != 'false'" />
             <_AbiWinRTInputs Include="@(AbiWinRTPlatformWinMDReferences)" Condition="'$(AbiWinRTEnablePlatformProjection)' != 'false'" />
 
 
